@@ -147,6 +147,25 @@ const Dashboard = () => {
     }
   };
 
+  const regenerateAnonymousIdentity = async () => {
+    try {
+      const headers = getAuthHeaders();
+      const response = await axios.post(`${API}/profile/generate-anonymous`, {}, { 
+        headers, 
+        withCredentials: true 
+      });
+      
+      setProfile({
+        ...profile,
+        anonymous_alias: response.data.anonymous_alias,
+        anonymous_avatar: response.data.anonymous_avatar
+      });
+    } catch (error) {
+      console.error('Error regenerating anonymous identity:', error);
+      alert('Erro ao gerar nova identidade');
+    }
+  };
+
   const currentUser = user || passedUser;
 
   if (authLoading || loading) {
