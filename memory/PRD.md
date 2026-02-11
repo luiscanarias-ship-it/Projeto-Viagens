@@ -27,9 +27,9 @@ Criar uma plataforma de angariação de fundos chamada "4Luis" (4Luis.com) com c
 - [x] QR codes para pagamentos crypto
 - [x] Design claro, sofisticado, emocional (tons pêssego/coral)
 
-## O Que Foi Implementado (11 Fev 2026)
+## O Que Foi Implementado
 
-### Backend
+### Fase 1 - MVP (11 Fev 2026)
 - API REST completa com FastAPI
 - Autenticação JWT + Google OAuth
 - CRUD de viagens (journeys)
@@ -39,29 +39,41 @@ Criar uma plataforma de angariação de fundos chamada "4Luis" (4Luis.com) com c
 - Tradução automática via GPT-5.2
 - Geração de bilhetes para sorteio
 
-### Frontend
-- Homepage com animações Framer Motion
-- Cards de viagens com progresso visual
-- Página de detalhes de viagem
-- Modal de pagamento multi-método
-- Login/Registo + Google Auth
-- Dashboard do utilizador
-- Painel de administração
-- Seletor de idioma
+### Fase 2 - Novas Funcionalidades (11 Fev 2026)
+- [x] **Contador de Sonhadores** na homepage
+  - Total de sonhadores (contribuidores únicos)
+  - Total de gestos fraternais (contribuições)
+  - Destaque para o maior sonhador (top contributor)
+- [x] **Secção "Entre em Contacto"** no final da homepage
+  - Email configurável pelo admin
+  - Mensagem personalizável
+- [x] **Confirmação manual de pagamentos**
+  - Tab "Contribuições" no admin
+  - Confirmar/Rejeitar pagamentos pendentes
+  - Atualização automática dos montantes
+- [x] **Sistema de Sorteio**
+  - Tab "Sorteio" no admin
+  - Seleção de viagem
+  - Regras claras do sorteio
+  - Sorteio aleatório com resultado visual
+- [x] **Progresso em percentagem**
+  - Mostra apenas "XX% angariado"
+  - Máximo de 100% mesmo que ultrapassado
+- [x] **Configurações do site** (Admin)
+  - Email de contacto editável
+  - Mensagem de contacto editável
 
 ## Backlog / Próximas Tarefas
 
 ### P0 (Crítico)
-- [ ] Confirmação manual de pagamentos (MBWay, PayPal, Crypto)
-- [ ] Sistema de sorteio de bilhetes
-
-### P1 (Importante)
 - [ ] Email de confirmação de contribuição
 - [ ] Notificações push
-- [ ] Histórico de contribuições no dashboard
+
+### P1 (Importante)
+- [ ] Histórico de contribuições no dashboard utilizador
+- [ ] Testemunhos/mensagens de apoio em cada viagem
 
 ### P2 (Nice to have)
-- [ ] Testemunhos/mensagens de apoio em cada viagem
 - [ ] Avatar personalizado
 - [ ] Integração Wise/Revolut/Monzo/Chase
 
@@ -70,3 +82,8 @@ Criar uma plataforma de angariação de fundos chamada "4Luis" (4Luis.com) com c
 - **Crypto Address**: TGcWs89gTkkxARVT8UJsCFUMc9sQkvUmtL (USDT TRC20)
 - **MBWay**: +351968068535
 - **PayPal**: paypal.me/LuisCanarias
+
+## Configurações Admin
+Aceda a Admin → Configurações para definir:
+- Email de contacto (mostrado na secção "Entre em Contacto")
+- Mensagem de contacto personalizada
