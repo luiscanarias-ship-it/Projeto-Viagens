@@ -233,40 +233,6 @@ const Home = () => {
           </motion.div>
         </div>
       </section>
-
-      {/* Contact Section */}
-      {siteSettings && (
-        <section id="contact" className="py-20 bg-white" data-testid="contact-section">
-          <div className="max-w-2xl mx-auto px-6 text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-            >
-              <div className="w-16 h-16 bg-[#FFBE98]/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Mail className="w-8 h-8 text-[#FFBE98]" />
-              </div>
-              
-              <h2 className="text-3xl md:text-4xl font-bold text-[#2D2A26] mb-4">
-                Entre em Contacto
-              </h2>
-              
-              <p className="text-[#6B6661] text-lg mb-8 max-w-md mx-auto">
-                {siteSettings.contact_message || "Tem alguma questão? Entre em contacto connosco."}
-              </p>
-              
-              <a
-                href={`mailto:${siteSettings.contact_email}`}
-                className="btn-primary inline-flex items-center gap-3 text-lg"
-                data-testid="contact-email-btn"
-              >
-                <Mail className="w-5 h-5" />
-                {siteSettings.contact_email}
-              </a>
-            </motion.div>
-          </div>
-        </section>
-      )}
     </div>
   );
 };
