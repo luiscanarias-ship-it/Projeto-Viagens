@@ -736,6 +736,32 @@ async def update_user_profile(request: Request):
     updated_user = await db.users.find_one({"user_id": user.user_id}, {"_id": 0, "password_hash": 0})
     return updated_user
 
+@api_router.post("/profile/avatar")
+async def upload_avatar(request: Request):
+    """Upload user avatar image (accepts base64 encoded image)"""
+    user = await require_auth(request)
+    data = await request.json()
+    
+    image_data = data.get("image")
+    if not image_data:
+        raise HTTPException(status_code=400, detail="Imagem não fornecida")
+    
+    # Validate that it's a valid base64 image data URL
+    if not image_data.startswith("data:image/"):
+        raise HTTPException(status_code=400, detail="Formato de imagem inválido")
+    
+    # Check image size (max 500KB for base64)
+    if len(image_data) > 700000:  # ~500KB in base64
+        raise HTTPException(status_code=400, detail="Imagem muito grande. Máximo 500KB.")
+    
+    # Update user avatar
+    await db.users.update_one(
+        {"user_id": user.user_id},
+        {"$set": {"avatar": image_data, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    return {"message": "Avatar atualizado com sucesso", "avatar": image_data}
+
 # ==================== TRANSLATION ====================
 
 @api_router.post("/translate")
