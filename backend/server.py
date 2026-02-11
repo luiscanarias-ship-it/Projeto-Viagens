@@ -1346,6 +1346,7 @@ async def get_travel_resources(journey_id: str):
     
     destination = journey.get("name", "")
     destination_encoded = destination.replace(" ", "+")
+    destination_slug = destination.lower().replace(" ", "-")
     
     # Build resource links for the destination
     resources = {
@@ -1353,82 +1354,82 @@ async def get_travel_resources(journey_id: str):
         "map": {
             "title": "Google Maps",
             "description": f"Explore {destination} no mapa",
-            "url": f"https://www.google.com/maps/search/{destination_encoded}",
+            "url": f"https://www.google.com/maps/place/{destination_encoded}",
             "icon": "map"
         },
         "hotels": [
             {
                 "name": "Booking.com",
-                "url": f"https://www.booking.com/searchresults.html?ss={destination_encoded}",
+                "url": f"https://www.booking.com/searchresults.pt-pt.html?ss={destination_encoded}",
                 "icon": "booking"
             },
             {
                 "name": "TripAdvisor",
-                "url": f"https://www.tripadvisor.com/Search?q={destination_encoded}",
+                "url": f"https://www.tripadvisor.com/Search?q={destination_encoded}&searchSessionId=hotels",
                 "icon": "tripadvisor"
             },
             {
                 "name": "Hoteis.com",
-                "url": f"https://www.hoteis.com/Hotel-Search?destination={destination_encoded}",
+                "url": f"https://pt.hotels.com/Hotel-Search?destination={destination_encoded}",
                 "icon": "hotel"
             },
             {
                 "name": "Airbnb",
-                "url": f"https://www.airbnb.com/s/{destination_encoded}/homes",
+                "url": f"https://www.airbnb.pt/s/{destination_encoded}/homes",
                 "icon": "airbnb"
             },
             {
                 "name": "ALL Accor",
-                "url": f"https://all.accor.com/hotel/search.html?destination={destination_encoded}",
+                "url": f"https://all.accor.com/ssr/app/accor/hotels/{destination_slug}/index.pt-pt.shtml",
                 "icon": "accor"
             }
         ],
         "flights": [
             {
-                "name": "TAP Portugal",
-                "url": f"https://www.flytap.com/pt-pt/pesquisar-voos?origin=LIS&destination={destination_encoded}",
+                "name": "TAP",
+                "url": "https://www.flytap.com/pt-pt",
                 "icon": "tap"
             },
             {
                 "name": "Ryanair",
-                "url": f"https://www.ryanair.com/pt/pt",
+                "url": "https://www.ryanair.com/pt/pt",
                 "icon": "ryanair"
             },
             {
                 "name": "EasyJet",
-                "url": f"https://www.easyjet.com/pt",
+                "url": "https://www.easyjet.com/pt",
                 "icon": "easyjet"
             },
             {
-                "name": "Skyscanner",
-                "url": f"https://www.skyscanner.pt/transport/flights/lis/{destination_encoded}",
-                "icon": "skyscanner"
+                "name": "Google Flights",
+                "url": f"https://www.google.com/travel/flights?q=voos+para+{destination_encoded}",
+                "icon": "google"
             }
         ],
         "social": [
             {
-                "name": "Instagram",
-                "url": f"https://www.instagram.com/explore/tags/{destination.lower().replace(' ', '')}",
-                "icon": "instagram",
-                "description": f"Fotos e experiências de {destination}"
+                "name": "YouTube",
+                "url": f"https://www.youtube.com/results?search_query={destination_encoded}+travel+vlog",
+                "icon": "youtube",
+                "description": f"Vídeos e vlogs de viagem para {destination}"
             },
             {
-                "name": "TikTok",
-                "url": f"https://www.tiktok.com/search?q={destination_encoded}+travel",
-                "icon": "tiktok",
-                "description": "Vídeos e dicas de viagem"
+                "name": "Pinterest",
+                "url": f"https://www.pinterest.pt/search/pins/?q={destination_encoded}+travel",
+                "icon": "pinterest",
+                "description": "Inspiração e ideias de viagem"
             },
             {
-                "name": "Facebook",
-                "url": f"https://www.facebook.com/search/top?q={destination_encoded}+travel",
-                "icon": "facebook",
-                "description": "Grupos e páginas de viagem"
+                "name": "GetYourGuide",
+                "url": f"https://www.getyourguide.pt/s/?q={destination_encoded}",
+                "icon": "getyourguide",
+                "description": "Tours e atividades"
             },
             {
-                "name": "Threads",
-                "url": f"https://www.threads.net/search?q={destination_encoded}",
-                "icon": "threads",
-                "description": "Discussões e recomendações"
+                "name": "Reddit",
+                "url": f"https://www.reddit.com/search/?q={destination_encoded}+travel",
+                "icon": "reddit",
+                "description": "Discussões e experiências reais"
             }
         ],
         "blogs": [
