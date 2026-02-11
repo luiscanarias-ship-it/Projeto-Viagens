@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowDown } from 'lucide-react';
+import { ArrowDown, Users, Star, Mail } from 'lucide-react';
 import axios from 'axios';
 import { useLanguage } from '../contexts/LanguageContext';
 import JourneyCard from '../components/JourneyCard';
@@ -12,22 +12,33 @@ const Home = () => {
   const { t } = useLanguage();
   const [journeys, setJourneys] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [dreamersStats, setDreamersStats] = useState(null);
+  const [siteSettings, setSiteSettings] = useState(null);
 
   useEffect(() => {
-    const fetchJourneys = async () => {
+    const fetchData = async () => {
       try {
-        // First seed if needed
+        // Seed if needed
         await axios.post(`${API}/seed-journeys`).catch(() => {});
-        const response = await axios.get(`${API}/journeys`);
-        setJourneys(response.data);
+        
+        // Fetch all data in parallel
+        const [journeysRes, dreamersRes, settingsRes] = await Promise.all([
+          axios.get(`${API}/journeys`),
+          axios.get(`${API}/dreamers-stats`),
+          axios.get(`${API}/settings`)
+        ]);
+        
+        setJourneys(journeysRes.data);
+        setDreamersStats(dreamersRes.data);
+        setSiteSettings(settingsRes.data);
       } catch (error) {
-        console.error('Error fetching journeys:', error);
+        console.error('Error fetching data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchJourneys();
+    fetchData();
   }, []);
 
   const scrollToJourneys = () => {
@@ -98,6 +109,76 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Dreamers Counter Section */}
+      {dreamersStats && (
+        <section className="py-12 bg-white border-b border-stone-100" data-testid="dreamers-section">
+          <div className="max-w-5xl mx-auto px-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="grid grid-cols-1 md:grid-cols-3 gap-6"
+            >
+              {/* Total Dreamers */}
+              <div className="text-center p-6 rounded-2xl bg-[#E6F4F1]/30">
+                <div className="w-14 h-14 bg-[#E6F4F1] rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Users className="w-7 h-7 text-[#2D2A26]" />
+                </div>
+                <motion.p 
+                  className="text-4xl font-bold text-[#2D2A26] mb-1"
+                  initial={{ scale: 0 }}
+                  whileInView={{ scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ type: "spring", delay: 0.2 }}
+                >
+                  {dreamersStats.total_dreamers || 0}
+                </motion.p>
+                <p className="text-[#6B6661] font-medium">Sonhadores</p>
+              </div>
+
+              {/* Total Contributions */}
+              <div className="text-center p-6 rounded-2xl bg-[#FFBE98]/10">
+                <div className="w-14 h-14 bg-[#FFBE98]/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">💝</span>
+                </div>
+                <motion.p 
+                  className="text-4xl font-bold text-[#2D2A26] mb-1"
+                  initial={{ scale: 0 }}
+                  whileInView={{ scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ type: "spring", delay: 0.3 }}
+                >
+                  {dreamersStats.total_contributions || 0}
+                </motion.p>
+                <p className="text-[#6B6661] font-medium">Gestos Fraternais</p>
+              </div>
+
+              {/* Top Dreamer */}
+              {dreamersStats.top_dreamer && (
+                <div className="text-center p-6 rounded-2xl bg-gradient-to-br from-[#F2C94C]/20 to-[#E0C097]/20 border-2 border-[#F2C94C]/30">
+                  <div className="w-14 h-14 bg-[#F2C94C]/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Star className="w-7 h-7 text-[#F2C94C] fill-[#F2C94C]" />
+                  </div>
+                  <p className="text-sm text-[#6B6661] mb-1">Maior Sonhador</p>
+                  <motion.p 
+                    className="text-2xl font-bold text-[#2D2A26] mb-1"
+                    initial={{ scale: 0 }}
+                    whileInView={{ scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ type: "spring", delay: 0.4 }}
+                  >
+                    {dreamersStats.top_dreamer.name}
+                  </motion.p>
+                  <p className="text-sm text-[#6B6661]">
+                    {dreamersStats.top_dreamer.contribution_count} contribuições
+                  </p>
+                </div>
+              )}
+            </motion.div>
+          </div>
+        </section>
+      )}
+
       {/* Journeys Section */}
       <section id="journeys" className="py-20 md:py-32 px-6 md:px-12 bg-[#FAFAF9]" data-testid="journeys-section">
         <div className="max-w-7xl mx-auto">
@@ -149,6 +230,40 @@ const Home = () => {
           </motion.div>
         </div>
       </section>
+
+      {/* Contact Section */}
+      {siteSettings && (
+        <section id="contact" className="py-20 bg-white" data-testid="contact-section">
+          <div className="max-w-2xl mx-auto px-6 text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+            >
+              <div className="w-16 h-16 bg-[#FFBE98]/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Mail className="w-8 h-8 text-[#FFBE98]" />
+              </div>
+              
+              <h2 className="text-3xl md:text-4xl font-bold text-[#2D2A26] mb-4">
+                Entre em Contacto
+              </h2>
+              
+              <p className="text-[#6B6661] text-lg mb-8 max-w-md mx-auto">
+                {siteSettings.contact_message || "Tem alguma questão? Entre em contacto connosco."}
+              </p>
+              
+              <a
+                href={`mailto:${siteSettings.contact_email}`}
+                className="btn-primary inline-flex items-center gap-3 text-lg"
+                data-testid="contact-email-btn"
+              >
+                <Mail className="w-5 h-5" />
+                {siteSettings.contact_email}
+              </a>
+            </motion.div>
+          </div>
+        </section>
+      )}
     </div>
   );
 };
