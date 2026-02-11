@@ -1356,7 +1356,7 @@ async def get_travel_resources(journey_id: str):
         "map": {
             "title": "Google Maps",
             "description": f"Explore {destination} no mapa",
-            "url": f"https://www.google.pt/maps/search/{destination_plus}",
+            "url": f"https://maps.google.com/?q={destination_plus}",
             "icon": "map"
         },
         "hotels": [
@@ -1414,12 +1414,6 @@ async def get_travel_resources(journey_id: str):
                 "url": f"https://www.getyourguide.pt/s/?q={destination_plus}",
                 "icon": "getyourguide",
                 "description": "Tours e atividades guiadas"
-            },
-            {
-                "name": "Viator",
-                "url": f"https://www.viator.com/pt-PT/searchResults/all?text={destination_plus}",
-                "icon": "viator",
-                "description": "Experiências e excursões"
             },
             {
                 "name": "Pinterest",
