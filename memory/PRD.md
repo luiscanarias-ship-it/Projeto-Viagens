@@ -25,9 +25,14 @@ Criar uma plataforma de angariação de fundos chamada "4Luis" (4Luis.com) com c
 - [x] Modal de pagamento com múltiplos métodos (Stripe, MBWay, PayPal, Crypto)
 - [x] Sistema de autenticação duplo (JWT + Google)
 - [x] Painel de administração completo
-- [x] Sistema de sponsor links
+- [x] Sistema de sponsor links (corrigido bug de serialização - 11 Fev)
 - [x] QR codes para pagamentos crypto
 - [x] Design claro, sofisticado, emocional
+
+### Dashboard do Utilizador (Atualizado 11 Fev)
+- [x] Secção "Meu Perfil" sem campo sobrenome (apenas Nome)
+- [x] Secção "Links de Sponsor" com nota sobre validade do voucher (1 ano)
+- [x] Secção "Meus Bilhetes" com texto atualizado sobre vouchers
 
 ### Secção Comunidade (Homepage)
 - [x] **"Cada contributo é um passo de luz"** - frase de destaque
