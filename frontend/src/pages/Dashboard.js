@@ -99,6 +99,54 @@ const Dashboard = () => {
     }
   };
 
+  const handleAvatarUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Por favor selecione uma imagem válida');
+      return;
+    }
+
+    // Validate file size (max 500KB)
+    if (file.size > 500 * 1024) {
+      alert('A imagem é muito grande. Máximo 500KB.');
+      return;
+    }
+
+    setUploadingAvatar(true);
+    try {
+      // Convert to base64
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64Image = reader.result;
+        
+        try {
+          const headers = getAuthHeaders();
+          const response = await axios.post(`${API}/profile/avatar`, 
+            { image: base64Image },
+            { headers, withCredentials: true }
+          );
+          
+          setProfile({ ...profile, avatar: response.data.avatar });
+          await checkAuth();
+          alert('Avatar atualizado com sucesso!');
+        } catch (error) {
+          console.error('Error uploading avatar:', error);
+          alert(error.response?.data?.detail || 'Erro ao carregar avatar');
+        } finally {
+          setUploadingAvatar(false);
+        }
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Error reading file:', error);
+      setUploadingAvatar(false);
+      alert('Erro ao processar imagem');
+    }
+  };
+
   const currentUser = user || passedUser;
 
   if (authLoading || loading) {
