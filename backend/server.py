@@ -859,20 +859,23 @@ async def get_dreamers_stats():
         top_user_id = top_result[0]["_id"]
         user = await db.users.find_one({"user_id": top_user_id}, {"_id": 0})
         if user:
-            # Get first name only for privacy
-            first_name = user.get("name", "Anónimo").split()[0]
+            # Check if user wants to show real name or stay anonymous
+            use_real_name = user.get("use_real_name", True)
+            if use_real_name and user.get("name"):
+                # Show only first name for privacy
+                display_name = user.get("name", "Anónimo").split()[0]
+            else:
+                # Use alias or "Sonhador Anónimo"
+                display_name = user.get("alias") or "Sonhador Anónimo"
+            
             top_dreamer = {
-                "name": first_name,
-                "contribution_count": top_result[0]["contribution_count"],
-                "is_top": True
+                "name": display_name,
+                "has_avatar": bool(user.get("avatar") or user.get("picture")),
+                "avatar_url": user.get("avatar") or user.get("picture")
             }
-    
-    # Get total contributions count
-    total_contributions = await db.contributions.count_documents({"status": {"$in": ["completed", "pending_confirmation"]}})
     
     return {
         "total_dreamers": total_dreamers,
-        "total_contributions": total_contributions,
         "top_dreamer": top_dreamer
     }
 
