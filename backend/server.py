@@ -361,6 +361,8 @@ async def create_journey(journey_data: JourneyCreate, request: Request):
     doc["created_at"] = doc["created_at"].isoformat()
     doc["updated_at"] = doc["updated_at"].isoformat()
     await db.journeys.insert_one(doc)
+    # Return without _id
+    del_id = doc.pop("_id", None)
     return doc
 
 @api_router.put("/admin/journeys/{journey_id}")
