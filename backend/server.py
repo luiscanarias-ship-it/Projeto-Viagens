@@ -1103,6 +1103,228 @@ async def draw_raffle_winner(journey_id: str, request: Request):
         "total_tickets": len(tickets)
     }
 
+# ==================== TRIP GALLERY ====================
+
+@api_router.get("/gallery")
+async def get_trip_gallery():
+    """Get photos from completed trips by raffle winners"""
+    photos = await db.trip_photos.find({"is_approved": True}, {"_id": 0}).sort("created_at", -1).to_list(50)
+    return photos
+
+@api_router.post("/gallery/upload")
+async def upload_trip_photo(request: Request):
+    """Upload a trip photo (authenticated users who won a raffle)"""
+    user = await require_auth(request)
+    data = await request.json()
+    
+    # Check if user won a raffle
+    raffle = await db.raffle_results.find_one({"winner_user_id": user.user_id}, {"_id": 0})
+    if not raffle:
+        raise HTTPException(status_code=403, detail="Apenas vencedores de sorteios podem adicionar fotos")
+    
+    photo_doc = {
+        "photo_id": f"photo_{uuid.uuid4().hex[:12]}",
+        "user_id": user.user_id,
+        "journey_id": data.get("journey_id"),
+        "image_url": data.get("image_url"),
+        "caption": data.get("caption", ""),
+        "location": data.get("location", ""),
+        "is_approved": True,  # Auto-approve for now
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.trip_photos.insert_one(photo_doc)
+    
+    return {"message": "Foto adicionada com sucesso", "photo_id": photo_doc["photo_id"]}
+
+@api_router.get("/admin/gallery")
+async def get_all_gallery_photos(request: Request):
+    """Get all gallery photos for admin"""
+    await require_admin(request)
+    photos = await db.trip_photos.find({}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    return photos
+
+@api_router.put("/admin/gallery/{photo_id}/approve")
+async def approve_gallery_photo(photo_id: str, request: Request):
+    """Approve a gallery photo"""
+    await require_admin(request)
+    await db.trip_photos.update_one({"photo_id": photo_id}, {"$set": {"is_approved": True}})
+    return {"message": "Foto aprovada"}
+
+@api_router.delete("/admin/gallery/{photo_id}")
+async def delete_gallery_photo(photo_id: str, request: Request):
+    """Delete a gallery photo"""
+    await require_admin(request)
+    await db.trip_photos.delete_one({"photo_id": photo_id})
+    return {"message": "Foto eliminada"}
+
+# ==================== AI TRIP PLANNER ====================
+
+@api_router.post("/journey/{journey_id}/ai-planner")
+async def ai_trip_planner(journey_id: str, request: Request):
+    """AI-powered trip planning assistant"""
+    from emergentintegrations.llm.chat import LlmChat, UserMessage
+    
+    data = await request.json()
+    user_question = data.get("question", "")
+    
+    # Get journey info
+    journey = await db.journeys.find_one({"journey_id": journey_id}, {"_id": 0})
+    if not journey:
+        raise HTTPException(status_code=404, detail="Viagem não encontrada")
+    
+    api_key = os.environ.get("EMERGENT_LLM_KEY")
+    if not api_key:
+        raise HTTPException(status_code=500, detail="Serviço de IA não configurado")
+    
+    destination = journey.get("name", "")
+    
+    system_message = f"""Você é um assistente especializado em planeamento de viagens para {destination}. 
+    Ajude o utilizador a planear a sua viagem de sonho com:
+    - Roteiros detalhados (3, 5 ou 7 dias)
+    - Melhores locais a visitar e atrações imperdíveis
+    - Recomendações de hotéis e alojamentos para diferentes orçamentos
+    - Restaurantes e gastronomia local
+    - Dicas de transporte (como se deslocar, passes, apps úteis)
+    - Melhor época para visitar
+    - Dicas culturais e de etiqueta
+    - Estimativas de custos
+    - Segurança e precauções
+    
+    Seja amigável, detalhado e prático nas suas recomendações.
+    Responda sempre em português de Portugal."""
+    
+    chat = LlmChat(
+        api_key=api_key,
+        session_id=f"planner_{journey_id}_{uuid.uuid4().hex[:8]}",
+        system_message=system_message
+    ).with_model("openai", "gpt-5.2")
+    
+    try:
+        user_message = UserMessage(text=user_question or f"Ajuda-me a planear uma viagem para {destination}. O que me recomendas?")
+        response = await chat.send_message(user_message)
+        return {"response": response, "destination": destination}
+    except Exception as e:
+        logger.error(f"AI Planner error: {e}")
+        raise HTTPException(status_code=500, detail="Erro ao processar pedido de IA")
+
+@api_router.get("/journey/{journey_id}/travel-resources")
+async def get_travel_resources(journey_id: str):
+    """Get curated travel resources for a destination"""
+    journey = await db.journeys.find_one({"journey_id": journey_id}, {"_id": 0})
+    if not journey:
+        raise HTTPException(status_code=404, detail="Viagem não encontrada")
+    
+    destination = journey.get("name", "")
+    destination_encoded = destination.replace(" ", "+")
+    
+    # Build resource links for the destination
+    resources = {
+        "destination": destination,
+        "map": {
+            "title": "Google Maps",
+            "description": f"Explore {destination} no mapa",
+            "url": f"https://www.google.com/maps/search/{destination_encoded}",
+            "icon": "map"
+        },
+        "hotels": [
+            {
+                "name": "Booking.com",
+                "url": f"https://www.booking.com/searchresults.html?ss={destination_encoded}",
+                "icon": "booking"
+            },
+            {
+                "name": "TripAdvisor",
+                "url": f"https://www.tripadvisor.com/Search?q={destination_encoded}",
+                "icon": "tripadvisor"
+            },
+            {
+                "name": "Hoteis.com",
+                "url": f"https://www.hoteis.com/Hotel-Search?destination={destination_encoded}",
+                "icon": "hotel"
+            },
+            {
+                "name": "Airbnb",
+                "url": f"https://www.airbnb.com/s/{destination_encoded}/homes",
+                "icon": "airbnb"
+            },
+            {
+                "name": "ALL Accor",
+                "url": f"https://all.accor.com/hotel/search.html?destination={destination_encoded}",
+                "icon": "accor"
+            }
+        ],
+        "flights": [
+            {
+                "name": "TAP Portugal",
+                "url": f"https://www.flytap.com/pt-pt/pesquisar-voos?origin=LIS&destination={destination_encoded}",
+                "icon": "tap"
+            },
+            {
+                "name": "Ryanair",
+                "url": f"https://www.ryanair.com/pt/pt",
+                "icon": "ryanair"
+            },
+            {
+                "name": "EasyJet",
+                "url": f"https://www.easyjet.com/pt",
+                "icon": "easyjet"
+            },
+            {
+                "name": "Skyscanner",
+                "url": f"https://www.skyscanner.pt/transport/flights/lis/{destination_encoded}",
+                "icon": "skyscanner"
+            }
+        ],
+        "social": [
+            {
+                "name": "Instagram",
+                "url": f"https://www.instagram.com/explore/tags/{destination.lower().replace(' ', '')}",
+                "icon": "instagram",
+                "description": f"Fotos e experiências de {destination}"
+            },
+            {
+                "name": "TikTok",
+                "url": f"https://www.tiktok.com/search?q={destination_encoded}+travel",
+                "icon": "tiktok",
+                "description": "Vídeos e dicas de viagem"
+            },
+            {
+                "name": "Facebook",
+                "url": f"https://www.facebook.com/search/top?q={destination_encoded}+travel",
+                "icon": "facebook",
+                "description": "Grupos e páginas de viagem"
+            },
+            {
+                "name": "Threads",
+                "url": f"https://www.threads.net/search?q={destination_encoded}",
+                "icon": "threads",
+                "description": "Discussões e recomendações"
+            }
+        ],
+        "blogs": [
+            {
+                "name": "Alma de Viajante",
+                "url": f"https://www.almadeviajante.com/?s={destination_encoded}",
+                "icon": "blog",
+                "description": "Blog português de viagens"
+            },
+            {
+                "name": "Viaje Comigo",
+                "url": f"https://www.viajecomigo.com/?s={destination_encoded}",
+                "icon": "blog",
+                "description": "Dicas e roteiros"
+            },
+            {
+                "name": "Lonely Planet",
+                "url": f"https://www.lonelyplanet.com/search?q={destination_encoded}",
+                "icon": "lonelyplanet",
+                "description": "Guias de viagem mundiais"
+            }
+        ]
+    }
+    
+    return resources
+
 # ==================== SEED DATA ====================
 
 @api_router.post("/seed-journeys")
