@@ -190,7 +190,7 @@ const Home = () => {
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="flex items-center justify-center"
+              className="bg-[#F2C94C]/5 rounded-2xl p-6 flex items-center justify-center"
             >
               <div className="text-center">
                 {/* Raffle Stats */}
