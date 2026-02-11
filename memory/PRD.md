@@ -77,7 +77,6 @@ Criar uma plataforma de angariação de fundos chamada "4Luis" (4Luis.com) com c
 ## Backlog / Próximas Tarefas
 
 ### P1 (Importante)
-- [ ] Upload de avatar personalizado
 - [ ] Email de confirmação de contribuição
 - [ ] Histórico de contribuições no dashboard
 
