@@ -1356,7 +1356,7 @@ async def get_travel_resources(journey_id: str):
         "map": {
             "title": "Google Maps",
             "description": f"Explore {destination} no mapa",
-            "url": f"https://maps.google.com/?q={destination_plus}",
+            "url": f"https://www.google.com/maps/search/{destination_encoded}",
             "icon": "map"
         },
         "hotels": [
