@@ -16,9 +16,6 @@ const Footer = () => {
               <Heart className="w-6 h-6 text-[#FFBE98] fill-[#FFBE98]" />
               <span className="text-xl font-bold text-[#2D2A26]">4Luis</span>
             </Link>
-            <p className="text-[#6B6661] text-sm font-handwritten text-xl">
-              {t('footer.tagline')}
-            </p>
           </div>
 
           {/* Links */}
