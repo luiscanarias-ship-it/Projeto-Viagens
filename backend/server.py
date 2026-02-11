@@ -1440,10 +1440,6 @@ async def get_travel_resources(journey_id: str):
                 "description": "Discussões e experiências reais"
             }
         ],
-                "icon": "reddit",
-                "description": "Discussões e experiências reais"
-            }
-        ],
         "blogs": [
             {
                 "name": "Alma de Viajante",
