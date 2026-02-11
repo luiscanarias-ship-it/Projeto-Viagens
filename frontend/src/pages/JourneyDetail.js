@@ -161,19 +161,7 @@ const JourneyDetail = () => {
       <div className="max-w-4xl mx-auto px-6 md:px-12 py-12">
         {/* Progress Bar */}
         <div className="bg-white rounded-3xl p-8 shadow-lg -mt-16 relative z-10 mb-8">
-          <div className="flex justify-between items-end mb-4">
-            <div>
-              <span className="text-3xl font-bold text-[#2D2A26]">
-                €{journey.current_amount.toLocaleString()}
-              </span>
-              <span className="text-[#6B6661] ml-2">{t('journeys.progress')}</span>
-            </div>
-            <div className="text-right">
-              <span className="text-[#6B6661]">{t('journeys.goal')}: </span>
-              <span className="font-semibold">€{journey.goal_amount.toLocaleString()}</span>
-            </div>
-          </div>
-          <div className="h-4 bg-stone-100 rounded-full overflow-hidden">
+          <div className="h-4 bg-stone-100 rounded-full overflow-hidden mb-4">
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
@@ -181,8 +169,8 @@ const JourneyDetail = () => {
               className="h-full progress-bar-warm rounded-full"
             />
           </div>
-          <p className="text-center mt-4 text-[#6B6661]">
-            {progress.toFixed(0)}% do objetivo atingido
+          <p className="text-center text-2xl font-bold text-[#2D2A26]">
+            {Math.round(progress)}% {t('journeys.progress')}
           </p>
         </div>
 
