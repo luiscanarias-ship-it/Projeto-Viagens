@@ -401,6 +401,7 @@ class FourLuisAPITester:
         self.test_journey_endpoints()
         self.test_payment_endpoints()
         self.test_translation_endpoint()
+        self.test_new_features()
         
         # Print summary
         print(f"\n📊 Test Results: {self.tests_passed}/{self.tests_run} passed")
