@@ -1356,7 +1356,7 @@ async def get_travel_resources(journey_id: str):
         "map": {
             "title": "Google Maps",
             "description": f"Explore {destination} no mapa",
-            "url": f"https://www.google.com/maps/place/{destination_encoded}",
+            "url": f"https://www.google.pt/maps/search/{destination_plus}",
             "icon": "map"
         },
         "hotels": [
@@ -1410,28 +1410,28 @@ async def get_travel_resources(journey_id: str):
         ],
         "social": [
             {
-                "name": "Instagram",
-                "url": f"https://www.instagram.com/explore/tags/{destination_hashtag}travel/",
-                "icon": "instagram",
-                "description": f"Fotos e stories de {destination}"
+                "name": "GetYourGuide",
+                "url": f"https://www.getyourguide.pt/s/?q={destination_plus}",
+                "icon": "getyourguide",
+                "description": "Tours e atividades guiadas"
             },
             {
-                "name": "Facebook",
-                "url": f"https://www.facebook.com/search/pages/?q={destination_plus}%20travel",
-                "icon": "facebook",
-                "description": "Páginas e grupos de viagem"
+                "name": "Viator",
+                "url": f"https://www.viator.com/pt-PT/searchResults/all?text={destination_plus}",
+                "icon": "viator",
+                "description": "Experiências e excursões"
             },
             {
                 "name": "Pinterest",
                 "url": f"https://www.pinterest.pt/search/pins/?q={destination_plus}%20travel",
                 "icon": "pinterest",
-                "description": "Inspiração e ideias de viagem"
+                "description": "Inspiração visual de viagem"
             },
             {
-                "name": "GetYourGuide",
-                "url": f"https://www.getyourguide.pt/s/?q={destination_plus}",
-                "icon": "getyourguide",
-                "description": "Tours e atividades"
+                "name": "WikiVoyage",
+                "url": f"https://pt.wikivoyage.org/wiki/{destination_encoded}",
+                "icon": "wikivoyage",
+                "description": "Guia de viagem colaborativo"
             },
             {
                 "name": "Reddit",
