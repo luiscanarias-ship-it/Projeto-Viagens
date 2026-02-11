@@ -1,15 +1,34 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart } from 'lucide-react';
+import { Heart, Mail } from 'lucide-react';
+import axios from 'axios';
 import { useLanguage } from '../contexts/LanguageContext';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
 
 const Footer = () => {
   const { t, language } = useLanguage();
+  const [contactEmail, setContactEmail] = useState('contacto@4luis.com');
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await axios.get(`${API}/settings`);
+        if (response.data.contact_email) {
+          setContactEmail(response.data.contact_email);
+        }
+      } catch (error) {
+        // Use default email
+      }
+    };
+    fetchSettings();
+  }, []);
 
   return (
     <footer className="bg-white border-t border-stone-100 mt-auto" data-testid="footer">
       <div className="max-w-7xl mx-auto px-6 md:px-12 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div>
             <Link to="/" className="flex items-center gap-2 mb-4">
@@ -35,6 +54,18 @@ const Footer = () => {
           <div className="flex flex-col gap-2">
             <span className="text-[#6B6661] text-sm">{t('footer.privacy')}</span>
             <span className="text-[#6B6661] text-sm">{t('footer.terms')}</span>
+          </div>
+
+          {/* Contact */}
+          <div className="flex flex-col gap-2">
+            <a 
+              href={`mailto:${contactEmail}`}
+              className="text-[#FFBE98] hover:text-[#FFAB7D] text-sm transition-colors flex items-center gap-2 font-medium"
+              data-testid="footer-contact"
+            >
+              <Mail className="w-4 h-4" />
+              Contacte-nos
+            </a>
           </div>
         </div>
 
