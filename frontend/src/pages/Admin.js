@@ -31,7 +31,8 @@ const Admin = () => {
     emotional_message: '',
     impact_description: '',
     image_url: '',
-    goal_amount: 5000
+    goal_amount: 5000,
+    target_date: ''
   });
 
   useEffect(() => {
@@ -82,7 +83,8 @@ const Admin = () => {
         emotional_message: '',
         impact_description: '',
         image_url: '',
-        goal_amount: 5000
+        goal_amount: 5000,
+        target_date: ''
       });
     } catch (error) {
       console.error('Error creating journey:', error);
