@@ -807,6 +807,48 @@ async def get_admin_stats(request: Request):
         "total_journeys": total_journeys
     }
 
+# ==================== RAFFLE STATS (PUBLIC) ====================
+
+@api_router.get("/raffle-stats")
+async def get_public_raffle_stats():
+    """Get public statistics about completed raffles"""
+    # Get all raffle results
+    raffles = await db.raffle_results.find({}, {"_id": 0}).sort("drawn_at", -1).to_list(100)
+    
+    total_raffles = len(raffles)
+    total_prize_amount = sum(r.get("prize_amount", 0) for r in raffles)
+    
+    # Get winners with privacy respect
+    winners = []
+    for raffle in raffles:
+        winner_user_id = raffle.get("winner_user_id")
+        if winner_user_id:
+            user = await db.users.find_one({"user_id": winner_user_id}, {"_id": 0})
+            if user:
+                # Check privacy settings
+                use_real_name = user.get("use_real_name", True)
+                if use_real_name and user.get("name"):
+                    display_name = user.get("name", "").split()[0]  # First name only
+                else:
+                    display_name = user.get("alias") or "Sonhador Anónimo"
+                
+                # Get journey name
+                journey = await db.journeys.find_one({"journey_id": raffle.get("journey_id")}, {"_id": 0, "name": 1})
+                
+                winners.append({
+                    "name": display_name,
+                    "avatar_url": user.get("avatar") or user.get("picture"),
+                    "journey_name": journey.get("name") if journey else "",
+                    "prize_amount": raffle.get("prize_amount", 0),
+                    "drawn_at": raffle.get("drawn_at")
+                })
+    
+    return {
+        "total_raffles": total_raffles,
+        "total_prize_amount": total_prize_amount,
+        "winners": winners
+    }
+
 # ==================== SITE SETTINGS ====================
 
 @api_router.get("/settings")
