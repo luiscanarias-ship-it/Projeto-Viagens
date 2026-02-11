@@ -431,24 +431,6 @@ const Dashboard = () => {
                   />
                 </div>
 
-                {/* Alias */}
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Alias (Nome público alternativo)
-                  </label>
-                  <input
-                    type="text"
-                    value={profile.alias || ''}
-                    onChange={(e) => setProfile({ ...profile, alias: e.target.value })}
-                    placeholder="Ex: Sonhador Misterioso"
-                    className="w-full input-warm px-4"
-                    data-testid="profile-alias"
-                  />
-                  <p className="text-xs text-[#6B6661] mt-1">
-                    Este nome será mostrado publicamente se preferir manter o anonimato.
-                  </p>
-                </div>
-
                 {/* Privacy Toggle */}
                 <div className="p-4 bg-stone-50 rounded-xl">
                   <div className="flex items-center justify-between">
