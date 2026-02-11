@@ -109,78 +109,153 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Dreamers Counter Section */}
-      {dreamersStats && (
-        <section className="py-12 bg-white border-b border-stone-100" data-testid="dreamers-section">
-          <div className="max-w-4xl mx-auto px-6">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-center mb-8"
-            >
-              <p className="font-handwritten text-2xl md:text-3xl text-[#FFBE98]">
-                Cada contributo é um passo de luz.
-              </p>
-            </motion.div>
-            
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16"
-            >
-              {/* Total Dreamers */}
-              <div className="text-center">
-                <div className="w-16 h-16 bg-[#E6F4F1] rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Users className="w-8 h-8 text-[#2D2A26]" />
-                </div>
-                <motion.p 
-                  className="text-5xl font-bold text-[#2D2A26] mb-2"
-                  initial={{ scale: 0 }}
-                  whileInView={{ scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ type: "spring", delay: 0.2 }}
-                >
-                  {dreamersStats.total_dreamers || 0}
-                </motion.p>
-                <p className="text-[#6B6661] font-medium text-lg">Sonhadores</p>
-              </div>
+      {/* Community Stats Section - Dreamers & Raffles */}
+      <section className="py-16 bg-white border-b border-stone-100" data-testid="community-section">
+        <div className="max-w-6xl mx-auto px-6">
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <p className="font-handwritten text-2xl md:text-3xl text-[#FFBE98]">
+              Cada contributo é um passo de luz.
+            </p>
+          </motion.div>
 
-              {/* Divider */}
-              <div className="hidden md:block w-px h-24 bg-stone-200" />
-
-              {/* Top Dreamer */}
-              {dreamersStats.top_dreamer && (
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+            {/* Left: Dreamers */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="bg-[#E6F4F1]/20 rounded-3xl p-8"
+            >
+              <div className="flex items-center justify-center gap-8 md:gap-12">
+                {/* Total Dreamers */}
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-[#F2C94C]/30 to-[#E0C097]/30 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-[#F2C94C]/40">
-                    {dreamersStats.top_dreamer.avatar_url ? (
-                      <img 
-                        src={dreamersStats.top_dreamer.avatar_url} 
-                        alt="" 
-                        className="w-full h-full rounded-full object-cover"
-                      />
-                    ) : (
-                      <Star className="w-8 h-8 text-[#F2C94C]" />
-                    )}
+                  <div className="w-16 h-16 bg-[#E6F4F1] rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Users className="w-8 h-8 text-[#2D2A26]" />
                   </div>
-                  <p className="text-sm text-[#6B6661] mb-1">O Maior Sonhador</p>
                   <motion.p 
-                    className="text-2xl font-bold text-[#2D2A26]"
+                    className="text-4xl md:text-5xl font-bold text-[#2D2A26] mb-2"
                     initial={{ scale: 0 }}
                     whileInView={{ scale: 1 }}
                     viewport={{ once: true }}
-                    transition={{ type: "spring", delay: 0.3 }}
+                    transition={{ type: "spring", delay: 0.2 }}
                   >
-                    {dreamersStats.top_dreamer.name}
+                    {dreamersStats?.total_dreamers || 0}
                   </motion.p>
+                  <p className="text-[#6B6661] font-medium">Sonhadores</p>
                 </div>
-              )}
+
+                {/* Divider */}
+                {dreamersStats?.top_dreamer && (
+                  <div className="w-px h-20 bg-stone-200" />
+                )}
+
+                {/* Top Dreamer */}
+                {dreamersStats?.top_dreamer && (
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-gradient-to-br from-[#F2C94C]/30 to-[#E0C097]/30 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-[#F2C94C]/40 overflow-hidden">
+                      {dreamersStats.top_dreamer.avatar_url ? (
+                        <img 
+                          src={dreamersStats.top_dreamer.avatar_url} 
+                          alt="" 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <Star className="w-8 h-8 text-[#F2C94C]" />
+                      )}
+                    </div>
+                    <p className="text-sm text-[#6B6661] mb-1">O Maior Sonhador</p>
+                    <motion.p 
+                      className="text-xl font-bold text-[#2D2A26]"
+                      initial={{ scale: 0 }}
+                      whileInView={{ scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ type: "spring", delay: 0.3 }}
+                    >
+                      {dreamersStats.top_dreamer.name}
+                    </motion.p>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+
+            {/* Right: Raffles */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="bg-gradient-to-br from-[#F2C94C]/10 to-[#E0C097]/10 rounded-3xl p-8"
+            >
+              <div className="text-center">
+                {/* Raffle Stats */}
+                <div className="flex items-center justify-center gap-3 mb-6">
+                  <Gift className="w-8 h-8 text-[#F2C94C]" />
+                  <div>
+                    <motion.p 
+                      className="text-4xl md:text-5xl font-bold text-[#2D2A26]"
+                      initial={{ scale: 0 }}
+                      whileInView={{ scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ type: "spring", delay: 0.2 }}
+                    >
+                      {raffleStats?.total_raffles || 0}
+                    </motion.p>
+                  </div>
+                </div>
+                <p className="text-[#6B6661] font-medium mb-1">
+                  {raffleStats?.total_raffles === 1 ? 'Viagem Sorteada' : 'Viagens Sorteadas'}
+                </p>
+                {raffleStats?.total_prize_amount > 0 && (
+                  <p className="text-lg font-semibold text-[#F2C94C]">
+                    €{raffleStats.total_prize_amount.toLocaleString()} em prémios
+                  </p>
+                )}
+
+                {/* Winners */}
+                {raffleStats?.winners && raffleStats.winners.length > 0 && (
+                  <div className="mt-6 pt-6 border-t border-[#F2C94C]/20">
+                    <p className="text-sm text-[#6B6661] mb-4">Felizes Contemplados</p>
+                    <div className="flex flex-wrap justify-center gap-3">
+                      {raffleStats.winners.slice(0, 3).map((winner, index) => (
+                        <motion.div
+                          key={index}
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          whileInView={{ opacity: 1, scale: 1 }}
+                          viewport={{ once: true }}
+                          transition={{ delay: 0.1 * index }}
+                          className="flex items-center gap-2 bg-white px-3 py-2 rounded-full shadow-sm"
+                        >
+                          <div className="w-8 h-8 bg-gradient-to-br from-[#F2C94C]/30 to-[#E0C097]/30 rounded-full flex items-center justify-center overflow-hidden">
+                            {winner.avatar_url ? (
+                              <img src={winner.avatar_url} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                              <Star className="w-4 h-4 text-[#F2C94C]" />
+                            )}
+                          </div>
+                          <span className="font-medium text-sm text-[#2D2A26]">{winner.name}</span>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* No raffles yet message */}
+                {(!raffleStats || raffleStats.total_raffles === 0) && (
+                  <p className="text-sm text-[#6B6661] mt-2 italic">
+                    Em breve serão sorteadas viagens de sonho
+                  </p>
+                )}
+              </div>
             </motion.div>
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
       {/* Journeys Section */}
       <section id="journeys" className="py-20 md:py-32 px-6 md:px-12 bg-[#FAFAF9]" data-testid="journeys-section">
