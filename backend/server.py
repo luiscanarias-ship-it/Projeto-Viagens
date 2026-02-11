@@ -1301,8 +1301,14 @@ async def ai_trip_planner(journey_id: str, request: Request):
     - Estimativas de custos
     - Segurança e precauções
     
-    Seja amigável, detalhado e prático nas suas recomendações.
-    Responda sempre em português de Portugal."""
+    REGRAS DE FORMATAÇÃO IMPORTANTES:
+    - Use texto limpo e bem estruturado
+    - Use parágrafos separados para cada tópico
+    - Use listas com hífens (-) para enumerar itens
+    - NÃO use caracteres especiais como *, #, ** no início das frases
+    - NÃO use markdown ou formatação especial
+    - Seja claro, organizado e fácil de ler
+    - Responda sempre em português de Portugal."""
     
     chat = LlmChat(
         api_key=api_key,
@@ -1313,7 +1319,20 @@ async def ai_trip_planner(journey_id: str, request: Request):
     try:
         user_message = UserMessage(text=user_question or f"Ajuda-me a planear uma viagem para {destination}. O que me recomendas?")
         response = await chat.send_message(user_message)
-        return {"response": response, "destination": destination}
+        
+        # Clean up the response - remove markdown formatting characters
+        clean_response = response
+        if isinstance(clean_response, str):
+            # Remove markdown bold/italic markers
+            clean_response = clean_response.replace("**", "").replace("__", "")
+            clean_response = clean_response.replace("*", "").replace("_", "")
+            # Remove markdown headers
+            import re
+            clean_response = re.sub(r'^#{1,6}\s*', '', clean_response, flags=re.MULTILINE)
+            # Clean up excessive whitespace
+            clean_response = re.sub(r'\n{3,}', '\n\n', clean_response)
+        
+        return {"response": clean_response, "destination": destination}
     except Exception as e:
         logger.error(f"AI Planner error: {e}")
         raise HTTPException(status_code=500, detail="Erro ao processar pedido de IA")
