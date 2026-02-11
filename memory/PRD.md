@@ -52,6 +52,13 @@ Criar uma plataforma de angariação de fundos chamada "4Luis" (4Luis.com) com c
 - [x] Validação de tamanho (máx 500KB) e tipo de ficheiro
 - [x] Funciona em desktop e mobile
 
+### Identidade Anónima Automática (11 Fev)
+- [x] Geração automática de nome fictício (ex: "Buscador Sábio", "Nómada Curioso")
+- [x] Geração automática de avatar usando DiceBear API
+- [x] Quando utilizador desativa "Mostrar nome real", sistema gera identidade
+- [x] Botão "Gerar nova identidade anónima" para regenerar
+- [x] Identidade anónima usada em rankings e lista de vencedores
+
 ### Secção Comunidade (Homepage)
 - [x] **"Cada contributo é um passo de luz"** - frase de destaque
 - [x] **Contador de Sonhadores** - número de contribuidores únicos
