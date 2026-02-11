@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Ticket, Link as LinkIcon, Copy, Check, Plus, User, Eye, EyeOff, Save } from 'lucide-react';
+import { Ticket, Link as LinkIcon, Copy, Check, Plus, User, Eye, EyeOff, Save, Camera } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
