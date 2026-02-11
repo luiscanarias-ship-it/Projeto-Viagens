@@ -364,16 +364,39 @@ const Dashboard = () => {
               <div className="max-w-md space-y-6">
                 {/* Avatar */}
                 <div className="flex items-center gap-4">
-                  <div className="w-20 h-20 bg-stone-100 rounded-full flex items-center justify-center overflow-hidden">
-                    {profile.avatar || profile.picture ? (
-                      <img src={profile.avatar || profile.picture} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      <User className="w-10 h-10 text-[#6B6661]" />
-                    )}
+                  <div className="relative">
+                    <div className="w-20 h-20 bg-stone-100 rounded-full flex items-center justify-center overflow-hidden">
+                      {profile.avatar || profile.picture ? (
+                        <img src={profile.avatar || profile.picture} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <User className="w-10 h-10 text-[#6B6661]" />
+                      )}
+                    </div>
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploadingAvatar}
+                      className="absolute -bottom-1 -right-1 w-8 h-8 bg-[#FFBE98] rounded-full flex items-center justify-center shadow-lg hover:bg-[#FFAB7D] transition-colors disabled:opacity-50"
+                      data-testid="avatar-upload-btn"
+                    >
+                      {uploadingAvatar ? (
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <Camera className="w-4 h-4 text-white" />
+                      )}
+                    </button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAvatarUpload}
+                      className="hidden"
+                      data-testid="avatar-input"
+                    />
                   </div>
                   <div>
                     <p className="font-medium">{profile.name}</p>
                     <p className="text-sm text-[#6B6661]">{profile.email}</p>
+                    <p className="text-xs text-[#FFBE98] mt-1">Clique no ícone para alterar foto</p>
                   </div>
                 </div>
 
