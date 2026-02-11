@@ -444,7 +444,7 @@ const Dashboard = () => {
                         <p className="text-xs text-[#6B6661]">
                           {profile.use_real_name 
                             ? 'O seu primeiro nome será visível (ex: rankings)'
-                            : 'Será mostrado o seu alias ou "Sonhador Anónimo"'
+                            : 'Será mostrada a sua identidade anónima gerada automaticamente'
                           }
                         </p>
                       </div>
@@ -462,6 +462,39 @@ const Dashboard = () => {
                     </button>
                   </div>
                 </div>
+
+                {/* Anonymous Identity Preview - shown when anonymous mode is on */}
+                {!profile.use_real_name && (
+                  <div className="p-4 bg-[#E6F4F1]/50 rounded-xl border border-[#E6F4F1]">
+                    <p className="text-sm font-medium text-[#2D2A26] mb-3">A sua identidade anónima:</p>
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-full overflow-hidden bg-white">
+                        {profile.anonymous_avatar ? (
+                          <img src={profile.anonymous_avatar} alt="Avatar anónimo" className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-stone-200">
+                            <User className="w-6 h-6 text-stone-400" />
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-medium text-[#2D2A26]">
+                          {profile.anonymous_alias || 'A gerar...'}
+                        </p>
+                        <p className="text-xs text-[#6B6661]">
+                          Este nome e avatar serão mostrados publicamente
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={regenerateAnonymousIdentity}
+                      className="mt-3 text-xs text-[#FFBE98] hover:text-[#FFAB7D] transition-colors"
+                      data-testid="regenerate-identity-btn"
+                    >
+                      Gerar nova identidade anónima
+                    </button>
+                  </div>
+                )}
 
                 {/* Save Button */}
                 <button
