@@ -470,6 +470,11 @@ const Admin = () => {
                             <p className="text-sm text-[#6B6661]">{journey.poetic_name}</p>
                             <p className="text-xs text-[#6B6661]">
                               €{journey.current_amount.toLocaleString()} / €{journey.goal_amount.toLocaleString()}
+                              {journey.target_date && (
+                                <span className="ml-2 text-[#FFBE98]">
+                                  • Objetivo: {new Date(journey.target_date).toLocaleDateString('pt-PT')}
+                                </span>
+                              )}
                               {!journey.is_active && (
                                 <span className="ml-2 bg-red-100 text-red-600 px-2 py-0.5 rounded">Inativa</span>
                               )}
