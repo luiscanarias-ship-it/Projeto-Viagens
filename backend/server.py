@@ -763,6 +763,18 @@ async def update_user_profile(request: Request):
     updates = {k: v for k, v in data.items() if k in allowed_fields}
     updates["updated_at"] = datetime.now(timezone.utc).isoformat()
     
+    # If user is going anonymous and doesn't have an anonymous identity yet, generate one
+    if "use_real_name" in updates and updates["use_real_name"] == False:
+        current_user = await db.users.find_one({"user_id": user.user_id}, {"_id": 0})
+        
+        # Generate alias if not already set
+        if not current_user.get("anonymous_alias"):
+            updates["anonymous_alias"] = generate_anonymous_alias()
+        
+        # Generate anonymous avatar if not already set
+        if not current_user.get("anonymous_avatar"):
+            updates["anonymous_avatar"] = generate_anonymous_avatar(user.user_id)
+    
     await db.users.update_one(
         {"user_id": user.user_id},
         {"$set": updates}
@@ -770,6 +782,28 @@ async def update_user_profile(request: Request):
     
     updated_user = await db.users.find_one({"user_id": user.user_id}, {"_id": 0, "password_hash": 0})
     return updated_user
+
+@api_router.post("/profile/generate-anonymous")
+async def generate_anonymous_identity(request: Request):
+    """Generate a new anonymous identity (alias and avatar) for the user"""
+    user = await require_auth(request)
+    
+    new_alias = generate_anonymous_alias()
+    new_avatar = generate_anonymous_avatar(uuid.uuid4().hex[:8])
+    
+    await db.users.update_one(
+        {"user_id": user.user_id},
+        {"$set": {
+            "anonymous_alias": new_alias,
+            "anonymous_avatar": new_avatar,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {
+        "anonymous_alias": new_alias,
+        "anonymous_avatar": new_avatar
+    }
 
 @api_router.post("/profile/avatar")
 async def upload_avatar(request: Request):
