@@ -627,9 +627,15 @@ async def create_sponsor_link(request: Request):
     doc = link.model_dump()
     doc["created_at"] = doc["created_at"].isoformat()
     await db.sponsor_links.insert_one(doc)
-    # Remove _id before returning
-    doc.pop("_id", None)
-    return doc
+    # Return clean response without _id (MongoDB adds _id to doc after insert)
+    return {
+        "link_id": doc["link_id"],
+        "user_id": doc["user_id"],
+        "journey_id": doc["journey_id"],
+        "referral_count": doc["referral_count"],
+        "successful_referrals": doc["successful_referrals"],
+        "created_at": doc["created_at"]
+    }
 
 @api_router.get("/sponsor-links/my-links")
 async def get_my_sponsor_links(request: Request):

@@ -170,7 +170,7 @@ const Dashboard = () => {
                 <div className="text-center py-8">
                   <p className="text-[#6B6661] mb-4">Ainda não tem bilhetes.</p>
                   <p className="text-sm text-[#6B6661]">
-                    Convide 3 amigos para apoiar uma viagem e ganhe bilhetes para o sorteio!
+                    Se for contemplado com um voucher, esta secção será actualizada com o número de bilhetes que lhe dão direito ao voucher.
                   </p>
                 </div>
               ) : (
@@ -277,8 +277,9 @@ const Dashboard = () => {
 
               <div className="mt-4 p-4 bg-[#F2C94C]/10 rounded-xl">
                 <p className="text-sm text-[#2D2A26]">
-                  <strong>Nota:</strong> Só tem direito aos bilhetes de participação no sorteio 
-                  depois de convidar pelo menos 3 amigos a apoiar a angariação.
+                  <strong>Nota:</strong> Este voucher é válido durante 1 ano. Só terá direito aos 
+                  bilhetes de participação se a angariação atingir o objectivo e se convidar pelo 
+                  menos 3 amigos a apoiar a angariação de fundos.
                 </p>
               </div>
             </motion.div>
@@ -328,17 +329,6 @@ const Dashboard = () => {
                     onChange={(e) => setProfile({ ...profile, name: e.target.value })}
                     className="w-full input-warm px-4"
                     data-testid="profile-name"
-                  />
-                </div>
-
-                {/* Surname */}
-                <div>
-                  <label className="block text-sm font-medium mb-2">Sobrenome</label>
-                  <input
-                    type="text"
-                    value={profile.surname || ''}
-                    onChange={(e) => setProfile({ ...profile, surname: e.target.value })}
-                    className="w-full input-warm px-4"
                   />
                 </div>
 
