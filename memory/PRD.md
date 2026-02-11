@@ -46,6 +46,12 @@ Criar uma plataforma de angariação de fundos chamada "4Luis" (4Luis.com) com c
 - [x] Admin pode definir/editar data objetivo para cada viagem
 - [x] Funciona em desktop e mobile
 
+### Upload de Avatar (11 Fev)
+- [x] Endpoint `/api/profile/avatar` para upload de imagem (base64)
+- [x] Botão de câmara no perfil do utilizador para alterar foto
+- [x] Validação de tamanho (máx 500KB) e tipo de ficheiro
+- [x] Funciona em desktop e mobile
+
 ### Secção Comunidade (Homepage)
 - [x] **"Cada contributo é um passo de luz"** - frase de destaque
 - [x] **Contador de Sonhadores** - número de contribuidores únicos
