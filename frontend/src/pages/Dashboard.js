@@ -170,7 +170,8 @@ const Dashboard = () => {
                 <div className="text-center py-8">
                   <p className="text-[#6B6661] mb-4">Ainda não tem bilhetes.</p>
                   <p className="text-sm text-[#6B6661]">
-                    Se for contemplado com um voucher, esta secção será actualizada com o número de bilhetes que lhe dão direito ao voucher.
+                    <strong>Importante:</strong> Convida 3 amigos a apoiar uma viagem e ganha automaticamente 
+                    bilhetes para o sorteio do voucher da tua viagem de sonho! Para isso envia-lhes o teu link de Sponsor.
                   </p>
                 </div>
               ) : (
@@ -275,11 +276,17 @@ const Dashboard = () => {
                 </div>
               )}
 
-              <div className="mt-4 p-4 bg-[#F2C94C]/10 rounded-xl">
+              <div className="mt-4 p-4 bg-[#F2C94C]/10 rounded-xl space-y-3">
                 <p className="text-sm text-[#2D2A26]">
-                  <strong>Nota:</strong> Este voucher é válido durante 1 ano. Só terá direito aos 
-                  bilhetes de participação se a angariação atingir o objectivo e se convidar pelo 
-                  menos 3 amigos a apoiar a angariação de fundos.
+                  A tua contribuição também ajuda a financiar a tua viagem de sonho. Pede aos teus amigos 
+                  para contribuírem para este projeto. Assim que o objetivo de angariação for conseguido, 
+                  e se pelo menos 3 dos teus amigos tiverem contribuído, ficarás habilitado ao sorteio de 
+                  um voucher de viagem por isso quantos mais amigos conseguires convidar melhor.
+                </p>
+                <p className="text-sm text-[#2D2A26]">
+                  <strong>Nota:</strong> Se o objetivo de financiamento for atingido o valor do voucher 
+                  será de 5.000€, se o objetivo não for atingido o valor do voucher será de 5% do valor 
+                  angariado com o máximo de 2.500€.
                 </p>
               </div>
             </motion.div>
