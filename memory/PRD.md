@@ -42,8 +42,11 @@ Criar uma plataforma de angariação de fundos chamada "4Luis" (4Luis.com) com c
 ### Fase 2 - Novas Funcionalidades (11 Fev 2026)
 - [x] **Contador de Sonhadores** na homepage
   - Total de sonhadores (contribuidores únicos)
-  - Total de gestos fraternais (contribuições)
-  - Destaque para o maior sonhador (top contributor)
+  - "O Maior Sonhador" ao lado (apenas nome/alias, sem valores)
+- [x] **Sistema de Privacidade do Utilizador**
+  - Campo Alias para nome público alternativo
+  - Toggle "Mostrar nome real publicamente"
+  - Se desativado, mostra alias ou "Sonhador Anónimo"
 - [x] **Secção "Entre em Contacto"** no final da homepage
   - Email configurável pelo admin
   - Mensagem personalizável
@@ -62,6 +65,10 @@ Criar uma plataforma de angariação de fundos chamada "4Luis" (4Luis.com) com c
 - [x] **Configurações do site** (Admin)
   - Email de contacto editável
   - Mensagem de contacto editável
+- [x] **Dashboard do Utilizador melhorado**
+  - Tab "Meu Perfil" com configurações de privacidade
+  - Editar nome, sobrenome, alias
+  - Toggle para anonimato público
 
 ## Backlog / Próximas Tarefas
 
