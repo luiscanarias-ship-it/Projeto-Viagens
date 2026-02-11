@@ -16,72 +16,51 @@ Criar uma plataforma de angariação de fundos chamada "4Luis" (4Luis.com) com c
 2. **Administrador**: Gestor da plataforma (password: Admin1)
 3. **Sponsor**: Utilizador que partilha links e ganha bilhetes
 
-## Requisitos Core (Implementados)
+## O Que Foi Implementado (11 Fev 2026)
+
+### Funcionalidades Core
 - [x] Homepage com hero emocional e lista de viagens
 - [x] Seleção de idioma com tradução automática (PT, EN, ES, FR, DE, IT)
 - [x] Página de detalhes de viagem com barra de progresso (% angariado)
-- [x] Modal de pagamento com múltiplos métodos
+- [x] Modal de pagamento com múltiplos métodos (Stripe, MBWay, PayPal, Crypto)
 - [x] Sistema de autenticação duplo (JWT + Google)
-- [x] Painel de administração para CRUD de viagens
+- [x] Painel de administração completo
 - [x] Sistema de sponsor links
 - [x] QR codes para pagamentos crypto
-- [x] Design claro, sofisticado, emocional (tons pêssego/coral)
+- [x] Design claro, sofisticado, emocional
 
-## O Que Foi Implementado
+### Secção Comunidade (Homepage)
+- [x] **"Cada contributo é um passo de luz"** - frase de destaque
+- [x] **Contador de Sonhadores** - número de contribuidores únicos
+- [x] **O Maior Sonhador** - destaque sem mostrar valores (respeita privacidade)
+- [x] **Viagens Sorteadas** - contador com valor total em prémios
+- [x] **Felizes Contemplados** - lista de vencedores (nome/alias/anónimo)
 
-### Fase 1 - MVP (11 Fev 2026)
-- API REST completa com FastAPI
-- Autenticação JWT + Google OAuth
-- CRUD de viagens (journeys)
-- Sistema de contribuições e pagamentos
-- Integração Stripe para cartões
-- Sistema de sponsor links e referências
-- Tradução automática via GPT-5.2
-- Geração de bilhetes para sorteio
+### Sistema de Privacidade
+- [x] Campo **Alias** no perfil (nome público alternativo)
+- [x] Toggle **"Mostrar nome real publicamente"**
+- [x] Se desativado → mostra alias ou "Sonhador Anónimo"
 
-### Fase 2 - Novas Funcionalidades (11 Fev 2026)
-- [x] **Contador de Sonhadores** na homepage
-  - Total de sonhadores (contribuidores únicos)
-  - "O Maior Sonhador" ao lado (apenas nome/alias, sem valores)
-- [x] **Sistema de Privacidade do Utilizador**
-  - Campo Alias para nome público alternativo
-  - Toggle "Mostrar nome real publicamente"
-  - Se desativado, mostra alias ou "Sonhador Anónimo"
-- [x] **Secção "Entre em Contacto"** no final da homepage
-  - Email configurável pelo admin
-  - Mensagem personalizável
-- [x] **Confirmação manual de pagamentos**
-  - Tab "Contribuições" no admin
-  - Confirmar/Rejeitar pagamentos pendentes
-  - Atualização automática dos montantes
-- [x] **Sistema de Sorteio**
-  - Tab "Sorteio" no admin
-  - Seleção de viagem
-  - Regras claras do sorteio
-  - Sorteio aleatório com resultado visual
-- [x] **Progresso em percentagem**
-  - Mostra apenas "XX% angariado"
-  - Máximo de 100% mesmo que ultrapassado
-- [x] **Configurações do site** (Admin)
-  - Email de contacto editável
-  - Mensagem de contacto editável
-- [x] **Dashboard do Utilizador melhorado**
-  - Tab "Meu Perfil" com configurações de privacidade
-  - Editar nome, sobrenome, alias
-  - Toggle para anonimato público
+### Painel Admin (4 tabs)
+- [x] **Viagens**: CRUD completo
+- [x] **Contribuições**: Confirmar/Rejeitar pagamentos manuais
+- [x] **Sorteio**: Sistema completo com regras e sorteio aleatório
+- [x] **Configurações**: Email de contacto editável
+
+### Outros
+- [x] Link "Contacte-nos" no footer (mailto configurável)
+- [x] Progresso em percentagem apenas (máx 100%)
 
 ## Backlog / Próximas Tarefas
 
-### P0 (Crítico)
-- [ ] Email de confirmação de contribuição
-- [ ] Notificações push
-
 ### P1 (Importante)
-- [ ] Histórico de contribuições no dashboard utilizador
-- [ ] Testemunhos/mensagens de apoio em cada viagem
+- [ ] Upload de avatar personalizado
+- [ ] Email de confirmação de contribuição
+- [ ] Histórico de contribuições no dashboard
 
 ### P2 (Nice to have)
-- [ ] Avatar personalizado
+- [ ] Notificações push
+- [ ] Testemunhos/mensagens de apoio em cada viagem
 - [ ] Integração Wise/Revolut/Monzo/Chase
 
 ## Credenciais
@@ -90,7 +69,6 @@ Criar uma plataforma de angariação de fundos chamada "4Luis" (4Luis.com) com c
 - **MBWay**: +351968068535
 - **PayPal**: paypal.me/LuisCanarias
 
-## Configurações Admin
-Aceda a Admin → Configurações para definir:
-- Email de contacto (mostrado na secção "Entre em Contacto")
-- Mensagem de contacto personalizada
+## URLs
+- **Frontend**: https://build-project-51.preview.emergentagent.com
+- **API**: https://build-project-51.preview.emergentagent.com/api
