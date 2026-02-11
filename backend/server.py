@@ -627,6 +627,8 @@ async def create_sponsor_link(request: Request):
     doc = link.model_dump()
     doc["created_at"] = doc["created_at"].isoformat()
     await db.sponsor_links.insert_one(doc)
+    # Remove _id before returning
+    doc.pop("_id", None)
     return doc
 
 @api_router.get("/sponsor-links/my-links")
