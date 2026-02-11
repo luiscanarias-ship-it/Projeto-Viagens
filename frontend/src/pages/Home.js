@@ -117,6 +117,18 @@ const Home = () => {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
+              className="text-center mb-8"
+            >
+              <p className="font-handwritten text-2xl md:text-3xl text-[#FFBE98]">
+                Cada contributo é um passo de luz.
+              </p>
+            </motion.div>
+            
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
               className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16"
             >
               {/* Total Dreamers */}
