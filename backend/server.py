@@ -1042,14 +1042,16 @@ async def get_dreamers_stats():
             if use_real_name and user.get("name"):
                 # Show only first name for privacy
                 display_name = user.get("name", "Anónimo").split()[0]
+                display_avatar = user.get("avatar") or user.get("picture")
             else:
-                # Use alias or "Sonhador Anónimo"
-                display_name = user.get("alias") or "Sonhador Anónimo"
+                # Use anonymous identity
+                display_name = user.get("anonymous_alias") or user.get("alias") or "Sonhador Anónimo"
+                display_avatar = user.get("anonymous_avatar") or user.get("avatar") or user.get("picture")
             
             top_dreamer = {
                 "name": display_name,
-                "has_avatar": bool(user.get("avatar") or user.get("picture")),
-                "avatar_url": user.get("avatar") or user.get("picture")
+                "has_avatar": bool(display_avatar),
+                "avatar_url": display_avatar
             }
     
     return {
