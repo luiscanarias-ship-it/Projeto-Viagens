@@ -1,12 +1,19 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Calendar } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const JourneyCard = ({ journey, index }) => {
   const { t } = useLanguage();
   const progress = Math.min((journey.current_amount / journey.goal_amount) * 100, 100);
+
+  // Format target date for display
+  const formatDate = (dateStr) => {
+    if (!dateStr) return null;
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  };
 
   return (
     <motion.div
@@ -51,9 +58,17 @@ const JourneyCard = ({ journey, index }) => {
                 className="h-full progress-bar-warm rounded-full"
               />
             </div>
-            <p className="text-sm text-[#2D2A26] font-medium">
-              {Math.round(progress)}% {t('journeys.progress')}
-            </p>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-[#2D2A26] font-medium">
+                {Math.round(progress)}% {t('journeys.progress')}
+              </p>
+              {journey.target_date && (
+                <p className="text-xs text-[#6B6661] flex items-center gap-1">
+                  <Calendar className="w-3 h-3" />
+                  Data objetivo: {formatDate(journey.target_date)}
+                </p>
+              )}
+            </div>
           </div>
 
           {/* CTA */}
