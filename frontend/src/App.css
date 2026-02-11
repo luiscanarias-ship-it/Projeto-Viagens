@@ -10,18 +10,18 @@
 }
 
 .App-header {
-    background-color: #0f0f10;
+    background-color: #FAFAF9;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     font-size: calc(10px + 2vmin);
-    color: white;
+    color: #2D2A26;
 }
 
 .App-link {
-    color: #61dafb;
+    color: #FFBE98;
 }
 
 @keyframes App-logo-spin {
@@ -31,4 +31,21 @@
     to {
         transform: rotate(360deg);
     }
+}
+
+/* Line clamp utility */
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Prose styles for content */
+.prose {
+    max-width: 65ch;
+}
+
+.prose p {
+    margin-bottom: 1.25em;
 }
