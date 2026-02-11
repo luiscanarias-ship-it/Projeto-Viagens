@@ -780,6 +780,257 @@ async def get_admin_stats(request: Request):
         "total_journeys": total_journeys
     }
 
+# ==================== SITE SETTINGS ====================
+
+@api_router.get("/settings")
+async def get_site_settings():
+    """Get public site settings"""
+    settings = await db.site_settings.find_one({"setting_id": "main"}, {"_id": 0})
+    if not settings:
+        # Default settings
+        return {
+            "contact_email": "contacto@4luis.com",
+            "contact_message": "Tem alguma questão? Entre em contacto connosco."
+        }
+    return {
+        "contact_email": settings.get("contact_email", "contacto@4luis.com"),
+        "contact_message": settings.get("contact_message", "Tem alguma questão? Entre em contacto connosco.")
+    }
+
+@api_router.put("/admin/settings")
+async def update_site_settings(request: Request):
+    """Update site settings (admin only)"""
+    await require_admin(request)
+    data = await request.json()
+    
+    await db.site_settings.update_one(
+        {"setting_id": "main"},
+        {"$set": {
+            "setting_id": "main",
+            "contact_email": data.get("contact_email"),
+            "contact_message": data.get("contact_message"),
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }},
+        upsert=True
+    )
+    return {"message": "Configurações atualizadas com sucesso"}
+
+@api_router.get("/admin/settings")
+async def get_admin_settings(request: Request):
+    """Get all site settings (admin only)"""
+    await require_admin(request)
+    settings = await db.site_settings.find_one({"setting_id": "main"}, {"_id": 0})
+    if not settings:
+        return {
+            "contact_email": "contacto@4luis.com",
+            "contact_message": "Tem alguma questão? Entre em contacto connosco."
+        }
+    return settings
+
+# ==================== DREAMERS STATS ====================
+
+@api_router.get("/dreamers-stats")
+async def get_dreamers_stats():
+    """Get public statistics about dreamers (contributors)"""
+    # Count unique dreamers (users who contributed)
+    pipeline = [
+        {"$match": {"status": {"$in": ["completed", "pending_confirmation"]}}},
+        {"$group": {"_id": "$user_id"}},
+        {"$count": "total"}
+    ]
+    result = await db.contributions.aggregate(pipeline).to_list(1)
+    total_dreamers = result[0]["total"] if result else 0
+    
+    # Get top dreamer (highest total contribution)
+    top_pipeline = [
+        {"$match": {"status": {"$in": ["completed", "pending_confirmation"]}, "user_id": {"$ne": None}}},
+        {"$group": {
+            "_id": "$user_id",
+            "total_amount": {"$sum": "$amount"},
+            "contribution_count": {"$sum": 1}
+        }},
+        {"$sort": {"total_amount": -1}},
+        {"$limit": 1}
+    ]
+    top_result = await db.contributions.aggregate(top_pipeline).to_list(1)
+    
+    top_dreamer = None
+    if top_result:
+        top_user_id = top_result[0]["_id"]
+        user = await db.users.find_one({"user_id": top_user_id}, {"_id": 0})
+        if user:
+            # Get first name only for privacy
+            first_name = user.get("name", "Anónimo").split()[0]
+            top_dreamer = {
+                "name": first_name,
+                "contribution_count": top_result[0]["contribution_count"],
+                "is_top": True
+            }
+    
+    # Get total contributions count
+    total_contributions = await db.contributions.count_documents({"status": {"$in": ["completed", "pending_confirmation"]}})
+    
+    return {
+        "total_dreamers": total_dreamers,
+        "total_contributions": total_contributions,
+        "top_dreamer": top_dreamer
+    }
+
+# ==================== ADMIN CONTRIBUTIONS MANAGEMENT ====================
+
+@api_router.get("/admin/contributions")
+async def get_all_contributions(request: Request):
+    """Get all contributions for admin management"""
+    await require_admin(request)
+    contributions = await db.contributions.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    
+    # Enrich with user and journey info
+    for contrib in contributions:
+        if contrib.get("user_id"):
+            user = await db.users.find_one({"user_id": contrib["user_id"]}, {"_id": 0, "name": 1, "email": 1})
+            contrib["user_name"] = user.get("name") if user else "Desconhecido"
+            contrib["user_email"] = user.get("email") if user else ""
+        else:
+            contrib["user_name"] = "Anónimo"
+            contrib["user_email"] = ""
+        
+        journey = await db.journeys.find_one({"journey_id": contrib["journey_id"]}, {"_id": 0, "name": 1})
+        contrib["journey_name"] = journey.get("name") if journey else "Desconhecida"
+    
+    return contributions
+
+@api_router.put("/admin/contributions/{contribution_id}/confirm")
+async def confirm_contribution(contribution_id: str, request: Request):
+    """Confirm a manual payment contribution"""
+    await require_admin(request)
+    
+    contribution = await db.contributions.find_one({"contribution_id": contribution_id}, {"_id": 0})
+    if not contribution:
+        raise HTTPException(status_code=404, detail="Contribuição não encontrada")
+    
+    if contribution["status"] == "completed":
+        return {"message": "Contribuição já confirmada"}
+    
+    # Update contribution status
+    await db.contributions.update_one(
+        {"contribution_id": contribution_id},
+        {"$set": {"status": "completed", "confirmed_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    # Update journey amount
+    await db.journeys.update_one(
+        {"journey_id": contribution["journey_id"]},
+        {"$inc": {"current_amount": contribution["amount"]}}
+    )
+    
+    # Update sponsor link if applicable
+    if contribution.get("sponsor_link_id"):
+        await db.sponsor_links.update_one(
+            {"link_id": contribution["sponsor_link_id"]},
+            {"$inc": {"successful_referrals": 1}}
+        )
+    
+    # Generate tickets if user has 3+ referrals
+    if contribution.get("user_id"):
+        await generate_tickets_for_user(
+            contribution["user_id"], 
+            contribution["journey_id"],
+            contribution_id,
+            contribution["tickets_count"],
+            contribution.get("is_crypto", False)
+        )
+    
+    return {"message": "Contribuição confirmada com sucesso"}
+
+@api_router.put("/admin/contributions/{contribution_id}/reject")
+async def reject_contribution(contribution_id: str, request: Request):
+    """Reject a contribution"""
+    await require_admin(request)
+    
+    result = await db.contributions.update_one(
+        {"contribution_id": contribution_id},
+        {"$set": {"status": "rejected", "rejected_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Contribuição não encontrada")
+    
+    return {"message": "Contribuição rejeitada"}
+
+# ==================== RAFFLE SYSTEM ====================
+
+@api_router.get("/admin/raffle/{journey_id}")
+async def get_raffle_tickets(journey_id: str, request: Request):
+    """Get all tickets for a journey raffle"""
+    await require_admin(request)
+    
+    tickets = await db.tickets.find({"journey_id": journey_id}, {"_id": 0}).to_list(10000)
+    
+    # Enrich with user info
+    for ticket in tickets:
+        user = await db.users.find_one({"user_id": ticket["user_id"]}, {"_id": 0, "name": 1, "email": 1})
+        ticket["user_name"] = user.get("name") if user else "Desconhecido"
+        ticket["user_email"] = user.get("email") if user else ""
+    
+    return {
+        "journey_id": journey_id,
+        "total_tickets": len(tickets),
+        "tickets": tickets
+    }
+
+@api_router.post("/admin/raffle/{journey_id}/draw")
+async def draw_raffle_winner(journey_id: str, request: Request):
+    """Draw a random winner from tickets"""
+    import random
+    
+    await require_admin(request)
+    
+    tickets = await db.tickets.find({"journey_id": journey_id}, {"_id": 0}).to_list(10000)
+    
+    if not tickets:
+        raise HTTPException(status_code=400, detail="Não há bilhetes para este sorteio")
+    
+    # Random selection
+    winning_ticket = random.choice(tickets)
+    
+    # Get winner info
+    user = await db.users.find_one({"user_id": winning_ticket["user_id"]}, {"_id": 0})
+    
+    # Get journey info
+    journey = await db.journeys.find_one({"journey_id": journey_id}, {"_id": 0})
+    
+    # Calculate prize
+    if journey:
+        if journey["current_amount"] >= journey["goal_amount"]:
+            prize = 5000.0
+        else:
+            prize = min(journey["current_amount"] * 0.05, 2500.0)
+    else:
+        prize = 0
+    
+    # Save raffle result
+    raffle_result = {
+        "raffle_id": f"raffle_{uuid.uuid4().hex[:12]}",
+        "journey_id": journey_id,
+        "winning_ticket_id": winning_ticket["ticket_id"],
+        "winner_user_id": winning_ticket["user_id"],
+        "winner_name": user.get("name") if user else "Desconhecido",
+        "winner_email": user.get("email") if user else "",
+        "prize_amount": prize,
+        "drawn_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.raffle_results.insert_one(raffle_result)
+    
+    return {
+        "winner": {
+            "ticket_id": winning_ticket["ticket_id"],
+            "name": user.get("name") if user else "Desconhecido",
+            "email": user.get("email") if user else ""
+        },
+        "prize_amount": prize,
+        "total_tickets": len(tickets)
+    }
+
 # ==================== SEED DATA ====================
 
 @api_router.post("/seed-journeys")
