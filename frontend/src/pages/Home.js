@@ -112,20 +112,20 @@ const Home = () => {
       {/* Dreamers Counter Section */}
       {dreamersStats && (
         <section className="py-12 bg-white border-b border-stone-100" data-testid="dreamers-section">
-          <div className="max-w-5xl mx-auto px-6">
+          <div className="max-w-4xl mx-auto px-6">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="grid grid-cols-1 md:grid-cols-3 gap-6"
+              className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16"
             >
               {/* Total Dreamers */}
-              <div className="text-center p-6 rounded-2xl bg-[#E6F4F1]/30">
-                <div className="w-14 h-14 bg-[#E6F4F1] rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Users className="w-7 h-7 text-[#2D2A26]" />
+              <div className="text-center">
+                <div className="w-16 h-16 bg-[#E6F4F1] rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Users className="w-8 h-8 text-[#2D2A26]" />
                 </div>
                 <motion.p 
-                  className="text-4xl font-bold text-[#2D2A26] mb-1"
+                  className="text-5xl font-bold text-[#2D2A26] mb-2"
                   initial={{ scale: 0 }}
                   whileInView={{ scale: 1 }}
                   viewport={{ once: true }}
@@ -133,45 +133,36 @@ const Home = () => {
                 >
                   {dreamersStats.total_dreamers || 0}
                 </motion.p>
-                <p className="text-[#6B6661] font-medium">Sonhadores</p>
+                <p className="text-[#6B6661] font-medium text-lg">Sonhadores</p>
               </div>
 
-              {/* Total Contributions */}
-              <div className="text-center p-6 rounded-2xl bg-[#FFBE98]/10">
-                <div className="w-14 h-14 bg-[#FFBE98]/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl">💝</span>
-                </div>
-                <motion.p 
-                  className="text-4xl font-bold text-[#2D2A26] mb-1"
-                  initial={{ scale: 0 }}
-                  whileInView={{ scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ type: "spring", delay: 0.3 }}
-                >
-                  {dreamersStats.total_contributions || 0}
-                </motion.p>
-                <p className="text-[#6B6661] font-medium">Gestos Fraternais</p>
-              </div>
+              {/* Divider */}
+              <div className="hidden md:block w-px h-24 bg-stone-200" />
 
               {/* Top Dreamer */}
               {dreamersStats.top_dreamer && (
-                <div className="text-center p-6 rounded-2xl bg-gradient-to-br from-[#F2C94C]/20 to-[#E0C097]/20 border-2 border-[#F2C94C]/30">
-                  <div className="w-14 h-14 bg-[#F2C94C]/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Star className="w-7 h-7 text-[#F2C94C] fill-[#F2C94C]" />
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-gradient-to-br from-[#F2C94C]/30 to-[#E0C097]/30 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-[#F2C94C]/40">
+                    {dreamersStats.top_dreamer.avatar_url ? (
+                      <img 
+                        src={dreamersStats.top_dreamer.avatar_url} 
+                        alt="" 
+                        className="w-full h-full rounded-full object-cover"
+                      />
+                    ) : (
+                      <Star className="w-8 h-8 text-[#F2C94C]" />
+                    )}
                   </div>
-                  <p className="text-sm text-[#6B6661] mb-1">Maior Sonhador</p>
+                  <p className="text-sm text-[#6B6661] mb-1">O Maior Sonhador</p>
                   <motion.p 
-                    className="text-2xl font-bold text-[#2D2A26] mb-1"
+                    className="text-2xl font-bold text-[#2D2A26]"
                     initial={{ scale: 0 }}
                     whileInView={{ scale: 1 }}
                     viewport={{ once: true }}
-                    transition={{ type: "spring", delay: 0.4 }}
+                    transition={{ type: "spring", delay: 0.3 }}
                   >
                     {dreamersStats.top_dreamer.name}
                   </motion.p>
-                  <p className="text-sm text-[#6B6661]">
-                    {dreamersStats.top_dreamer.contribution_count} contribuições
-                  </p>
                 </div>
               )}
             </motion.div>
