@@ -361,6 +361,16 @@ const Admin = () => {
                       onChange={(e) => setFormData({ ...formData, goal_amount: parseFloat(e.target.value) })}
                       className="input-warm px-4"
                     />
+                    <div>
+                      <label className="block text-xs text-[#6B6661] mb-1">Data Objetivo</label>
+                      <input
+                        type="date"
+                        value={formData.target_date}
+                        onChange={(e) => setFormData({ ...formData, target_date: e.target.value })}
+                        className="input-warm px-4 w-full"
+                        data-testid="input-target-date"
+                      />
+                    </div>
                     <textarea
                       placeholder="Descrição"
                       value={formData.description}
