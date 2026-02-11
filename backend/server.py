@@ -73,6 +73,7 @@ class Journey(BaseModel):
     goal_amount: float
     current_amount: float = 0.0
     currency: str = "EUR"
+    target_date: Optional[str] = None  # Data objetivo para o financiamento (formato: YYYY-MM-DD)
     is_active: bool = True
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -86,6 +87,7 @@ class JourneyCreate(BaseModel):
     image_url: str
     goal_amount: float
     currency: str = "EUR"
+    target_date: Optional[str] = None
 
 class JourneyUpdate(BaseModel):
     name: Optional[str] = None
@@ -95,6 +97,7 @@ class JourneyUpdate(BaseModel):
     impact_description: Optional[str] = None
     image_url: Optional[str] = None
     goal_amount: Optional[float] = None
+    target_date: Optional[str] = None
     is_active: Optional[bool] = None
 
 class Contribution(BaseModel):
