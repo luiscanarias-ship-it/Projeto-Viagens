@@ -282,6 +282,113 @@ class FourLuisAPITester:
             translation_data
         )
 
+    def test_new_features(self):
+        """Test new features: dreamers stats, settings, contributions management, raffle"""
+        print("\n🔍 Testing New Features...")
+        
+        # Test dreamers stats endpoint
+        dreamers_stats = self.run_test(
+            "Get Dreamers Stats",
+            "GET",
+            "dreamers-stats",
+            200
+        )
+        
+        if dreamers_stats:
+            print(f"   Dreamers stats: {dreamers_stats}")
+        
+        # Test site settings endpoint
+        settings = self.run_test(
+            "Get Site Settings",
+            "GET",
+            "settings",
+            200
+        )
+        
+        if settings:
+            print(f"   Site settings: {settings}")
+        
+        # Test admin settings endpoints
+        if self.admin_token:
+            admin_headers = {"Authorization": f"Bearer {self.admin_token}"}
+            
+            # Test get admin settings
+            admin_settings = self.run_test(
+                "Get Admin Settings",
+                "GET",
+                "admin/settings",
+                200,
+                headers=admin_headers
+            )
+            
+            # Test update admin settings
+            new_settings = {
+                "contact_email": "test@4luis.com",
+                "contact_message": "Test message for contact section"
+            }
+            
+            self.run_test(
+                "Update Admin Settings",
+                "PUT",
+                "admin/settings",
+                200,
+                new_settings,
+                headers=admin_headers
+            )
+            
+            # Test admin contributions endpoint
+            contributions = self.run_test(
+                "Get Admin Contributions",
+                "GET",
+                "admin/contributions",
+                200,
+                headers=admin_headers
+            )
+            
+            if contributions:
+                print(f"   Found {len(contributions)} contributions")
+            
+            # Test manual contribution creation
+            manual_contrib_data = {
+                "journey_id": "journey_china001",  # Using seeded journey
+                "amount_key": "10",
+                "payment_method": "MBWay",
+                "is_crypto": False,
+                "name": "Test User",
+                "email": "testcontrib@test.com"
+            }
+            
+            manual_contrib = self.run_test(
+                "Create Manual Contribution",
+                "POST",
+                "contributions/manual",
+                200,
+                manual_contrib_data
+            )
+            
+            if manual_contrib and 'contribution_id' in manual_contrib:
+                contrib_id = manual_contrib['contribution_id']
+                print(f"   Created manual contribution: {contrib_id}")
+                
+                # Test confirm contribution
+                self.run_test(
+                    "Confirm Manual Contribution",
+                    "PUT",
+                    f"admin/contributions/{contrib_id}/confirm",
+                    200,
+                    {},
+                    headers=admin_headers
+                )
+            
+            # Test raffle endpoints (get tickets for a journey)
+            self.run_test(
+                "Get Raffle Tickets",
+                "GET",
+                "admin/raffle/journey_china001",
+                200,
+                headers=admin_headers
+            )
+
     def run_all_tests(self):
         """Run all tests"""
         print("🚀 Starting 4Luis API Tests...")
