@@ -1354,9 +1354,9 @@ async def get_travel_resources(journey_id: str):
     resources = {
         "destination": destination,
         "map": {
-            "title": "OpenStreetMap",
+            "title": "Bing Maps",
             "description": f"Explore {destination} no mapa",
-            "url": f"https://www.openstreetmap.org/search?query={destination_encoded}",
+            "url": f"https://www.bing.com/maps?q={destination_plus}",
             "icon": "map"
         },
         "hotels": [
