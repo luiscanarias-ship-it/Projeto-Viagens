@@ -289,6 +289,62 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Trip Gallery Section */}
+      {gallery && gallery.length > 0 && (
+        <section className="py-16 bg-white" data-testid="gallery-section">
+          <div className="max-w-7xl mx-auto px-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center mb-10"
+            >
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <Camera className="w-6 h-6 text-[#FFBE98]" />
+                <h2 className="text-3xl font-bold text-[#2D2A26]">
+                  Sonhos Realizados
+                </h2>
+              </div>
+              <p className="text-[#6B6661]">
+                Fotos das viagens dos nossos felizes contemplados
+              </p>
+            </motion.div>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {gallery.slice(0, 8).map((photo, index) => (
+                <motion.div
+                  key={photo.photo_id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  className="relative group aspect-square rounded-2xl overflow-hidden"
+                >
+                  <img
+                    src={photo.image_url}
+                    alt={photo.caption || "Foto de viagem"}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="absolute bottom-0 left-0 right-0 p-4">
+                      {photo.location && (
+                        <p className="text-white text-sm flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />
+                          {photo.location}
+                        </p>
+                      )}
+                      {photo.caption && (
+                        <p className="text-white/80 text-xs mt-1">{photo.caption}</p>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Emotional Quote Section */}
       <section className="py-16 bg-gradient-to-b from-[#FAFAF9] to-[#E6F4F1]/30">
         <div className="max-w-4xl mx-auto px-6 text-center">
