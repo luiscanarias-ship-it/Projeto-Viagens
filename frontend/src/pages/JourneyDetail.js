@@ -540,9 +540,20 @@ const JourneyDetail = () => {
                                   <div className="w-8 h-8 bg-gradient-to-br from-[#FFBE98] to-[#F2C94C] rounded-lg flex items-center justify-center flex-shrink-0">
                                     <Sparkles className="w-4 h-4 text-white" />
                                   </div>
-                                  <div className="flex-1 prose prose-sm prose-stone max-w-none">
-                                    <div className="whitespace-pre-wrap text-sm text-[#2D2A26]">
-                                      {aiResponse}
+                                  <div className="flex-1">
+                                    <div className="text-sm text-[#2D2A26] leading-relaxed">
+                                      {aiResponse.split('\n').map((line, idx) => (
+                                        <p key={idx} className={line.trim() ? 'mb-2' : 'mb-1'}>
+                                          {line.trim().startsWith('-') ? (
+                                            <span className="flex items-start gap-2">
+                                              <span className="text-[#FFBE98] mt-1">•</span>
+                                              <span>{line.trim().substring(1).trim()}</span>
+                                            </span>
+                                          ) : (
+                                            line
+                                          )}
+                                        </p>
+                                      ))}
                                     </div>
                                   </div>
                                 </div>
