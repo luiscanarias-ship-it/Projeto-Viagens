@@ -1,0 +1,174 @@
+<analysis>**original_problem_statement:**
+O utilizador quer construir uma plataforma de angariação de fundos (crowdfunding) chamada 4Luis. O projeto tem um forte apelo emocional e visa financiar viagens de sonho.
+
+**PRODUCT REQUIREMENTS (extraído do documento e conversa):**
+-   **Autenticação:** Login com email/palavra-passe (JWT) e Google Auth.
+-   **Jornadas (Viagens):** O admin pode criar, editar e apagar viagens de sonho que os utilizadores podem financiar.
+-   **Contribuições:** Utilizadores podem contribuir para as viagens.
+-   **Pagamentos:** Integração com Stripe (cartão) e métodos manuais (transferência, MBWay, Crypto). O admin confirma pagamentos manuais.
+-   **Sistema de Sorteio (Raffle):** Contribuições dão bilhetes para um sorteio de vouchers de viagem. As regras do sorteio são específicas (e.g., dependem de atingir o objetivo da campanha).
+-   **Sistema de Referência (Sponsor Link):** Utilizadores podem gerar um link de partilha. Se amigos contribuírem através do link, o utilizador ganha bilhetes para o sorteio.
+-   **Tradução:** Tradução automática de conteúdo usando GPT-5.2.
+-   **Páginas:** Homepage, Detalhe da Viagem, Login, Dashboard do Utilizador, Painel de Admin.
+-   **Homepage:** Deve mostrar as viagens, um contador de sonhadores (contribuidores), o maior sonhador, estatísticas de sorteios, e uma galeria de fotos de sonhos realizados.
+-   **Dashboard do Utilizador:** Gestão de perfil (incluindo alias para anonimato e avatar), visualização de contribuições e bilhetes de sorteio, e geração do link de sponsor.
+-   **Painel de Admin:** Gestão de viagens, confirmação de pagamentos manuais, realização de sorteios e configuração do site (ex: email de contacto).
+-   **Página de Detalhe da Viagem:** Deve incluir ferramentas de planeamento de viagem: mapa, links para sites de reserva (hotéis, voos), resumos de redes sociais, e um assistente de IA para planeamento.
+-   **Design:** Tema claro, sofisticado e moderno com um forte apelo emocional.
+
+**User's preferred language**: Portuguese (Portugal)
+
+**what currently exists?**
+Uma aplicação full-stack (React + FastAPI) para a plataforma de angariação de fundos 4Luis. As funcionalidades principais estão implementadas, incluindo autenticação de utilizador (JWT e Google), criação e listagem de viagens de sonho, sistema de contribuições, painel de admin para gestão, e um dashboard de utilizador. A homepage exibe as viagens, contadores de contribuidores (sonhadores), e vencedores de sorteios. A página de detalhe da viagem inclui ferramentas de planeamento com IA. A maioria das funcionalidades solicitadas pelo utilizador foi implementada e testada.
+
+**Last working item**:
+-   **Last item agent was working**: O agente estava a diagnosticar e a preparar-se para corrigir um bug no backend. O endpoint para criar sponsor links () estava a falhar com um  (500) devido a um problema de serialização de  do MongoDB ao tentar retornar o objeto do link criado.
+-   **Status**: IN PROGRESS
+-   **Agent Testing Done**: N (O agente reproduziu o erro usando  e identificou a causa nos logs do backend).
+-   **Which testing method agent to use?**: backend testing agent (para testar a correção do endpoint) ou um comando  que valide uma resposta 200 OK com os dados do link.
+-   **User Testing Done**: N
+
+**All Pending/In progress Issue list**:
+-   **Issue 1**: O endpoint de criação de link de sponsor está quebrado.
+    -   **Attempted fixes**: Nenhum. O agente identificou a causa do erro ( nos logs), que aponta para uma tentativa de serializar um documento MongoDB que ainda contém um .
+    -   **Next debug checklist**:
+        -   Localizar a função  em .
+        -   Modificar a resposta da função para garantir que o  do documento  é convertido para uma string ou removido antes de ser retornado como JSON. O objeto a ser retornado () precisa ser limpo.
+        -   Reiniciar o backend e testar novamente com .
+    -   **Why fix this issue and what will be achieved with the fix?**: Corrigir isto é um bloqueio para a funcionalidade de referência, que foi um pedido explícito do utilizador na sua última mensagem. A correção permitirá que os utilizadores gerem os seus links de partilha.
+    -   **Status**: IN PROGRESS
+    -   **Is recurring issue?**: N
+    -   **Should Test frontend/backend/both after fix?**: both
+    -   **Blocked on other issue**: N/A
+
+**In progress Task List**:
+-   **Task 1**: Implementar as alterações solicitadas pelo utilizador no Dashboard. (Prioridade: P0)
+    -   **Where to resume**: Após a correção do **Issue 1**, o agente deve continuar a implementação das seguintes alterações:
+        1.  **Backend:** Garantir que o endpoint  está funcional.
+        2.  **Frontend ():**
+            -   Remover o campo Sobrenome (surname) da secção Meu Perfil, deixando apenas o Nome.
+            -   Adicionar a nota informativa na secção do link de sponsor sobre as regras do voucher e a necessidade de 3 amigos contribuírem.
+            -   Alterar a frase na secção Meus bilhetes para a nova versão fornecida pelo utilizador.
+    -   **What will be achieved with this?**: Completará o último conjunto de pedidos do utilizador, melhorando a usabilidade e clareza do Dashboard do utilizador.
+    -   **Status**: BLOCKED
+    -   **Should Test frontend/backend/both after fix?**: both
+    -   **Blocked on something**: **Issue 1: O endpoint de criação de link de sponsor está quebrado.**
+
+**Upcoming and Future Tasks**
+-   **Upcoming Tasks:**
+    -   **P1:** Upload de avatar personalizado para o perfil do utilizador.
+    -   **P1:** Implementação de emails de confirmação automáticos (ex: após contribuição, registo).
+-   **Future Tasks:**
+    -   **P2:** Sistema de notificações dentro da aplicação.
+
+**Completed work in this session**
+-   Construção da plataforma MVP (backend e frontend).
+-   Sistema de autenticação (JWT e Google Auth).
+-   Integração de pagamentos (Stripe, Crypto, e manuais).
+-   Painel de Admin completo (gestão de viagens, confirmação de pagamentos, sorteios, configurações).
+-   Dashboard do utilizador com gestão de perfil, privacidade (alias), e visualização de bilhetes.
+-   Homepage dinâmica com:
+    -   Listagem de viagens.
+    -   Secção Sonhadores (contador e Maior Sonhador).
+    -   Secção Sorteios (viagens sorteadas, valor em prémios, e lista de vencedores).
+    -   Galeria de fotos Sonhos Realizados.
+-   Página de detalhe da viagem com ferramentas de planeamento (mapas, links de reserva, IA helper).
+-   Funcionalidade de tradução (integrada via GPT-5.2).
+-   Múltiplos ajustes de UI e texto baseados no feedback contínuo do utilizador.
+
+**Earlier issues found/mentioned but not fixed**
+Nenhum. Todos os problemas anteriores foram resolvidos ou estão a ser tratados (como o bug do sponsor link).
+
+**Known issue recurrence from previous fork**
+-   **Issue recurrence in previous fork**: N/A
+-   **Recurrence count**: 0
+-   **Status**: N/A
+
+**Code Architecture**
+
+
+**Key Technical Concepts**
+-   **Backend**: FastAPI (Python), MongoDB (através da  e ), JWT para autenticação.
+-   **Frontend**: React.js, TailwindCSS,  para chamadas API.
+-   **Database**: MongoDB.
+-   **Arquitetura**: Aplicação Full-Stack Monorepo.
+
+**key DB schema**
+-   **users**: 
+-   **journeys**: 
+-   **contributions**: 
+-   **tickets**: 
+-   **sponsor_links**: 
+-   **raffles**: 
+-   **site_settings**: 
+-   **gallery_photos**: 
+
+**changes in tech stack**
+Nenhuma.
+
+**All files of reference**
+-   : Ficheiro único que contém toda a lógica do backend, incluindo modelos de dados, endpoints da API, e lógica de negócio.
+-   : Componente da página principal, que agrega várias secções dinâmicas.
+-   : Componente para o painel do utilizador, onde as últimas alterações foram solicitadas.
+-   : Componente para o painel de administração.
+-   : Página de detalhe da viagem com as ferramentas de planeamento.
+-   : Ficheiro principal de roteamento do frontend.
+-   : Componente do rodapé, modificado para incluir o link de contacto.
+-   : Documento com o registo do progresso e requisitos.
+
+**Areas that need refactoring**:
+-   O ficheiro  tornou-se muito grande e monolítico (mais de 1100 linhas). Seria benéfico refatorá-lo, dividindo os endpoints em múltiplos s por funcionalidade (e.g., , , ) para melhorar a manutenibilidade.
+
+**key api endpoints**
+-   : Autenticação de utilizadores.
+-   : CRUD para viagens.
+-   : Criação de link de referência (atualmente com bug).
+-   : Obter dados para o painel do utilizador.
+-   : Atualizar perfil do utilizador.
+-   : Endpoints de administração.
+-   : Obter estatísticas para a homepage (sonhadores, sorteios).
+-   : Obter dados para as ferramentas de planeamento de viagem.
+
+**Critical Info for New Agent**
+-   O ficheiro  é o ponto central de toda a lógica de backend. Qualquer nova funcionalidade ou correção de bug no backend provavelmente será feita aqui.
+-   O utilizador é muito participativo e fornece feedback frequente. É importante testar visualmente (com screenshots) e comunicar as alterações de forma clara.
+-   O bug de serialização de  do MongoDB é um problema comum neste projeto. Esteja atento a isso sempre que retornar dados do banco de dados em endpoints da API. Certifique-se de que os s são convertidos para  ou excluídos das respostas.
+
+**documents and test reports created in this job**
+-   
+-   
+-   
+
+**Last 10 User Messages and any pending HUMAN messages**
+1.  **User**: Pede para mover o link Entre em contacto para o footer da página.
+2.  **User**: Pergunta onde está a frase Não é apenas crowdfunding, é Crowddreaming.... Pede para adicionar a essa secção o número de viagens sorteadas, o valor total em prémios e a identificação dos vencedores.
+3.  **User**: Pede para colocar a nova secção de sorteios lado a lado com a secção dos sonhadores para harmonia visual.
+4.  **User**: Pede para remover a cor de fundo da secção de viagens sorteadas e reduzir a sua altura.
+5.  **User**: Muda de ideias e pede para adicionar um fundo subtil à secção de viagens sorteadas.
+6.  **User**: ok (confirma a alteração).
+7.  **User**: nao (indica que não há mais alterações no momento).
+8.  **User**: sim, adiciona a galeria de fotos e pede para adicionar a secção de ferramentas de planeamento na página de detalhe da viagem (mapa, hotéis, voos, redes sociais, IA helper).
+9.  **User**: Reporta um bug (Não consegui criar um link de sponsor) e solicita 4 alterações específicas no Dashboard: remover o sobrenome, corrigir o link, e alterar dois textos informativos.
+10. **Agent**: Responde que vai fazer as alterações e começa a investigar o problema do sponsor link.
+
+**Project Health Check:**
+-   **Broken**: A funcionalidade de criação de sponsor link no dashboard do utilizador está quebrada devido a um bug no backend.
+-   **Mocked**: A integração com GPT-5.2 para tradução é um placeholder, pois o modelo exato e a sua API podem não ser os finais.
+
+**3rd Party Integrations**
+-   **Stripe (Payments)** — requer User API Key (mas uma chave de teste do sistema está a ser usada).
+-   **Emergent-managed Google Auth (Authentication)** — usa Emergent LLM Key.
+-   **GPT-5.2 (Translation)** — usa Emergent LLM Key (implementação de placeholder).
+
+**Testing status**
+-   **Testing agent used after significant changes**: YES (duas vezes).
+-   **Troubleshoot agent used after agent stuck in loop**: NO.
+-   **Test files created**: , .
+-   **Known regressions**: A funcionalidade de criação de sponsor link, que pode ter funcionado antes, está agora quebrada.
+
+**Credentials to test flow:**
+-   **Admin**:  / 
+-   **Test User**:  /  (criado durante os testes) e  /  (criado para simular contribuições e sorteios).
+
+**What agent forgot to execute**
+O agente não se esqueceu de nada. Está no meio da execução do último pedido do utilizador, mas foi bloqueado por um bug que precisa ser resolvido primeiro.</analysis>
