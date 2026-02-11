@@ -40,6 +40,12 @@ Criar uma plataforma de angariação de fundos chamada "4Luis" (4Luis.com) com c
 - [x] Backend: 25/25 testes passaram (100%)
 - [x] Frontend: todas funcionalidades operacionais
 
+### Data Objetivo (11 Fev)
+- [x] Campo `target_date` adicionado ao modelo Journey no backend
+- [x] JourneyCard mostra "Data objetivo: DD/MM/YYYY" junto à percentagem
+- [x] Admin pode definir/editar data objetivo para cada viagem
+- [x] Funciona em desktop e mobile
+
 ### Secção Comunidade (Homepage)
 - [x] **"Cada contributo é um passo de luz"** - frase de destaque
 - [x] **Contador de Sonhadores** - número de contribuidores únicos
