@@ -42,15 +42,7 @@ const JourneyCard = ({ journey, index }) => {
 
           {/* Progress */}
           <div className="mb-4">
-            <div className="flex justify-between text-sm mb-2">
-              <span className="text-[#2D2A26] font-medium">
-                €{journey.current_amount.toLocaleString()} {t('journeys.progress')}
-              </span>
-              <span className="text-[#6B6661]">
-                €{journey.goal_amount.toLocaleString()} {t('journeys.goal')}
-              </span>
-            </div>
-            <div className="h-2 bg-stone-100 rounded-full overflow-hidden">
+            <div className="h-2 bg-stone-100 rounded-full overflow-hidden mb-2">
               <motion.div
                 initial={{ width: 0 }}
                 whileInView={{ width: `${progress}%` }}
@@ -59,6 +51,9 @@ const JourneyCard = ({ journey, index }) => {
                 className="h-full progress-bar-warm rounded-full"
               />
             </div>
+            <p className="text-sm text-[#2D2A26] font-medium">
+              {Math.round(progress)}% {t('journeys.progress')}
+            </p>
           </div>
 
           {/* CTA */}
