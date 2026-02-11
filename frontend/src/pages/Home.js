@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowDown, Users, Star, Mail } from 'lucide-react';
+import { ArrowDown, Users, Star, Gift } from 'lucide-react';
 import axios from 'axios';
 import { useLanguage } from '../contexts/LanguageContext';
 import JourneyCard from '../components/JourneyCard';
@@ -13,7 +13,7 @@ const Home = () => {
   const [journeys, setJourneys] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dreamersStats, setDreamersStats] = useState(null);
-  const [siteSettings, setSiteSettings] = useState(null);
+  const [raffleStats, setRaffleStats] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -22,15 +22,15 @@ const Home = () => {
         await axios.post(`${API}/seed-journeys`).catch(() => {});
         
         // Fetch all data in parallel
-        const [journeysRes, dreamersRes, settingsRes] = await Promise.all([
+        const [journeysRes, dreamersRes, raffleRes] = await Promise.all([
           axios.get(`${API}/journeys`),
           axios.get(`${API}/dreamers-stats`),
-          axios.get(`${API}/settings`)
+          axios.get(`${API}/raffle-stats`)
         ]);
         
         setJourneys(journeysRes.data);
         setDreamersStats(dreamersRes.data);
-        setSiteSettings(settingsRes.data);
+        setRaffleStats(raffleRes.data);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
