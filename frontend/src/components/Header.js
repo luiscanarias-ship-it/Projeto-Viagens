@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Globe, Menu, X, User, LogOut, Settings, Heart } from 'lucide-react';
+import { Globe, Menu, X, User, LogOut, Settings, Heart, Mail } from 'lucide-react';
+import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
 
 const languages = [
   { code: 'pt', name: 'Português', flag: '🇵🇹' },
@@ -21,6 +25,21 @@ const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [contactEmail, setContactEmail] = useState('contacto@4luis.com');
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await axios.get(`${API}/settings`);
+        if (response.data.contact_email) {
+          setContactEmail(response.data.contact_email);
+        }
+      } catch (error) {
+        // Use default email
+      }
+    };
+    fetchSettings();
+  }, []);
 
   const handleLogout = async () => {
     await logout();
