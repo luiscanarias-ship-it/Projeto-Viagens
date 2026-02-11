@@ -698,6 +698,33 @@ async def get_journey_tickets(journey_id: str, request: Request):
     ).to_list(1000)
     return tickets
 
+# ==================== USER PROFILE ====================
+
+@api_router.get("/profile")
+async def get_user_profile(request: Request):
+    """Get current user profile with privacy settings"""
+    user = await require_auth(request)
+    user_data = await db.users.find_one({"user_id": user.user_id}, {"_id": 0, "password_hash": 0})
+    return user_data
+
+@api_router.put("/profile")
+async def update_user_profile(request: Request):
+    """Update user profile including privacy settings"""
+    user = await require_auth(request)
+    data = await request.json()
+    
+    allowed_fields = ["name", "surname", "alias", "use_real_name", "avatar"]
+    updates = {k: v for k, v in data.items() if k in allowed_fields}
+    updates["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    await db.users.update_one(
+        {"user_id": user.user_id},
+        {"$set": updates}
+    )
+    
+    updated_user = await db.users.find_one({"user_id": user.user_id}, {"_id": 0, "password_hash": 0})
+    return updated_user
+
 # ==================== TRANSLATION ====================
 
 @api_router.post("/translate")
