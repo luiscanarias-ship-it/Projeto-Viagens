@@ -1345,8 +1345,10 @@ async def get_travel_resources(journey_id: str):
         raise HTTPException(status_code=404, detail="Viagem não encontrada")
     
     destination = journey.get("name", "")
-    destination_encoded = destination.replace(" ", "+")
+    destination_encoded = destination.replace(" ", "%20")
+    destination_plus = destination.replace(" ", "+")
     destination_slug = destination.lower().replace(" ", "-")
+    destination_hashtag = destination.lower().replace(" ", "")
     
     # Build resource links for the destination
     resources = {
@@ -1359,19 +1361,19 @@ async def get_travel_resources(journey_id: str):
         },
         "hotels": [
             {
-                "name": "Booking.com",
-                "url": f"https://www.booking.com/searchresults.pt-pt.html?ss={destination_encoded}",
-                "icon": "booking"
+                "name": "Trivago",
+                "url": f"https://www.trivago.pt/?search={destination_plus}",
+                "icon": "trivago"
             },
             {
                 "name": "TripAdvisor",
-                "url": f"https://www.tripadvisor.com/Search?q={destination_encoded}&searchSessionId=hotels",
+                "url": f"https://www.tripadvisor.pt/Search?q={destination_plus}",
                 "icon": "tripadvisor"
             },
             {
-                "name": "Hoteis.com",
-                "url": f"https://pt.hotels.com/Hotel-Search?destination={destination_encoded}",
-                "icon": "hotel"
+                "name": "Kayak",
+                "url": f"https://www.kayak.pt/hotels/{destination_slug}",
+                "icon": "kayak"
             },
             {
                 "name": "Airbnb",
@@ -1380,7 +1382,7 @@ async def get_travel_resources(journey_id: str):
             },
             {
                 "name": "ALL Accor",
-                "url": f"https://all.accor.com/ssr/app/accor/hotels/{destination_slug}/index.pt-pt.shtml",
+                "url": "https://all.accor.com/pt-pt/world/index.shtml",
                 "icon": "accor"
             }
         ],
@@ -1401,33 +1403,43 @@ async def get_travel_resources(journey_id: str):
                 "icon": "easyjet"
             },
             {
-                "name": "Google Flights",
-                "url": f"https://www.google.com/travel/flights?q=voos+para+{destination_encoded}",
-                "icon": "google"
+                "name": "Momondo",
+                "url": f"https://www.momondo.pt/flight-search/{destination_slug}",
+                "icon": "momondo"
             }
         ],
         "social": [
             {
-                "name": "YouTube",
-                "url": f"https://www.youtube.com/results?search_query={destination_encoded}+travel+vlog",
-                "icon": "youtube",
-                "description": f"Vídeos e vlogs de viagem para {destination}"
+                "name": "Instagram",
+                "url": f"https://www.instagram.com/explore/tags/{destination_hashtag}travel/",
+                "icon": "instagram",
+                "description": f"Fotos e stories de {destination}"
+            },
+            {
+                "name": "Facebook",
+                "url": f"https://www.facebook.com/search/pages/?q={destination_plus}%20travel",
+                "icon": "facebook",
+                "description": "Páginas e grupos de viagem"
             },
             {
                 "name": "Pinterest",
-                "url": f"https://www.pinterest.pt/search/pins/?q={destination_encoded}+travel",
+                "url": f"https://www.pinterest.pt/search/pins/?q={destination_plus}%20travel",
                 "icon": "pinterest",
                 "description": "Inspiração e ideias de viagem"
             },
             {
                 "name": "GetYourGuide",
-                "url": f"https://www.getyourguide.pt/s/?q={destination_encoded}",
+                "url": f"https://www.getyourguide.pt/s/?q={destination_plus}",
                 "icon": "getyourguide",
                 "description": "Tours e atividades"
             },
             {
                 "name": "Reddit",
-                "url": f"https://www.reddit.com/search/?q={destination_encoded}+travel",
+                "url": f"https://www.reddit.com/search/?q={destination_plus}%20travel",
+                "icon": "reddit",
+                "description": "Discussões e experiências reais"
+            }
+        ],
                 "icon": "reddit",
                 "description": "Discussões e experiências reais"
             }
