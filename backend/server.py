@@ -38,6 +38,40 @@ api_router = APIRouter(prefix="/api")
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+# ==================== ANONYMOUS IDENTITY GENERATOR ====================
+
+# Poetic name combinations for anonymous users
+ALIAS_PREFIXES = [
+    "Sonhador", "Viajante", "Explorador", "Aventureiro", "Navegador",
+    "Peregrino", "Descobridor", "Caminhante", "Nómada", "Errante",
+    "Buscador", "Observador", "Contemplador", "Andarilho", "Vagabundo"
+]
+
+ALIAS_SUFFIXES = [
+    "Misterioso", "Sereno", "Curioso", "Audaz", "Sábio",
+    "Tranquilo", "Intrépido", "Silencioso", "Luminoso", "Etéreo",
+    "Radiante", "Encantado", "Celestial", "Infinito", "Dourado",
+    "Prateado", "Estrelado", "Solar", "Lunar", "Cósmico"
+]
+
+# DiceBear avatar styles and colors for anonymous users
+AVATAR_STYLES = ["adventurer", "avataaars", "big-smile", "bottts", "lorelei", "micah", "miniavs", "personas"]
+AVATAR_BACKGROUNDS = ["b6e3f4", "c0aede", "d1d4f9", "ffd5dc", "ffdfbf", "e8f5e9", "fff3e0", "f3e5f5"]
+
+def generate_anonymous_alias() -> str:
+    """Generate a poetic anonymous alias"""
+    prefix = random.choice(ALIAS_PREFIXES)
+    suffix = random.choice(ALIAS_SUFFIXES)
+    return f"{prefix} {suffix}"
+
+def generate_anonymous_avatar(seed: str = None) -> str:
+    """Generate an anonymous avatar URL using DiceBear API"""
+    if not seed:
+        seed = uuid.uuid4().hex[:8]
+    style = random.choice(AVATAR_STYLES)
+    bg_color = random.choice(AVATAR_BACKGROUNDS)
+    return f"https://api.dicebear.com/7.x/{style}/svg?seed={seed}&backgroundColor={bg_color}"
+
 # ==================== MODELS ====================
 
 class UserBase(BaseModel):
