@@ -935,15 +935,18 @@ async def get_public_raffle_stats():
                 use_real_name = user.get("use_real_name", True)
                 if use_real_name and user.get("name"):
                     display_name = user.get("name", "").split()[0]  # First name only
+                    display_avatar = user.get("avatar") or user.get("picture")
                 else:
-                    display_name = user.get("alias") or "Sonhador Anónimo"
+                    # Use anonymous identity
+                    display_name = user.get("anonymous_alias") or user.get("alias") or "Sonhador Anónimo"
+                    display_avatar = user.get("anonymous_avatar") or user.get("avatar") or user.get("picture")
                 
                 # Get journey name
                 journey = await db.journeys.find_one({"journey_id": raffle.get("journey_id")}, {"_id": 0, "name": 1})
                 
                 winners.append({
                     "name": display_name,
-                    "avatar_url": user.get("avatar") or user.get("picture"),
+                    "avatar_url": display_avatar,
                     "journey_name": journey.get("name") if journey else "",
                     "prize_amount": raffle.get("prize_amount", 0),
                     "drawn_at": raffle.get("drawn_at")
