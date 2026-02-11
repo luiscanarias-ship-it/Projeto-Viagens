@@ -14,6 +14,7 @@ const Dashboard = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
+  const fileInputRef = useRef(null);
   
   const [activeTab, setActiveTab] = useState('tickets');
   const [tickets, setTickets] = useState([]);
@@ -24,6 +25,7 @@ const Dashboard = () => {
   const [copiedLink, setCopiedLink] = useState(null);
   const [selectedJourney, setSelectedJourney] = useState('');
   const [savingProfile, setSavingProfile] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   const passedUser = location.state?.user;
 
