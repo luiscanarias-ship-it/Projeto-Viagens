@@ -424,6 +424,15 @@ const Admin = () => {
                             onChange={(e) => setEditingJourney({ ...editingJourney, goal_amount: parseFloat(e.target.value) })}
                             className="input-warm px-3 text-sm"
                           />
+                          <div>
+                            <label className="block text-xs text-[#6B6661] mb-1">Data Objetivo</label>
+                            <input
+                              type="date"
+                              value={editingJourney.target_date || ''}
+                              onChange={(e) => setEditingJourney({ ...editingJourney, target_date: e.target.value })}
+                              className="input-warm px-3 text-sm w-full"
+                            />
+                          </div>
                           <select
                             value={editingJourney.is_active}
                             onChange={(e) => setEditingJourney({ ...editingJourney, is_active: e.target.value === 'true' })}
