@@ -31,8 +31,14 @@ Criar uma plataforma de angariação de fundos chamada "4Luis" (4Luis.com) com c
 
 ### Dashboard do Utilizador (Atualizado 11 Fev)
 - [x] Secção "Meu Perfil" sem campo sobrenome (apenas Nome)
-- [x] Secção "Links de Sponsor" com nota sobre validade do voucher (1 ano)
-- [x] Secção "Meus Bilhetes" com texto atualizado sobre vouchers
+- [x] Secção "Links de Sponsor" com nota detalhada sobre regras do voucher (5.000€ ou 5% até 2.500€)
+- [x] Secção "Meus Bilhetes" com texto incentivando 3 amigos para ganhar bilhetes
+
+### Testes Completos (11 Fev)
+- [x] Mobile responsiveness testado em 3 viewports (mobile, tablet, desktop)
+- [x] Todos os meios de pagamento testados (Stripe, MBWay, PayPal, Crypto)
+- [x] Backend: 25/25 testes passaram (100%)
+- [x] Frontend: todas funcionalidades operacionais
 
 ### Secção Comunidade (Homepage)
 - [x] **"Cada contributo é um passo de luz"** - frase de destaque
