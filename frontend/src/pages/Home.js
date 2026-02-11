@@ -190,38 +190,36 @@ const Home = () => {
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="bg-gradient-to-br from-[#F2C94C]/10 to-[#E0C097]/10 rounded-3xl p-8"
+              className="flex items-center justify-center"
             >
               <div className="text-center">
                 {/* Raffle Stats */}
-                <div className="flex items-center justify-center gap-3 mb-6">
-                  <Gift className="w-8 h-8 text-[#F2C94C]" />
-                  <div>
-                    <motion.p 
-                      className="text-4xl md:text-5xl font-bold text-[#2D2A26]"
-                      initial={{ scale: 0 }}
-                      whileInView={{ scale: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ type: "spring", delay: 0.2 }}
-                    >
-                      {raffleStats?.total_raffles || 0}
-                    </motion.p>
-                  </div>
+                <div className="flex items-center justify-center gap-3 mb-2">
+                  <Gift className="w-6 h-6 text-[#F2C94C]" />
+                  <motion.p 
+                    className="text-4xl font-bold text-[#2D2A26]"
+                    initial={{ scale: 0 }}
+                    whileInView={{ scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ type: "spring", delay: 0.2 }}
+                  >
+                    {raffleStats?.total_raffles || 0}
+                  </motion.p>
                 </div>
-                <p className="text-[#6B6661] font-medium mb-1">
+                <p className="text-[#6B6661] font-medium text-sm">
                   {raffleStats?.total_raffles === 1 ? 'Viagem Sorteada' : 'Viagens Sorteadas'}
                 </p>
                 {raffleStats?.total_prize_amount > 0 && (
-                  <p className="text-lg font-semibold text-[#F2C94C]">
+                  <p className="text-sm font-semibold text-[#F2C94C]">
                     €{raffleStats.total_prize_amount.toLocaleString()} em prémios
                   </p>
                 )}
 
                 {/* Winners */}
                 {raffleStats?.winners && raffleStats.winners.length > 0 && (
-                  <div className="mt-6 pt-6 border-t border-[#F2C94C]/20">
-                    <p className="text-sm text-[#6B6661] mb-4">Felizes Contemplados</p>
-                    <div className="flex flex-wrap justify-center gap-3">
+                  <div className="mt-4 pt-4 border-t border-stone-200">
+                    <p className="text-xs text-[#6B6661] mb-2">Felizes Contemplados</p>
+                    <div className="flex flex-wrap justify-center gap-2">
                       {raffleStats.winners.slice(0, 3).map((winner, index) => (
                         <motion.div
                           key={index}
@@ -229,13 +227,13 @@ const Home = () => {
                           whileInView={{ opacity: 1, scale: 1 }}
                           viewport={{ once: true }}
                           transition={{ delay: 0.1 * index }}
-                          className="flex items-center gap-2 bg-white px-3 py-2 rounded-full shadow-sm"
+                          className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full shadow-sm border border-stone-100"
                         >
-                          <div className="w-8 h-8 bg-gradient-to-br from-[#F2C94C]/30 to-[#E0C097]/30 rounded-full flex items-center justify-center overflow-hidden">
+                          <div className="w-6 h-6 bg-gradient-to-br from-[#F2C94C]/30 to-[#E0C097]/30 rounded-full flex items-center justify-center overflow-hidden">
                             {winner.avatar_url ? (
                               <img src={winner.avatar_url} alt="" className="w-full h-full object-cover" />
                             ) : (
-                              <Star className="w-4 h-4 text-[#F2C94C]" />
+                              <Star className="w-3 h-3 text-[#F2C94C]" />
                             )}
                           </div>
                           <span className="font-medium text-sm text-[#2D2A26]">{winner.name}</span>
@@ -247,7 +245,7 @@ const Home = () => {
 
                 {/* No raffles yet message */}
                 {(!raffleStats || raffleStats.total_raffles === 0) && (
-                  <p className="text-sm text-[#6B6661] mt-2 italic">
+                  <p className="text-xs text-[#6B6661] mt-2 italic">
                     Em breve serão sorteadas viagens de sonho
                   </p>
                 )}
