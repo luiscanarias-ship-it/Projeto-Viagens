@@ -80,6 +80,14 @@ const Header = () => {
               {t('nav.journeys')}
             </Link>
             
+            <a 
+              href={`mailto:${contactEmail}`}
+              className="text-[#2D2A26] hover:text-[#FFBE98] transition-colors font-medium flex items-center gap-1"
+              data-testid="nav-contact"
+            >
+              Contacto
+            </a>
+            
             {user && (
               <Link 
                 to="/dashboard" 
