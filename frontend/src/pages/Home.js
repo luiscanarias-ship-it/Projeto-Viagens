@@ -288,15 +288,15 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Emotional Section with Raffle Stats */}
-      <section className="py-20 bg-gradient-to-b from-[#FAFAF9] to-[#E6F4F1]/30">
+      {/* Emotional Quote Section */}
+      <section className="py-16 bg-gradient-to-b from-[#FAFAF9] to-[#E6F4F1]/30">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <p className="font-handwritten text-3xl md:text-4xl text-[#6B6661] leading-relaxed mb-12">
+            <p className="font-handwritten text-3xl md:text-4xl text-[#6B6661] leading-relaxed">
               "Não é apenas crowdfunding,
               <br />
               <span className="text-[#FFBE98]">  é crowddreaming.</span>
@@ -306,57 +306,6 @@ const Home = () => {
               <span className="text-[#FFBE98]">é um gesto fraternal.</span>"
             </p>
           </motion.div>
-
-          {/* Raffle Stats */}
-          {raffleStats && raffleStats.total_raffles > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-              className="mt-8"
-            >
-              <div className="inline-flex items-center gap-2 bg-[#F2C94C]/20 px-6 py-3 rounded-full mb-6">
-                <Gift className="w-5 h-5 text-[#F2C94C]" />
-                <span className="text-[#2D2A26] font-medium">
-                  {raffleStats.total_raffles} {raffleStats.total_raffles === 1 ? 'viagem sorteada' : 'viagens sorteadas'} no valor de €{raffleStats.total_prize_amount.toLocaleString()}
-                </span>
-              </div>
-
-              {/* Winners */}
-              {raffleStats.winners && raffleStats.winners.length > 0 && (
-                <div className="mt-6">
-                  <p className="text-sm text-[#6B6661] mb-4">Felizes Contemplados</p>
-                  <div className="flex flex-wrap justify-center gap-4">
-                    {raffleStats.winners.map((winner, index) => (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.1 * index }}
-                        className="flex items-center gap-3 bg-white px-4 py-3 rounded-2xl shadow-sm border border-stone-100"
-                      >
-                        <div className="w-10 h-10 bg-gradient-to-br from-[#F2C94C]/30 to-[#E0C097]/30 rounded-full flex items-center justify-center overflow-hidden border-2 border-[#F2C94C]/40">
-                          {winner.avatar_url ? (
-                            <img src={winner.avatar_url} alt="" className="w-full h-full object-cover" />
-                          ) : (
-                            <Star className="w-5 h-5 text-[#F2C94C]" />
-                          )}
-                        </div>
-                        <div className="text-left">
-                          <p className="font-medium text-[#2D2A26]">{winner.name}</p>
-                          <p className="text-xs text-[#6B6661]">
-                            {winner.journey_name} • €{winner.prize_amount.toLocaleString()}
-                          </p>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </motion.div>
-          )}
         </div>
       </section>
     </div>
