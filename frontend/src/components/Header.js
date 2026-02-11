@@ -259,6 +259,13 @@ const Header = () => {
               >
                 {t('nav.journeys')}
               </Link>
+              <a
+                href={`mailto:${contactEmail}`}
+                onClick={() => setMobileMenuOpen(false)}
+                className="block py-3 text-[#2D2A26] font-medium"
+              >
+                Contacto
+              </a>
               {user && (
                 <Link
                   to="/dashboard"
