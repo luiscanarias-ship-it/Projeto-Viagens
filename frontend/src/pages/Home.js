@@ -378,46 +378,56 @@ const Home = () => {
               Ferramentas úteis para planear a viagem dos teus sonhos
             </p>
             
-            {/* Destination Selector */}
-            <div className="max-w-md mx-auto">
-              <select
-                value={selectedDestination}
-                onChange={(e) => setSelectedDestination(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-white text-[#2D2A26] focus:outline-none focus:ring-2 focus:ring-[#FFBE98]"
+            {/* Destination Input */}
+            <div className="max-w-md mx-auto flex gap-2">
+              <input
+                type="text"
+                value={customDestination}
+                onChange={(e) => setCustomDestination(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Escreve o teu destino... (ex: Paris, Tóquio, Nova Iorque)"
+                className="flex-1 px-4 py-3 rounded-xl border border-stone-200 bg-white text-[#2D2A26] focus:outline-none focus:ring-2 focus:ring-[#FFBE98]"
+              />
+              <button
+                onClick={searchDestination}
+                disabled={!customDestination.trim() || loadingResources}
+                className="px-6 py-3 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-medium hover:bg-[#FFAB7D] transition-colors disabled:opacity-50"
               >
-                <option value="">Escolhe um destino...</option>
-                {journeys.map(j => (
-                  <option key={j.journey_id} value={j.journey_id}>{j.name}</option>
-                ))}
-              </select>
+                {loadingResources ? '...' : 'Pesquisar'}
+              </button>
             </div>
           </motion.div>
 
           {/* Travel Resources - Compact Grid */}
-          {travelResources && selectedDestination && (
+          {travelResources && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="grid grid-cols-2 md:grid-cols-4 gap-4"
+              className="mt-6"
             >
-              {/* Map */}
-              <a
-                href={travelResources.map?.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-stone-50 rounded-xl p-4 hover:bg-stone-100 transition-colors text-center"
-              >
-                <Map className="w-6 h-6 text-[#FFBE98] mx-auto mb-2" />
-                <p className="text-sm font-medium text-[#2D2A26]">{travelResources.map?.title}</p>
-                <p className="text-xs text-[#6B6661]">Ver no mapa</p>
-              </a>
+              <p className="text-center text-sm text-[#6B6661] mb-4">
+                Recursos para: <span className="font-semibold text-[#2D2A26]">{travelResources.destination}</span>
+              </p>
+              
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {/* Map */}
+                <a
+                  href={travelResources.map?.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-stone-50 rounded-xl p-4 hover:bg-stone-100 transition-colors text-center"
+                >
+                  <Map className="w-6 h-6 text-[#FFBE98] mx-auto mb-2" />
+                  <p className="text-sm font-medium text-[#2D2A26]">{travelResources.map?.title || 'Mapa'}</p>
+                  <p className="text-xs text-[#6B6661]">Ver no mapa</p>
+                </a>
 
-              {/* Hotels */}
-              <div 
-                className="bg-stone-50 rounded-xl p-4 cursor-pointer hover:bg-stone-100 transition-colors text-center"
-                onClick={() => setExpandedSection(expandedSection === 'hotels' ? null : 'hotels')}
-              >
-                <Hotel className="w-6 h-6 text-[#FFBE98] mx-auto mb-2" />
+                {/* Hotels */}
+                <div 
+                  className="bg-stone-50 rounded-xl p-4 cursor-pointer hover:bg-stone-100 transition-colors text-center"
+                  onClick={() => setExpandedSection(expandedSection === 'hotels' ? null : 'hotels')}
+                >
+                  <Hotel className="w-6 h-6 text-[#FFBE98] mx-auto mb-2" />
                 <p className="text-sm font-medium text-[#2D2A26]">Onde Ficar</p>
                 <p className="text-xs text-[#6B6661]">{travelResources.hotels?.length} opções</p>
               </div>
