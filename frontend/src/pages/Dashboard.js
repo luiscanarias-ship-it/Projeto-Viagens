@@ -357,9 +357,12 @@ const Dashboard = () => {
                   começarás a ganhar pontos. Quantos mais amigos convidares e mais contribuíres, mais pontos acumulas 
                   para seres O Maior Sonhador!
                 </p>
-                <p className="text-sm text-[#2D2A26]">
-                  <strong>Dica:</strong> Paga com criptomoedas e ganha pontos a dobrar!
-                </p>
+                <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-[#FFBE98]/30 to-[#F2C94C]/30 rounded-xl border border-[#FFBE98]/40">
+                  <span className="text-2xl">🚀</span>
+                  <p className="text-sm font-semibold text-[#2D2A26]">
+                    <span className="text-[#FFBE98]">Dica:</span> Paga com criptomoedas e ganha <span className="text-[#F2C94C] font-bold">pontos a dobrar!</span>
+                  </p>
+                </div>
               </div>
             </motion.div>
           )}
