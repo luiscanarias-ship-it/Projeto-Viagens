@@ -56,13 +56,6 @@ const Admin = () => {
         setSettings(settingsRes.data);
         setContributions(contributionsRes.data);
         setSponsorsReport(sponsorsRes.data);
-          axios.get(`${API}/admin/contributions`, { headers, withCredentials: true })
-        ]);
-        
-        setJourneys(journeysRes.data);
-        setStats(statsRes.data);
-        setSettings(settingsRes.data);
-        setContributions(contributionsRes.data);
       } catch (error) {
         console.error('Error fetching admin data:', error);
       } finally {
