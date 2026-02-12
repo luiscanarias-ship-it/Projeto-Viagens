@@ -178,6 +178,50 @@ const Admin = () => {
     }
   };
 
+  const loadRaffleParticipants = async (journeyId) => {
+    try {
+      const headers = getAuthHeaders();
+      const response = await axios.get(`${API}/admin/raffle/${journeyId}`, { 
+        headers, 
+        withCredentials: true 
+      });
+      setRaffleParticipants(response.data);
+      setSelectedRaffleJourney(journeyId);
+    } catch (error) {
+      console.error('Error loading raffle participants:', error);
+      alert('Erro ao carregar participantes');
+    }
+  };
+
+  const performRaffleDraw = async (journeyId) => {
+    if (!window.confirm('Tem certeza que deseja realizar o sorteio? Esta ação não pode ser desfeita.')) return;
+    
+    setDrawingRaffle(true);
+    try {
+      const headers = getAuthHeaders();
+      const response = await axios.post(`${API}/admin/raffle/${journeyId}/draw`, {}, { 
+        headers, 
+        withCredentials: true 
+      });
+      
+      alert(`🎉 Sorteio realizado com sucesso!\n\nVencedor: ${response.data.winner.name}\nEmail: ${response.data.winner.email}\nTotal de entradas: ${response.data.total_entries}`);
+      
+      // Reload raffle data
+      const rafflesRes = await axios.get(`${API}/admin/journeys-ready-for-raffle`, { headers, withCredentials: true });
+      setRafflesReady(rafflesRes.data.ready_journeys || []);
+      
+      // Reload participants for the current journey
+      if (selectedRaffleJourney === journeyId) {
+        await loadRaffleParticipants(journeyId);
+      }
+    } catch (error) {
+      console.error('Error performing raffle:', error);
+      alert(error.response?.data?.detail || 'Erro ao realizar sorteio');
+    } finally {
+      setDrawingRaffle(false);
+    }
+  };
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center pt-20">
