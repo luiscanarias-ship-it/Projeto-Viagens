@@ -1144,17 +1144,59 @@ async def confirm_contribution(contribution_id: str, request: Request):
             {"$inc": {"successful_referrals": 1}}
         )
     
-    # Generate tickets if user has 3+ referrals
+    # Generate points if user has 3+ referrals
     if contribution.get("user_id"):
-        await generate_tickets_for_user(
+        await generate_points_for_user(
             contribution["user_id"], 
             contribution["journey_id"],
             contribution_id,
-            contribution["tickets_count"],
+            contribution.get("points_count", 0),
             contribution.get("is_crypto", False)
         )
     
     return {"message": "Contribuição confirmada com sucesso"}
+
+@api_router.get("/admin/sponsors-report")
+async def get_sponsors_report(request: Request):
+    """Get report of sponsors who have 3+ successful referrals - Admin only"""
+    await require_admin(request)
+    
+    # Find all sponsor links with 3+ successful referrals
+    sponsors = await db.sponsor_links.find(
+        {"successful_referrals": {"$gte": 3}},
+        {"_id": 0}
+    ).to_list(1000)
+    
+    report = []
+    for sponsor in sponsors:
+        user = await db.users.find_one({"user_id": sponsor["user_id"]}, {"_id": 0, "name": 1, "email": 1, "alias": 1})
+        journey = await db.journeys.find_one({"journey_id": sponsor["journey_id"]}, {"_id": 0, "name": 1})
+        
+        # Get user's total points
+        points = await db.points.find({"user_id": sponsor["user_id"]}, {"_id": 0}).to_list(1000)
+        total_points = sum(p.get("points_value", 1) for p in points)
+        registration_numbers = [p["point_id"] for p in points]
+        
+        report.append({
+            "user_id": sponsor["user_id"],
+            "user_name": user.get("name") if user else "Desconhecido",
+            "user_email": user.get("email") if user else "",
+            "alias": user.get("alias") if user else None,
+            "journey_name": journey.get("name") if journey else "Desconhecida",
+            "successful_referrals": sponsor["successful_referrals"],
+            "total_referrals": sponsor["referral_count"],
+            "total_points": total_points,
+            "registration_numbers": registration_numbers,
+            "created_at": sponsor.get("created_at")
+        })
+    
+    # Sort by total points descending
+    report.sort(key=lambda x: x["total_points"], reverse=True)
+    
+    return {
+        "total_qualified_sponsors": len(report),
+        "sponsors": report
+    }
 
 @api_router.put("/admin/contributions/{contribution_id}/reject")
 async def reject_contribution(contribution_id: str, request: Request):
