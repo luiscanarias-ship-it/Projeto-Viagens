@@ -99,5 +99,5 @@ Criar uma plataforma de angariação de fundos chamada "4Luis" (4Luis.com) com c
 - **PayPal**: paypal.me/LuisCanarias
 
 ## URLs
-- **Frontend**: https://crowddream.preview.emergentagent.com
-- **API**: https://crowddream.preview.emergentagent.com/api
+- **Frontend**: https://dream-trips-4.preview.emergentagent.com
+- **API**: https://dream-trips-4.preview.emergentagent.com/api
