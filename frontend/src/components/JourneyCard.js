@@ -49,14 +49,28 @@ const JourneyCard = ({ journey, index }) => {
             {journey.emotional_message}
           </p>
 
-          {/* Progress - Hidden progress bar, only show date */}
+          {/* Progress */}
           <div className="mb-4">
-            {journey.target_date && (
-              <p className="text-xs text-[#6B6661] flex items-center gap-1">
-                <Calendar className="w-3 h-3" />
-                Data objetivo: {formatDate(journey.target_date)}
+            <div className="h-2 bg-stone-100 rounded-full overflow-hidden mb-2">
+              <motion.div
+                initial={{ width: 0 }}
+                whileInView={{ width: `${progress}%` }}
+                viewport={{ once: true }}
+                transition={{ duration: 1, delay: 0.3 }}
+                className="h-full progress-bar-warm rounded-full"
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-[#FFBE98] font-medium">
+                {Math.round(progress)}% {t('journeys.progress')}
               </p>
-            )}
+              {journey.target_date && (
+                <p className="text-xs text-[#6B6661] flex items-center gap-1">
+                  <Calendar className="w-3 h-3" />
+                  {formatDate(journey.target_date)}
+                </p>
+              )}
+            </div>
           </div>
 
           {/* CTA */}

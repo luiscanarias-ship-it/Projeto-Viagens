@@ -161,6 +161,8 @@ const JourneyDetail = () => {
     "O que não posso deixar de visitar?"
   ];
 
+  const progress = journey ? Math.min((journey.current_amount / journey.goal_amount) * 100, 100) : 0;
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -206,16 +208,26 @@ const JourneyDetail = () => {
       </div>
 
       <div className="max-w-6xl mx-auto px-6 md:px-12 py-12">
-        {/* Emotional Quote Card - Replaced progress bar */}
+        {/* Progress Bar */}
         <div className="bg-white rounded-3xl p-8 shadow-lg -mt-16 relative z-10 mb-8">
-          <p className="text-center text-xl font-handwritten text-[#6B6661]">
-            "{journey.emotional_message}"
-          </p>
-          {journey.target_date && (
-            <p className="text-center text-sm text-[#FFBE98] mt-4">
-              Data objetivo: {new Date(journey.target_date).toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+          <div className="h-4 bg-stone-100 rounded-full overflow-hidden mb-4">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 1.5, ease: 'easeOut' }}
+              className="h-full progress-bar-warm rounded-full"
+            />
+          </div>
+          <div className="flex items-center justify-center gap-4 flex-wrap">
+            <p className="text-2xl font-bold text-[#FFBE98]">
+              {Math.round(progress)}% angariado
             </p>
-          )}
+            {journey.target_date && (
+              <p className="text-sm text-[#6B6661]">
+                Data objetivo: {new Date(journey.target_date).toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+              </p>
+            )}
+          </div>
         </div>
 
         {/* Main Content Grid */}
