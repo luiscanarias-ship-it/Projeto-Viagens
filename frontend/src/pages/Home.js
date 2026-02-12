@@ -306,7 +306,7 @@ const Home = () => {
                 </h2>
               </div>
               <p className="text-[#6B6661]">
-                Fotos das viagens dos nossos felizes contemplados
+                Fotos das viagens dos nossos felizes sonhadores
               </p>
             </motion.div>
 
