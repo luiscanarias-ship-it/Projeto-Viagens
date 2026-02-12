@@ -198,7 +198,7 @@ const Dashboard = () => {
         {/* Tabs */}
         <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
           {[
-            { id: 'tickets', label: 'Meus Bilhetes' },
+            { id: 'points', label: 'Meus Pontos' },
             { id: 'sponsor', label: 'Links de Sponsor' },
             { id: 'profile', label: 'Meu Perfil' }
           ].map(tab => (
@@ -218,10 +218,10 @@ const Dashboard = () => {
         </div>
 
         <AnimatePresence mode="wait">
-          {/* Tickets Tab */}
-          {activeTab === 'tickets' && (
+          {/* Points Tab */}
+          {activeTab === 'points' && (
             <motion.div
-              key="tickets"
+              key="points"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
@@ -229,15 +229,15 @@ const Dashboard = () => {
             >
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-12 h-12 bg-[#E6F4F1] rounded-xl flex items-center justify-center">
-                  <Ticket className="w-6 h-6 text-[#2D2A26]" />
+                  <Award className="w-6 h-6 text-[#2D2A26]" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold">{t('dashboard.tickets')}</h2>
-                  <p className="text-sm text-[#6B6661]">{tickets.length} bilhetes</p>
+                  <h2 className="text-xl font-bold">Meus Pontos</h2>
+                  <p className="text-sm text-[#6B6661]">{totalPoints} pontos • {points.length} números de registo</p>
                 </div>
               </div>
 
-              {tickets.length === 0 ? (
+              {points.length === 0 ? (
                 <div className="text-center py-8">
                   <p className="text-[#6B6661] mb-4">Ainda não tem bilhetes.</p>
                   <p className="text-sm text-[#6B6661]">
