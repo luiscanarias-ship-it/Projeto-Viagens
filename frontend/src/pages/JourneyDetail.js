@@ -208,19 +208,16 @@ const JourneyDetail = () => {
       </div>
 
       <div className="max-w-6xl mx-auto px-6 md:px-12 py-12">
-        {/* Progress Bar */}
+        {/* Emotional Quote Card - Replaced progress bar */}
         <div className="bg-white rounded-3xl p-8 shadow-lg -mt-16 relative z-10 mb-8">
-          <div className="h-4 bg-stone-100 rounded-full overflow-hidden mb-4">
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: `${progress}%` }}
-              transition={{ duration: 1.5, ease: 'easeOut' }}
-              className="h-full progress-bar-warm rounded-full"
-            />
-          </div>
-          <p className="text-center text-2xl font-bold text-[#2D2A26]">
-            {Math.round(progress)}% {t('journeys.progress')}
+          <p className="text-center text-xl font-handwritten text-[#6B6661]">
+            "{journey.emotional_message}"
           </p>
+          {journey.target_date && (
+            <p className="text-center text-sm text-[#FFBE98] mt-4">
+              Data objetivo: {new Date(journey.target_date).toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+            </p>
+          )}
         </div>
 
         {/* Main Content Grid */}
