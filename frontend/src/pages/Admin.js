@@ -172,27 +172,6 @@ const Admin = () => {
     }
   };
 
-  const handleDrawRaffle = async () => {
-    if (!selectedJourneyForRaffle) {
-      alert('Selecione uma viagem para o sorteio');
-      return;
-    }
-    
-    if (!window.confirm('Tem certeza que deseja realizar o sorteio? Esta ação é irreversível.')) return;
-    
-    try {
-      const headers = getAuthHeaders();
-      const response = await axios.post(`${API}/admin/raffle/${selectedJourneyForRaffle}/draw`, {}, {
-        headers,
-        withCredentials: true
-      });
-      setRaffleResult(response.data);
-    } catch (error) {
-      console.error('Error drawing raffle:', error);
-      alert(error.response?.data?.detail || 'Erro ao realizar sorteio');
-    }
-  };
-
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center pt-20">
