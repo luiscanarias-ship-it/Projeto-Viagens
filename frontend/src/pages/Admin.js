@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit2, Trash2, Save, X, BarChart3, Settings, CheckCircle, XCircle, Mail, Users, Award } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, X, BarChart3, Settings, CheckCircle, XCircle, Mail, Users, Award, Gift } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -23,6 +23,10 @@ const Admin = () => {
   const [editingJourney, setEditingJourney] = useState(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [sponsorsReport, setSponsorsReport] = useState(null);
+  const [rafflesReady, setRafflesReady] = useState([]);
+  const [selectedRaffleJourney, setSelectedRaffleJourney] = useState(null);
+  const [raffleParticipants, setRaffleParticipants] = useState(null);
+  const [drawingRaffle, setDrawingRaffle] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     poetic_name: '',
