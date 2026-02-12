@@ -402,7 +402,7 @@ async def create_journey(journey_data: JourneyCreate, request: Request):
     doc["updated_at"] = doc["updated_at"].isoformat()
     await db.journeys.insert_one(doc)
     # Return without _id
-    del_id = doc.pop("_id", None)
+    doc.pop("_id", None)
     return doc
 
 @api_router.put("/admin/journeys/{journey_id}")
@@ -1526,7 +1526,6 @@ async def get_travel_resources(journey_id: str):
     destination_encoded = destination.replace(" ", "%20")
     destination_plus = destination.replace(" ", "+")
     destination_slug = destination.lower().replace(" ", "-")
-    destination_hashtag = destination.lower().replace(" ", "")
     
     # Build resource links for the destination
     resources = {
