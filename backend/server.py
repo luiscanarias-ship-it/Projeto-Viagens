@@ -700,51 +700,63 @@ async def track_sponsor_referral(link_id: str):
         raise HTTPException(status_code=404, detail="Link não encontrado")
     return {"message": "Referência registada"}
 
-async def generate_tickets_for_user(user_id: str, journey_id: str, contribution_id: str, 
-                                    tickets_count: int, is_crypto: bool):
-    # Check if user has 3+ successful referrals
+async def generate_points_for_user(user_id: str, journey_id: str, contribution_id: str, 
+                                    points_count: int, is_crypto: bool):
+    """Generate points for a user based on their contribution"""
+    # Check if user has 3+ successful referrals (required to earn points)
     link = await db.sponsor_links.find_one(
         {"user_id": user_id, "journey_id": journey_id}, {"_id": 0}
     )
     
     if not link or link.get("successful_referrals", 0) < 3:
-        return  # Not eligible for tickets
+        return  # Not eligible for points yet
     
-    # Get user initials
+    # Get user initials for registration number
     user = await db.users.find_one({"user_id": user_id}, {"_id": 0})
     name_initial = (user.get("name", "X")[0]).upper() if user else "X"
     surname_initial = (user.get("surname", "X")[0]).upper() if user and user.get("surname") else "X"
     
-    # Generate tickets
-    existing_count = await db.tickets.count_documents({"journey_id": journey_id})
+    # Generate registration numbers (points)
+    existing_count = await db.points.count_documents({"journey_id": journey_id})
     
-    for i in range(tickets_count):
-        ticket_number = existing_count + i + 1
-        ticket_id = f"{name_initial}{surname_initial}1{str(ticket_number).zfill(7)}"
+    for i in range(points_count):
+        registration_number = existing_count + i + 1
+        point_id = f"{name_initial}{surname_initial}1{str(registration_number).zfill(7)}"
         
-        await db.tickets.insert_one({
-            "ticket_id": ticket_id,
+        await db.points.insert_one({
+            "point_id": point_id,
             "user_id": user_id,
             "journey_id": journey_id,
             "contribution_id": contribution_id,
+            "points_value": 1,
             "created_at": datetime.now(timezone.utc).isoformat()
         })
 
-# ==================== USER TICKETS ====================
+# ==================== USER POINTS ====================
 
-@api_router.get("/tickets/my-tickets")
-async def get_my_tickets(request: Request):
+@api_router.get("/points/my-points")
+async def get_my_points(request: Request):
+    """Get all points for the authenticated user"""
     user = await require_auth(request)
-    tickets = await db.tickets.find({"user_id": user.user_id}, {"_id": 0}).to_list(1000)
-    return tickets
+    points = await db.points.find({"user_id": user.user_id}, {"_id": 0}).to_list(1000)
+    
+    # Calculate total points
+    total_points = sum(p.get("points_value", 1) for p in points)
+    
+    return {
+        "points": points,
+        "total_points": total_points,
+        "registration_numbers": [p["point_id"] for p in points]
+    }
 
-@api_router.get("/tickets/journey/{journey_id}")
-async def get_journey_tickets(journey_id: str, request: Request):
+@api_router.get("/points/journey/{journey_id}")
+async def get_journey_points(journey_id: str, request: Request):
+    """Get user's points for a specific journey"""
     user = await require_auth(request)
-    tickets = await db.tickets.find(
+    points = await db.points.find(
         {"user_id": user.user_id, "journey_id": journey_id}, {"_id": 0}
     ).to_list(1000)
-    return tickets
+    return points
 
 # ==================== USER PROFILE ====================
 
