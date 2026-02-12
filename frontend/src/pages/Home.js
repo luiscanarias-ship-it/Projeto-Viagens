@@ -14,9 +14,10 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [dreamersStats, setDreamersStats] = useState(null);
   const [gallery, setGallery] = useState([]);
-  const [selectedDestination, setSelectedDestination] = useState('');
+  const [customDestination, setCustomDestination] = useState('');
   const [travelResources, setTravelResources] = useState(null);
   const [expandedSection, setExpandedSection] = useState(null);
+  const [loadingResources, setLoadingResources] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
