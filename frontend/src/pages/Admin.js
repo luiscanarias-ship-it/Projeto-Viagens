@@ -615,6 +615,162 @@ const Admin = () => {
             </motion.div>
           )}
 
+          {/* Raffles Tab */}
+          {activeTab === 'raffles' && (
+            <motion.div
+              key="raffles"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="bg-white rounded-3xl p-6 shadow-lg border border-stone-100"
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <Gift className="w-8 h-8 text-[#FFBE98]" />
+                <div>
+                  <h2 className="text-xl font-bold">Sorteios</h2>
+                  <p className="text-sm text-[#6B6661]">
+                    Viagens que atingiram o objetivo de financiamento
+                  </p>
+                </div>
+              </div>
+
+              {rafflesReady.length > 0 ? (
+                <div className="space-y-4">
+                  {/* List of journeys ready for raffle */}
+                  <div className="grid gap-4">
+                    {rafflesReady.map((journey) => (
+                      <div
+                        key={journey.journey_id}
+                        className={`p-4 rounded-xl border ${
+                          journey.raffle_done 
+                            ? 'border-green-200 bg-green-50' 
+                            : 'border-[#FFBE98] bg-[#FFBE98]/10'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                          <div>
+                            <h3 className="font-bold text-[#2D2A26]">{journey.name}</h3>
+                            <p className="text-sm text-[#6B6661]">
+                              €{journey.current_amount.toLocaleString()} / €{journey.goal_amount.toLocaleString()} angariados
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-medium">
+                              {journey.participant_count} participantes
+                            </p>
+                            {journey.raffle_done ? (
+                              <span className="text-xs bg-green-500 text-white px-2 py-1 rounded-full">
+                                Sorteado
+                              </span>
+                            ) : (
+                              <span className="text-xs bg-[#FFBE98] text-[#2D2A26] px-2 py-1 rounded-full">
+                                Pronto
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {journey.raffle_done && journey.raffle_result && (
+                          <div className="bg-white rounded-lg p-3 mt-2">
+                            <p className="text-sm font-medium text-green-600">
+                              🎉 Vencedor: {journey.raffle_result.winner_name}
+                            </p>
+                            <p className="text-xs text-[#6B6661]">
+                              {journey.raffle_result.winner_email}
+                            </p>
+                          </div>
+                        )}
+
+                        <div className="flex gap-2 mt-3">
+                          <button
+                            onClick={() => loadRaffleParticipants(journey.journey_id)}
+                            className="flex-1 px-4 py-2 bg-white border border-stone-200 rounded-xl text-sm font-medium hover:bg-stone-50 transition-colors"
+                          >
+                            Ver Participantes
+                          </button>
+                          {!journey.raffle_done && (
+                            <button
+                              onClick={() => performRaffleDraw(journey.journey_id)}
+                              disabled={drawingRaffle || journey.participant_count === 0}
+                              className="flex-1 px-4 py-2 bg-[#FFBE98] text-[#2D2A26] rounded-xl text-sm font-medium hover:bg-[#FFAB7D] transition-colors disabled:opacity-50"
+                            >
+                              {drawingRaffle ? 'A sortear...' : 'Realizar Sorteio'}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Participants Modal/Section */}
+                  {raffleParticipants && selectedRaffleJourney && (
+                    <div className="mt-6 p-4 bg-stone-50 rounded-xl">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="font-bold">
+                          Participantes - {rafflesReady.find(j => j.journey_id === selectedRaffleJourney)?.name}
+                        </h3>
+                        <button
+                          onClick={() => { setRaffleParticipants(null); setSelectedRaffleJourney(null); }}
+                          className="text-[#6B6661] hover:text-[#2D2A26]"
+                        >
+                          <X className="w-5 h-5" />
+                        </button>
+                      </div>
+                      
+                      {raffleParticipants.raffle_done && raffleParticipants.raffle_result && (
+                        <div className="bg-green-100 rounded-lg p-3 mb-4">
+                          <p className="text-sm font-medium text-green-700">
+                            ✅ Sorteio já realizado - Vencedor: {raffleParticipants.raffle_result.winner_name}
+                          </p>
+                        </div>
+                      )}
+
+                      <div className="text-sm text-[#6B6661] mb-3">
+                        {raffleParticipants.total_participants} participantes | {raffleParticipants.total_points} pontos totais
+                      </div>
+                      
+                      <div className="max-h-64 overflow-y-auto space-y-2">
+                        {raffleParticipants.participants?.map((participant, idx) => (
+                          <div 
+                            key={participant.user_id}
+                            className={`p-3 rounded-lg bg-white flex items-center justify-between ${
+                              raffleParticipants.raffle_result?.winner_user_id === participant.user_id 
+                                ? 'border-2 border-green-500' 
+                                : ''
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              {idx === 0 && <Award className="w-4 h-4 text-[#F2C94C]" />}
+                              {raffleParticipants.raffle_result?.winner_user_id === participant.user_id && (
+                                <span className="text-xs bg-green-500 text-white px-2 py-0.5 rounded-full">Vencedor</span>
+                              )}
+                              <div>
+                                <p className="font-medium">{participant.user_name}</p>
+                                <p className="text-xs text-[#6B6661]">{participant.user_email}</p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-bold text-[#FFBE98]">{participant.total_points} pontos</p>
+                              <p className="text-xs text-[#6B6661]">{participant.entries.length} entradas</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-12 text-[#6B6661]">
+                  <Gift className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>Nenhuma viagem atingiu o objetivo de financiamento ainda.</p>
+                  <p className="text-sm mt-2">
+                    Os sorteios ficam disponíveis quando uma viagem atinge 100% do objetivo.
+                  </p>
+                </div>
+              )}
+            </motion.div>
+          )}
+
           {/* Sponsors Tab */}
           {activeTab === 'sponsors' && (
             <motion.div
