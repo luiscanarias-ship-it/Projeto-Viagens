@@ -47,12 +47,13 @@ const Admin = () => {
     const fetchData = async () => {
       try {
         const headers = getAuthHeaders();
-        const [journeysRes, statsRes, settingsRes, contributionsRes, sponsorsRes] = await Promise.all([
+        const [journeysRes, statsRes, settingsRes, contributionsRes, sponsorsRes, rafflesRes] = await Promise.all([
           axios.get(`${API}/admin/journeys`, { headers, withCredentials: true }),
           axios.get(`${API}/admin/stats`, { headers, withCredentials: true }),
           axios.get(`${API}/admin/settings`, { headers, withCredentials: true }),
           axios.get(`${API}/admin/contributions`, { headers, withCredentials: true }),
-          axios.get(`${API}/admin/sponsors-report`, { headers, withCredentials: true })
+          axios.get(`${API}/admin/sponsors-report`, { headers, withCredentials: true }),
+          axios.get(`${API}/admin/journeys-ready-for-raffle`, { headers, withCredentials: true })
         ]);
         
         setJourneys(journeysRes.data);
@@ -60,6 +61,7 @@ const Admin = () => {
         setSettings(settingsRes.data);
         setContributions(contributionsRes.data);
         setSponsorsReport(sponsorsRes.data);
+        setRafflesReady(rafflesRes.data.ready_journeys || []);
       } catch (error) {
         console.error('Error fetching admin data:', error);
       } finally {
