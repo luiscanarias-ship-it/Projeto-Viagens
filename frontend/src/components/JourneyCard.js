@@ -6,7 +6,9 @@ import { useLanguage } from '../contexts/LanguageContext';
 
 const JourneyCard = ({ journey, index }) => {
   const { t } = useLanguage();
-  const progress = Math.min((journey.current_amount / journey.goal_amount) * 100, 100);
+  // Only show progress if goal_amount exists and is greater than 0 (for internal calculation only)
+  const hasProgress = journey.goal_amount && journey.goal_amount > 0;
+  const progress = hasProgress ? Math.min((journey.current_amount / journey.goal_amount) * 100, 100) : 0;
 
   // Format target date for display
   const formatDate = (dateStr) => {
@@ -47,28 +49,14 @@ const JourneyCard = ({ journey, index }) => {
             {journey.emotional_message}
           </p>
 
-          {/* Progress */}
+          {/* Progress - Hidden progress bar, only show date */}
           <div className="mb-4">
-            <div className="h-2 bg-stone-100 rounded-full overflow-hidden mb-2">
-              <motion.div
-                initial={{ width: 0 }}
-                whileInView={{ width: `${progress}%` }}
-                viewport={{ once: true }}
-                transition={{ duration: 1, delay: 0.3 }}
-                className="h-full progress-bar-warm rounded-full"
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-[#2D2A26] font-medium">
-                {Math.round(progress)}% {t('journeys.progress')}
+            {journey.target_date && (
+              <p className="text-xs text-[#6B6661] flex items-center gap-1">
+                <Calendar className="w-3 h-3" />
+                Data objetivo: {formatDate(journey.target_date)}
               </p>
-              {journey.target_date && (
-                <p className="text-xs text-[#6B6661] flex items-center gap-1">
-                  <Calendar className="w-3 h-3" />
-                  Data objetivo: {formatDate(journey.target_date)}
-                </p>
-              )}
-            </div>
+            )}
           </div>
 
           {/* CTA */}

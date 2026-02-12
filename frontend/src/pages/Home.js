@@ -243,6 +243,9 @@ const Home = () => {
                         {dreamersStats.top_dreamer.tagline}
                       </p>
                     )}
+                    <p className="text-xs text-[#6B6661] mt-2 italic max-w-[200px] mx-auto">
+                      Um dos maiores sonhadores poderá ser convidado a viajar comigo
+                    </p>
                   </div>
                 )}
               </div>
