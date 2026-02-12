@@ -161,8 +161,6 @@ const JourneyDetail = () => {
     "O que não posso deixar de visitar?"
   ];
 
-  const progress = journey ? Math.min((journey.current_amount / journey.goal_amount) * 100, 100) : 0;
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
