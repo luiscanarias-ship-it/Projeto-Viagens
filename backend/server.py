@@ -1410,6 +1410,46 @@ async def ai_trip_planner(journey_id: str, request: Request):
         logger.error(f"AI Planner error: {e}")
         raise HTTPException(status_code=500, detail="Erro ao processar pedido de IA")
 
+@api_router.get("/travel-resources/{destination}")
+async def get_custom_travel_resources(destination: str):
+    """Get curated travel resources for any custom destination"""
+    from urllib.parse import unquote
+    
+    destination = unquote(destination)
+    destination_encoded = destination.replace(" ", "%20")
+    destination_plus = destination.replace(" ", "+")
+    destination_slug = destination.lower().replace(" ", "-")
+    
+    resources = {
+        "destination": destination,
+        "map": {
+            "title": "Bing Maps",
+            "description": f"Explore {destination} no mapa",
+            "url": f"https://www.bing.com/maps?q={destination_plus}",
+        },
+        "hotels": [
+            {"name": "Trivago", "url": f"https://www.trivago.pt/?search={destination_plus}"},
+            {"name": "TripAdvisor", "url": f"https://www.tripadvisor.pt/Search?q={destination_plus}"},
+            {"name": "Kayak", "url": f"https://www.kayak.pt/hotels/{destination_slug}"},
+            {"name": "Airbnb", "url": f"https://www.airbnb.pt/s/{destination_encoded}/homes"},
+            {"name": "ALL Accor", "url": "https://all.accor.com/pt-pt/world/index.shtml"}
+        ],
+        "flights": [
+            {"name": "TAP", "url": "https://www.flytap.com/pt-pt"},
+            {"name": "Ryanair", "url": "https://www.ryanair.com/pt/pt"},
+            {"name": "EasyJet", "url": "https://www.easyjet.com/pt"},
+            {"name": "Momondo", "url": f"https://www.momondo.pt/flight-search/{destination_slug}"}
+        ],
+        "social": [
+            {"name": "GetYourGuide", "url": f"https://www.getyourguide.pt/s/?q={destination_plus}", "description": "Tours e atividades"},
+            {"name": "Pinterest", "url": f"https://www.pinterest.pt/search/pins/?q={destination_plus}%20travel", "description": "Inspiração visual"},
+            {"name": "WikiVoyage", "url": f"https://pt.wikivoyage.org/wiki/{destination_encoded}", "description": "Guia colaborativo"},
+            {"name": "Reddit", "url": f"https://www.reddit.com/search/?q={destination_plus}%20travel", "description": "Experiências reais"}
+        ]
+    }
+    
+    return resources
+
 @api_router.get("/journey/{journey_id}/travel-resources")
 async def get_travel_resources(journey_id: str):
     """Get curated travel resources for a destination"""
