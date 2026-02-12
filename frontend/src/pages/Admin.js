@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit2, Trash2, Save, X, BarChart3, Settings, CheckCircle, XCircle, Gift, Mail } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, X, BarChart3, Settings, CheckCircle, XCircle, Mail, Users, Award } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -22,8 +22,7 @@ const Admin = () => {
   const [loading, setLoading] = useState(true);
   const [editingJourney, setEditingJourney] = useState(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [raffleResult, setRaffleResult] = useState(null);
-  const [selectedJourneyForRaffle, setSelectedJourneyForRaffle] = useState('');
+  const [sponsorsReport, setSponsorsReport] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     poetic_name: '',
@@ -44,10 +43,19 @@ const Admin = () => {
     const fetchData = async () => {
       try {
         const headers = getAuthHeaders();
-        const [journeysRes, statsRes, settingsRes, contributionsRes] = await Promise.all([
+        const [journeysRes, statsRes, settingsRes, contributionsRes, sponsorsRes] = await Promise.all([
           axios.get(`${API}/admin/journeys`, { headers, withCredentials: true }),
           axios.get(`${API}/admin/stats`, { headers, withCredentials: true }),
           axios.get(`${API}/admin/settings`, { headers, withCredentials: true }),
+          axios.get(`${API}/admin/contributions`, { headers, withCredentials: true }),
+          axios.get(`${API}/admin/sponsors-report`, { headers, withCredentials: true })
+        ]);
+        
+        setJourneys(journeysRes.data);
+        setStats(statsRes.data);
+        setSettings(settingsRes.data);
+        setContributions(contributionsRes.data);
+        setSponsorsReport(sponsorsRes.data);
           axios.get(`${API}/admin/contributions`, { headers, withCredentials: true })
         ]);
         
