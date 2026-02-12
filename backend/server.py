@@ -622,9 +622,9 @@ async def record_manual_contribution(request: Request):
     elif user:
         user_id = user.user_id
     
-    # Calculate tickets (double for crypto)
-    base_tickets = int(amount / 5)
-    tickets_count = base_tickets * 2 if is_crypto else base_tickets
+    # Calculate points (double for crypto)
+    base_points = int(amount / 5)
+    points_count = base_points * 2 if is_crypto else base_points
     
     contribution_id = f"contrib_{uuid.uuid4().hex[:12]}"
     contribution_doc = {
@@ -636,7 +636,7 @@ async def record_manual_contribution(request: Request):
         "payment_method": payment_method,
         "is_crypto": is_crypto,
         "status": "pending_confirmation",
-        "tickets_count": tickets_count,
+        "points_count": points_count,
         "sponsor_link_id": sponsor_code,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
@@ -644,7 +644,7 @@ async def record_manual_contribution(request: Request):
     
     return {
         "contribution_id": contribution_id,
-        "tickets_count": tickets_count,
+        "points_count": points_count,
         "message": "Contribuição registada. Aguarda confirmação do pagamento."
     }
 
