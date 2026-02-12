@@ -451,71 +451,60 @@ const Home = () => {
                 <p className="text-sm font-medium text-[#2D2A26]">Recursos</p>
                 <p className="text-xs text-[#6B6661]">{travelResources.social?.length} sites</p>
               </div>
-            </motion.div>
-          )}
+            </div>
 
-          {/* Expanded Section - Hotels */}
-          {expandedSection === 'hotels' && travelResources?.hotels && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              className="mt-4 grid grid-cols-2 md:grid-cols-5 gap-3"
-            >
-              {travelResources.hotels.map((hotel, idx) => (
-                <a
-                  key={idx}
-                  href={hotel.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bg-white border border-stone-200 rounded-lg p-3 hover:border-[#FFBE98] transition-colors text-center"
-                >
-                  <p className="text-sm font-medium text-[#2D2A26]">{hotel.name}</p>
-                </a>
-              ))}
-            </motion.div>
-          )}
+            {/* Expanded Section - Hotels */}
+            {expandedSection === 'hotels' && travelResources?.hotels && (
+              <div className="mt-4 grid grid-cols-2 md:grid-cols-5 gap-3">
+                {travelResources.hotels.map((hotel, idx) => (
+                  <a
+                    key={idx}
+                    href={hotel.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-white border border-stone-200 rounded-lg p-3 hover:border-[#FFBE98] transition-colors text-center"
+                  >
+                    <p className="text-sm font-medium text-[#2D2A26]">{hotel.name}</p>
+                  </a>
+                ))}
+              </div>
+            )}
 
-          {/* Expanded Section - Flights */}
-          {expandedSection === 'flights' && travelResources?.flights && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3"
-            >
-              {travelResources.flights.map((flight, idx) => (
-                <a
-                  key={idx}
-                  href={flight.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bg-white border border-stone-200 rounded-lg p-3 hover:border-[#FFBE98] transition-colors text-center"
-                >
-                  <p className="text-sm font-medium text-[#2D2A26]">{flight.name}</p>
-                </a>
-              ))}
-            </motion.div>
-          )}
+            {/* Expanded Section - Flights */}
+            {expandedSection === 'flights' && travelResources?.flights && (
+              <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3">
+                {travelResources.flights.map((flight, idx) => (
+                  <a
+                    key={idx}
+                    href={flight.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-white border border-stone-200 rounded-lg p-3 hover:border-[#FFBE98] transition-colors text-center"
+                  >
+                    <p className="text-sm font-medium text-[#2D2A26]">{flight.name}</p>
+                  </a>
+                ))}
+              </div>
+            )}
 
-          {/* Expanded Section - Social/Resources */}
-          {expandedSection === 'social' && travelResources?.social && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3"
-            >
-              {travelResources.social.map((social, idx) => (
-                <a
-                  key={idx}
-                  href={social.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bg-white border border-stone-200 rounded-lg p-3 hover:border-[#FFBE98] transition-colors text-center"
-                >
-                  <p className="text-sm font-medium text-[#2D2A26]">{social.name}</p>
-                  <p className="text-xs text-[#6B6661]">{social.description}</p>
-                </a>
-              ))}
-            </motion.div>
+            {/* Expanded Section - Social/Resources */}
+            {expandedSection === 'social' && travelResources?.social && (
+              <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3">
+                {travelResources.social.map((social, idx) => (
+                  <a
+                    key={idx}
+                    href={social.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-white border border-stone-200 rounded-lg p-3 hover:border-[#FFBE98] transition-colors text-center"
+                  >
+                    <p className="text-sm font-medium text-[#2D2A26]">{social.name}</p>
+                    <p className="text-xs text-[#6B6661]">{social.description}</p>
+                  </a>
+                ))}
+              </div>
+            )}
+          </motion.div>
           )}
         </div>
       </section>
