@@ -144,7 +144,7 @@ class Contribution(BaseModel):
     payment_method: str
     is_crypto: bool = False
     status: str = "pending"  # pending, completed, failed
-    tickets_count: int = 0
+    points_count: int = 0  # Changed from tickets_count to points_count
     sponsor_link_id: Optional[str] = None
     session_id: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -164,11 +164,13 @@ class SponsorLink(BaseModel):
     successful_referrals: int = 0
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
-class Ticket(BaseModel):
-    ticket_id: str
+class Point(BaseModel):
+    """Points earned by users - replaces the old Ticket system"""
+    point_id: str  # Registration number
     user_id: str
     journey_id: str
     contribution_id: str
+    points_value: int = 1  # How many points this entry represents
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class TranslationRequest(BaseModel):
