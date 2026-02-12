@@ -13,8 +13,9 @@ const Home = () => {
   const [journeys, setJourneys] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dreamersStats, setDreamersStats] = useState(null);
-  const [raffleStats, setRaffleStats] = useState(null);
   const [gallery, setGallery] = useState([]);
+  const [selectedDestination, setSelectedDestination] = useState('');
+  const [travelResources, setTravelResources] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
