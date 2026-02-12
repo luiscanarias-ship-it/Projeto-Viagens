@@ -24,16 +24,14 @@ const Home = () => {
         await axios.post(`${API}/seed-journeys`).catch(() => {});
         
         // Fetch all data in parallel
-        const [journeysRes, dreamersRes, raffleRes, galleryRes] = await Promise.all([
+        const [journeysRes, dreamersRes, galleryRes] = await Promise.all([
           axios.get(`${API}/journeys`),
           axios.get(`${API}/dreamers-stats`),
-          axios.get(`${API}/raffle-stats`),
           axios.get(`${API}/gallery`)
         ]);
         
         setJourneys(journeysRes.data);
         setDreamersStats(dreamersRes.data);
-        setRaffleStats(raffleRes.data);
         setGallery(galleryRes.data);
       } catch (error) {
         console.error('Error fetching data:', error);
