@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Ticket, Link as LinkIcon, Copy, Check, Plus, User, Eye, EyeOff, Save, Camera } from 'lucide-react';
+import { Award, Link as LinkIcon, Copy, Check, Plus, User, Eye, EyeOff, Save, Camera } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -16,8 +16,9 @@ const Dashboard = () => {
   const location = useLocation();
   const fileInputRef = useRef(null);
   
-  const [activeTab, setActiveTab] = useState('tickets');
-  const [tickets, setTickets] = useState([]);
+  const [activeTab, setActiveTab] = useState('points');
+  const [points, setPoints] = useState([]);
+  const [totalPoints, setTotalPoints] = useState(0);
   const [sponsorLinks, setSponsorLinks] = useState([]);
   const [journeys, setJourneys] = useState([]);
   const [profile, setProfile] = useState(null);
@@ -38,14 +39,15 @@ const Dashboard = () => {
     const fetchData = async () => {
       try {
         const headers = getAuthHeaders();
-        const [ticketsRes, linksRes, journeysRes, profileRes] = await Promise.all([
-          axios.get(`${API}/tickets/my-tickets`, { headers, withCredentials: true }),
+        const [pointsRes, linksRes, journeysRes, profileRes] = await Promise.all([
+          axios.get(`${API}/points/my-points`, { headers, withCredentials: true }),
           axios.get(`${API}/sponsor-links/my-links`, { headers, withCredentials: true }),
           axios.get(`${API}/journeys`),
           axios.get(`${API}/profile`, { headers, withCredentials: true })
         ]);
         
-        setTickets(ticketsRes.data);
+        setPoints(pointsRes.data.points || []);
+        setTotalPoints(pointsRes.data.total_points || 0);
         setSponsorLinks(linksRes.data);
         setJourneys(journeysRes.data);
         setProfile(profileRes.data);
