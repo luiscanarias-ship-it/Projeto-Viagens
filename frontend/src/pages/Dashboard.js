@@ -356,14 +356,12 @@ const Dashboard = () => {
               <div className="mt-4 p-4 bg-[#F2C94C]/10 rounded-xl space-y-3">
                 <p className="text-sm text-[#2D2A26]">
                   A tua contribuição também ajuda a financiar a tua viagem de sonho. Pede aos teus amigos 
-                  para contribuírem para este projeto. Assim que o objetivo de angariação for conseguido, 
-                  e se pelo menos 3 dos teus amigos tiverem contribuído, ficarás habilitado ao sorteio de 
-                  um voucher de viagem por isso quantos mais amigos conseguires convidar melhor.
+                  para contribuírem para este projeto. Assim que conseguires pelo menos 3 amigos a contribuir, 
+                  começarás a ganhar pontos e números de registo. Quantos mais amigos convidares e mais 
+                  contribuíres, mais pontos acumulas!
                 </p>
                 <p className="text-sm text-[#2D2A26]">
-                  <strong>Nota:</strong> Se o objetivo de financiamento for atingido o valor do voucher 
-                  será de 5.000€, se o objetivo não for atingido o valor do voucher será de 5% do valor 
-                  angariado com o máximo de 2.500€.
+                  <strong>Dica:</strong> Paga com criptomoedas e ganha pontos a dobrar!
                 </p>
               </div>
             </motion.div>
