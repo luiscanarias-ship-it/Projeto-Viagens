@@ -44,6 +44,22 @@ const Home = () => {
     fetchData();
   }, []);
 
+  // Fetch travel resources when destination changes
+  useEffect(() => {
+    if (selectedDestination) {
+      fetchTravelResources(selectedDestination);
+    }
+  }, [selectedDestination]);
+
+  const fetchTravelResources = async (journeyId) => {
+    try {
+      const response = await axios.get(`${API}/journey/${journeyId}/travel-resources`);
+      setTravelResources(response.data);
+    } catch (error) {
+      console.error('Error fetching travel resources:', error);
+    }
+  };
+
   const scrollToJourneys = () => {
     document.getElementById('journeys')?.scrollIntoView({ behavior: 'smooth' });
   };
