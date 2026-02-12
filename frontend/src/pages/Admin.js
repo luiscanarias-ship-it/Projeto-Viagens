@@ -585,78 +585,99 @@ const Admin = () => {
             </motion.div>
           )}
 
-          {/* Raffle Tab */}
-          {activeTab === 'raffle' && (
+          {/* Sponsors Tab */}
+          {activeTab === 'sponsors' && (
             <motion.div
-              key="raffle"
+              key="sponsors"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               className="bg-white rounded-3xl p-6 shadow-lg border border-stone-100"
             >
               <div className="flex items-center gap-3 mb-6">
-                <Gift className="w-8 h-8 text-[#FFBE98]" />
-                <h2 className="text-xl font-bold">Sistema de Sorteio</h2>
+                <Users className="w-8 h-8 text-[#FFBE98]" />
+                <div>
+                  <h2 className="text-xl font-bold">Sponsors Qualificados</h2>
+                  <p className="text-sm text-[#6B6661]">
+                    Utilizadores que convidaram 3+ amigos e estão a ganhar pontos
+                  </p>
+                </div>
               </div>
 
-              <div className="max-w-md mx-auto">
-                <div className="mb-6">
-                  <label className="block text-sm font-medium mb-2">Selecionar Viagem</label>
-                  <select
-                    value={selectedJourneyForRaffle}
-                    onChange={(e) => setSelectedJourneyForRaffle(e.target.value)}
-                    className="w-full input-warm px-4"
-                  >
-                    <option value="">Escolha uma viagem...</option>
-                    {journeys.map((j) => (
-                      <option key={j.journey_id} value={j.journey_id}>
-                        {j.name} - €{j.current_amount.toLocaleString()} / €{j.goal_amount.toLocaleString()}
-                      </option>
+              {sponsorsReport && sponsorsReport.sponsors?.length > 0 ? (
+                <div className="space-y-4">
+                  {/* Summary */}
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="bg-[#E6F4F1]/30 rounded-xl p-4 text-center">
+                      <p className="text-3xl font-bold text-[#2D2A26]">
+                        {sponsorsReport.total_qualified_sponsors}
+                      </p>
+                      <p className="text-sm text-[#6B6661]">Sponsors Qualificados</p>
+                    </div>
+                    <div className="bg-[#FFBE98]/10 rounded-xl p-4 text-center">
+                      <p className="text-3xl font-bold text-[#2D2A26]">
+                        {sponsorsReport.sponsors.reduce((acc, s) => acc + s.total_points, 0)}
+                      </p>
+                      <p className="text-sm text-[#6B6661]">Total de Pontos</p>
+                    </div>
+                  </div>
+
+                  {/* Sponsors List */}
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {sponsorsReport.sponsors.map((sponsor, idx) => (
+                      <div
+                        key={sponsor.user_id}
+                        className={`p-4 rounded-xl border ${
+                          idx === 0 ? 'border-[#F2C94C] bg-[#F2C94C]/5' : 'border-stone-200 bg-stone-50'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-3">
+                            {idx === 0 && <Award className="w-5 h-5 text-[#F2C94C]" />}
+                            <div>
+                              <p className="font-semibold text-[#2D2A26]">
+                                {sponsor.user_name}
+                                {sponsor.alias && <span className="text-sm text-[#6B6661] ml-2">({sponsor.alias})</span>}
+                              </p>
+                              <p className="text-xs text-[#6B6661]">{sponsor.user_email}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold text-[#FFBE98]">{sponsor.total_points} pontos</p>
+                            <p className="text-xs text-[#6B6661]">{sponsor.successful_referrals} referências</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between text-xs text-[#6B6661]">
+                          <span>Viagem: {sponsor.journey_name}</span>
+                          <span>{sponsor.registration_numbers.length} números de registo</span>
+                        </div>
+                        {sponsor.registration_numbers.length > 0 && (
+                          <div className="mt-2 flex flex-wrap gap-1">
+                            {sponsor.registration_numbers.slice(0, 5).map(num => (
+                              <span key={num} className="text-xs bg-white px-2 py-0.5 rounded font-mono">
+                                {num}
+                              </span>
+                            ))}
+                            {sponsor.registration_numbers.length > 5 && (
+                              <span className="text-xs text-[#6B6661]">
+                                +{sponsor.registration_numbers.length - 5} mais
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     ))}
-                  </select>
+                  </div>
                 </div>
-
-                <div className="bg-[#E6F4F1]/30 rounded-2xl p-6 mb-6">
-                  <h3 className="font-semibold mb-2">Regras do Sorteio</h3>
-                  <ul className="text-sm text-[#6B6661] space-y-1">
-                    <li>• Voucher de viagem de €5.000 se objetivo atingido</li>
-                    <li>• 5% do valor angariado (máx. €2.500) se não atingido</li>
-                    <li>• Só participam quem convidou 3+ amigos</li>
-                    <li>• Contribuições em crypto = bilhetes em dobro</li>
-                  </ul>
+              ) : (
+                <div className="text-center py-12 text-[#6B6661]">
+                  <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>Ainda não há sponsors qualificados.</p>
+                  <p className="text-sm mt-2">
+                    Os utilizadores precisam de convidar pelo menos 3 amigos para se qualificarem.
+                  </p>
                 </div>
-
-                <button
-                  onClick={handleDrawRaffle}
-                  disabled={!selectedJourneyForRaffle}
-                  className="w-full btn-primary flex items-center justify-center gap-2 disabled:opacity-50"
-                  data-testid="draw-raffle-btn"
-                >
-                  <Gift className="w-5 h-5" />
-                  Realizar Sorteio
-                </button>
-
-                {/* Raffle Result */}
-                {raffleResult && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="mt-6 p-6 bg-gradient-to-br from-[#F2C94C]/20 to-[#E0C097]/20 rounded-2xl text-center"
-                  >
-                    <Gift className="w-12 h-12 text-[#F2C94C] mx-auto mb-4" />
-                    <h3 className="text-xl font-bold mb-2">Vencedor!</h3>
-                    <p className="text-2xl font-bold text-[#2D2A26] mb-1">{raffleResult.winner.name}</p>
-                    <p className="text-sm text-[#6B6661] mb-4">{raffleResult.winner.email}</p>
-                    <p className="text-sm text-[#6B6661]">Bilhete: {raffleResult.winner.ticket_id}</p>
-                    <p className="text-lg font-semibold text-[#FFBE98] mt-4">
-                      Prémio: €{raffleResult.prize_amount.toLocaleString()}
-                    </p>
-                    <p className="text-xs text-[#6B6661] mt-2">
-                      De um total de {raffleResult.total_tickets} bilhetes
-                    </p>
-                  </motion.div>
-                )}
-              </div>
+              )}
             </motion.div>
           )}
 
