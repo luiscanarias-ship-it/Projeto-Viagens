@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowDown, Users, Star, Gift, Camera, MapPin } from 'lucide-react';
+import { ArrowDown, Users, Star, Camera, MapPin, Map, Hotel, Plane, MessageCircle, Sparkles, ChevronDown, ExternalLink, BookOpen, Compass, Globe } from 'lucide-react';
 import axios from 'axios';
 import { useLanguage } from '../contexts/LanguageContext';
 import JourneyCard from '../components/JourneyCard';
