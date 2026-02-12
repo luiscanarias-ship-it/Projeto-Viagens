@@ -319,6 +319,157 @@ const Home = () => {
           </motion.div>
         </div>
       </section>
+
+      {/* Plan Your Trip Section */}
+      <section className="py-16 bg-white" data-testid="plan-trip-section">
+        <div className="max-w-7xl mx-auto px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-8"
+          >
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <Map className="w-6 h-6 text-[#FFBE98]" />
+              <h2 className="text-3xl font-bold text-[#2D2A26]">
+                Planeia a Tua Viagem
+              </h2>
+            </div>
+            <p className="text-[#6B6661] mb-6">
+              Ferramentas úteis para planear a viagem dos teus sonhos
+            </p>
+            
+            {/* Destination Selector */}
+            <div className="max-w-md mx-auto">
+              <select
+                value={selectedDestination}
+                onChange={(e) => setSelectedDestination(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-white text-[#2D2A26] focus:outline-none focus:ring-2 focus:ring-[#FFBE98]"
+              >
+                <option value="">Escolhe um destino...</option>
+                {journeys.map(j => (
+                  <option key={j.journey_id} value={j.journey_id}>{j.name}</option>
+                ))}
+              </select>
+            </div>
+          </motion.div>
+
+          {/* Travel Resources - Compact Grid */}
+          {travelResources && selectedDestination && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="grid grid-cols-2 md:grid-cols-4 gap-4"
+            >
+              {/* Map */}
+              <a
+                href={travelResources.map?.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-stone-50 rounded-xl p-4 hover:bg-stone-100 transition-colors text-center"
+              >
+                <Map className="w-6 h-6 text-[#FFBE98] mx-auto mb-2" />
+                <p className="text-sm font-medium text-[#2D2A26]">{travelResources.map?.title}</p>
+                <p className="text-xs text-[#6B6661]">Ver no mapa</p>
+              </a>
+
+              {/* Hotels */}
+              <div 
+                className="bg-stone-50 rounded-xl p-4 cursor-pointer hover:bg-stone-100 transition-colors text-center"
+                onClick={() => setExpandedSection(expandedSection === 'hotels' ? null : 'hotels')}
+              >
+                <Hotel className="w-6 h-6 text-[#FFBE98] mx-auto mb-2" />
+                <p className="text-sm font-medium text-[#2D2A26]">Onde Ficar</p>
+                <p className="text-xs text-[#6B6661]">{travelResources.hotels?.length} opções</p>
+              </div>
+
+              {/* Flights */}
+              <div 
+                className="bg-stone-50 rounded-xl p-4 cursor-pointer hover:bg-stone-100 transition-colors text-center"
+                onClick={() => setExpandedSection(expandedSection === 'flights' ? null : 'flights')}
+              >
+                <Plane className="w-6 h-6 text-[#FFBE98] mx-auto mb-2" />
+                <p className="text-sm font-medium text-[#2D2A26]">Voos</p>
+                <p className="text-xs text-[#6B6661]">{travelResources.flights?.length} companhias</p>
+              </div>
+
+              {/* Resources */}
+              <div 
+                className="bg-stone-50 rounded-xl p-4 cursor-pointer hover:bg-stone-100 transition-colors text-center"
+                onClick={() => setExpandedSection(expandedSection === 'social' ? null : 'social')}
+              >
+                <Compass className="w-6 h-6 text-[#FFBE98] mx-auto mb-2" />
+                <p className="text-sm font-medium text-[#2D2A26]">Recursos</p>
+                <p className="text-xs text-[#6B6661]">{travelResources.social?.length} sites</p>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Expanded Section - Hotels */}
+          {expandedSection === 'hotels' && travelResources?.hotels && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              className="mt-4 grid grid-cols-2 md:grid-cols-5 gap-3"
+            >
+              {travelResources.hotels.map((hotel, idx) => (
+                <a
+                  key={idx}
+                  href={hotel.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-white border border-stone-200 rounded-lg p-3 hover:border-[#FFBE98] transition-colors text-center"
+                >
+                  <p className="text-sm font-medium text-[#2D2A26]">{hotel.name}</p>
+                </a>
+              ))}
+            </motion.div>
+          )}
+
+          {/* Expanded Section - Flights */}
+          {expandedSection === 'flights' && travelResources?.flights && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3"
+            >
+              {travelResources.flights.map((flight, idx) => (
+                <a
+                  key={idx}
+                  href={flight.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-white border border-stone-200 rounded-lg p-3 hover:border-[#FFBE98] transition-colors text-center"
+                >
+                  <p className="text-sm font-medium text-[#2D2A26]">{flight.name}</p>
+                </a>
+              ))}
+            </motion.div>
+          )}
+
+          {/* Expanded Section - Social/Resources */}
+          {expandedSection === 'social' && travelResources?.social && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3"
+            >
+              {travelResources.social.map((social, idx) => (
+                <a
+                  key={idx}
+                  href={social.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-white border border-stone-200 rounded-lg p-3 hover:border-[#FFBE98] transition-colors text-center"
+                >
+                  <p className="text-sm font-medium text-[#2D2A26]">{social.name}</p>
+                  <p className="text-xs text-[#6B6661]">{social.description}</p>
+                </a>
+              ))}
+            </motion.div>
+          )}
+        </div>
+      </section>
     </div>
   );
 };
