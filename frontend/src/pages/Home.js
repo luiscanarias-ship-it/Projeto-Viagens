@@ -127,12 +127,12 @@ const Home = () => {
             </p>
           </motion.div>
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-            {/* Left: Dreamers */}
+          {/* Stats - Only Dreamers (removed Raffles section) */}
+          <div className="max-w-2xl mx-auto">
+            {/* Dreamers */}
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               className="bg-[#E6F4F1]/20 rounded-3xl p-8"
             >
@@ -156,13 +156,13 @@ const Home = () => {
 
                 {/* Divider */}
                 {dreamersStats?.top_dreamer && (
-                  <div className="w-px h-20 bg-stone-200" />
+                  <div className="w-px h-24 bg-stone-200" />
                 )}
 
-                {/* Top Dreamer */}
+                {/* Top Dreamer - Now based on points */}
                 {dreamersStats?.top_dreamer && (
                   <div className="text-center">
-                    <div className="w-16 h-16 bg-gradient-to-br from-[#F2C94C]/30 to-[#E0C097]/30 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-[#F2C94C]/40 overflow-hidden">
+                    <div className="w-16 h-16 bg-gradient-to-br from-[#F2C94C]/30 to-[#E0C097]/30 rounded-full flex items-center justify-center mx-auto mb-3 border-2 border-[#F2C94C]/40 overflow-hidden">
                       {dreamersStats.top_dreamer.avatar_url ? (
                         <img 
                           src={dreamersStats.top_dreamer.avatar_url} 
@@ -183,16 +183,18 @@ const Home = () => {
                     >
                       {dreamersStats.top_dreamer.name}
                     </motion.p>
+                    {dreamersStats.top_dreamer.tagline && (
+                      <p className="text-sm text-[#FFBE98] mt-1 italic">
+                        {dreamersStats.top_dreamer.tagline}
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
             </motion.div>
-
-            {/* Right: Raffles */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
+          </div>
+        </div>
+      </section>
               className="bg-[#F2C94C]/5 rounded-2xl p-6 flex items-center justify-center"
             >
               <div className="text-center">
