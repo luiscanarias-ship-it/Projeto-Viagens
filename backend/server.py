@@ -1215,76 +1215,141 @@ async def reject_contribution(contribution_id: str, request: Request):
 
 # ==================== RAFFLE SYSTEM ====================
 
-@api_router.get("/admin/raffle/{journey_id}")
-async def get_raffle_tickets(journey_id: str, request: Request):
-    """Get all tickets for a journey raffle"""
+@api_router.get("/admin/journeys-ready-for-raffle")
+async def get_journeys_ready_for_raffle(request: Request):
+    """Get all journeys that have reached their funding goal and are ready for raffle"""
     await require_admin(request)
     
-    tickets = await db.tickets.find({"journey_id": journey_id}, {"_id": 0}).to_list(10000)
+    # Find journeys where current_amount >= goal_amount
+    journeys = await db.journeys.find(
+        {"is_active": True},
+        {"_id": 0}
+    ).to_list(100)
+    
+    ready_journeys = []
+    for journey in journeys:
+        if journey.get("current_amount", 0) >= journey.get("goal_amount", float('inf')):
+            # Check if raffle already done for this journey
+            existing_raffle = await db.raffle_results.find_one(
+                {"journey_id": journey["journey_id"]},
+                {"_id": 0}
+            )
+            
+            # Count participants (users with points for this journey)
+            participants_pipeline = [
+                {"$match": {"journey_id": journey["journey_id"]}},
+                {"$group": {"_id": "$user_id"}},
+                {"$count": "total"}
+            ]
+            participants_result = await db.points.aggregate(participants_pipeline).to_list(1)
+            participant_count = participants_result[0]["total"] if participants_result else 0
+            
+            ready_journeys.append({
+                "journey_id": journey["journey_id"],
+                "name": journey["name"],
+                "goal_amount": journey["goal_amount"],
+                "current_amount": journey["current_amount"],
+                "participant_count": participant_count,
+                "raffle_done": existing_raffle is not None,
+                "raffle_result": existing_raffle
+            })
+    
+    return {
+        "ready_journeys": ready_journeys,
+        "total_ready": len(ready_journeys)
+    }
+
+@api_router.get("/admin/raffle/{journey_id}")
+async def get_raffle_participants(journey_id: str, request: Request):
+    """Get all participants (users with points) for a journey raffle"""
+    await require_admin(request)
+    
+    # Get all points for this journey
+    points = await db.points.find({"journey_id": journey_id}, {"_id": 0}).to_list(10000)
+    
+    # Group by user and count their points
+    user_points = {}
+    for point in points:
+        user_id = point["user_id"]
+        if user_id not in user_points:
+            user_points[user_id] = {"total_points": 0, "entries": []}
+        user_points[user_id]["total_points"] += point.get("points_value", 1)
+        user_points[user_id]["entries"].append(point["point_id"])
     
     # Enrich with user info
-    for ticket in tickets:
-        user = await db.users.find_one({"user_id": ticket["user_id"]}, {"_id": 0, "name": 1, "email": 1})
-        ticket["user_name"] = user.get("name") if user else "Desconhecido"
-        ticket["user_email"] = user.get("email") if user else ""
+    participants = []
+    for user_id, data in user_points.items():
+        user = await db.users.find_one({"user_id": user_id}, {"_id": 0, "name": 1, "email": 1})
+        participants.append({
+            "user_id": user_id,
+            "user_name": user.get("name") if user else "Desconhecido",
+            "user_email": user.get("email") if user else "",
+            "total_points": data["total_points"],
+            "entries": data["entries"]
+        })
+    
+    # Sort by total points descending
+    participants.sort(key=lambda x: x["total_points"], reverse=True)
+    
+    # Check if raffle already done
+    existing_raffle = await db.raffle_results.find_one({"journey_id": journey_id}, {"_id": 0})
     
     return {
         "journey_id": journey_id,
-        "total_tickets": len(tickets),
-        "tickets": tickets
+        "total_participants": len(participants),
+        "total_points": sum(p["total_points"] for p in participants),
+        "participants": participants,
+        "raffle_done": existing_raffle is not None,
+        "raffle_result": existing_raffle
     }
 
 @api_router.post("/admin/raffle/{journey_id}/draw")
 async def draw_raffle_winner(journey_id: str, request: Request):
-    """Draw a random winner from tickets"""
+    """Draw a random winner from participants (weighted by points)"""
     import random
     
     await require_admin(request)
     
-    tickets = await db.tickets.find({"journey_id": journey_id}, {"_id": 0}).to_list(10000)
+    # Check if raffle already done
+    existing_raffle = await db.raffle_results.find_one({"journey_id": journey_id}, {"_id": 0})
+    if existing_raffle:
+        raise HTTPException(status_code=400, detail="Sorteio já foi realizado para esta viagem")
     
-    if not tickets:
-        raise HTTPException(status_code=400, detail="Não há bilhetes para este sorteio")
+    # Get all points for this journey
+    points = await db.points.find({"journey_id": journey_id}, {"_id": 0}).to_list(10000)
     
-    # Random selection
-    winning_ticket = random.choice(tickets)
+    if not points:
+        raise HTTPException(status_code=400, detail="Não há participantes para este sorteio")
+    
+    # Random selection (each point is an entry)
+    winning_point = random.choice(points)
     
     # Get winner info
-    user = await db.users.find_one({"user_id": winning_ticket["user_id"]}, {"_id": 0})
+    user = await db.users.find_one({"user_id": winning_point["user_id"]}, {"_id": 0})
     
     # Get journey info
     journey = await db.journeys.find_one({"journey_id": journey_id}, {"_id": 0})
-    
-    # Calculate prize
-    if journey:
-        if journey["current_amount"] >= journey["goal_amount"]:
-            prize = 5000.0
-        else:
-            prize = min(journey["current_amount"] * 0.05, 2500.0)
-    else:
-        prize = 0
     
     # Save raffle result
     raffle_result = {
         "raffle_id": f"raffle_{uuid.uuid4().hex[:12]}",
         "journey_id": journey_id,
-        "winning_ticket_id": winning_ticket["ticket_id"],
-        "winner_user_id": winning_ticket["user_id"],
+        "winning_point_id": winning_point["point_id"],
+        "winner_user_id": winning_point["user_id"],
         "winner_name": user.get("name") if user else "Desconhecido",
         "winner_email": user.get("email") if user else "",
-        "prize_amount": prize,
         "drawn_at": datetime.now(timezone.utc).isoformat()
     }
     await db.raffle_results.insert_one(raffle_result)
     
     return {
         "winner": {
-            "ticket_id": winning_ticket["ticket_id"],
+            "point_id": winning_point["point_id"],
             "name": user.get("name") if user else "Desconhecido",
             "email": user.get("email") if user else ""
         },
-        "prize_amount": prize,
-        "total_tickets": len(tickets)
+        "total_entries": len(points),
+        "journey_name": journey.get("name") if journey else ""
     }
 
 # ==================== TRIP GALLERY ====================
