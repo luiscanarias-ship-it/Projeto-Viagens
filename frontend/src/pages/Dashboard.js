@@ -353,10 +353,9 @@ const Dashboard = () => {
 
               <div className="mt-4 p-4 bg-[#F2C94C]/10 rounded-xl space-y-3">
                 <p className="text-sm text-[#2D2A26]">
-                  A tua contribuição também ajuda a financiar a tua viagem de sonho. Pede aos teus amigos 
-                  para contribuírem para este projeto. Assim que conseguires pelo menos 3 amigos a contribuir, 
-                  começarás a ganhar pontos e números de registo. Quantos mais amigos convidares e mais 
-                  contribuíres, mais pontos acumulas!
+                  Partilha o teu link de sponsor com os teus amigos. Assim que conseguires pelo menos 3 amigos a contribuir, 
+                  começarás a ganhar pontos. Quantos mais amigos convidares e mais contribuíres, mais pontos acumulas 
+                  para seres O Maior Sonhador!
                 </p>
                 <p className="text-sm text-[#2D2A26]">
                   <strong>Dica:</strong> Paga com criptomoedas e ganha pontos a dobrar!
