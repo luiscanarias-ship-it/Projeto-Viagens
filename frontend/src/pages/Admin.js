@@ -264,7 +264,7 @@ const Admin = () => {
           {[
             { id: 'journeys', label: 'Viagens', icon: null },
             { id: 'contributions', label: 'Contribuições', icon: pendingContributions.length > 0 ? pendingContributions.length : null },
-            { id: 'raffle', label: 'Sorteio', icon: null },
+            { id: 'sponsors', label: 'Sponsors', icon: sponsorsReport?.total_qualified_sponsors || null },
             { id: 'settings', label: 'Configurações', icon: null }
           ].map(tab => (
             <button
@@ -279,7 +279,7 @@ const Admin = () => {
             >
               {tab.label}
               {tab.icon && (
-                <span className="w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                <span className="w-5 h-5 bg-[#FFBE98] text-[#2D2A26] text-xs rounded-full flex items-center justify-center">
                   {tab.icon}
                 </span>
               )}
