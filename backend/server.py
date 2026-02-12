@@ -1023,7 +1023,7 @@ async def get_admin_settings(request: Request):
 
 @api_router.get("/dreamers-stats")
 async def get_dreamers_stats():
-    """Get public statistics about dreamers (contributors)"""
+    """Get public statistics about dreamers (contributors) - top dreamer based on POINTS"""
     # Count unique dreamers (users who contributed)
     pipeline = [
         {"$match": {"status": {"$in": ["completed", "pending_confirmation"]}}},
@@ -1033,39 +1033,56 @@ async def get_dreamers_stats():
     result = await db.contributions.aggregate(pipeline).to_list(1)
     total_dreamers = result[0]["total"] if result else 0
     
-    # Get top dreamer (highest total contribution)
+    # Get top dreamer by POINTS (not monetary contribution)
     top_pipeline = [
-        {"$match": {"status": {"$in": ["completed", "pending_confirmation"]}, "user_id": {"$ne": None}}},
         {"$group": {
             "_id": "$user_id",
-            "total_amount": {"$sum": "$amount"},
-            "contribution_count": {"$sum": 1}
+            "total_points": {"$sum": "$points_value"}
         }},
-        {"$sort": {"total_amount": -1}},
+        {"$sort": {"total_points": -1}},
         {"$limit": 1}
     ]
-    top_result = await db.contributions.aggregate(top_pipeline).to_list(1)
+    top_result = await db.points.aggregate(top_pipeline).to_list(1)
     
     top_dreamer = None
+    top_journey_name = None
+    
     if top_result:
         top_user_id = top_result[0]["_id"]
+        total_points = top_result[0]["total_points"]
+        
         user = await db.users.find_one({"user_id": top_user_id}, {"_id": 0})
         if user:
+            # Get the journey this user supported most
+            journey_pipeline = [
+                {"$match": {"user_id": top_user_id}},
+                {"$group": {"_id": "$journey_id", "count": {"$sum": 1}}},
+                {"$sort": {"count": -1}},
+                {"$limit": 1}
+            ]
+            journey_result = await db.points.aggregate(journey_pipeline).to_list(1)
+            
+            if journey_result:
+                journey = await db.journeys.find_one({"journey_id": journey_result[0]["_id"]}, {"_id": 0, "name": 1})
+                if journey:
+                    top_journey_name = journey.get("name")
+            
             # Check if user wants to show real name or stay anonymous
             use_real_name = user.get("use_real_name", True)
             if use_real_name and user.get("name"):
-                # Show only first name for privacy
                 display_name = user.get("name", "Anónimo").split()[0]
                 display_avatar = user.get("avatar") or user.get("picture")
             else:
-                # Use anonymous identity
                 display_name = user.get("anonymous_alias") or user.get("alias") or "Sonhador Anónimo"
                 display_avatar = user.get("anonymous_avatar") or user.get("avatar") or user.get("picture")
             
             top_dreamer = {
                 "name": display_name,
                 "has_avatar": bool(display_avatar),
-                "avatar_url": display_avatar
+                "avatar_url": display_avatar,
+                "total_points": total_points,
+                "journey_name": top_journey_name,
+                "tagline": f"Sonhou mais alto com {top_journey_name}" if top_journey_name else None
             }
     
     return {
