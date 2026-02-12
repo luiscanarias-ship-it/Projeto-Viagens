@@ -45,19 +45,57 @@ const Home = () => {
     fetchData();
   }, []);
 
-  // Fetch travel resources when destination changes
-  useEffect(() => {
-    if (selectedDestination) {
-      fetchTravelResources(selectedDestination);
-    }
-  }, [selectedDestination]);
-
-  const fetchTravelResources = async (journeyId) => {
+  const searchDestination = async () => {
+    if (!customDestination.trim()) return;
+    
+    setLoadingResources(true);
+    setExpandedSection(null);
+    
     try {
-      const response = await axios.get(`${API}/journey/${journeyId}/travel-resources`);
+      // Use a custom endpoint that accepts any destination
+      const response = await axios.get(`${API}/travel-resources/${encodeURIComponent(customDestination.trim())}`);
       setTravelResources(response.data);
     } catch (error) {
       console.error('Error fetching travel resources:', error);
+      // Create basic resources for any destination
+      const destination = customDestination.trim();
+      const destEncoded = encodeURIComponent(destination);
+      const destPlus = destination.replace(/ /g, '+');
+      
+      setTravelResources({
+        destination: destination,
+        map: {
+          title: "Bing Maps",
+          url: `https://www.bing.com/maps?q=${destPlus}`,
+        },
+        hotels: [
+          { name: "Trivago", url: `https://www.trivago.pt/?search=${destPlus}` },
+          { name: "TripAdvisor", url: `https://www.tripadvisor.pt/Search?q=${destPlus}` },
+          { name: "Kayak", url: `https://www.kayak.pt/hotels` },
+          { name: "Airbnb", url: `https://www.airbnb.pt/s/${destEncoded}/homes` },
+          { name: "ALL Accor", url: "https://all.accor.com/pt-pt/world/index.shtml" }
+        ],
+        flights: [
+          { name: "TAP", url: "https://www.flytap.com/pt-pt" },
+          { name: "Ryanair", url: "https://www.ryanair.com/pt/pt" },
+          { name: "EasyJet", url: "https://www.easyjet.com/pt" },
+          { name: "Momondo", url: "https://www.momondo.pt" }
+        ],
+        social: [
+          { name: "GetYourGuide", url: `https://www.getyourguide.pt/s/?q=${destPlus}`, description: "Tours e atividades" },
+          { name: "Pinterest", url: `https://www.pinterest.pt/search/pins/?q=${destPlus}%20travel`, description: "Inspiração visual" },
+          { name: "WikiVoyage", url: `https://pt.wikivoyage.org/wiki/${destEncoded}`, description: "Guia colaborativo" },
+          { name: "Reddit", url: `https://www.reddit.com/search/?q=${destPlus}%20travel`, description: "Experiências reais" }
+        ]
+      });
+    } finally {
+      setLoadingResources(false);
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      searchDestination();
     }
   };
 
