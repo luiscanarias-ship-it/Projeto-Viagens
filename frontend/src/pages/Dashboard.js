@@ -233,7 +233,7 @@ const Dashboard = () => {
                 </div>
                 <div>
                   <h2 className="text-xl font-bold">Meus Pontos</h2>
-                  <p className="text-sm text-[#6B6661]">{totalPoints} pontos • {points.length} números de registo</p>
+                  <p className="text-sm text-[#6B6661]">{totalPoints} pontos</p>
                 </div>
               </div>
 
