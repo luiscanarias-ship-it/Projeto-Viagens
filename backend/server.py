@@ -539,12 +539,12 @@ async def get_checkout_status(session_id: str, request: Request):
             # Update contribution
             contribution = await db.contributions.find_one({"session_id": session_id}, {"_id": 0})
             if contribution:
-                # Calculate tickets (1 ticket per 5€)
-                tickets_count = int(contribution["amount"] / 5)
+                # Calculate points (1 point per 5€)
+                points_count = int(contribution["amount"] / 5)
                 
                 await db.contributions.update_one(
                     {"session_id": session_id},
-                    {"$set": {"status": "completed", "tickets_count": tickets_count}}
+                    {"$set": {"status": "completed", "points_count": points_count}}
                 )
                 
                 # Update journey amount
@@ -553,10 +553,10 @@ async def get_checkout_status(session_id: str, request: Request):
                     {"$inc": {"current_amount": contribution["amount"]}}
                 )
                 
-                # Generate tickets if user has a sponsor link with 3+ referrals
+                # Generate points if user has a sponsor link with 3+ referrals
                 if contribution.get("user_id"):
-                    await generate_tickets_for_user(contribution["user_id"], contribution["journey_id"], 
-                                                   contribution["contribution_id"], tickets_count, contribution.get("is_crypto", False))
+                    await generate_points_for_user(contribution["user_id"], contribution["journey_id"], 
+                                                   contribution["contribution_id"], points_count, contribution.get("is_crypto", False))
     
     return {
         "status": status.status,
