@@ -241,9 +241,8 @@ const Dashboard = () => {
                 <div className="text-center py-8">
                   <p className="text-[#6B6661] mb-4">Ainda não tem pontos.</p>
                   <p className="text-sm text-[#6B6661]">
-                    <strong>Importante:</strong> Convida 3 amigos a apoiar uma viagem e ganha automaticamente 
-                    pontos e números de registo! Quanto mais contribuíres e mais amigos convidares, mais pontos ganhas. 
-                    Para isso envia-lhes o teu link de Sponsor.
+                    <strong>Importante:</strong> Convida 3 amigos a apoiar uma viagem e começa a ganhar pontos! 
+                    Quanto mais contribuíres e mais amigos convidares, mais pontos acumulas para seres O Maior Sonhador.
                   </p>
                 </div>
               ) : (
@@ -254,7 +253,6 @@ const Dashboard = () => {
                       className="flex items-center justify-between p-3 bg-stone-50 rounded-xl"
                     >
                       <div className="flex items-center gap-3">
-                        <span className="font-mono text-sm font-medium">{point.point_id}</span>
                         <span className="text-xs bg-[#FFBE98]/20 text-[#FFBE98] px-2 py-0.5 rounded-full">
                           {point.points_value} ponto{point.points_value > 1 ? 's' : ''}
                         </span>
