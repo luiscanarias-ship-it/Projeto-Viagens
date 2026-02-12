@@ -16,6 +16,7 @@ const Home = () => {
   const [gallery, setGallery] = useState([]);
   const [selectedDestination, setSelectedDestination] = useState('');
   const [travelResources, setTravelResources] = useState(null);
+  const [expandedSection, setExpandedSection] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
