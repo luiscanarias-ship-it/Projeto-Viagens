@@ -239,22 +239,28 @@ const Dashboard = () => {
 
               {points.length === 0 ? (
                 <div className="text-center py-8">
-                  <p className="text-[#6B6661] mb-4">Ainda não tem bilhetes.</p>
+                  <p className="text-[#6B6661] mb-4">Ainda não tem pontos.</p>
                   <p className="text-sm text-[#6B6661]">
                     <strong>Importante:</strong> Convida 3 amigos a apoiar uma viagem e ganha automaticamente 
-                    bilhetes para o sorteio do voucher da tua viagem de sonho! Para isso envia-lhes o teu link de Sponsor.
+                    pontos e números de registo! Quanto mais contribuíres e mais amigos convidares, mais pontos ganhas. 
+                    Para isso envia-lhes o teu link de Sponsor.
                   </p>
                 </div>
               ) : (
                 <div className="space-y-2 max-h-96 overflow-y-auto">
-                  {tickets.map((ticket) => (
+                  {points.map((point) => (
                     <div
-                      key={ticket.ticket_id}
+                      key={point.point_id}
                       className="flex items-center justify-between p-3 bg-stone-50 rounded-xl"
                     >
-                      <span className="font-mono text-sm font-medium">{ticket.ticket_id}</span>
+                      <div className="flex items-center gap-3">
+                        <span className="font-mono text-sm font-medium">{point.point_id}</span>
+                        <span className="text-xs bg-[#FFBE98]/20 text-[#FFBE98] px-2 py-0.5 rounded-full">
+                          {point.points_value} ponto{point.points_value > 1 ? 's' : ''}
+                        </span>
+                      </div>
                       <span className="text-xs text-[#6B6661]">
-                        {journeys.find(j => j.journey_id === ticket.journey_id)?.name}
+                        {journeys.find(j => j.journey_id === point.journey_id)?.name}
                       </span>
                     </div>
                   ))}
@@ -278,7 +284,7 @@ const Dashboard = () => {
                 </div>
                 <div>
                   <h2 className="text-xl font-bold">{t('dashboard.sponsor_links')}</h2>
-                  <p className="text-sm text-[#6B6661]">Partilhe e ganhe bilhetes</p>
+                  <p className="text-sm text-[#6B6661]">Partilhe e ganhe pontos</p>
                 </div>
               </div>
 
