@@ -29,7 +29,7 @@ const paymentMethods = [
   { id: 'stripe', name: 'Cartão', icon: CreditCard, description: 'Visa, Mastercard, etc.' },
   { id: 'mbway', name: 'MBWay', icon: Smartphone, description: 'Pagamento móvel' },
   { id: 'paypal', name: 'PayPal', icon: ExternalLink, description: 'paypal.me/LuisCanarias' },
-  { id: 'crypto', name: 'Crypto', icon: Bitcoin, description: 'USDT (TRC20) - Bilhetes em dobro!' }
+  { id: 'crypto', name: 'Crypto', icon: Bitcoin, description: 'Seja um sonhador moderno - Pontos a dobrar!' }
 ];
 
 // Icon components for social/travel resources
