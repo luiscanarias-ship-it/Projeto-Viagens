@@ -14,6 +14,7 @@ from datetime import datetime, timezone, timedelta
 import bcrypt
 import jwt
 import httpx
+import stripe
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -27,6 +28,12 @@ db = client[os.environ['DB_NAME']]
 JWT_SECRET = os.environ.get('JWT_SECRET', 'luis4dreams_secret_key_2024')
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRATION_HOURS = 168  # 7 days
+
+# Stripe Config
+STRIPE_API_KEY = os.environ.get('STRIPE_API_KEY', '')
+STRIPE_SONHADOR_PRICE_ID = "price_1T1sngEBabTiQNkcaNBfBaHR"
+STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET', '')
+stripe.api_key = STRIPE_API_KEY
 
 # Admin password
 ADMIN_PASSWORD = "Admin1"
