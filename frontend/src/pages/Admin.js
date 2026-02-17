@@ -32,6 +32,12 @@ const Admin = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [userDetail, setUserDetail] = useState(null);
   const [updatingUser, setUpdatingUser] = useState(false);
+  // Users table filters
+  const [userSearch, setUserSearch] = useState('');
+  const [userLevelFilter, setUserLevelFilter] = useState('all');
+  const [userSubscriptionFilter, setUserSubscriptionFilter] = useState('all');
+  const [userSortBy, setUserSortBy] = useState('referrals');
+  const [userSortOrder, setUserSortOrder] = useState('desc');
   const [formData, setFormData] = useState({
     name: '',
     poetic_name: '',
