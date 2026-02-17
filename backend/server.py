@@ -1171,13 +1171,18 @@ async def get_subscription_status(request: Request):
     """Get current user's subscription status"""
     user = await require_auth(request)
     
+    # Get full user data from DB
+    user_data = await db.users.find_one({"user_id": user.user_id}, {"_id": 0})
+    if not user_data:
+        raise HTTPException(status_code=404, detail="Utilizador não encontrado")
+    
     return {
-        "subscription_active": user.get("subscription_active", False),
-        "level": user.get("level", "curioso"),
-        "valid_referrals_count": user.get("valid_referrals_count", 0),
-        "subscription_started_at": user.get("subscription_started_at"),
-        "premium_unlocked_at": user.get("premium_unlocked_at"),
-        "can_upgrade_to_premium": user.get("subscription_active", False) and user.get("valid_referrals_count", 0) >= 3 and user.get("level") != "premium"
+        "subscription_active": user_data.get("subscription_active", False),
+        "level": user_data.get("level", "curioso"),
+        "valid_referrals_count": user_data.get("valid_referrals_count", 0),
+        "subscription_started_at": user_data.get("subscription_started_at"),
+        "premium_unlocked_at": user_data.get("premium_unlocked_at"),
+        "can_upgrade_to_premium": user_data.get("subscription_active", False) and user_data.get("valid_referrals_count", 0) >= 3 and user_data.get("level") != "premium"
     }
 
 # ==================== ADMIN STATS ====================
