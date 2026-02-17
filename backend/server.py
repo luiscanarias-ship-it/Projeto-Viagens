@@ -1037,17 +1037,15 @@ async def stripe_subscription_webhook(request: Request):
     
     # Handle checkout.session.completed - Subscription started
     if event_type == "checkout.session.completed":
-        session = event.data.object
-        user_id = session.get("client_reference_id") or session.get("metadata", {}).get("user_id")
+        user_id = event_data.get("client_reference_id") or event_data.get("metadata", {}).get("user_id")
         
-        if user_id and session.get("mode") == "subscription":
-            await activate_subscription(user_id, session.get("subscription"), session.get("customer"))
+        if user_id and event_data.get("mode") == "subscription":
+            await activate_subscription(user_id, event_data.get("subscription"), event_data.get("customer"))
             
     # Handle invoice.paid - Payment successful
     elif event_type == "invoice.paid":
-        invoice = event.data.object
-        customer_id = invoice.get("customer")
-        subscription_id = invoice.get("subscription")
+        customer_id = event_data.get("customer")
+        subscription_id = event_data.get("subscription")
         
         if subscription_id:
             # Find user by stripe_customer_id or subscription_id
@@ -1069,8 +1067,7 @@ async def stripe_subscription_webhook(request: Request):
     
     # Handle invoice.payment_failed - Payment failed
     elif event_type == "invoice.payment_failed":
-        invoice = event.data.object
-        customer_id = invoice.get("customer")
+        customer_id = event_data.get("customer")
         
         user = await db.users.find_one({"stripe_customer_id": customer_id}, {"_id": 0})
         if user:
@@ -1078,17 +1075,21 @@ async def stripe_subscription_webhook(request: Request):
                 "log_id": f"log_{uuid.uuid4().hex[:12]}",
                 "user_id": user["user_id"],
                 "event": "payment_failed",
-                "invoice_id": invoice.get("id"),
+                "invoice_id": event_data.get("id"),
                 "created_at": datetime.now(timezone.utc).isoformat()
             })
             # Could notify user here (P2)
     
     # Handle customer.subscription.deleted - Subscription cancelled
     elif event_type == "customer.subscription.deleted":
-        subscription = event.data.object
-        customer_id = subscription.get("customer")
+        customer_id = event_data.get("customer")
+        customer_email = event_data.get("customer_email")
         
+        # Try to find user by customer_id first, then by email
         user = await db.users.find_one({"stripe_customer_id": customer_id}, {"_id": 0})
+        if not user and customer_email:
+            user = await db.users.find_one({"email": customer_email}, {"_id": 0})
+        
         if user:
             await deactivate_subscription(user["user_id"])
     
