@@ -949,8 +949,11 @@ async def create_subscription_checkout(request: Request):
     if not STRIPE_API_KEY or STRIPE_API_KEY == 'sk_test_emergent':
         raise HTTPException(status_code=500, detail="Stripe não configurado")
     
+    # Get full user data from DB
+    user_data = await db.users.find_one({"user_id": user.user_id}, {"_id": 0})
+    
     # Check if user already has active subscription
-    if user.get("subscription_active"):
+    if user_data and user_data.get("subscription_active"):
         raise HTTPException(status_code=400, detail="Já tens uma subscrição ativa")
     
     # Get frontend URL for redirects
