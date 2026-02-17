@@ -1,74 +1,82 @@
 <analysis>**original_problem_statement:**
-O utilizador quer construir uma plataforma de angariação de fundos (crowdfunding) chamada 4Luis. O projeto tem um forte apelo emocional e visa financiar viagens de sonho.
+O utilizador quer construir uma plataforma de angariação de fundos (crowdfunding) chamada 4Luis para financiar viagens de sonho. O projeto evoluiu significativamente para incluir um modelo de utilizador com múltiplos níveis (, , ) e um sistema de subscrição paga (via Stripe) para desbloquear níveis mais altos.
 
 **PRODUCT REQUIREMENTS (extraído do documento e conversa):**
-- **Autenticação:** Login com email/palavra-passe (JWT) e Google Auth.
-- **Jornadas (Viagens):** O admin pode criar, editar e apagar viagens de sonho.
-- **Contribuições:** Utilizadores podem contribuir para as viagens.
-- **Pagamentos:** Integração com Stripe (cartão) e métodos manuais (transferência, MBWay, Crypto). O admin confirma pagamentos manuais.
-- **Sistema de Pontos (anteriormente Bilhetes):** Contribuições e referências (sponsors) dão pontos. O utilizador com mais pontos é o Maior Sonhador. Os sorteios de vouchers foram removidos da vista pública e a sua lógica alterada.
-- **Sistema de Referência (Sponsor Link):** Utilizadores ganham pontos extra quando amigos contribuem através do seu link de partilha. Um relatório de sponsors qualificados (3+ referências) está disponível para o admin.
-- **Tradução:** Tradução automática de conteúdo (placeholder para GPT-5.2).
-- **Páginas:** Homepage, Detalhe da Viagem, Login, Dashboard do Utilizador, Painel de Admin.
-- **Homepage:** Mostra as viagens, um contador de sonhadores, o maior sonhador (baseado em pontos), e uma galeria de fotos. Inclui também uma ferramenta de planeamento de viagem no final da página.
-- **Dashboard do Utilizador:** Gestão de perfil com upload de avatar, geração automática de identidade anónima (alias e avatar), visualização de contribuições e pontos, e geração do link de sponsor.
-- **Painel de Admin:** Gestão de viagens, confirmação de pagamentos manuais, relatório de sponsors qualificados e configuração do site.
-- **Página de Detalhe da Viagem:** Inclui ferramentas de planeamento de viagem: mapa (Bing), links para sites de reserva (hotéis, voos), resumos de redes sociais, e um assistente de IA para planeamento.
-- **Design:** Tema claro, sofisticado e moderno com um forte apelo emocional.
+- **Modelo de Utilizador (v2):**
+    - **Níveis:**
+        - **Curioso:** Nível base para todos os utilizadores registados.
+        - **Sonhador:** Nível desbloqueado através de uma subscrição paga mensal de 10€ (Stripe).
+        - **Premium:** Nível desbloqueado automaticamente quando um Sonhador ativo refere 3 ou mais utilizadores que também fazem uma contribuição confirmada.
+    - **Sponsor System:** Os utilizadores podem referir outros. Quando um utilizador referido faz uma contribuição válida, o sponsor original ganha um convite válido. O sistema deve rastrear quem convidou quem e o impacto financeiro de cada sponsor.
+- **Admin Growth Dashboard:** Um painel de administração detalhado para monitorizar o crescimento da plataforma, incluindo:
+    - Métricas chave (total de utilizadores, subscrições ativas, valor total de contribuições, etc.).
+    - Gráficos de crescimento (novos utilizadores e contribuições ao longo do tempo).
+    - Tabelas de utilizadores com filtros, pesquisa e ordenação.
+    - Ações de gestão manual (ativar/desativar subscrições, alterar nível do utilizador).
+    - Platform Momentum Score para uma visão rápida da saúde da plataforma.
+- **Pagamentos:**
+    - **Contribuições:** Integração com Stripe para pagamentos únicos.
+    - **Subscrições:** Integração com Stripe Subscriptions para a subscrição Sonhador.
+- **Sistema de Sorteios (Raffles):** Um sorteio é automaticamente ativado para uma viagem quando esta atinge 100% do seu objetivo de financiamento. A gestão é feita pelo admin.
+- **Visibilidade de Dados:** O  de uma viagem é visível apenas para o admin. A barra de progresso, percentagem e data objetivo são visíveis publicamente.
+- **Funcionalidades Despriorizadas (Congeladas):** O sistema original de pontos e a gamificação associada estão em pausa.
 
 **User's preferred language**: Portuguese (Portugal)
 
 **what currently exists?**
-Uma aplicação full-stack (React + FastAPI) para a plataforma 4Luis. As funcionalidades principais, incluindo autenticação, CRUD de viagens, contribuições, e painéis de admin/utilizador, estão implementadas. Recentemente, o sistema de bilhetes foi refatorado para um sistema de pontos, alterando a forma como o Maior Sonhador é determinado. A secção de sorteios públicos foi removida, e foi adicionado um relatório de sponsors para o admin. Foi também implementada uma ferramenta de planeamento de viagem na homepage com um campo de texto livre. A funcionalidade de upload de avatar e geração de identidade anónima está completa. A homepage da aplicação está atualmente quebrada devido a um erro de sintaxe.
+Uma aplicação full-stack (React + FastAPI) com as funcionalidades base implementadas. O trabalho mais recente focou-se numa refatoração profunda do modelo de dados para suportar o novo sistema de níveis de utilizador e sponsors. Foi implementado um Admin Growth Dashboard muito completo, com métricas, gráficos e ferramentas de gestão. A integração com Stripe Subscriptions foi iniciada: os endpoints de backend para criar a sessão de checkout e receber webhooks foram criados, e os CTAs (Call to Action) foram adicionados no frontend. A barra de progresso das viagens foi restaurada na UI, mas sem mostrar o valor monetário do objetivo.
 
 **Last working item**:
--   **Last item agent was working**: O agente estava a corrigir um erro de sintaxe em . O erro foi introduzido ao mover a lógica do Planeia a tua viagem para a homepage e converter o seletor de destino num campo de texto livre. O agente identificou que os blocos JSX para as secções de recursos de viagem (Onde Ficar, Voos, etc.) foram colocados fora do bloco de renderização condicional, causando uma falha na renderização da página.
+-   **Last item agent was working**: O agente finalizou a implementação inicial da integração com Stripe Subscriptions. Adicionou os CTAs no frontend (, ) para os utilizadores se tornarem Sonhadores, criou os endpoints no backend (, ), e adicionou a variável  ao ficheiro  do backend com uma nota para o utilizador.
 -   **Status**: IN PROGRESS
--   **Agent Testing Done**: N
--   **Which testing method agent to use?**: screenshot tool (para uma verificação rápida da UI da homepage após a correção)
+-   **Agent Testing Done**: N (Apenas os endpoints foram testados isoladamente via  após uma correção. O fluxo de webhook completo nunca foi testado.)
+-   **Which testing method agent to use?**: backend testing agent. É crucial testar o endpoint  simulando os diferentes eventos do Stripe (, , etc.) para garantir que os campos  e  do utilizador são atualizados corretamente no banco de dados.
 -   **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
--   **Issue 1**: Erro de sintaxe em  quebra a homepage. (Priority: P0 - BLOCKER)
-    -   **Attempted fixes**: O agente identificou a causa do erro: os blocos  que renderizam as listas de recursos de viagem estão fora do condicional .
+-   **Issue 1**: O atributo  está a causar um erro no objeto . (Priority: P0 - BLOCKER)
+    -   **Attempted fixes**: O agente corrigiu o erro no endpoint de status da subscrição () alterando  para , , etc., pois  retorna um objeto Pydantic, não um dicionário.
     -   **Next debug checklist**:
-        -   Abrir o ficheiro .
-        -   Mover os blocos JSX correspondentes às secções de recursos de viagem (que começam com ) para dentro do bloco de renderização condicional .
-        -   Verificar o funcionamento da homepage com a ferramenta de screenshot, garantindo que a secção Planeia a tua viagem carrega e funciona como esperado.
-    -   **Why fix this issue and what will be achieved with the fix?**: A homepage, a página principal da aplicação, está completamente inacessível. A correção é crítica para restaurar a funcionalidade básica e permitir o teste das alterações recentes solicitadas pelo utilizador.
+        -   Verificar todos os endpoints que usam o  e recebem o objeto  para garantir que o acesso aos atributos é feito via  e não . O agente corrigiu dois locais, mas pode haver mais.
+        -   Focar especialmente no novo endpoint de webhook (), pois é complexo e foi escrito após a descoberta do bug.
+    -   **Why fix this issue and what will be achieved with the fix?**: A falha no acesso aos atributos do utilizador quebra a lógica de negócio principal, especialmente nos novos endpoints de subscrição. A correção é essencial para a funcionalidade do Stripe.
     -   **Status**: IN PROGRESS
-    -   **Is recurring issue?**: N
-    -   **Should Test frontend/backend/both after fix?**: frontend
+    -   **Is recurring issue?**: Y (O agente corrigiu em um local, mas o padrão de erro pode existir em outros.)
+    -   **Should Test frontend/backend/both after fix?**: backend
     -   **Blocked on other issue**: N/A
 
 **In progress Task List**:
--   **Task 1**: Validar as últimas alterações solicitadas pelo utilizador. (Priority: P0)
-    -   **Where to resume**: Após a correção do **Issue 1**, o agente deve verificar a implementação das seguintes alterações:
-        1.  **Homepage**: A secção Planeia a tua viagem deve ter um campo de texto livre para o destino, em vez de um dropdown.
-        2.  **Dashboard (Meus Pontos)**: O texto números de registo deve ser removido, pois é informação exclusiva do admin.
-        3.  **Dashboard (Link de Sponsor)**: A nota informativa deve refletir que os utilizadores ganham pontos para se tornarem o Maior Sonhador, e não para financiar a sua própria viagem.
-    -   **What will be achieved with this?**: Finaliza o último ciclo de feedback do utilizador, ajustando as funcionalidades recentemente implementadas.
-    -   **Status**: BLOCKED
-    -   **Should Test frontend/backend/both after fix?**: frontend
-    -   **Blocked on something**: **Issue 1: Erro de sintaxe em Home.js quebra a homepage.**
+-   **Task 1**: Concluir e testar a integração do Stripe Subscriptions. (Priority: P0)
+    -   **Where to resume**: O código base está implementado. O próximo passo crítico é testar o fluxo completo.
+        1.  **Testar Webhooks**: Usar o agente de testes de backend ou  para enviar payloads de teste para o endpoint  e verificar se a base de dados é atualizada corretamente.
+            -   Simular  -> Verificar se  vira  e  vira .
+            -   Simular  -> Verificar se  vira .
+            -   Verificar se a lógica do motor Premium (ativar nível Premium se ) é acionada após a ativação da subscrição.
+        2.  **Validação de Segurança**: Confirmar que o endpoint de criação de checkout () falha se o utilizador não estiver autenticado.
+    -   **What will be achieved with this?**: O motor de monetização principal da aplicação (subscrições Sonhador) estará funcional e seguro.
+    -   **Status**: IN PROGRESS
+    -   **Should Test frontend/backend/both after fix?**: backend
+    -   **Blocked on something**: **Issue 1**, que pode afetar a lógica dos webhooks.
 
 **Upcoming and Future Tasks**
 -   **Upcoming Tasks:**
-    -   **P1:** Implementar emails de confirmação automáticos (ex: após contribuição, registo).
+    -   **P1:** UI básica de progressão para utilizadores (mostrar-lhes o seu nível e progresso para o próximo).
+    -   **P2:** Implementar emails de confirmação automáticos (pós-subscrição, cancelamento, etc.).
 -   **Future Tasks:**
     -   **P2:** Adicionar uma secção de testemunhos/mensagens de apoio em cada página de viagem.
     -   **P2:** Implementar um sistema de notificações dentro da aplicação.
+    -   **P3:** Reintroduzir e integrar o sistema de Pontos e a gamificação que foram congelados.
 
 **Completed work in this session**
--   **Refatoração Bilhetes para Pontos**: Toda a lógica de backend e frontend foi alterada para usar pontos. O Maior Sonhador agora é determinado pelo total de pontos.
--   **Remoção da Secção de Sorteios**: A secção pública de sorteios foi removida da homepage e do painel de admin.
--   **Relatório de Sponsors**: Adicionada uma nova secção no painel de admin para listar utilizadores que qualificaram para ganhar pontos por referência (3+ amigos).
--   **Planeador de Viagem na Homepage**: A ferramenta Planeia a tua viagem foi movida para a homepage com um campo de texto livre.
--   **Feature: Identidade Anónima Automática**: Implementada a geração automática de um alias poético e um avatar (via DiceBear API) quando um utilizador opta pelo anonimato.
--   **Feature: Upload de Avatar Personalizado**: Adicionada funcionalidade para os utilizadores carregarem a sua própria imagem de perfil.
--   **Feature: Data Objetivo para Viagens**: Adicionado campo de data no admin e exibição na homepage para cada viagem.
--   **Correções de Bugs e Links**: Corrigidos múltiplos links quebrados nas ferramentas de planeamento da viagem, substituindo serviços problemáticos (Google Maps, Instagram, Facebook) por alternativas funcionais (Bing Maps, GetYourGuide, etc.).
--   **Correção de Bug no Backend**: Resolvido um erro de serialização de  no endpoint de criação de link de sponsor.
+-   Implementado o **Admin Growth Dashboard** completo, com métricas globais, gráficos, tabelas de utilizadores com filtros/ordenação e ações de gestão.
+-   Realizada uma **migração da base de dados** para adaptar os modelos  e  à nova lógica de negócio (níveis, sponsors, subscrições).
+-   Corrigido o fluxo de registo para **capturar o ** quando um novo utilizador se regista através de um link de referência.
+-   Implementados os **endpoints de backend para Stripe Subscriptions** e adicionados os CTAs correspondentes no frontend.
+-   Restaurada a **barra de progresso** nas páginas de viagem (homepage e detalhe), ocultando o valor absoluto do objetivo.
+-   Reimplementado o sistema de **Sorteios (Raffles)** no painel de admin, que é acionado quando uma viagem atinge o seu objetivo de financiamento.
+-   Adicionada a nota um dos maiores sonhadores poderá ser convidado a viajar comigo na homepage.
+-   Melhorado o estilo da dica de pontos a dobrar no dashboard do utilizador.
+-   Corrigido o erro de sintaxe que quebrava a homepage no início da sessão.
 
 **Earlier issues found/mentioned but not fixed**
 Nenhum.
@@ -85,84 +93,80 @@ Nenhum.
 -   **Backend**: FastAPI (Python), MongoDB (, ).
 -   **Frontend**: React.js, TailwindCSS, , .
 -   **Database**: MongoDB.
--   **Arquitetura**: Aplicação Full-Stack Monorepo.
+-   **Pagamentos**: Stripe SDK (diretamente para Subscriptions),  (para contribuições únicas).
+-   **Autenticação**: JWT (criado no backend).
 
 **key DB schema**
 -   **users**: 
 -   **journeys**: 
 -   **contributions**: 
--   **points**:  (anteriormente )
 -   **sponsor_links**: 
+-   **points**: Schema existe, mas a sua utilização está congelada.
 
 **changes in tech stack**
-Nenhuma.
+-   O SDK  foi instalado e é usado diretamente no  para a lógica de subscrições, pois a biblioteca  não suportava o modo .
 
 **All files of reference**
--   : Ficheiro central da lógica de backend. Sofreu alterações massivas para a lógica de pontos.
--   : Componente da página principal. **Atualmente com erro de sintaxe.**
--   : Painel do utilizador, atualizado para pontos e identidade anónima.
--   : Painel de administração, atualizado para remover sorteios e adicionar relatório de sponsors.
--   : Página de detalhe da viagem, com ferramentas de planeamento corrigidas.
--   : Atualizado para mostrar a data objetivo.
--   : Atualizado com o progresso.
+-   : Ficheiro mais modificado. Contém toda a nova lógica para a migração de dados, o Admin Growth Dashboard, e a integração com Stripe Subscriptions.
+-   : Ficheiro de frontend mais modificado. Contém toda a UI para o novo e complexo Growth Dashboard.
+-   : Atualizado com o banner/CTA de subscrição e a lógica para iniciar o checkout.
+-   : Modificado para capturar o  da URL e armazená-lo para ser usado durante o registo.
+-   : Atualizado para incluir o banner/CTA de subscrição.
+-   : Atualizado extensivamente para refletir a nova visão do produto.
 
 **Areas that need refactoring**:
--   O ficheiro  está extremamente monolítico (cresceu de ~1100 para mais de 1800 linhas nesta sessão) e precisa urgentemente de ser dividido em múltiplos s por funcionalidade (e.g., , , , ).
--   A lógica e UI da secção Planeia a tua viagem está duplicada entre  e . Deve ser extraída para um componente reutilizável.
+-    está criticamente sobrecarregado. A sua divisão em múltiplos s (e.g., , , ) é mais urgente do que nunca.
+-    tornou-se um mega componente com mais de 1000 linhas, contendo toda a lógica do dashboard de utilizadores. Deve ser decomposto em componentes menores (e.g., , , ).
 
 **key api endpoints**
--   
--   
--   
--   
--    (PUT): Lógica atualizada para gerar identidade anónima.
--    (PUT): **Novo** endpoint para upload de avatar.
--    (POST): **Novo** endpoint para gerar novo alias/avatar.
--    (GET): **Novo** endpoint para o relatório de admin.
--    (GET): **Novo** endpoint para o planeador de viagem com destino livre.
--   : **Removido**.
+-   **** (GET): Novo endpoint que fornece todos os dados para o Admin Growth Dashboard.
+-   **** (POST): Para o admin ativar/desativar uma subscrição manualmente.
+-   **** (POST): Para o admin alterar o nível de um utilizador.
+-   **** (POST): Cria uma sessão de checkout no Stripe para iniciar uma subscrição.
+-   **** (POST): Recebe eventos do Stripe para gerir o ciclo de vida da subscrição.
+-   **** (GET): Retorna o estado da subscrição do utilizador autenticado.
+-    (POST): Endpoint de uso único para migrar dados de utilizadores e viagens existentes.
 
 **Critical Info for New Agent**
--   **Bloqueio Crítico:** A homepage está quebrada. A primeira ação deve ser corrigir o erro de sintaxe em .
--   **Refatoração do Backend:** A complexidade do  está a tornar-se um risco para a manutenção. Planear a sua divisão é uma prioridade técnica.
--   **Ambiente de Preview:** Esteja ciente de que o ambiente de preview bloqueia iframes e links para certos domínios (como Google, Facebook). Use alternativas comprovadas como Bing Maps, Trivago, Kayak, etc.
--   **Lógica de Pontos:** Toda a lógica de gamificação gira agora em torno de pontos, não de contribuições monetárias diretas para o Maior Sonhador.
+-   **Prioridade Máxima:** O utilizador deu instruções muito detalhadas para a implementação. A tarefa atual é a integração do Stripe Subscriptions. O próximo passo é **testar rigorosamente o webhook**, pois é a peça que liga o pagamento no Stripe à atualização do status do utilizador na aplicação.
+-   **Modelo de Negócio:** O core da aplicação agora gira em torno dos níveis de utilizador ( ->  -> ). Entender este fluxo (registo -> subscrição -> referrals) é essencial.
+-   **Variáveis de Ambiente:** O utilizador forneceu um  de teste (). O agente adicionou  ao  e deve instruir o utilizador sobre como obter e configurar este valor no dashboard do Stripe para que os webhooks funcionem.
+-   **Risco Técnico:** O erro  foi corrigido em dois locais mas pode persistir noutros endpoints que usam , especialmente no novo código do webhook.
 
 **documents and test reports created in this job**
 -   
 -   
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User**: Pede correções nos links do planeador de viagem (Youtube, Google Flights, Booking, Hoteis.com).
-2.  **User**: Reporta que os links do Google Maps, Facebook e Instagram continuam bloqueados.
-3.  **User**: Reporta que o Google Maps e agora o Viator também não funcionam.
-4.  **User**: Confirma que o Bing Maps funciona.
-5.  **User**: Solicita uma grande refatoração: mudar bilhetes para pontos, alterar a lógica do Maior Sonhador, remover a secção de sorteios públicos, e mover o planeador de viagem para a homepage.
-6.  **User**: Pede mais correções: o planeador na homepage deve ter um campo de texto livre, remover números de registo do dashboard do utilizador, e ajustar o texto do link de sponsor.
-7.  **Agent**: Inicia a implementação das correções e novas funcionalidades.
-8.  **Agent**: Tenta executar um screenshot da homepage após as alterações, mas a ferramenta falha.
-9.  **Agent**: Investiga a falha e descobre um erro de sintaxe em .
-10. **Agent**: Prepara-se para corrigir o erro de sintaxe.
+1.  **User**: Aprova o plano para implementar o Admin Growth Dashboard e pede para incluir métricas específicas como impacto financeiro global.
+2.  **Agent**: Confirma tecnicamente que consegue calcular todas as métricas pedidas.
+3.  **Agent**: Implementa a primeira versão do Admin Growth Dashboard, incluindo a nova tab, métricas e tabela de utilizadores.
+4.  **User**: Fornece uma especificação final para o Admin Growth Dashboard, focando em 3 perguntas-chave (crescimento, impacto, comunidade) e métricas oficiais, além de um Platform Momentum Score.
+5.  **Agent**: Atualiza o backend e frontend para corresponder à especificação final do dashboard, adicionando todas as métricas e gráficos.
+6.  **Agent**: Confirma que a nova dashboard está completa e pergunta se pode avançar com Stripe Subscriptions.
+7.  **User**: Fornece uma especificação detalhada para a integração do Stripe Subscriptions, incluindo o fluxo exato, endpoints de webhook necessários e regras de progressão de nível.
+8.  **Agent**: Inicia a implementação do Stripe Subscriptions, consultando o subagente de integrações e decidindo usar o SDK Stripe diretamente.
+9.  **Agent**: Pede ao utilizador uma chave de API Stripe válida, pois a de teste é um placeholder.
+10. **User**: Confirma que a chave será configurada no ambiente e fornece um  de teste para o produto Sonhador, instruindo o agente a continuar com a implementação do checkout e dos webhooks.
 
 **Project Health Check:**
--   **Broken**: A página principal da aplicação () não renderiza devido a um erro de sintaxe em JavaScript.
+-   **Broken**: A funcionalidade de Stripe Subscriptions está incompleta. O endpoint de webhook () existe mas não foi testado, o que significa que as subscrições pagas não ativarão o status Sonhador nos utilizadores.
 -   **Mocked**: A integração com GPT-5.2 para tradução continua a ser um placeholder.
 
 **3rd Party Integrations**
--   **Stripe (Payments)** — Requer chave de API do utilizador.
+-   **Stripe (Payments & Subscriptions)** — Usa  para pagamentos únicos e o SDK  diretamente para subscrições. Requer chaves de API do utilizador e um segredo de webhook.
 -   **Emergent-managed Google Auth (Authentication)** — Gerido pela plataforma.
--   **GPT-5.2 (Translation)** — Placeholder, a ser implementado.
--   **DiceBear (Avatars)** — Integrado no backend para gerar avatares anónimos.
+-   **DiceBear (Avatars)** — Integrado no backend.
 
 **Testing status**
--   **Testing agent used after significant changes**: YES. Utilizado para testar os meios de pagamento e a responsividade mobile antes da última ronda de alterações.
+-   **Testing agent used after significant changes**: YES, mas foi antes das últimas grandes alterações (migração de dados, admin dashboard, Stripe).
 -   **Troubleshoot agent used after agent stuck in loop**: NO.
 -   **Test files created**: .
--   **Known regressions**: A homepage está quebrada.
+-   **Known regressions**: Nenhuma regressão funcional, mas o novo fluxo de subscrição está por testar.
 
 **Credentials to test flow:**
 -   **Admin**:  / 
 -   **Test User**:  / 
 
 **What agent forgot to execute**
-Nada foi esquecido. O agente foi interrompido por um erro de sintaxe que introduziu enquanto implementava o último pedido do utilizador e estava no processo de o corrigir.</analysis>
+O agente não esqueceu nada, mas a tarefa de integração do Stripe é grande e foi interrompida antes da fase de testes de webhook, que é a mais crítica. O próximo agente deve focar-se exclusivamente em validar e robustecer essa parte do fluxo.</analysis>

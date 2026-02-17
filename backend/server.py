@@ -957,7 +957,7 @@ async def create_subscription_checkout(request: Request):
         raise HTTPException(status_code=400, detail="Já tens uma subscrição ativa")
     
     # Get frontend URL for redirects
-    frontend_url = os.environ.get('FRONTEND_URL', 'https://dream-trips-4.preview.emergentagent.com')
+    frontend_url = os.environ.get('FRONTEND_URL', 'https://crowdtrip.preview.emergentagent.com')
     
     try:
         # Create Stripe Checkout Session

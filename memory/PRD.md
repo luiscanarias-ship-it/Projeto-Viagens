@@ -50,7 +50,7 @@ THEN level = "premium"
 
 1. **STRIPE_API_KEY** no backend/.env (chave secreta)
 2. **Webhook Endpoint** no Stripe Dashboard:
-   - URL: `https://dream-trips-4.preview.emergentagent.com/api/stripe/subscription-webhook`
+   - URL: `https://crowdtrip.preview.emergentagent.com/api/stripe/subscription-webhook`
    - Eventos: `checkout.session.completed`, `invoice.paid`, `invoice.payment_failed`, `customer.subscription.deleted`
 3. **STRIPE_WEBHOOK_SECRET** no backend/.env (obtido após criar webhook)
 
