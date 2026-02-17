@@ -319,6 +319,79 @@ const Admin = () => {
     );
   };
 
+  // Filter and sort users
+  const getFilteredUsers = () => {
+    if (!usersDashboard?.users) return [];
+    
+    let filtered = usersDashboard.users.filter(u => !u.is_admin);
+    
+    // Search filter
+    if (userSearch) {
+      const search = userSearch.toLowerCase();
+      filtered = filtered.filter(u => 
+        u.name?.toLowerCase().includes(search) || 
+        u.email?.toLowerCase().includes(search)
+      );
+    }
+    
+    // Level filter
+    if (userLevelFilter !== 'all') {
+      filtered = filtered.filter(u => u.level === userLevelFilter);
+    }
+    
+    // Subscription filter
+    if (userSubscriptionFilter !== 'all') {
+      filtered = filtered.filter(u => 
+        userSubscriptionFilter === 'active' ? u.subscription_active : !u.subscription_active
+      );
+    }
+    
+    // Sort
+    filtered.sort((a, b) => {
+      let aVal, bVal;
+      switch (userSortBy) {
+        case 'referrals':
+          aVal = a.valid_referrals_count || 0;
+          bVal = b.valid_referrals_count || 0;
+          break;
+        case 'contributions':
+          aVal = a.contributions_total || 0;
+          bVal = b.contributions_total || 0;
+          break;
+        case 'impact':
+          aVal = a.sponsor_impact_value || 0;
+          bVal = b.sponsor_impact_value || 0;
+          break;
+        case 'date':
+          aVal = a.registered_at || '';
+          bVal = b.registered_at || '';
+          break;
+        case 'name':
+          aVal = a.name?.toLowerCase() || '';
+          bVal = b.name?.toLowerCase() || '';
+          break;
+        default:
+          aVal = a.valid_referrals_count || 0;
+          bVal = b.valid_referrals_count || 0;
+      }
+      if (userSortOrder === 'desc') {
+        return bVal > aVal ? 1 : -1;
+      }
+      return aVal > bVal ? 1 : -1;
+    });
+    
+    return filtered;
+  };
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '-';
+    try {
+      return new Date(dateStr).toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    } catch {
+      return '-';
+    }
+  };
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center pt-20">
