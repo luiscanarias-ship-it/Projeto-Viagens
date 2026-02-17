@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit2, Trash2, Save, X, BarChart3, Settings, CheckCircle, XCircle, Mail, Users, Award, Gift } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, X, BarChart3, Settings, CheckCircle, XCircle, Mail, Users, Award, Gift, Crown, TrendingUp, UserPlus, ChevronRight, Star } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -27,6 +27,11 @@ const Admin = () => {
   const [selectedRaffleJourney, setSelectedRaffleJourney] = useState(null);
   const [raffleParticipants, setRaffleParticipants] = useState(null);
   const [drawingRaffle, setDrawingRaffle] = useState(false);
+  // Users Dashboard State
+  const [usersDashboard, setUsersDashboard] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [userDetail, setUserDetail] = useState(null);
+  const [updatingUser, setUpdatingUser] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     poetic_name: '',
