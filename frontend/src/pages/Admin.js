@@ -707,6 +707,328 @@ const Admin = () => {
             </motion.div>
           )}
 
+          {/* Users Tab */}
+          {activeTab === 'users' && usersDashboard && (
+            <motion.div
+              key="users"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="space-y-6"
+            >
+              {/* Metrics Cards */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-white rounded-2xl p-5 shadow-lg border border-stone-100">
+                  <Users className="w-6 h-6 text-[#FFBE98] mb-2" />
+                  <p className="text-2xl font-bold text-[#2D2A26]">{usersDashboard.metrics.total_users}</p>
+                  <p className="text-xs text-[#6B6661]">Total Utilizadores</p>
+                </div>
+                <div className="bg-white rounded-2xl p-5 shadow-lg border border-stone-100">
+                  <Crown className="w-6 h-6 text-[#F2C94C] mb-2" />
+                  <p className="text-2xl font-bold text-[#2D2A26]">{usersDashboard.metrics.premium_users}</p>
+                  <p className="text-xs text-[#6B6661]">Premium</p>
+                </div>
+                <div className="bg-white rounded-2xl p-5 shadow-lg border border-stone-100">
+                  <TrendingUp className="w-6 h-6 text-green-500 mb-2" />
+                  <p className="text-2xl font-bold text-[#2D2A26]">€{usersDashboard.metrics.total_contributions_value.toLocaleString()}</p>
+                  <p className="text-xs text-[#6B6661]">Contribuições Totais</p>
+                </div>
+                <div className="bg-white rounded-2xl p-5 shadow-lg border border-stone-100">
+                  <UserPlus className="w-6 h-6 text-blue-500 mb-2" />
+                  <p className="text-2xl font-bold text-[#2D2A26]">{usersDashboard.metrics.weekly_signups}</p>
+                  <p className="text-xs text-[#6B6661]">Novos (7 dias)</p>
+                </div>
+              </div>
+
+              {/* Level Distribution & Top Sponsors */}
+              <div className="grid md:grid-cols-2 gap-4">
+                {/* Level Distribution */}
+                <div className="bg-white rounded-2xl p-5 shadow-lg border border-stone-100">
+                  <h3 className="font-bold text-[#2D2A26] mb-4">Distribuição por Nível</h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-[#6B6661]">Curioso</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-32 h-2 bg-stone-100 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-stone-400 rounded-full" 
+                            style={{ width: `${(usersDashboard.level_distribution.curioso / usersDashboard.metrics.total_users * 100) || 0}%` }}
+                          />
+                        </div>
+                        <span className="text-sm font-medium w-8">{usersDashboard.level_distribution.curioso}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-[#FFBE98]">Sonhador</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-32 h-2 bg-stone-100 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-[#FFBE98] rounded-full" 
+                            style={{ width: `${(usersDashboard.level_distribution.sonhador / usersDashboard.metrics.total_users * 100) || 0}%` }}
+                          />
+                        </div>
+                        <span className="text-sm font-medium w-8">{usersDashboard.level_distribution.sonhador}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-[#F2C94C]">Premium</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-32 h-2 bg-stone-100 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-[#F2C94C] rounded-full" 
+                            style={{ width: `${(usersDashboard.level_distribution.premium / usersDashboard.metrics.total_users * 100) || 0}%` }}
+                          />
+                        </div>
+                        <span className="text-sm font-medium w-8">{usersDashboard.level_distribution.premium}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-4 pt-4 border-t border-stone-100">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-[#6B6661]">Subscrições Ativas</span>
+                      <span className="font-bold text-[#2D2A26]">{usersDashboard.metrics.active_subscriptions}</span>
+                    </div>
+                    <div className="flex justify-between text-sm mt-1">
+                      <span className="text-[#6B6661]">Total Referrals Válidos</span>
+                      <span className="font-bold text-[#2D2A26]">{usersDashboard.metrics.valid_referrals_total}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Top Sponsors */}
+                <div className="bg-white rounded-2xl p-5 shadow-lg border border-stone-100">
+                  <h3 className="font-bold text-[#2D2A26] mb-4 flex items-center gap-2">
+                    <Star className="w-5 h-5 text-[#F2C94C]" />
+                    Top Sponsors (por Impacto €)
+                  </h3>
+                  {usersDashboard.top_sponsors.length > 0 ? (
+                    <div className="space-y-3">
+                      {usersDashboard.top_sponsors.map((sponsor, idx) => (
+                        <div key={sponsor.user_id} className="flex items-center justify-between p-2 bg-stone-50 rounded-lg">
+                          <div className="flex items-center gap-2">
+                            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${idx === 0 ? 'bg-[#F2C94C] text-white' : 'bg-stone-200 text-stone-600'}`}>
+                              {idx + 1}
+                            </span>
+                            <span className="font-medium text-sm">{sponsor.name}</span>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-bold text-[#FFBE98]">€{sponsor.impact_value.toLocaleString()}</p>
+                            <p className="text-xs text-[#6B6661]">{sponsor.referrals_count} convites</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-[#6B6661] text-center py-4">Ainda sem sponsors com impacto</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Users Table */}
+              <div className="bg-white rounded-2xl p-5 shadow-lg border border-stone-100">
+                <h3 className="font-bold text-[#2D2A26] mb-4">Lista de Utilizadores</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-stone-100">
+                        <th className="text-left py-3 px-2 text-[#6B6661] font-medium">Nome</th>
+                        <th className="text-left py-3 px-2 text-[#6B6661] font-medium">Nível</th>
+                        <th className="text-center py-3 px-2 text-[#6B6661] font-medium">Subscrição</th>
+                        <th className="text-center py-3 px-2 text-[#6B6661] font-medium">Referrals</th>
+                        <th className="text-right py-3 px-2 text-[#6B6661] font-medium">Contribuições</th>
+                        <th className="text-right py-3 px-2 text-[#6B6661] font-medium">Impacto</th>
+                        <th className="text-center py-3 px-2 text-[#6B6661] font-medium">Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {usersDashboard.users.filter(u => !u.is_admin).map(u => (
+                        <tr key={u.user_id} className="border-b border-stone-50 hover:bg-stone-50 transition-colors">
+                          <td className="py-3 px-2">
+                            <div>
+                              <p className="font-medium text-[#2D2A26]">{u.name}</p>
+                              <p className="text-xs text-[#6B6661]">{u.email}</p>
+                            </div>
+                          </td>
+                          <td className="py-3 px-2">{getLevelBadge(u.level)}</td>
+                          <td className="py-3 px-2 text-center">
+                            <button
+                              onClick={() => toggleSubscription(u.user_id)}
+                              disabled={updatingUser}
+                              className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
+                                u.subscription_active 
+                                  ? 'bg-green-100 text-green-600 hover:bg-green-200' 
+                                  : 'bg-stone-100 text-stone-400 hover:bg-stone-200'
+                              }`}
+                              title={u.subscription_active ? 'Desativar subscrição' : 'Ativar subscrição'}
+                            >
+                              {u.subscription_active ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+                            </button>
+                          </td>
+                          <td className="py-3 px-2 text-center">
+                            <span className="font-medium">{u.valid_referrals_count}</span>
+                            <span className="text-[#6B6661]">/{u.referrals_made}</span>
+                          </td>
+                          <td className="py-3 px-2 text-right">
+                            <span className="font-medium">€{u.contributions_total.toLocaleString()}</span>
+                            <span className="text-[#6B6661] text-xs ml-1">({u.contributions_count})</span>
+                          </td>
+                          <td className="py-3 px-2 text-right">
+                            <span className={`font-medium ${u.sponsor_impact_value > 0 ? 'text-[#FFBE98]' : 'text-[#6B6661]'}`}>
+                              €{u.sponsor_impact_value.toLocaleString()}
+                            </span>
+                          </td>
+                          <td className="py-3 px-2 text-center">
+                            <button
+                              onClick={() => loadUserDetail(u.user_id)}
+                              className="p-2 hover:bg-stone-100 rounded-lg transition-colors"
+                              title="Ver detalhes"
+                            >
+                              <ChevronRight className="w-4 h-4 text-[#6B6661]" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* User Detail Modal */}
+              {userDetail && selectedUser && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+                  onClick={() => { setSelectedUser(null); setUserDetail(null); }}
+                >
+                  <motion.div
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="bg-white rounded-2xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto"
+                    onClick={e => e.stopPropagation()}
+                  >
+                    <div className="flex items-center justify-between mb-6">
+                      <div>
+                        <h3 className="text-xl font-bold text-[#2D2A26]">{userDetail.user.name}</h3>
+                        <p className="text-sm text-[#6B6661]">{userDetail.user.email}</p>
+                      </div>
+                      <button
+                        onClick={() => { setSelectedUser(null); setUserDetail(null); }}
+                        className="p-2 hover:bg-stone-100 rounded-full"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+
+                    {/* User Stats */}
+                    <div className="grid grid-cols-3 gap-4 mb-6">
+                      <div className="bg-stone-50 rounded-xl p-4 text-center">
+                        <p className="text-2xl font-bold text-[#2D2A26]">€{userDetail.contributions_total.toLocaleString()}</p>
+                        <p className="text-xs text-[#6B6661]">Contribuições</p>
+                      </div>
+                      <div className="bg-stone-50 rounded-xl p-4 text-center">
+                        <p className="text-2xl font-bold text-[#FFBE98]">{userDetail.user.valid_referrals_count || 0}</p>
+                        <p className="text-xs text-[#6B6661]">Referrals Válidos</p>
+                      </div>
+                      <div className="bg-stone-50 rounded-xl p-4 text-center">
+                        <p className="text-2xl font-bold text-[#F2C94C]">€{userDetail.sponsor_impact_value.toLocaleString()}</p>
+                        <p className="text-xs text-[#6B6661]">Impacto</p>
+                      </div>
+                    </div>
+
+                    {/* Admin Actions */}
+                    <div className="space-y-4 mb-6">
+                      <div className="flex items-center justify-between p-4 bg-stone-50 rounded-xl">
+                        <div>
+                          <p className="font-medium">Nível</p>
+                          <p className="text-sm text-[#6B6661]">Atual: {getLevelBadge(userDetail.user.level)}</p>
+                        </div>
+                        <select
+                          value={userDetail.user.level || 'curioso'}
+                          onChange={(e) => updateUserLevel(userDetail.user.user_id, e.target.value)}
+                          disabled={updatingUser}
+                          className="px-4 py-2 border border-stone-200 rounded-xl bg-white"
+                        >
+                          <option value="curioso">Curioso</option>
+                          <option value="sonhador">Sonhador</option>
+                          <option value="premium">Premium</option>
+                        </select>
+                      </div>
+
+                      <div className="flex items-center justify-between p-4 bg-stone-50 rounded-xl">
+                        <div>
+                          <p className="font-medium">Subscrição</p>
+                          <p className="text-sm text-[#6B6661]">{userDetail.user.subscription_active ? 'Ativa' : 'Inativa'}</p>
+                        </div>
+                        <button
+                          onClick={() => toggleSubscription(userDetail.user.user_id)}
+                          disabled={updatingUser}
+                          className={`px-4 py-2 rounded-xl font-medium transition-colors ${
+                            userDetail.user.subscription_active
+                              ? 'bg-red-100 text-red-600 hover:bg-red-200'
+                              : 'bg-green-100 text-green-600 hover:bg-green-200'
+                          }`}
+                        >
+                          {userDetail.user.subscription_active ? 'Desativar' : 'Ativar'}
+                        </button>
+                      </div>
+
+                      <div className="flex items-center justify-between p-4 bg-stone-50 rounded-xl">
+                        <div>
+                          <p className="font-medium">Referrals Válidos</p>
+                          <p className="text-sm text-[#6B6661]">Corrigir manualmente</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number"
+                            min="0"
+                            defaultValue={userDetail.user.valid_referrals_count || 0}
+                            className="w-20 px-3 py-2 border border-stone-200 rounded-xl text-center"
+                            onBlur={(e) => {
+                              const newVal = parseInt(e.target.value);
+                              if (newVal !== userDetail.user.valid_referrals_count) {
+                                updateUserReferrals(userDetail.user.user_id, newVal);
+                              }
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Sponsor Info */}
+                    {userDetail.sponsor_info && (
+                      <div className="mb-6">
+                        <h4 className="font-medium mb-2">Convidado por</h4>
+                        <div className="p-3 bg-stone-50 rounded-xl">
+                          <p className="font-medium">{userDetail.sponsor_info.name}</p>
+                          <p className="text-sm text-[#6B6661]">{userDetail.sponsor_info.email}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Invited Users */}
+                    {userDetail.invited_users.length > 0 && (
+                      <div>
+                        <h4 className="font-medium mb-2">Utilizadores Convidados ({userDetail.invited_users.length})</h4>
+                        <div className="space-y-2 max-h-40 overflow-y-auto">
+                          {userDetail.invited_users.map(inv => (
+                            <div key={inv.user_id} className="flex items-center justify-between p-2 bg-stone-50 rounded-lg">
+                              <div>
+                                <p className="font-medium text-sm">{inv.name}</p>
+                                <p className="text-xs text-[#6B6661]">{inv.email}</p>
+                              </div>
+                              <p className="text-sm font-medium text-[#FFBE98]">€{inv.contributions_total?.toLocaleString() || 0}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </motion.div>
+                </motion.div>
+              )}
+            </motion.div>
+          )}
+
           {/* Raffles Tab */}
           {activeTab === 'raffles' && (
             <motion.div
