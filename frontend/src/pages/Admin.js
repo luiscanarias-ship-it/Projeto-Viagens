@@ -384,6 +384,7 @@ const Admin = () => {
           {[
             { id: 'journeys', label: 'Viagens', icon: null },
             { id: 'contributions', label: 'Contribuições', icon: pendingContributions.length > 0 ? pendingContributions.length : null },
+            { id: 'users', label: 'Utilizadores', icon: usersDashboard?.metrics?.premium_users || null },
             { id: 'raffles', label: 'Sorteios', icon: rafflesReady?.length || null },
             { id: 'sponsors', label: 'Sponsors', icon: sponsorsReport?.total_qualified_sponsors || null },
             { id: 'settings', label: 'Configurações', icon: null }
