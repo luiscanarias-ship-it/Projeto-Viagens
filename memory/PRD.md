@@ -7,128 +7,110 @@ Criar uma plataforma de angariação de fundos chamada "4Luis" (4Luis.com) com c
 - **Frontend**: React 19 + TailwindCSS + Framer Motion
 - **Backend**: FastAPI (Python)
 - **Database**: MongoDB
-- **Pagamentos**: Stripe + MBWay + PayPal + Crypto (USDT TRC20)
-- **Tradução**: GPT-5.2 via Emergent LLM Key (PLACEHOLDER)
+- **Pagamentos**: Stripe Subscriptions + MBWay + PayPal + Crypto
 - **Autenticação**: JWT + Google OAuth (Emergent Auth)
 
-## Schema da Base de Dados
+## Stripe Subscriptions (Implementado)
 
-### USERS
-```
-user_id: string (PK)
-email: string
-name: string
-surname: string (optional)
-password_hash: string
-avatar: string (base64, optional)
-use_real_name: boolean
-sponsor_id: string (FK → users) // IMUTÁVEL - quem convidou
-level: "curioso" | "sonhador" | "premium"
-subscription_active: boolean
-valid_referrals_count: int
-registered_at: datetime
-premium_unlocked_at: datetime (optional)
-created_at: datetime
-```
+### Produto
+- **Nome**: Sonhador
+- **Preço**: €10/mês (recorrente)
+- **price_id**: `price_1T1sngEBabTiQNkcaNBfBaHR`
 
-### JOURNEYS (aka TRIPS)
-```
-journey_id: string (PK)
-name: string
-poetic_name: string
-description: string
-emotional_message: string
-impact_description: string
-image_url: string
-goal_amount: float // OCULTO nas páginas públicas
-current_amount: float
-status: "active" | "funded" | "closed"
-owner_user_id: string (FK → users)
-target_date: string
-created_at: datetime
-```
+### Endpoints
+- `POST /api/subscription/create-checkout` - Cria sessão de checkout Stripe
+- `POST /api/stripe/subscription-webhook` - Webhook handler
+- `GET /api/subscription/status` - Estado da subscrição do utilizador
 
-### CONTRIBUTIONS
-```
-contribution_id: string (PK)
-journey_id: string (FK → journeys)
-user_id: string (FK → users)
-amount: float
-status: "pending" | "completed" | "rejected"
-confirmed: boolean
-confirmed_at: datetime
-sponsor_link_id: string (optional)
-created_at: datetime
-```
+### Webhooks Configurados
+1. `checkout.session.completed` → Ativa Sonhador
+2. `invoice.paid` → Reforça estado ativo
+3. `invoice.payment_failed` → Log de falha
+4. `customer.subscription.deleted` → Desativa subscrição
 
-### SPONSOR_LINKS
-```
-link_id: string (PK) // sponsor_{uuid}
-user_id: string (FK → users)
-journey_id: string (FK → journeys)
-referral_count: int
-successful_referrals: int
-created_at: datetime
-```
+### Fluxo
+1. Utilizador clica CTA "Junta-te como Sonhador"
+2. Redireciona para Stripe Checkout
+3. Pagamento aprovado
+4. Webhook recebido → `subscription_active = true`, `level = "sonhador"`
+5. Se `valid_referrals_count >= 3` → `level = "premium"`
 
-## Motor Premium
-
-**Regra:**
+### Regras Premium
 ```
 IF subscription_active = true
 AND valid_referrals_count >= 3
 THEN level = "premium"
 ```
 
-**Fluxo de Sponsor:**
-1. URL `4luis.com/?ref=sponsor_{uuid}` → sessionStorage
-2. No registo, `sponsor_id` atribuído ao novo utilizador (IMUTÁVEL)
-3. Contribuição confirmada → incrementa `valid_referrals_count` do sponsor
-4. Verificação automática de condições Premium
+### CTAs Implementados
+- ✅ Dashboard (banner principal)
+- ✅ Homepage (secção entre comunidade e viagens)
 
-## O Que Foi Implementado
+## Configuração Stripe (Necessário)
 
-### Admin Users Dashboard ✅ (17 Fev 2026)
-- **Métricas principais**: Total users, Premium, Contribuições, Novos (7 dias)
-- **Distribuição por Nível**: Gráfico visual Curioso/Sonhador/Premium
-- **Top Sponsors**: Ranking por impacto (€ gerado pelos convidados)
-- **Lista de Utilizadores**: Tabela com nome, nível, subscrição, referrals, contribuições, impacto
-- **Ações por utilizador**:
-  - Ativar/desativar subscrição
-  - Alterar nível manualmente
-  - Corrigir referrals válidos
-  - Ver detalhes completos (quem convidou, quem convidou, impacto)
+1. **STRIPE_API_KEY** no backend/.env (chave secreta)
+2. **Webhook Endpoint** no Stripe Dashboard:
+   - URL: `https://dream-trips-4.preview.emergentagent.com/api/stripe/subscription-webhook`
+   - Eventos: `checkout.session.completed`, `invoice.paid`, `invoice.payment_failed`, `customer.subscription.deleted`
+3. **STRIPE_WEBHOOK_SECRET** no backend/.env (obtido após criar webhook)
 
-### Migração de Base de Dados ✅
-- Novos campos em USERS: sponsor_id, level, subscription_active, valid_referrals_count
-- Novos campos em JOURNEYS: status, owner_user_id
-- Fluxo de registo com sponsor_code via URL
-- Motor Premium automático
+## Schema da Base de Dados
 
-### Funcionalidades Core ✅
-- Homepage com hero emocional e viagens
-- Barra de progresso (sem valor objetivo público)
-- Sistema de sorteios (quando 100% atingido)
-- Nota "Maior Sonhador pode ser convidado a viajar"
-- Upload de avatar e identidade anónima
-- Planeador de viagem na homepage
+### USERS (campos de subscrição)
+```
+subscription_active: boolean
+level: "curioso" | "sonhador" | "premium"
+stripe_customer_id: string
+stripe_subscription_id: string
+subscription_started_at: datetime
+subscription_ended_at: datetime
+last_payment_at: datetime
+```
+
+### SUBSCRIPTION_LOGS
+```
+log_id: string
+user_id: string
+event: string
+session_id: string
+created_at: datetime
+```
+
+## Admin Growth Dashboard
+
+### 3 Perguntas Fundamentais
+1. **A crescer?** - Novos users, sonhadores, premium (7 dias)
+2. **Impacto real?** - Total €, contribuições, média, sponsor impact
+3. **Quem puxa?** - Top sponsors, top contribuidores
+
+### Métricas
+- Platform Momentum Score
+- total_users, active_users, premium_users
+- total_contributions_value, average_contribution
+- valid_referrals_total, journeys_funded
+
+### Gráficos
+- Evolução utilizadores
+- Evolução financeira
+- Evolução referrals
+- Distribuição níveis
 
 ## Backlog
 
 ### P1 (Próximo)
-- [ ] **Stripe Subscriptions** - Ativar premium automaticamente via pagamento
+- [ ] Testar fluxo completo de subscrição com Stripe real
+- [ ] Configurar webhook no Stripe Dashboard
 
 ### P2
-- [ ] UI básica de progressão para utilizadores
-- [ ] Emails automáticos (registo, contribuição)
-
-### Congelado (v2)
-- Sistema de Pontos (gamificação)
-- Sorteios públicos
+- [ ] UI de progressão para utilizadores
+- [ ] Emails automáticos (ativação, cancelamento, Premium)
+- [ ] Portal de gestão de subscrição (cancelar/alterar)
 
 ## Credenciais
 - **Admin**: admin@4luis.com / Admin1
 - **Test User**: test@test.com / test
 
-## APIs Mockadas
-- **GPT-5.2**: Tradução e planeamento de viagem (placeholder)
+## URLs
+- **Webhook**: `/api/stripe/subscription-webhook`
+- **Checkout**: `/api/subscription/create-checkout`
+- **Status**: `/api/subscription/status`
