@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Award, Link as LinkIcon, Copy, Check, Plus, User, Eye, EyeOff, Save, Camera } from 'lucide-react';
+import { Award, Link as LinkIcon, Copy, Check, Plus, User, Eye, EyeOff, Save, Camera, Crown, Star, Sparkles } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -27,8 +27,23 @@ const Dashboard = () => {
   const [selectedJourney, setSelectedJourney] = useState('');
   const [savingProfile, setSavingProfile] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [subscriptionStatus, setSubscriptionStatus] = useState(null);
+  const [startingCheckout, setStartingCheckout] = useState(false);
 
   const passedUser = location.state?.user;
+
+  // Check for subscription success/cancel from URL
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const subStatus = params.get('sub');
+    if (subStatus === 'success') {
+      // Refresh to get updated subscription status
+      window.history.replaceState({}, '', '/dashboard');
+      checkAuth();
+    } else if (subStatus === 'cancel') {
+      window.history.replaceState({}, '', '/dashboard');
+    }
+  }, [location.search, checkAuth]);
 
   useEffect(() => {
     if (!authLoading && !user && !passedUser) {
@@ -39,11 +54,12 @@ const Dashboard = () => {
     const fetchData = async () => {
       try {
         const headers = getAuthHeaders();
-        const [pointsRes, linksRes, journeysRes, profileRes] = await Promise.all([
+        const [pointsRes, linksRes, journeysRes, profileRes, subStatusRes] = await Promise.all([
           axios.get(`${API}/points/my-points`, { headers, withCredentials: true }),
           axios.get(`${API}/sponsor-links/my-links`, { headers, withCredentials: true }),
           axios.get(`${API}/journeys`),
-          axios.get(`${API}/profile`, { headers, withCredentials: true })
+          axios.get(`${API}/profile`, { headers, withCredentials: true }),
+          axios.get(`${API}/subscription/status`, { headers, withCredentials: true }).catch(() => ({ data: null }))
         ]);
         
         setPoints(pointsRes.data.points || []);
