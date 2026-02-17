@@ -67,6 +67,7 @@ const Dashboard = () => {
         setSponsorLinks(linksRes.data);
         setJourneys(journeysRes.data);
         setProfile(profileRes.data);
+        setSubscriptionStatus(subStatusRes.data);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
       } finally {
@@ -78,6 +79,25 @@ const Dashboard = () => {
       fetchData();
     }
   }, [user, authLoading, passedUser, navigate, getAuthHeaders]);
+
+  const startSubscriptionCheckout = async () => {
+    setStartingCheckout(true);
+    try {
+      const headers = getAuthHeaders();
+      const response = await axios.post(`${API}/subscription/create-checkout`, {}, { 
+        headers, 
+        withCredentials: true 
+      });
+      
+      if (response.data.checkout_url) {
+        window.location.href = response.data.checkout_url;
+      }
+    } catch (error) {
+      console.error('Error starting checkout:', error);
+      alert(error.response?.data?.detail || 'Erro ao iniciar pagamento');
+      setStartingCheckout(false);
+    }
+  };
 
   const createSponsorLink = async () => {
     if (!selectedJourney) return;
