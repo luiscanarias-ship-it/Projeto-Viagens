@@ -11,92 +11,156 @@ Criar uma plataforma de angariação de fundos chamada "4Luis" (4Luis.com) com c
 - **Tradução**: GPT-5.2 via Emergent LLM Key (PLACEHOLDER)
 - **Autenticação**: JWT + Google OAuth (Emergent Auth)
 
-## User Personas
-1. **Contribuidor**: Pessoa solidária que quer apoiar sonhos/viagens
-2. **Administrador**: Gestor da plataforma (password: Admin1)
-3. **Sponsor**: Utilizador que partilha links e ganha pontos
+## Schema da Base de Dados (Atualizado 12 Fev 2026)
+
+### USERS
+```
+user_id: string (PK)
+email: string
+name: string
+surname: string (optional)
+password_hash: string
+avatar: string (base64, optional)
+use_real_name: boolean
+sponsor_id: string (FK → users) // IMUTÁVEL - quem convidou
+level: "curioso" | "sonhador" | "premium"
+subscription_active: boolean
+valid_referrals_count: int
+registered_at: datetime
+premium_unlocked_at: datetime (optional)
+created_at: datetime
+```
+
+### JOURNEYS (aka TRIPS)
+```
+journey_id: string (PK)
+name: string
+poetic_name: string
+description: string
+emotional_message: string
+impact_description: string
+image_url: string
+goal_amount: float
+current_amount: float
+currency: string
+target_date: string (optional)
+is_active: boolean
+status: "active" | "funded" | "closed"
+owner_user_id: string (FK → users)
+created_at: datetime
+updated_at: datetime
+```
+
+### CONTRIBUTIONS
+```
+contribution_id: string (PK)
+journey_id: string (FK → journeys)
+user_id: string (FK → users)
+amount: float
+currency: string
+payment_method: string
+is_crypto: boolean
+status: "pending" | "completed" | "rejected"
+confirmed: boolean
+confirmed_at: datetime (optional)
+sponsor_link_id: string (optional)
+created_at: datetime
+```
+
+### SPONSOR_LINKS
+```
+link_id: string (PK) // sponsor_{uuid}
+user_id: string (FK → users)
+journey_id: string (FK → journeys)
+referral_count: int // pessoas que clicaram/registaram
+successful_referrals: int // pessoas que contribuíram
+created_at: datetime
+```
+
+### POINTS (congelado para v2)
+### RAFFLE_RESULTS (congelado para v2)
+
+## Motor Premium (Implementado - sem UI ainda)
+
+**Regra:**
+```
+IF subscription_active = true
+AND valid_referrals_count >= 3
+THEN level = "premium"
+```
+
+**Fluxo de Sponsor:**
+1. Utilizador entra via `4luis.com/?ref=sponsor_{uuid}`
+2. `sponsor_code` guardado em sessionStorage
+3. No registo, `sponsor_id` é atribuído ao novo utilizador (IMUTÁVEL)
+4. Quando contribuição é confirmada:
+   - Se user tem `sponsor_id` → incrementa `valid_referrals_count` do sponsor
+   - Verifica condições Premium automaticamente
 
 ## O Que Foi Implementado
 
-### 12 Fev 2026
+### 12 Fev 2026 (Sessão Atual)
 
-#### Sistema de Sorteios Reintroduzido
-- [x] Tab "Sorteios" no painel de admin
-- [x] Lista viagens que atingiram 100% do objetivo de financiamento
-- [x] Botão "Ver Participantes" mostra utilizadores com pontos
-- [x] Botão "Realizar Sorteio" faz sorteio aleatório (ponderado por pontos)
-- [x] Sorteio só pode ser feito uma vez por viagem
-- [x] Vencedor é exibido após sorteio
+#### ETAPA 1 - Expansão USERS ✅
+- `sponsor_id` (relation → users, imutável)
+- `level` ("curioso" | "sonhador" | "premium")
+- `subscription_active` (boolean)
+- `valid_referrals_count` (int)
+- `registered_at`, `premium_unlocked_at`
 
-#### Valor Objetivo Oculto nas Páginas Públicas
-- [x] Homepage: cartões de viagem **NÃO** mostram barra de progresso nem valor objetivo
-- [x] Página de detalhe: **NÃO** mostra barra de progresso
-- [x] Página de detalhe: mostra citação emocional e data objetivo
-- [x] Admin: **CONTINUA** a ver valores de financiamento (€X / €Y)
+#### ETAPA 2 - Fluxo de Registo com Sponsor ✅
+- URL `?ref=sponsor_{uuid}` capturada no frontend
+- `sponsor_code` guardado em sessionStorage
+- Registo passa `sponsor_code` ao backend
+- Backend resolve `sponsor_code → sponsor_user_id`
+- `sponsor_id` guardado no novo utilizador (imutável)
+- `referral_count` incrementado no sponsor_link
 
-#### Nota "Maior Sonhador"
-- [x] Sob o "Maior Sonhador" na homepage: "Um dos maiores sonhadores poderá ser convidado a viajar comigo"
-- [x] Nota só aparece quando existe um "Maior Sonhador" (utilizador com mais pontos)
+#### ETAPA 3 - Expansão JOURNEYS ✅
+- `owner_user_id` (admin que criou)
+- `status` ("active" | "funded" | "closed")
+- Status atualiza automaticamente para "funded" quando objetivo atingido
 
-#### Correções Anteriores Validadas
-- [x] "Planeia a tua viagem" na homepage tem campo de texto livre (não dropdown)
-- [x] Dashboard do utilizador não mostra "números de registo" (apenas para admin)
-- [x] Texto do link de sponsor refere "ganhar pontos para ser O Maior Sonhador"
+#### ETAPA 4 - Motor de Contribuições ✅
+- Quando contribuição confirmada:
+  - `confirmed = true`, `confirmed_at` guardado
+  - Se user tem sponsor → `valid_referrals_count++` no sponsor
+  - Verifica condições Premium automaticamente
+  - Atualiza `successful_referrals` no sponsor_link
 
-### 11 Fev 2026
+#### Endpoints Admin Novos ✅
+- `PUT /api/admin/users/{user_id}/subscription` - Ativar/desativar subscrição
+- `GET /api/admin/users` - Listar todos utilizadores com info de sponsor
+- `POST /api/admin/migrate-users` - Migrar utilizadores existentes
 
-#### Refatoração "Bilhetes" para "Pontos"
-- [x] Sistema de "bilhetes" convertido para "pontos"
-- [x] "Maior Sonhador" baseado em total de pontos (não contribuições monetárias)
-- [x] 1 ponto por cada 5€ contribuídos
-- [x] Pontos a dobrar para pagamentos em crypto
-- [x] Necessário 3+ referências para começar a ganhar pontos
-
-#### Planeador de Viagem na Homepage
-- [x] Campo de texto livre para destino
-- [x] Recursos de viagem: Mapa (Bing), Hotéis, Voos, Recursos sociais
-- [x] Links funcionais (substituídos Google Maps/Facebook/Instagram por alternativas)
-
-#### Identidade Anónima Automática
-- [x] Geração automática de alias poético (ex: "Buscador Sábio")
-- [x] Geração automática de avatar via DiceBear API
-- [x] Botão para regenerar identidade anónima
-
-#### Upload de Avatar
-- [x] Endpoint `/api/profile/avatar` (base64)
-- [x] Validação de tamanho (máx 500KB)
-
-### Funcionalidades Core
-- [x] Homepage com hero emocional e lista de viagens
-- [x] Seleção de idioma com tradução automática (PT, EN, ES, FR, DE, IT)
-- [x] Modal de pagamento com múltiplos métodos
-- [x] Sistema de autenticação duplo (JWT + Google)
-- [x] Painel de administração completo (5 tabs)
-- [x] Sistema de sponsor links
-- [x] QR codes para pagamentos crypto
-- [x] Design claro, sofisticado, emocional
+### Funcionalidades Anteriores
+- [x] Barra de progresso visível (sem valor objetivo)
+- [x] Sistema de sorteios (quando 100% atingido)
+- [x] Nota sob Maior Sonhador
+- [x] Upload de avatar
+- [x] Identidade anónima automática
+- [x] Planeador de viagem na homepage
 
 ## Backlog / Próximas Tarefas
 
 ### P1 (Importante)
 - [ ] Email de confirmação automático após contribuição
 - [ ] Email de confirmação automático após registo
+- [ ] UI para admin gerir subscrições (ativar Premium manualmente)
 
 ### P2 (Nice to have)
-- [ ] Testemunhos/mensagens de apoio em cada página de viagem
-- [ ] Sistema de notificações dentro da aplicação
-- [ ] Histórico de contribuições no dashboard
+- [ ] Dashboard Premium para utilizadores
+- [ ] Stripe Subscriptions para activação automática
+- [ ] Testemunhos/mensagens nas viagens
+- [ ] Sistema de notificações in-app
 
-### Refatoração Técnica Recomendada
-- [ ] Dividir `/app/backend/server.py` (2000+ linhas) em múltiplos routers
-- [ ] Extrair componente reutilizável "Planeia a tua viagem"
+### Congelado (v2)
+- Sistema de Pontos (gamificação)
+- Sorteios públicos
 
 ## Credenciais
 - **Admin Login**: admin@4luis.com / Admin1
 - **Test User**: test@test.com / test
-- **Crypto Address**: TGcWs89gTkkxARVT8UJsCFUMc9sQkvUmtL (USDT TRC20)
-- **MBWay**: +351968068535
-- **PayPal**: paypal.me/LuisCanarias
 
 ## APIs Mockadas
 - **GPT-5.2**: Tradução e planeamento de viagem (placeholder)
