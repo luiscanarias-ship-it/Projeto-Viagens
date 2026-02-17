@@ -795,159 +795,212 @@ const Admin = () => {
               exit={{ opacity: 0, y: -20 }}
               className="space-y-6"
             >
-              {/* Global Platform Stats Banner */}
-              <div className="bg-gradient-to-r from-[#FFBE98]/20 to-[#F2C94C]/20 rounded-2xl p-6 border border-[#FFBE98]/30">
-                <h3 className="font-bold text-[#2D2A26] mb-4 flex items-center gap-2">
-                  <BarChart3 className="w-5 h-5 text-[#FFBE98]" />
-                  Impacto Global da Plataforma (desde o início)
-                </h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {/* Platform Momentum Score */}
+              <div className="bg-gradient-to-r from-[#2D2A26] to-[#4A4640] rounded-2xl p-6 text-white">
+                <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-3xl font-bold text-[#2D2A26]">€{usersDashboard.metrics.total_contributions_value.toLocaleString()}</p>
-                    <p className="text-sm text-[#6B6661]">Total Angariado</p>
+                    <h3 className="text-sm opacity-80 mb-1">Platform Momentum Score</h3>
+                    <p className="text-4xl font-bold">{usersDashboard.metrics.momentum_score}</p>
+                    <p className="text-xs opacity-60 mt-1">novos registos + sonhadores + contribuições + referrals (7 dias)</p>
                   </div>
-                  <div>
-                    <p className="text-3xl font-bold text-[#2D2A26]">{usersDashboard.metrics.total_contributions_count || 0}</p>
-                    <p className="text-sm text-[#6B6661]">Contribuições</p>
-                  </div>
-                  <div>
-                    <p className="text-3xl font-bold text-[#2D2A26]">{usersDashboard.metrics.total_users}</p>
-                    <p className="text-sm text-[#6B6661]">Membros</p>
-                  </div>
-                  <div>
-                    <p className="text-3xl font-bold text-[#FFBE98]">€{usersDashboard.metrics.total_sponsor_impact?.toLocaleString() || 0}</p>
-                    <p className="text-sm text-[#6B6661]">Gerado via Sponsors</p>
+                  <div className="grid grid-cols-4 gap-4 text-center">
+                    <div>
+                      <p className="text-xl font-bold">{usersDashboard.metrics.weekly_signups}</p>
+                      <p className="text-xs opacity-60">Novos</p>
+                    </div>
+                    <div>
+                      <p className="text-xl font-bold">{usersDashboard.metrics.weekly_sonhadores}</p>
+                      <p className="text-xs opacity-60">Sonhadores</p>
+                    </div>
+                    <div>
+                      <p className="text-xl font-bold">{usersDashboard.metrics.weekly_contributions}</p>
+                      <p className="text-xs opacity-60">Contrib.</p>
+                    </div>
+                    <div>
+                      <p className="text-xl font-bold">{usersDashboard.metrics.valid_referrals_total}</p>
+                      <p className="text-xs opacity-60">Referrals</p>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Metrics Cards */}
-              <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
-                <div className="bg-white rounded-2xl p-4 shadow-lg border border-stone-100">
-                  <Users className="w-5 h-5 text-[#FFBE98] mb-1" />
-                  <p className="text-xl font-bold text-[#2D2A26]">{usersDashboard.metrics.total_users}</p>
-                  <p className="text-xs text-[#6B6661]">Utilizadores</p>
-                </div>
-                <div className="bg-white rounded-2xl p-4 shadow-lg border border-stone-100">
-                  <Crown className="w-5 h-5 text-[#F2C94C] mb-1" />
-                  <p className="text-xl font-bold text-[#2D2A26]">{usersDashboard.metrics.premium_users}</p>
-                  <p className="text-xs text-[#6B6661]">Premium</p>
-                </div>
-                <div className="bg-white rounded-2xl p-4 shadow-lg border border-stone-100">
-                  <Star className="w-5 h-5 text-[#FFBE98] mb-1" />
-                  <p className="text-xl font-bold text-[#2D2A26]">{usersDashboard.metrics.sonhador_users}</p>
-                  <p className="text-xs text-[#6B6661]">Sonhadores</p>
-                </div>
-                <div className="bg-white rounded-2xl p-4 shadow-lg border border-stone-100">
-                  <CheckCircle className="w-5 h-5 text-green-500 mb-1" />
-                  <p className="text-xl font-bold text-[#2D2A26]">{usersDashboard.metrics.active_subscriptions}</p>
-                  <p className="text-xs text-[#6B6661]">Subscrições</p>
-                </div>
-                <div className="bg-white rounded-2xl p-4 shadow-lg border border-stone-100">
-                  <UserPlus className="w-5 h-5 text-blue-500 mb-1" />
-                  <p className="text-xl font-bold text-[#2D2A26]">{usersDashboard.metrics.weekly_signups}</p>
-                  <p className="text-xs text-[#6B6661]">Novos (7 dias)</p>
-                </div>
-                <div className="bg-white rounded-2xl p-4 shadow-lg border border-stone-100">
-                  <Award className="w-5 h-5 text-purple-500 mb-1" />
-                  <p className="text-xl font-bold text-[#2D2A26]">{usersDashboard.metrics.valid_referrals_total}</p>
-                  <p className="text-xs text-[#6B6661]">Referrals Válidos</p>
-                </div>
-              </div>
-
-              {/* Charts Row */}
+              {/* 3 Questions Section */}
               <div className="grid md:grid-cols-3 gap-4">
-                {/* Signups Chart */}
+                {/* Q1: A plataforma está a crescer? */}
                 <div className="bg-white rounded-2xl p-5 shadow-lg border border-stone-100">
-                  <h3 className="font-bold text-[#2D2A26] mb-4 text-sm">Registos (últimos meses)</h3>
-                  <div className="flex items-end gap-1 h-24">
+                  <h3 className="font-bold text-[#2D2A26] mb-4 flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-green-500" />
+                    A crescer?
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-[#6B6661]">Novos utilizadores</span>
+                      <span className="font-bold text-[#2D2A26]">+{usersDashboard.metrics.weekly_signups} <span className="text-xs text-[#6B6661]">/ 7d</span></span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-[#6B6661]">Novos sonhadores</span>
+                      <span className="font-bold text-[#FFBE98]">+{usersDashboard.metrics.weekly_sonhadores} <span className="text-xs text-[#6B6661]">/ 7d</span></span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-[#6B6661]">Novos premium</span>
+                      <span className="font-bold text-[#F2C94C]">+{usersDashboard.metrics.weekly_premium} <span className="text-xs text-[#6B6661]">/ 7d</span></span>
+                    </div>
+                    <div className="pt-3 border-t border-stone-100">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-[#6B6661]">Total utilizadores</span>
+                        <span className="font-bold">{usersDashboard.metrics.total_users}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Q2: Está a gerar impacto real? */}
+                <div className="bg-white rounded-2xl p-5 shadow-lg border border-stone-100">
+                  <h3 className="font-bold text-[#2D2A26] mb-4 flex items-center gap-2">
+                    <BarChart3 className="w-5 h-5 text-[#FFBE98]" />
+                    Impacto real?
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-[#6B6661]">Total financiado</span>
+                      <span className="font-bold text-[#2D2A26]">€{usersDashboard.metrics.total_contributions_value.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-[#6B6661]">Nº contribuições</span>
+                      <span className="font-bold">{usersDashboard.metrics.total_contributions_count}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-[#6B6661]">Média por contrib.</span>
+                      <span className="font-bold">€{usersDashboard.metrics.average_contribution_value}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-[#6B6661]">Gerado via sponsors</span>
+                      <span className="font-bold text-[#FFBE98]">€{usersDashboard.metrics.total_sponsor_impact?.toLocaleString() || 0}</span>
+                    </div>
+                    <div className="pt-3 border-t border-stone-100">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-[#6B6661]">Viagens financiadas</span>
+                        <span className="font-bold text-green-500">{usersDashboard.metrics.journeys_funded} / {usersDashboard.metrics.journeys_active + usersDashboard.metrics.journeys_funded}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Q3: Quem está a puxar a comunidade? */}
+                <div className="bg-white rounded-2xl p-5 shadow-lg border border-stone-100">
+                  <h3 className="font-bold text-[#2D2A26] mb-4 flex items-center gap-2">
+                    <Users className="w-5 h-5 text-purple-500" />
+                    Quem puxa?
+                  </h3>
+                  <div className="space-y-2">
+                    <p className="text-xs text-[#6B6661] mb-2">Top Sponsors</p>
+                    {usersDashboard.top_sponsors.length > 0 ? (
+                      usersDashboard.top_sponsors.slice(0, 3).map((s, i) => (
+                        <div key={s.user_id} className="flex justify-between items-center text-sm">
+                          <span className="flex items-center gap-1">
+                            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${i === 0 ? 'bg-[#F2C94C] text-white' : 'bg-stone-200'}`}>{i+1}</span>
+                            {s.name}
+                          </span>
+                          <span className="font-bold text-[#FFBE98]">€{s.impact_value}</span>
+                        </div>
+                      ))
+                    ) : <p className="text-xs text-[#6B6661]">Sem sponsors ainda</p>}
+                    <p className="text-xs text-[#6B6661] mt-3 mb-2">Top Contribuidores</p>
+                    {usersDashboard.top_contributors?.length > 0 ? (
+                      usersDashboard.top_contributors.slice(0, 3).map((c, i) => (
+                        <div key={c.user_id} className="flex justify-between items-center text-sm">
+                          <span className="flex items-center gap-1">
+                            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${i === 0 ? 'bg-green-500 text-white' : 'bg-stone-200'}`}>{i+1}</span>
+                            {c.name}
+                          </span>
+                          <span className="font-bold text-green-600">€{c.total_contributed}</span>
+                        </div>
+                      ))
+                    ) : <p className="text-xs text-[#6B6661]">Sem contribuidores ainda</p>}
+                  </div>
+                </div>
+              </div>
+
+              {/* Charts Row - Evolução temporal */}
+              <div className="grid md:grid-cols-4 gap-4">
+                {/* Evolução utilizadores */}
+                <div className="bg-white rounded-2xl p-5 shadow-lg border border-stone-100">
+                  <h3 className="font-bold text-[#2D2A26] mb-3 text-sm">Evolução Utilizadores</h3>
+                  <div className="flex items-end gap-1 h-20">
                     {(usersDashboard.charts?.signups_by_month || []).slice(-6).map((item, idx) => (
                       <div key={idx} className="flex-1 flex flex-col items-center">
                         <div 
-                          className="w-full bg-[#FFBE98] rounded-t"
-                          style={{ height: `${Math.max(10, (item.count / Math.max(...(usersDashboard.charts?.signups_by_month || []).map(i => i.count), 1)) * 80)}px` }}
+                          className="w-full bg-[#FFBE98] rounded-t transition-all"
+                          style={{ height: `${Math.max(8, (item.count / Math.max(...(usersDashboard.charts?.signups_by_month || []).map(i => i.count), 1)) * 60)}px` }}
                         />
-                        <span className="text-[8px] text-[#6B6661] mt-1">{item.month?.slice(5)}</span>
+                        <span className="text-[7px] text-[#6B6661] mt-1">{item.month?.slice(5)}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* Contributions Chart */}
+                {/* Evolução financeira */}
                 <div className="bg-white rounded-2xl p-5 shadow-lg border border-stone-100">
-                  <h3 className="font-bold text-[#2D2A26] mb-4 text-sm">Contribuições (últimos meses)</h3>
-                  <div className="flex items-end gap-1 h-24">
+                  <h3 className="font-bold text-[#2D2A26] mb-3 text-sm">Evolução Financeira (€)</h3>
+                  <div className="flex items-end gap-1 h-20">
                     {(usersDashboard.charts?.contributions_by_month || []).slice(-6).map((item, idx) => (
                       <div key={idx} className="flex-1 flex flex-col items-center">
                         <div 
-                          className="w-full bg-green-400 rounded-t"
-                          style={{ height: `${Math.max(10, (item.amount / Math.max(...(usersDashboard.charts?.contributions_by_month || []).map(i => i.amount), 1)) * 80)}px` }}
+                          className="w-full bg-green-400 rounded-t transition-all"
+                          style={{ height: `${Math.max(8, (item.amount / Math.max(...(usersDashboard.charts?.contributions_by_month || []).map(i => i.amount), 1)) * 60)}px` }}
                         />
-                        <span className="text-[8px] text-[#6B6661] mt-1">€{item.amount}</span>
+                        <span className="text-[7px] text-[#6B6661] mt-1">€{item.amount}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* Level Distribution */}
+                {/* Evolução referrals */}
                 <div className="bg-white rounded-2xl p-5 shadow-lg border border-stone-100">
-                  <h3 className="font-bold text-[#2D2A26] mb-4 text-sm">Distribuição por Nível</h3>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-[#6B6661]">Curioso</span>
-                      <div className="flex items-center gap-2">
-                        <div className="w-24 h-2 bg-stone-100 rounded-full overflow-hidden">
-                          <div className="h-full bg-stone-400 rounded-full" style={{ width: `${(usersDashboard.level_distribution.curioso / usersDashboard.metrics.total_users * 100) || 0}%` }} />
-                        </div>
-                        <span className="text-xs font-medium w-6">{usersDashboard.level_distribution.curioso}</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-[#FFBE98]">Sonhador</span>
-                      <div className="flex items-center gap-2">
-                        <div className="w-24 h-2 bg-stone-100 rounded-full overflow-hidden">
-                          <div className="h-full bg-[#FFBE98] rounded-full" style={{ width: `${(usersDashboard.level_distribution.sonhador / usersDashboard.metrics.total_users * 100) || 0}%` }} />
-                        </div>
-                        <span className="text-xs font-medium w-6">{usersDashboard.level_distribution.sonhador}</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-[#F2C94C]">Premium</span>
-                      <div className="flex items-center gap-2">
-                        <div className="w-24 h-2 bg-stone-100 rounded-full overflow-hidden">
-                          <div className="h-full bg-[#F2C94C] rounded-full" style={{ width: `${(usersDashboard.level_distribution.premium / usersDashboard.metrics.total_users * 100) || 0}%` }} />
-                        </div>
-                        <span className="text-xs font-medium w-6">{usersDashboard.level_distribution.premium}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Top Sponsors */}
-              <div className="bg-white rounded-2xl p-5 shadow-lg border border-stone-100">
-                <h3 className="font-bold text-[#2D2A26] mb-4 flex items-center gap-2">
-                  <Star className="w-5 h-5 text-[#F2C94C]" />
-                  Top Sponsors (por Impacto €)
-                </h3>
-                {usersDashboard.top_sponsors.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
-                    {usersDashboard.top_sponsors.map((sponsor, idx) => (
-                      <div key={sponsor.user_id} className="flex items-center gap-3 p-3 bg-stone-50 rounded-xl">
-                        <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${idx === 0 ? 'bg-[#F2C94C] text-white' : idx === 1 ? 'bg-stone-300 text-white' : 'bg-stone-200 text-stone-600'}`}>
-                          {idx + 1}
-                        </span>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm truncate">{sponsor.name}</p>
-                          <p className="text-xs text-[#6B6661]">{sponsor.referrals_count} convites</p>
-                        </div>
-                        <p className="text-sm font-bold text-[#FFBE98]">€{sponsor.impact_value.toLocaleString()}</p>
+                  <h3 className="font-bold text-[#2D2A26] mb-3 text-sm">Evolução Referrals</h3>
+                  <div className="flex items-end gap-1 h-20">
+                    {(usersDashboard.charts?.referrals_by_month || []).slice(-6).map((item, idx) => (
+                      <div key={idx} className="flex-1 flex flex-col items-center">
+                        <div 
+                          className="w-full bg-purple-400 rounded-t transition-all"
+                          style={{ height: `${Math.max(8, (item.count / Math.max(...(usersDashboard.charts?.referrals_by_month || []).map(i => i.count), 1)) * 60)}px` }}
+                        />
+                        <span className="text-[7px] text-[#6B6661] mt-1">{item.month?.slice(5)}</span>
                       </div>
                     ))}
                   </div>
-                ) : (
-                  <p className="text-sm text-[#6B6661] text-center py-4">Ainda sem sponsors com impacto</p>
-                )}
+                </div>
+
+                {/* Distribuição níveis */}
+                <div className="bg-white rounded-2xl p-5 shadow-lg border border-stone-100">
+                  <h3 className="font-bold text-[#2D2A26] mb-3 text-sm">Distribuição Níveis</h3>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-20 h-2 bg-stone-100 rounded-full overflow-hidden">
+                        <div className="h-full bg-stone-400 rounded-full" style={{ width: `${(usersDashboard.level_distribution.curioso / usersDashboard.metrics.total_users * 100) || 0}%` }} />
+                      </div>
+                      <span className="text-xs text-[#6B6661]">{usersDashboard.level_distribution.curioso} Curioso</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-20 h-2 bg-stone-100 rounded-full overflow-hidden">
+                        <div className="h-full bg-[#FFBE98] rounded-full" style={{ width: `${(usersDashboard.level_distribution.sonhador / usersDashboard.metrics.total_users * 100) || 0}%` }} />
+                      </div>
+                      <span className="text-xs text-[#FFBE98]">{usersDashboard.level_distribution.sonhador} Sonhador</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-20 h-2 bg-stone-100 rounded-full overflow-hidden">
+                        <div className="h-full bg-[#F2C94C] rounded-full" style={{ width: `${(usersDashboard.level_distribution.premium / usersDashboard.metrics.total_users * 100) || 0}%` }} />
+                      </div>
+                      <span className="text-xs text-[#F2C94C]">{usersDashboard.level_distribution.premium} Premium</span>
+                    </div>
+                  </div>
+                  <div className="mt-3 pt-3 border-t border-stone-100 text-xs">
+                    <div className="flex justify-between">
+                      <span className="text-[#6B6661]">Ativos (30d)</span>
+                      <span className="font-medium">{usersDashboard.metrics.active_users}</span>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* Users Table */}
