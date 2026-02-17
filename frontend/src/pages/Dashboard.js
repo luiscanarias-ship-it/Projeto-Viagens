@@ -231,6 +231,88 @@ const Dashboard = () => {
           </p>
         </motion.div>
 
+        {/* Subscription Banner */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="mb-6"
+        >
+          {subscriptionStatus?.level === 'premium' ? (
+            // Premium Badge
+            <div className="bg-gradient-to-r from-[#F2C94C] to-[#FFBE98] rounded-2xl p-6 text-white">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center">
+                  <Crown className="w-8 h-8" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold">Membro Premium</h3>
+                  <p className="text-white/80 text-sm">
+                    Tens acesso a todos os benefícios exclusivos!
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : subscriptionStatus?.subscription_active ? (
+            // Sonhador Badge
+            <div className="bg-gradient-to-r from-[#FFBE98] to-[#E0C097] rounded-2xl p-6">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 bg-white/30 rounded-full flex items-center justify-center">
+                    <Star className="w-8 h-8 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-white">Membro Sonhador</h3>
+                    <p className="text-white/80 text-sm">
+                      {subscriptionStatus?.valid_referrals_count >= 3 
+                        ? 'Parabéns! Já tens 3+ referrals. O Premium está quase lá!'
+                        : `Convida ${3 - (subscriptionStatus?.valid_referrals_count || 0)} amigos para desbloquear o Premium`}
+                    </p>
+                  </div>
+                </div>
+                <div className="bg-white/20 rounded-xl px-4 py-2">
+                  <p className="text-white text-sm font-medium">{subscriptionStatus?.valid_referrals_count || 0}/3 referrals</p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            // CTA to become Sonhador
+            <div className="bg-gradient-to-r from-[#2D2A26] to-[#4A4640] rounded-2xl p-6 text-white">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 bg-[#FFBE98]/20 rounded-full flex items-center justify-center">
+                    <Sparkles className="w-8 h-8 text-[#FFBE98]" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold">Torna-te Sonhador</h3>
+                    <p className="text-white/70 text-sm">
+                      Por apenas €10/mês, apoia os sonhos e desbloqueia benefícios exclusivos
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={startSubscriptionCheckout}
+                  disabled={startingCheckout}
+                  className="px-6 py-3 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-bold hover:bg-[#FFAB7D] transition-colors disabled:opacity-50 flex items-center gap-2"
+                  data-testid="subscribe-btn"
+                >
+                  {startingCheckout ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-[#2D2A26] border-t-transparent rounded-full animate-spin" />
+                      A processar...
+                    </>
+                  ) : (
+                    <>
+                      <Star className="w-5 h-5" />
+                      Junta-te como Sonhador
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
+        </motion.div>
+
         {/* Tabs */}
         <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
           {[
