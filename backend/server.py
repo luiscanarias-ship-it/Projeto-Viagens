@@ -1342,6 +1342,39 @@ async def get_all_users(request: Request):
         "users": users
     }
 
+@api_router.post("/admin/migrate-users")
+async def migrate_existing_users(request: Request):
+    """Add new fields to existing users (one-time migration)"""
+    await require_admin(request)
+    
+    # Update all users that don't have the new fields
+    result = await db.users.update_many(
+        {"level": {"$exists": False}},
+        {"$set": {
+            "sponsor_id": None,
+            "level": "curioso",
+            "subscription_active": False,
+            "valid_referrals_count": 0,
+            "registered_at": None,
+            "premium_unlocked_at": None
+        }}
+    )
+    
+    # Also update journeys that don't have new fields
+    journey_result = await db.journeys.update_many(
+        {"status": {"$exists": False}},
+        {"$set": {
+            "status": "active",
+            "owner_user_id": None
+        }}
+    )
+    
+    return {
+        "users_migrated": result.modified_count,
+        "journeys_migrated": journey_result.modified_count,
+        "message": "Migração concluída"
+    }
+
 # ==================== RAFFLE SYSTEM ====================
 
 @api_router.get("/admin/journeys-ready-for-raffle")
