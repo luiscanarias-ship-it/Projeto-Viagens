@@ -1279,6 +1279,67 @@ async def reject_contribution(contribution_id: str, request: Request):
     
     return {"message": "Contribuição rejeitada"}
 
+# ==================== ADMIN USER MANAGEMENT ====================
+
+@api_router.put("/admin/users/{user_id}/subscription")
+async def toggle_user_subscription(user_id: str, request: Request):
+    """Toggle subscription_active for a user (v1 - manual activation)"""
+    await require_admin(request)
+    
+    user = await db.users.find_one({"user_id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="Utilizador não encontrado")
+    
+    new_status = not user.get("subscription_active", False)
+    update_data = {"subscription_active": new_status}
+    
+    # Check if user now qualifies for premium
+    if new_status and user.get("valid_referrals_count", 0) >= 3:
+        update_data["level"] = "premium"
+        update_data["premium_unlocked_at"] = datetime.now(timezone.utc).isoformat()
+    elif not new_status and user.get("level") == "premium":
+        # Downgrade from premium if subscription deactivated
+        update_data["level"] = "sonhador" if user.get("valid_referrals_count", 0) >= 1 else "curioso"
+    
+    await db.users.update_one(
+        {"user_id": user_id},
+        {"$set": update_data}
+    )
+    
+    return {
+        "message": f"Subscrição {'ativada' if new_status else 'desativada'}",
+        "subscription_active": new_status,
+        "level": update_data.get("level", user.get("level", "curioso"))
+    }
+
+@api_router.get("/admin/users")
+async def get_all_users(request: Request):
+    """Get all users with their sponsor/premium status - Admin only"""
+    await require_admin(request)
+    
+    users = await db.users.find(
+        {},
+        {"_id": 0, "password_hash": 0}
+    ).to_list(1000)
+    
+    # Enrich with sponsor info
+    for user in users:
+        if user.get("sponsor_id"):
+            sponsor = await db.users.find_one(
+                {"user_id": user["sponsor_id"]}, 
+                {"_id": 0, "name": 1, "email": 1}
+            )
+            user["sponsor_name"] = sponsor.get("name") if sponsor else "Desconhecido"
+        
+        # Count referrals made by this user
+        referrals = await db.users.count_documents({"sponsor_id": user["user_id"]})
+        user["referrals_made"] = referrals
+    
+    return {
+        "total_users": len(users),
+        "users": users
+    }
+
 # ==================== RAFFLE SYSTEM ====================
 
 @api_router.get("/admin/journeys-ready-for-raffle")
