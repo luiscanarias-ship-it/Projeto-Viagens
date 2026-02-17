@@ -1,34 +1,31 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Award, Link as LinkIcon, Copy, Check, Plus, User, Eye, EyeOff, Save, Camera, Crown, Star, Sparkles } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { 
+  Crown, Star, Sparkles, Users, Copy, Check, Share2, 
+  Wallet, TrendingUp, MapPin, Heart, User, Camera, 
+  Eye, EyeOff, Save, ExternalLink
+} from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
-import { useLanguage } from '../contexts/LanguageContext';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const Dashboard = () => {
   const { user, loading: authLoading, getAuthHeaders, checkAuth } = useAuth();
-  const { t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
   const fileInputRef = useRef(null);
   
-  const [activeTab, setActiveTab] = useState('points');
-  const [points, setPoints] = useState([]);
-  const [totalPoints, setTotalPoints] = useState(0);
-  const [sponsorLinks, setSponsorLinks] = useState([]);
-  const [journeys, setJourneys] = useState([]);
+  const [dashboardData, setDashboardData] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [copiedLink, setCopiedLink] = useState(null);
-  const [selectedJourney, setSelectedJourney] = useState('');
+  const [copiedLink, setCopiedLink] = useState(false);
+  const [startingCheckout, setStartingCheckout] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
-  const [subscriptionStatus, setSubscriptionStatus] = useState(null);
-  const [startingCheckout, setStartingCheckout] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
 
   const passedUser = location.state?.user;
 
@@ -37,7 +34,6 @@ const Dashboard = () => {
     const params = new URLSearchParams(location.search);
     const subStatus = params.get('sub');
     if (subStatus === 'success') {
-      // Refresh to get updated subscription status
       window.history.replaceState({}, '', '/dashboard');
       checkAuth();
     } else if (subStatus === 'cancel') {
@@ -54,20 +50,13 @@ const Dashboard = () => {
     const fetchData = async () => {
       try {
         const headers = getAuthHeaders();
-        const [pointsRes, linksRes, journeysRes, profileRes, subStatusRes] = await Promise.all([
-          axios.get(`${API}/points/my-points`, { headers, withCredentials: true }),
-          axios.get(`${API}/sponsor-links/my-links`, { headers, withCredentials: true }),
-          axios.get(`${API}/journeys`),
-          axios.get(`${API}/profile`, { headers, withCredentials: true }),
-          axios.get(`${API}/subscription/status`, { headers, withCredentials: true }).catch(() => ({ data: null }))
+        const [statsRes, profileRes] = await Promise.all([
+          axios.get(`${API}/dashboard/user-stats`, { headers, withCredentials: true }),
+          axios.get(`${API}/profile`, { headers, withCredentials: true })
         ]);
         
-        setPoints(pointsRes.data.points || []);
-        setTotalPoints(pointsRes.data.total_points || 0);
-        setSponsorLinks(linksRes.data);
-        setJourneys(journeysRes.data);
+        setDashboardData(statsRes.data);
         setProfile(profileRes.data);
-        setSubscriptionStatus(subStatusRes.data);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
       } finally {
@@ -99,27 +88,46 @@ const Dashboard = () => {
     }
   };
 
-  const createSponsorLink = async () => {
-    if (!selectedJourney) return;
-    
+  const createSponsorLink = async (journeyId) => {
     try {
       const headers = getAuthHeaders();
       const response = await axios.post(`${API}/sponsor-links/create`, 
-        { journey_id: selectedJourney },
+        { journey_id: journeyId },
         { headers, withCredentials: true }
       );
-      setSponsorLinks([...sponsorLinks, response.data]);
-      setSelectedJourney('');
+      // Refresh dashboard data
+      const statsRes = await axios.get(`${API}/dashboard/user-stats`, { headers, withCredentials: true });
+      setDashboardData(statsRes.data);
+      return response.data;
     } catch (error) {
       console.error('Error creating sponsor link:', error);
     }
   };
 
-  const copyLink = (linkId) => {
-    const fullUrl = `${window.location.origin}/journey/${sponsorLinks.find(l => l.link_id === linkId)?.journey_id}?sponsor=${linkId}`;
+  const copyLink = (linkId, journeyId) => {
+    const fullUrl = `${window.location.origin}/journey/${journeyId}?sponsor=${linkId}`;
     navigator.clipboard.writeText(fullUrl);
-    setCopiedLink(linkId);
-    setTimeout(() => setCopiedLink(null), 2000);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2000);
+  };
+
+  const shareLink = async (linkId, journeyId) => {
+    const fullUrl = `${window.location.origin}/journey/${journeyId}?sponsor=${linkId}`;
+    const shareData = {
+      title: '4Luis - Apoiar Viagem dos Sonhos',
+      text: 'Junta-te a mim para apoiar esta viagem incrível!',
+      url: fullUrl
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        console.log('Share cancelled');
+      }
+    } else {
+      copyLink(linkId, journeyId);
+    }
   };
 
   const saveProfile = async () => {
@@ -127,7 +135,7 @@ const Dashboard = () => {
     try {
       const headers = getAuthHeaders();
       await axios.put(`${API}/profile`, profile, { headers, withCredentials: true });
-      await checkAuth(); // Refresh auth context
+      await checkAuth();
       alert('Perfil guardado com sucesso!');
     } catch (error) {
       console.error('Error saving profile:', error);
@@ -141,13 +149,11 @@ const Dashboard = () => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith('image/')) {
       alert('Por favor selecione uma imagem válida');
       return;
     }
 
-    // Validate file size (max 500KB)
     if (file.size > 500 * 1024) {
       alert('A imagem é muito grande. Máximo 500KB.');
       return;
@@ -155,7 +161,6 @@ const Dashboard = () => {
 
     setUploadingAvatar(true);
     try {
-      // Convert to base64
       const reader = new FileReader();
       reader.onloadend = async () => {
         const base64Image = reader.result;
@@ -169,7 +174,6 @@ const Dashboard = () => {
           
           setProfile({ ...profile, avatar: response.data.avatar });
           await checkAuth();
-          alert('Avatar atualizado com sucesso!');
         } catch (error) {
           console.error('Error uploading avatar:', error);
           alert(error.response?.data?.detail || 'Erro ao carregar avatar');
@@ -181,7 +185,6 @@ const Dashboard = () => {
     } catch (error) {
       console.error('Error reading file:', error);
       setUploadingAvatar(false);
-      alert('Erro ao processar imagem');
     }
   };
 
@@ -200,7 +203,6 @@ const Dashboard = () => {
       });
     } catch (error) {
       console.error('Error regenerating anonymous identity:', error);
-      alert('Erro ao gerar nova identidade');
     }
   };
 
@@ -214,97 +216,96 @@ const Dashboard = () => {
     );
   }
 
-  return (
-    <div className="min-h-screen pt-28 pb-12 px-6 md:px-12" data-testid="dashboard-page">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <h1 className="text-4xl font-bold text-[#2D2A26] mb-2">
-            {t('dashboard.title')}
-          </h1>
-          <p className="text-[#6B6661]">
-            Olá, {currentUser?.name}! Bem-vindo de volta.
-          </p>
-        </motion.div>
+  if (!dashboardData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center pt-20">
+        <p className="text-[#6B6661]">Erro ao carregar dados</p>
+      </div>
+    );
+  }
 
-        {/* Subscription Banner */}
+  const { user: userData, contributions, invites, main_journey, main_sponsor_link } = dashboardData;
+  const level = userData?.level || 'curioso';
+  const subscriptionActive = userData?.subscription_active || false;
+  const validReferrals = userData?.valid_referrals_count || 0;
+  const isPremium = level === 'premium';
+  const isSonhador = subscriptionActive && level === 'sonhador';
+  const isCurioso = !subscriptionActive || level === 'curioso';
+
+  // Progress calculation
+  const progressPercent = Math.min((validReferrals / 3) * 100, 100);
+  const referralsNeeded = Math.max(3 - validReferrals, 0);
+
+  // Get or create sponsor link for main journey
+  const sponsorLinkId = main_sponsor_link?.link_id;
+  const sponsorLinkUrl = sponsorLinkId && main_journey 
+    ? `${window.location.origin}/journey/${main_journey.journey_id}?sponsor=${sponsorLinkId}`
+    : null;
+
+  return (
+    <div className="min-h-screen pt-28 pb-12 px-4 md:px-8" data-testid="dashboard-page">
+      <div className="max-w-4xl mx-auto space-y-6">
+        
+        {/* BLOCO 1 — Estado Atual */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="mb-6"
+          className="relative overflow-hidden rounded-3xl"
         >
-          {subscriptionStatus?.level === 'premium' ? (
-            // Premium Badge
-            <div className="bg-gradient-to-r from-[#F2C94C] to-[#FFBE98] rounded-2xl p-6 text-white">
+          {isPremium ? (
+            <div className="bg-gradient-to-br from-[#F2C94C] via-[#FFBE98] to-[#F2C94C] p-6 md:p-8">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center">
-                  <Crown className="w-8 h-8" />
+                <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+                  <Crown className="w-9 h-9 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold">Membro Premium</h3>
-                  <p className="text-white/80 text-sm">
-                    Tens acesso a todos os benefícios exclusivos!
-                  </p>
+                  <p className="text-white/80 text-sm font-medium">Estado</p>
+                  <h2 className="text-2xl md:text-3xl font-bold text-white">Premium</h2>
+                  <p className="text-white/70 text-sm mt-1">Acesso completo a todos os benefícios</p>
                 </div>
               </div>
             </div>
-          ) : subscriptionStatus?.subscription_active ? (
-            // Sonhador Badge
-            <div className="bg-gradient-to-r from-[#FFBE98] to-[#E0C097] rounded-2xl p-6">
-              <div className="flex items-center justify-between flex-wrap gap-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-white/30 rounded-full flex items-center justify-center">
-                    <Star className="w-8 h-8 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-white">Membro Sonhador</h3>
-                    <p className="text-white/80 text-sm">
-                      {subscriptionStatus?.valid_referrals_count >= 3 
-                        ? 'Parabéns! Já tens 3+ referrals. O Premium está quase lá!'
-                        : `Convida ${3 - (subscriptionStatus?.valid_referrals_count || 0)} amigos para desbloquear o Premium`}
-                    </p>
-                  </div>
+          ) : isSonhador ? (
+            <div className="bg-gradient-to-br from-[#FFBE98] to-[#E0C097] p-6 md:p-8">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 bg-white/25 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+                  <Star className="w-9 h-9 text-white" />
                 </div>
-                <div className="bg-white/20 rounded-xl px-4 py-2">
-                  <p className="text-white text-sm font-medium">{subscriptionStatus?.valid_referrals_count || 0}/3 referrals</p>
+                <div>
+                  <p className="text-white/80 text-sm font-medium">Estado</p>
+                  <h2 className="text-2xl md:text-3xl font-bold text-white">Sonhador ativo</h2>
+                  <p className="text-white/70 text-sm mt-1">Subscrição ativa</p>
                 </div>
               </div>
             </div>
           ) : (
-            // CTA to become Sonhador
-            <div className="bg-gradient-to-r from-[#2D2A26] to-[#4A4640] rounded-2xl p-6 text-white">
+            <div className="bg-gradient-to-br from-[#2D2A26] to-[#4A4640] p-6 md:p-8">
               <div className="flex items-center justify-between flex-wrap gap-4">
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-[#FFBE98]/20 rounded-full flex items-center justify-center">
-                    <Sparkles className="w-8 h-8 text-[#FFBE98]" />
+                  <div className="w-16 h-16 bg-[#FFBE98]/20 rounded-2xl flex items-center justify-center">
+                    <Sparkles className="w-9 h-9 text-[#FFBE98]" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold">Torna-te Sonhador</h3>
-                    <p className="text-white/70 text-sm">
-                      Por apenas €10/mês, apoia os sonhos e desbloqueia benefícios exclusivos
-                    </p>
+                    <p className="text-white/60 text-sm font-medium">Estado</p>
+                    <h2 className="text-2xl md:text-3xl font-bold text-white">Curioso</h2>
+                    <p className="text-white/50 text-sm mt-1">Ainda não és sonhador</p>
                   </div>
                 </div>
                 <button
                   onClick={startSubscriptionCheckout}
                   disabled={startingCheckout}
-                  className="px-6 py-3 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-bold hover:bg-[#FFAB7D] transition-colors disabled:opacity-50 flex items-center gap-2"
+                  className="px-6 py-3 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-bold hover:bg-[#FFAB7D] transition-all disabled:opacity-50 flex items-center gap-2 shadow-lg"
                   data-testid="subscribe-btn"
                 >
                   {startingCheckout ? (
                     <>
-                      <div className="w-4 h-4 border-2 border-[#2D2A26] border-t-transparent rounded-full animate-spin" />
+                      <div className="w-5 h-5 border-2 border-[#2D2A26] border-t-transparent rounded-full animate-spin" />
                       A processar...
                     </>
                   ) : (
                     <>
                       <Star className="w-5 h-5" />
-                      Junta-te como Sonhador
+                      Tornar-me Sonhador
                     </>
                   )}
                 </button>
@@ -313,199 +314,311 @@ const Dashboard = () => {
           )}
         </motion.div>
 
-        {/* Tabs */}
-        <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-          {[
-            { id: 'points', label: 'Meus Pontos' },
-            { id: 'sponsor', label: 'Links de Sponsor' },
-            { id: 'profile', label: 'Meu Perfil' }
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-6 py-3 rounded-xl font-medium transition-all whitespace-nowrap ${
-                activeTab === tab.id
-                  ? 'bg-[#FFBE98] text-[#2D2A26]'
-                  : 'bg-white border border-stone-200 text-[#6B6661] hover:bg-stone-50'
-              }`}
-              data-testid={`tab-${tab.id}`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        {/* BLOCO 2 — Progresso para Premium */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-white rounded-3xl p-6 md:p-8 shadow-lg border border-stone-100"
+        >
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-12 h-12 bg-gradient-to-br from-[#F2C94C]/20 to-[#FFBE98]/20 rounded-xl flex items-center justify-center">
+              <TrendingUp className="w-6 h-6 text-[#F2C94C]" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-[#2D2A26]">Progresso para Premium</h3>
+              <p className="text-sm text-[#6B6661]">Motor principal de progressão</p>
+            </div>
+          </div>
 
-        <AnimatePresence mode="wait">
-          {/* Points Tab */}
-          {activeTab === 'points' && (
-            <motion.div
-              key="points"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="bg-white rounded-3xl p-6 shadow-lg border border-stone-100"
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-[#E6F4F1] rounded-xl flex items-center justify-center">
-                  <Award className="w-6 h-6 text-[#2D2A26]" />
+          {isPremium ? (
+            <div className="text-center py-6">
+              <div className="w-20 h-20 bg-gradient-to-br from-[#F2C94C] to-[#FFBE98] rounded-full flex items-center justify-center mx-auto mb-4">
+                <Crown className="w-10 h-10 text-white" />
+              </div>
+              <h4 className="text-xl font-bold text-[#2D2A26] mb-2">Premium Desbloqueado!</h4>
+              <p className="text-[#6B6661]">
+                Continua a convidar e a apoiar para manter vantagens e acesso prioritário.
+              </p>
+            </div>
+          ) : (
+            <>
+              {/* Progress Stats */}
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Users className="w-5 h-5 text-[#FFBE98]" />
+                  <span className="font-semibold text-[#2D2A26]">Convites válidos:</span>
                 </div>
-                <div>
-                  <h2 className="text-xl font-bold">Meus Pontos</h2>
-                  <p className="text-sm text-[#6B6661]">{totalPoints} pontos</p>
-                </div>
+                <span className="text-2xl font-bold text-[#F2C94C]">{validReferrals} / 3</span>
               </div>
 
-              {points.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-[#6B6661] mb-4">Ainda não tem pontos.</p>
-                  <p className="text-sm text-[#6B6661]">
-                    <strong>Importante:</strong> Convida 3 amigos a apoiar uma viagem e começa a ganhar pontos! 
-                    Quanto mais contribuíres e mais amigos convidares, mais pontos acumulas para seres O Maior Sonhador.
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-2 max-h-96 overflow-y-auto">
-                  {points.map((point) => (
+              {/* Progress Bar */}
+              <div className="relative h-4 bg-stone-100 rounded-full overflow-hidden mb-4">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progressPercent}%` }}
+                  transition={{ duration: 1, ease: "easeOut" }}
+                  className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#FFBE98] to-[#F2C94C] rounded-full"
+                />
+                {/* Progress indicators */}
+                <div className="absolute inset-0 flex justify-between px-1">
+                  {[1, 2, 3].map((num) => (
                     <div
-                      key={point.point_id}
-                      className="flex items-center justify-between p-3 bg-stone-50 rounded-xl"
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="text-xs bg-[#FFBE98]/20 text-[#FFBE98] px-2 py-0.5 rounded-full">
-                          {point.points_value} ponto{point.points_value > 1 ? 's' : ''}
-                        </span>
-                      </div>
-                      <span className="text-xs text-[#6B6661]">
-                        {journeys.find(j => j.journey_id === point.journey_id)?.name}
-                      </span>
-                    </div>
+                      key={num}
+                      className={`w-3 h-3 rounded-full my-0.5 ${
+                        validReferrals >= num ? 'bg-white' : 'bg-stone-300'
+                      }`}
+                    />
                   ))}
-                </div>
-              )}
-            </motion.div>
-          )}
-
-          {/* Sponsor Links Tab */}
-          {activeTab === 'sponsor' && (
-            <motion.div
-              key="sponsor"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="bg-white rounded-3xl p-6 shadow-lg border border-stone-100"
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-[#FFBE98]/20 rounded-xl flex items-center justify-center">
-                  <LinkIcon className="w-6 h-6 text-[#FFBE98]" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold">{t('dashboard.sponsor_links')}</h2>
-                  <p className="text-sm text-[#6B6661]">Partilhe e ganhe pontos</p>
                 </div>
               </div>
 
-              {/* Create New Link */}
-              <div className="flex gap-2 mb-4">
-                <select
-                  value={selectedJourney}
-                  onChange={(e) => setSelectedJourney(e.target.value)}
-                  className="flex-1 px-4 py-2 rounded-xl border border-stone-200 bg-white text-sm"
-                  data-testid="journey-select"
-                >
-                  <option value="">Selecionar viagem...</option>
-                  {journeys.map((j) => (
-                    <option key={j.journey_id} value={j.journey_id}>
-                      {j.name}
-                    </option>
-                  ))}
-                </select>
-                <button
-                  onClick={createSponsorLink}
-                  disabled={!selectedJourney}
-                  className="px-4 py-2 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-medium disabled:opacity-50 transition-all hover:bg-[#FFAB7D]"
-                  data-testid="create-link-btn"
-                >
-                  <Plus className="w-5 h-5" />
-                </button>
-              </div>
-
-              {sponsorLinks.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-[#6B6661]">Crie um link de sponsor para começar.</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {sponsorLinks.map((link) => {
-                    const journey = journeys.find(j => j.journey_id === link.journey_id);
-                    return (
-                      <div key={link.link_id} className="p-4 bg-stone-50 rounded-xl">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="font-medium">{journey?.name}</span>
-                          <span className="text-xs bg-[#E6F4F1] px-2 py-1 rounded-full">
-                            {link.successful_referrals}/3 referências
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="text"
-                            readOnly
-                            value={`${window.location.origin}/journey/${link.journey_id}?sponsor=${link.link_id}`}
-                            className="flex-1 text-xs bg-white px-3 py-2 rounded-lg border border-stone-200 truncate"
-                          />
-                          <button
-                            onClick={() => copyLink(link.link_id)}
-                            className="p-2 hover:bg-white rounded-lg transition-colors"
-                          >
-                            {copiedLink === link.link_id ? (
-                              <Check className="w-4 h-4 text-green-500" />
-                            ) : (
-                              <Copy className="w-4 h-4 text-[#6B6661]" />
-                            )}
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              <div className="mt-4 p-4 bg-[#F2C94C]/10 rounded-xl space-y-3">
-                <p className="text-sm text-[#2D2A26]">
-                  Partilha o teu link de sponsor com os teus amigos. Assim que conseguires pelo menos 3 amigos a contribuir, 
-                  começarás a ganhar pontos. Quantos mais amigos convidares e mais contribuíres, mais pontos acumulas 
-                  para seres O Maior Sonhador!
-                </p>
-                <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-[#FFBE98]/30 to-[#F2C94C]/30 rounded-xl border border-[#FFBE98]/40">
-                  <span className="text-2xl">🚀</span>
-                  <p className="text-sm font-semibold text-[#2D2A26]">
-                    <span className="text-[#FFBE98]">Dica:</span> Paga com criptomoedas e ganha <span className="text-[#F2C94C] font-bold">pontos a dobrar!</span>
+              {/* Status Message */}
+              {isCurioso ? (
+                <div className="p-4 bg-[#FFF8F0] rounded-xl border border-[#FFBE98]/30">
+                  <p className="text-sm text-[#2D2A26]">
+                    <strong className="text-[#FFBE98]">Ativa a subscrição</strong> para que os teus convites contem e possas desbloquear Premium.
                   </p>
                 </div>
-              </div>
-            </motion.div>
+              ) : referralsNeeded > 0 ? (
+                <p className="text-center text-[#6B6661]">
+                  Faltam <span className="font-bold text-[#F2C94C]">{referralsNeeded}</span> para desbloquear Premium
+                </p>
+              ) : (
+                <p className="text-center text-green-600 font-medium">
+                  Já tens 3 referrals! O Premium será ativado automaticamente.
+                </p>
+              )}
+            </>
+          )}
+        </motion.div>
+
+        {/* BLOCO 3 — Convites */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-white rounded-3xl p-6 md:p-8 shadow-lg border border-stone-100"
+        >
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-12 h-12 bg-[#E6F4F1] rounded-xl flex items-center justify-center">
+              <Share2 className="w-6 h-6 text-[#2D2A26]" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-[#2D2A26]">Convites</h3>
+              <p className="text-sm text-[#6B6661]">Partilha e acompanha o teu impacto</p>
+            </div>
+          </div>
+
+          {/* Sponsor Link */}
+          {main_journey && (
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-[#6B6661] mb-2">
+                O teu link de convite:
+              </label>
+              
+              {sponsorLinkId ? (
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    readOnly
+                    value={sponsorLinkUrl}
+                    className="flex-1 px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm text-[#2D2A26] truncate"
+                    data-testid="sponsor-link-input"
+                  />
+                  <button
+                    onClick={() => copyLink(sponsorLinkId, main_journey.journey_id)}
+                    className={`px-4 py-3 rounded-xl font-medium transition-all flex items-center gap-2 ${
+                      copiedLink 
+                        ? 'bg-green-100 text-green-700' 
+                        : 'bg-[#FFBE98] text-[#2D2A26] hover:bg-[#FFAB7D]'
+                    }`}
+                    data-testid="copy-link-btn"
+                  >
+                    {copiedLink ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
+                    {copiedLink ? 'Copiado!' : 'Copiar'}
+                  </button>
+                  <button
+                    onClick={() => shareLink(sponsorLinkId, main_journey.journey_id)}
+                    className="px-4 py-3 bg-[#2D2A26] text-white rounded-xl font-medium hover:bg-[#4A4640] transition-all flex items-center gap-2"
+                    data-testid="share-link-btn"
+                  >
+                    <Share2 className="w-5 h-5" />
+                    <span className="hidden sm:inline">Partilhar</span>
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => createSponsorLink(main_journey.journey_id)}
+                  className="w-full px-4 py-3 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-medium hover:bg-[#FFAB7D] transition-all flex items-center justify-center gap-2"
+                  data-testid="create-sponsor-link-btn"
+                >
+                  <Share2 className="w-5 h-5" />
+                  Gerar link de convite
+                </button>
+              )}
+            </div>
           )}
 
-          {/* Profile Tab */}
-          {activeTab === 'profile' && profile && (
-            <motion.div
-              key="profile"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="bg-white rounded-3xl p-6 shadow-lg border border-stone-100"
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-[#E6F4F1] rounded-xl flex items-center justify-center">
-                  <User className="w-6 h-6 text-[#2D2A26]" />
+          {/* Invite Stats */}
+          <div className="grid grid-cols-3 gap-4">
+            <div className="text-center p-4 bg-stone-50 rounded-xl">
+              <p className="text-2xl font-bold text-[#2D2A26]">{invites?.total_invited || 0}</p>
+              <p className="text-xs text-[#6B6661] mt-1">Pessoas convidadas</p>
+            </div>
+            <div className="text-center p-4 bg-stone-50 rounded-xl">
+              <p className="text-2xl font-bold text-[#F2C94C]">{invites?.total_contributed_by_invites || 0}</p>
+              <p className="text-xs text-[#6B6661] mt-1">Quantas contribuíram</p>
+            </div>
+            <div className="text-center p-4 bg-stone-50 rounded-xl">
+              <p className="text-2xl font-bold text-[#FFBE98]">€{invites?.impact_amount?.toFixed(0) || 0}</p>
+              <p className="text-xs text-[#6B6661] mt-1">Impacto gerado</p>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* BLOCO 4 — Contribuições Pessoais */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="bg-white rounded-3xl p-6 md:p-8 shadow-lg border border-stone-100"
+        >
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-12 h-12 bg-[#FFBE98]/20 rounded-xl flex items-center justify-center">
+              <Wallet className="w-6 h-6 text-[#FFBE98]" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-[#2D2A26]">Contribuições Pessoais</h3>
+              <p className="text-sm text-[#6B6661]">O teu apoio direto</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <div className="text-center p-4 bg-gradient-to-br from-[#FFBE98]/10 to-[#F2C94C]/10 rounded-xl border border-[#FFBE98]/20">
+              <p className="text-2xl font-bold text-[#2D2A26]">€{contributions?.total_amount?.toFixed(0) || 0}</p>
+              <p className="text-xs text-[#6B6661] mt-1">Total contribuído</p>
+            </div>
+            <div className="text-center p-4 bg-stone-50 rounded-xl">
+              <p className="text-2xl font-bold text-[#2D2A26]">{contributions?.total_count || 0}</p>
+              <p className="text-xs text-[#6B6661] mt-1">Nº contribuições</p>
+            </div>
+            <div className="text-center p-4 bg-stone-50 rounded-xl">
+              <p className="text-sm font-medium text-[#2D2A26]">
+                {contributions?.last_contribution 
+                  ? new Date(contributions.last_contribution.created_at).toLocaleDateString('pt-PT')
+                  : '—'}
+              </p>
+              <p className="text-xs text-[#6B6661] mt-1">Última contribuição</p>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* BLOCO 5 — Atividade da Viagem Principal */}
+        {main_journey && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="bg-white rounded-3xl overflow-hidden shadow-lg border border-stone-100"
+          >
+            {/* Journey Image Header */}
+            <div className="relative h-40 md:h-48">
+              <img 
+                src={main_journey.image_url} 
+                alt={main_journey.name}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+              <div className="absolute bottom-4 left-6 right-6">
+                <div className="flex items-center gap-2 text-white/80 text-sm mb-1">
+                  <MapPin className="w-4 h-4" />
+                  <span>Viagem em destaque</span>
                 </div>
-                <div>
-                  <h2 className="text-xl font-bold">Meu Perfil</h2>
-                  <p className="text-sm text-[#6B6661]">Configurações de conta e privacidade</p>
+                <h3 className="text-xl md:text-2xl font-bold text-white">{main_journey.name}</h3>
+              </div>
+            </div>
+
+            <div className="p-6">
+              {/* Progress */}
+              <div className="mb-4">
+                <div className="flex items-center justify-between text-sm mb-2">
+                  <span className="text-[#6B6661]">Progresso</span>
+                  <span className="font-bold text-[#2D2A26]">
+                    {Math.min(Math.round((main_journey.current_amount / main_journey.goal_amount) * 100), 100)}%
+                  </span>
+                </div>
+                <div className="h-3 bg-stone-100 rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${Math.min((main_journey.current_amount / main_journey.goal_amount) * 100, 100)}%` }}
+                    transition={{ duration: 1, ease: "easeOut" }}
+                    className="h-full bg-gradient-to-r from-[#FFBE98] to-[#F2C94C] rounded-full"
+                  />
                 </div>
               </div>
 
-              <div className="max-w-md space-y-6">
-                {/* Avatar */}
+              {/* Stats */}
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <p className="text-xs text-[#6B6661]">Valor atual</p>
+                  <p className="text-lg font-bold text-[#2D2A26]">€{main_journey.current_amount?.toFixed(0) || 0}</p>
+                </div>
+                {main_journey.target_date && (
+                  <div className="text-right">
+                    <p className="text-xs text-[#6B6661]">Data objetivo</p>
+                    <p className="text-lg font-bold text-[#2D2A26]">
+                      {new Date(main_journey.target_date).toLocaleDateString('pt-PT', { month: 'short', year: 'numeric' })}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* CTA Button */}
+              <button
+                onClick={() => navigate(`/journey/${main_journey.journey_id}`)}
+                className="w-full py-4 bg-gradient-to-r from-[#FFBE98] to-[#F2C94C] text-[#2D2A26] rounded-xl font-bold hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                data-testid="support-journey-btn"
+              >
+                <Heart className="w-5 h-5" />
+                Apoiar viagem
+              </button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Profile Section (Collapsed by Default) */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="bg-white rounded-3xl shadow-lg border border-stone-100 overflow-hidden"
+        >
+          <button
+            onClick={() => setShowProfile(!showProfile)}
+            className="w-full p-6 flex items-center justify-between hover:bg-stone-50 transition-colors"
+            data-testid="toggle-profile-btn"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-stone-100 rounded-xl flex items-center justify-center overflow-hidden">
+                {profile?.avatar || profile?.picture ? (
+                  <img src={profile.avatar || profile.picture} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <User className="w-6 h-6 text-[#6B6661]" />
+                )}
+              </div>
+              <div className="text-left">
+                <h3 className="font-bold text-[#2D2A26]">{currentUser?.name}</h3>
+                <p className="text-sm text-[#6B6661]">Ver e editar perfil</p>
+              </div>
+            </div>
+            <ExternalLink className={`w-5 h-5 text-[#6B6661] transition-transform ${showProfile ? 'rotate-180' : ''}`} />
+          </button>
+
+          {showProfile && profile && (
+            <div className="px-6 pb-6 border-t border-stone-100">
+              <div className="pt-6 space-y-6">
+                {/* Avatar Upload */}
                 <div className="flex items-center gap-4">
                   <div className="relative">
                     <div className="w-20 h-20 bg-stone-100 rounded-full flex items-center justify-center overflow-hidden">
@@ -533,24 +646,22 @@ const Dashboard = () => {
                       accept="image/*"
                       onChange={handleAvatarUpload}
                       className="hidden"
-                      data-testid="avatar-input"
                     />
                   </div>
                   <div>
-                    <p className="font-medium">{profile.name}</p>
+                    <p className="font-medium text-[#2D2A26]">{profile.name}</p>
                     <p className="text-sm text-[#6B6661]">{profile.email}</p>
-                    <p className="text-xs text-[#FFBE98] mt-1">Clique no ícone para alterar foto</p>
                   </div>
                 </div>
 
-                {/* Name */}
+                {/* Name Input */}
                 <div>
-                  <label className="block text-sm font-medium mb-2">Nome</label>
+                  <label className="block text-sm font-medium mb-2 text-[#2D2A26]">Nome</label>
                   <input
                     type="text"
                     value={profile.name || ''}
                     onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                    className="w-full input-warm px-4"
+                    className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl"
                     data-testid="profile-name"
                   />
                 </div>
@@ -565,11 +676,11 @@ const Dashboard = () => {
                         <EyeOff className="w-5 h-5 text-[#6B6661]" />
                       )}
                       <div>
-                        <p className="font-medium">Mostrar nome real publicamente</p>
+                        <p className="font-medium text-[#2D2A26]">Mostrar nome real</p>
                         <p className="text-xs text-[#6B6661]">
                           {profile.use_real_name 
-                            ? 'O seu primeiro nome será visível (ex: rankings)'
-                            : 'Será mostrada a sua identidade anónima gerada automaticamente'
+                            ? 'Visível publicamente'
+                            : 'Identidade anónima ativa'
                           }
                         </p>
                       </div>
@@ -588,10 +699,10 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-                {/* Anonymous Identity Preview - shown when anonymous mode is on */}
+                {/* Anonymous Identity Preview */}
                 {!profile.use_real_name && (
                   <div className="p-4 bg-[#E6F4F1]/50 rounded-xl border border-[#E6F4F1]">
-                    <p className="text-sm font-medium text-[#2D2A26] mb-3">A sua identidade anónima:</p>
+                    <p className="text-sm font-medium text-[#2D2A26] mb-3">Identidade anónima:</p>
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 rounded-full overflow-hidden bg-white">
                         {profile.anonymous_avatar ? (
@@ -602,21 +713,15 @@ const Dashboard = () => {
                           </div>
                         )}
                       </div>
-                      <div>
-                        <p className="font-medium text-[#2D2A26]">
-                          {profile.anonymous_alias || 'A gerar...'}
-                        </p>
-                        <p className="text-xs text-[#6B6661]">
-                          Este nome e avatar serão mostrados publicamente
-                        </p>
-                      </div>
+                      <p className="font-medium text-[#2D2A26]">
+                        {profile.anonymous_alias || 'A gerar...'}
+                      </p>
                     </div>
                     <button
                       onClick={regenerateAnonymousIdentity}
                       className="mt-3 text-xs text-[#FFBE98] hover:text-[#FFAB7D] transition-colors"
-                      data-testid="regenerate-identity-btn"
                     >
-                      Gerar nova identidade anónima
+                      Gerar nova identidade
                     </button>
                   </div>
                 )}
@@ -625,7 +730,7 @@ const Dashboard = () => {
                 <button
                   onClick={saveProfile}
                   disabled={savingProfile}
-                  className="btn-primary flex items-center gap-2"
+                  className="w-full py-3 bg-[#2D2A26] text-white rounded-xl font-medium hover:bg-[#4A4640] transition-all flex items-center justify-center gap-2"
                   data-testid="save-profile-btn"
                 >
                   {savingProfile ? (
@@ -636,9 +741,9 @@ const Dashboard = () => {
                   Guardar Perfil
                 </button>
               </div>
-            </motion.div>
+            </div>
           )}
-        </AnimatePresence>
+        </motion.div>
       </div>
     </div>
   );
