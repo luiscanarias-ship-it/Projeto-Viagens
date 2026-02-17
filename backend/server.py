@@ -1009,18 +1009,23 @@ async def stripe_subscription_webhook(request: Request):
         "created_at": datetime.now(timezone.utc).isoformat()
     })
     
+    event_id = None
     try:
         # Verify webhook signature if secret is configured
         if STRIPE_WEBHOOK_SECRET:
             event = stripe.Webhook.construct_event(
                 payload, sig_header, STRIPE_WEBHOOK_SECRET
             )
+            event_type = event.type
+            event_id = event.id
+            event_data = event.data.object
         else:
-            # For testing without webhook secret
+            # For testing without webhook secret - parse JSON directly
             import json
-            event = stripe.Event.construct_from(
-                json.loads(payload), stripe.api_key
-            )
+            payload_json = json.loads(payload)
+            event_type = payload_json.get("type")
+            event_id = payload_json.get("id", f"test_{uuid.uuid4().hex[:8]}")
+            event_data = payload_json.get("data", {}).get("object", {})
     except ValueError as e:
         logging.error(f"Invalid webhook payload: {e}")
         raise HTTPException(status_code=400, detail="Invalid payload")
@@ -1028,7 +1033,6 @@ async def stripe_subscription_webhook(request: Request):
         logging.error(f"Invalid webhook signature: {e}")
         raise HTTPException(status_code=400, detail="Invalid signature")
     
-    event_type = event.type
     logging.info(f"Processing Stripe webhook: {event_type}")
     
     # Handle checkout.session.completed - Subscription started
