@@ -1441,16 +1441,52 @@ async def get_users_dashboard(request: Request):
             "curioso_users": curioso_users,
             "weekly_signups": weekly_signups,
             "total_contributions_value": total_contributions_value,
-            "valid_referrals_total": valid_referrals_total
+            "valid_referrals_total": valid_referrals_total,
+            "total_contributions_count": len(all_contributions),
+            "total_sponsor_impact": sum(s["value"] for s in sponsor_impact.values())
         },
         "level_distribution": {
             "curioso": curioso_users,
             "sonhador": sonhador_users,
             "premium": premium_users
         },
+        "charts": {
+            "signups_by_month": get_monthly_counts([u.get("registered_at") or u.get("created_at") for u in users]),
+            "contributions_by_month": get_monthly_contributions(all_contributions)
+        },
         "top_sponsors": top_sponsors,
         "users": enriched_users
     }
+
+def get_monthly_counts(dates):
+    """Group dates by month and count"""
+    from collections import defaultdict
+    counts = defaultdict(int)
+    for date_str in dates:
+        if date_str:
+            try:
+                # Handle ISO format
+                month_key = date_str[:7]  # YYYY-MM
+                counts[month_key] += 1
+            except:
+                pass
+    # Return sorted by month
+    return [{"month": k, "count": v} for k, v in sorted(counts.items())[-12:]]
+
+def get_monthly_contributions(contributions):
+    """Group contributions by month with totals"""
+    from collections import defaultdict
+    monthly = defaultdict(lambda: {"count": 0, "amount": 0})
+    for contrib in contributions:
+        date_str = contrib.get("created_at", "")
+        if date_str:
+            try:
+                month_key = date_str[:7]  # YYYY-MM
+                monthly[month_key]["count"] += 1
+                monthly[month_key]["amount"] += contrib.get("amount", 0)
+            except:
+                pass
+    return [{"month": k, "count": v["count"], "amount": v["amount"]} for k, v in sorted(monthly.items())[-12:]]
 
 @api_router.get("/admin/users/{user_id}/detail")
 async def get_user_detail(user_id: str, request: Request):
