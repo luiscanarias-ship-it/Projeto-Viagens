@@ -229,6 +229,90 @@ const Admin = () => {
     }
   };
 
+  // User management functions
+  const loadUserDetail = async (userId) => {
+    try {
+      const headers = getAuthHeaders();
+      const response = await axios.get(`${API}/admin/users/${userId}/detail`, { headers, withCredentials: true });
+      setUserDetail(response.data);
+      setSelectedUser(userId);
+    } catch (error) {
+      console.error('Error loading user detail:', error);
+      alert('Erro ao carregar detalhes do utilizador');
+    }
+  };
+
+  const toggleSubscription = async (userId) => {
+    setUpdatingUser(true);
+    try {
+      const headers = getAuthHeaders();
+      await axios.put(`${API}/admin/users/${userId}/subscription`, {}, { headers, withCredentials: true });
+      // Reload dashboard
+      const usersRes = await axios.get(`${API}/admin/users/dashboard`, { headers, withCredentials: true });
+      setUsersDashboard(usersRes.data);
+      if (selectedUser === userId) {
+        await loadUserDetail(userId);
+      }
+    } catch (error) {
+      console.error('Error toggling subscription:', error);
+      alert('Erro ao atualizar subscrição');
+    } finally {
+      setUpdatingUser(false);
+    }
+  };
+
+  const updateUserLevel = async (userId, newLevel) => {
+    setUpdatingUser(true);
+    try {
+      const headers = getAuthHeaders();
+      await axios.put(`${API}/admin/users/${userId}/level`, { level: newLevel }, { headers, withCredentials: true });
+      // Reload dashboard
+      const usersRes = await axios.get(`${API}/admin/users/dashboard`, { headers, withCredentials: true });
+      setUsersDashboard(usersRes.data);
+      if (selectedUser === userId) {
+        await loadUserDetail(userId);
+      }
+    } catch (error) {
+      console.error('Error updating level:', error);
+      alert('Erro ao atualizar nível');
+    } finally {
+      setUpdatingUser(false);
+    }
+  };
+
+  const updateUserReferrals = async (userId, newCount) => {
+    setUpdatingUser(true);
+    try {
+      const headers = getAuthHeaders();
+      await axios.put(`${API}/admin/users/${userId}/referrals`, { valid_referrals_count: newCount }, { headers, withCredentials: true });
+      // Reload dashboard
+      const usersRes = await axios.get(`${API}/admin/users/dashboard`, { headers, withCredentials: true });
+      setUsersDashboard(usersRes.data);
+      if (selectedUser === userId) {
+        await loadUserDetail(userId);
+      }
+    } catch (error) {
+      console.error('Error updating referrals:', error);
+      alert('Erro ao atualizar referrals');
+    } finally {
+      setUpdatingUser(false);
+    }
+  };
+
+  const getLevelBadge = (level) => {
+    const badges = {
+      curioso: { bg: 'bg-stone-100', text: 'text-stone-600', label: 'Curioso' },
+      sonhador: { bg: 'bg-[#FFBE98]/20', text: 'text-[#FFBE98]', label: 'Sonhador' },
+      premium: { bg: 'bg-[#F2C94C]/20', text: 'text-[#F2C94C]', label: 'Premium' }
+    };
+    const badge = badges[level] || badges.curioso;
+    return (
+      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${badge.bg} ${badge.text}`}>
+        {badge.label}
+      </span>
+    );
+  };
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center pt-20">
