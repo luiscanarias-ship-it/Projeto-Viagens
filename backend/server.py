@@ -419,10 +419,12 @@ async def get_journey(journey_id: str):
 
 @api_router.post("/admin/journeys")
 async def create_journey(journey_data: JourneyCreate, request: Request):
-    await require_admin(request)
+    user = await require_admin(request)
     
     journey = Journey(**journey_data.model_dump())
     doc = journey.model_dump()
+    doc["owner_user_id"] = user.user_id  # Admin que criou a viagem
+    doc["status"] = "active"  # Default status
     doc["created_at"] = doc["created_at"].isoformat()
     doc["updated_at"] = doc["updated_at"].isoformat()
     await db.journeys.insert_one(doc)
