@@ -254,6 +254,32 @@ const Home = () => {
         </div>
       </section>
 
+      {/* CTA Sonhador Banner */}
+      <section className="py-12 px-6 md:px-12 bg-gradient-to-r from-[#2D2A26] to-[#4A4640]">
+        <div className="max-w-4xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <h3 className="text-2xl md:text-3xl font-bold text-white mb-3">
+              Junta-te à comunidade de Sonhadores
+            </h3>
+            <p className="text-white/70 mb-6 max-w-lg mx-auto">
+              Por apenas €10/mês, apoia viagens de sonho e desbloqueia benefícios exclusivos
+            </p>
+            <a
+              href="/login?action=subscribe"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-bold hover:bg-[#FFAB7D] transition-colors"
+              data-testid="home-subscribe-cta"
+            >
+              <Star className="w-5 h-5" />
+              Torna-te Sonhador
+            </a>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Journeys Section */}
       <section id="journeys" className="py-20 md:py-32 px-6 md:px-12 bg-[#FAFAF9]" data-testid="journeys-section">
         <div className="max-w-7xl mx-auto">
