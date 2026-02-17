@@ -256,6 +256,21 @@ async def register(user_data: UserCreate):
     user_id = f"user_{uuid.uuid4().hex[:12]}"
     is_admin = user_data.password == ADMIN_PASSWORD
     
+    # Resolve sponsor_id from sponsor_code (CRÍTICO - imutável após registo)
+    sponsor_id = None
+    if user_data.sponsor_code:
+        sponsor_link = await db.sponsor_links.find_one(
+            {"link_id": user_data.sponsor_code}, 
+            {"_id": 0, "user_id": 1}
+        )
+        if sponsor_link:
+            sponsor_id = sponsor_link["user_id"]
+            # Incrementar referral_count do sponsor_link
+            await db.sponsor_links.update_one(
+                {"link_id": user_data.sponsor_code},
+                {"$inc": {"referral_count": 1}}
+            )
+    
     user_doc = {
         "user_id": user_id,
         "email": user_data.email,
@@ -265,6 +280,13 @@ async def register(user_data: UserCreate):
         "is_admin": is_admin,
         "avatar": None,
         "use_real_name": True,
+        # Novos campos ETAPA 1
+        "sponsor_id": sponsor_id,  # IMUTÁVEL - quem convidou este utilizador
+        "level": "curioso",  # curioso | sonhador | premium
+        "subscription_active": False,
+        "valid_referrals_count": 0,  # Referências que confirmaram contribuição
+        "registered_at": datetime.now(timezone.utc).isoformat(),
+        "premium_unlocked_at": None,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.users.insert_one(user_doc)
