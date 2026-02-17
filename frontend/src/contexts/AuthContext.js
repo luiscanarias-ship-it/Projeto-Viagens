@@ -14,10 +14,35 @@ export const useAuth = () => {
   return context;
 };
 
+// Helper to get sponsor_code from URL or sessionStorage
+const getSponsorCode = () => {
+  // First check URL params
+  const urlParams = new URLSearchParams(window.location.search);
+  const refFromUrl = urlParams.get('ref');
+  
+  if (refFromUrl) {
+    // Save to sessionStorage for persistence through navigation
+    sessionStorage.setItem('sponsor_code', refFromUrl);
+    return refFromUrl;
+  }
+  
+  // Fallback to sessionStorage
+  return sessionStorage.getItem('sponsor_code');
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(localStorage.getItem('token'));
+  const [sponsorCode, setSponsorCode] = useState(getSponsorCode());
+
+  // Check for sponsor_code on mount and URL changes
+  useEffect(() => {
+    const code = getSponsorCode();
+    if (code) {
+      setSponsorCode(code);
+    }
+  }, []);
 
   const checkAuth = useCallback(async () => {
     try {
@@ -50,13 +75,22 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (email, password, name, surname) => {
-    const response = await axios.post(`${API}/auth/register`, { 
-      email, password, name, surname 
-    });
+    // Include sponsor_code if available (CRITICAL - links new user to sponsor)
+    const payload = { email, password, name, surname };
+    if (sponsorCode) {
+      payload.sponsor_code = sponsorCode;
+    }
+    
+    const response = await axios.post(`${API}/auth/register`, payload);
     const { token: newToken, user: userData } = response.data;
     localStorage.setItem('token', newToken);
     setToken(newToken);
     setUser(userData);
+    
+    // Clear sponsor_code after successful registration
+    sessionStorage.removeItem('sponsor_code');
+    setSponsorCode(null);
+    
     return userData;
   };
 
@@ -98,6 +132,7 @@ export const AuthProvider = ({ children }) => {
       user,
       loading,
       token,
+      sponsorCode,
       login,
       register,
       loginWithGoogle,
