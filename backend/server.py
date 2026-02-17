@@ -1097,7 +1097,7 @@ async def stripe_subscription_webhook(request: Request):
     await db.subscription_logs.insert_one({
         "log_id": f"log_{uuid.uuid4().hex[:12]}",
         "event": f"webhook_processed_{event_type}",
-        "event_id": event.id,
+        "event_id": event_id,
         "created_at": datetime.now(timezone.utc).isoformat()
     })
     
