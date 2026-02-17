@@ -1407,7 +1407,9 @@ async def get_users_dashboard(request: Request):
     # Calculate dashboard metrics
     now = datetime.now(timezone.utc)
     week_ago = now - timedelta(days=7)
+    month_ago = now - timedelta(days=30)
     week_ago_iso = week_ago.isoformat()
+    month_ago_iso = month_ago.isoformat()
     
     total_users = len(users)
     active_subscriptions = sum(1 for u in users if u.get("subscription_active"))
@@ -1415,14 +1417,31 @@ async def get_users_dashboard(request: Request):
     sonhador_users = sum(1 for u in users if u.get("level") == "sonhador")
     curioso_users = sum(1 for u in users if u.get("level") == "curioso")
     
+    # Active users (contributed in last 30 days)
+    active_user_ids = set(c.get("user_id") for c in all_contributions if c.get("created_at", "") >= month_ago_iso)
+    active_users = len(active_user_ids)
+    sonhadores_ativos = sum(1 for u in users if u.get("level") == "sonhador" and u.get("user_id") in active_user_ids)
+    premium_ativos = sum(1 for u in users if u.get("level") == "premium" and u.get("user_id") in active_user_ids)
+    
     # Weekly signups
     weekly_signups = sum(1 for u in users if (u.get("registered_at") or u.get("created_at", "")) >= week_ago_iso)
+    weekly_sonhadores = sum(1 for u in users if u.get("level") == "sonhador" and (u.get("registered_at") or u.get("created_at", "")) >= week_ago_iso)
+    weekly_premium = sum(1 for u in users if u.get("level") == "premium" and (u.get("registered_at") or u.get("created_at", "")) >= week_ago_iso)
     
-    # Total contributions value
+    # Total contributions
     total_contributions_value = sum(c.get("amount", 0) for c in all_contributions)
+    total_contributions_count = len(all_contributions)
+    average_contribution_value = total_contributions_value / total_contributions_count if total_contributions_count > 0 else 0
     
-    # Total valid referrals
+    # Referrals
+    referrals_total = sum(u.get("referrals_made", 0) for u in enriched_users)
     valid_referrals_total = sum(u.get("valid_referrals_count", 0) for u in users)
+    weekly_referrals = 0  # Would need timestamp tracking on referrals
+    
+    # Journeys funded
+    all_journeys = await db.journeys.find({}, {"_id": 0}).to_list(100)
+    journeys_funded = sum(1 for j in all_journeys if j.get("status") == "funded")
+    journeys_active = sum(1 for j in all_journeys if j.get("status") == "active")
     
     # Top sponsors (by impact value)
     top_sponsors = sorted(
@@ -1432,18 +1451,59 @@ async def get_users_dashboard(request: Request):
         reverse=True
     )[:5]
     
+    # Top contributors (by total contributed)
+    top_contributors = sorted(
+        [{"user_id": u["user_id"], "name": u["name"], "total_contributed": u["contributions_total"], "contributions_count": u["contributions_count"]}
+         for u in enriched_users if u["contributions_total"] > 0],
+        key=lambda x: x["total_contributed"],
+        reverse=True
+    )[:5]
+    
+    # Platform Momentum Score (novos_registos + novos_sonhadores + contribuições_semana + referrals_válidos_semana)
+    weekly_contributions = sum(1 for c in all_contributions if c.get("created_at", "") >= week_ago_iso)
+    momentum_score = weekly_signups + weekly_sonhadores + weekly_contributions + valid_referrals_total
+    
+    # Referrals evolution by month
+    referrals_by_month = []
+    for u in users:
+        reg_date = u.get("registered_at") or u.get("created_at", "")
+        if reg_date and u.get("sponsor_id"):
+            month_key = reg_date[:7]
+            existing = next((r for r in referrals_by_month if r["month"] == month_key), None)
+            if existing:
+                existing["count"] += 1
+            else:
+                referrals_by_month.append({"month": month_key, "count": 1})
+    referrals_by_month.sort(key=lambda x: x["month"])
+    
     return {
         "metrics": {
+            # Utilizadores
             "total_users": total_users,
+            "active_users": active_users,
+            "sonhadores_ativos": sonhadores_ativos,
+            "premium_ativos": premium_ativos,
             "active_subscriptions": active_subscriptions,
             "premium_users": premium_users,
             "sonhador_users": sonhador_users,
             "curioso_users": curioso_users,
-            "weekly_signups": weekly_signups,
+            # Financeiro
             "total_contributions_value": total_contributions_value,
+            "total_contributions_count": total_contributions_count,
+            "average_contribution_value": round(average_contribution_value, 2),
+            "total_sponsor_impact": sum(s["value"] for s in sponsor_impact.values()),
+            # Growth
+            "weekly_signups": weekly_signups,
+            "weekly_sonhadores": weekly_sonhadores,
+            "weekly_premium": weekly_premium,
+            "weekly_contributions": weekly_contributions,
+            "referrals_total": referrals_total,
             "valid_referrals_total": valid_referrals_total,
-            "total_contributions_count": len(all_contributions),
-            "total_sponsor_impact": sum(s["value"] for s in sponsor_impact.values())
+            # Impacto social
+            "journeys_funded": journeys_funded,
+            "journeys_active": journeys_active,
+            # Momentum
+            "momentum_score": momentum_score
         },
         "level_distribution": {
             "curioso": curioso_users,
@@ -1452,9 +1512,11 @@ async def get_users_dashboard(request: Request):
         },
         "charts": {
             "signups_by_month": get_monthly_counts([u.get("registered_at") or u.get("created_at") for u in users]),
-            "contributions_by_month": get_monthly_contributions(all_contributions)
+            "contributions_by_month": get_monthly_contributions(all_contributions),
+            "referrals_by_month": referrals_by_month[-12:]
         },
         "top_sponsors": top_sponsors,
+        "top_contributors": top_contributors,
         "users": enriched_users
     }
 
