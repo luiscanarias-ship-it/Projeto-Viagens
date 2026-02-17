@@ -1153,7 +1153,11 @@ async def confirm_contribution(contribution_id: str, request: Request):
     # Update contribution status
     await db.contributions.update_one(
         {"contribution_id": contribution_id},
-        {"$set": {"status": "completed", "confirmed_at": datetime.now(timezone.utc).isoformat()}}
+        {"$set": {
+            "status": "completed", 
+            "confirmed": True,  # Campo explícito de confirmação
+            "confirmed_at": datetime.now(timezone.utc).isoformat()
+        }}
     )
     
     # Update journey amount
@@ -1162,12 +1166,49 @@ async def confirm_contribution(contribution_id: str, request: Request):
         {"$inc": {"current_amount": contribution["amount"]}}
     )
     
+    # Check if journey reached goal - update status to "funded"
+    journey = await db.journeys.find_one({"journey_id": contribution["journey_id"]}, {"_id": 0})
+    if journey and journey.get("current_amount", 0) >= journey.get("goal_amount", float('inf')):
+        await db.journeys.update_one(
+            {"journey_id": contribution["journey_id"]},
+            {"$set": {"status": "funded"}}
+        )
+    
     # Update sponsor link if applicable
     if contribution.get("sponsor_link_id"):
         await db.sponsor_links.update_one(
             {"link_id": contribution["sponsor_link_id"]},
             {"$inc": {"successful_referrals": 1}}
         )
+    
+    # MOTOR PREMIUM: Se o utilizador que contribuiu tem sponsor_id, incrementar valid_referrals_count do sponsor
+    if contribution.get("user_id"):
+        contributing_user = await db.users.find_one({"user_id": contribution["user_id"]}, {"_id": 0})
+        if contributing_user and contributing_user.get("sponsor_id"):
+            sponsor_user_id = contributing_user["sponsor_id"]
+            
+            # Incrementar valid_referrals_count do sponsor
+            await db.users.update_one(
+                {"user_id": sponsor_user_id},
+                {"$inc": {"valid_referrals_count": 1}}
+            )
+            
+            # Verificar se sponsor atinge condições Premium
+            sponsor = await db.users.find_one({"user_id": sponsor_user_id}, {"_id": 0})
+            if sponsor:
+                valid_refs = sponsor.get("valid_referrals_count", 0)
+                subscription = sponsor.get("subscription_active", False)
+                current_level = sponsor.get("level", "curioso")
+                
+                # MOTOR PREMIUM: subscription_active + valid_referrals >= 3 = premium
+                if subscription and valid_refs >= 3 and current_level != "premium":
+                    await db.users.update_one(
+                        {"user_id": sponsor_user_id},
+                        {"$set": {
+                            "level": "premium",
+                            "premium_unlocked_at": datetime.now(timezone.utc).isoformat()
+                        }}
+                    )
     
     # Generate points if user has 3+ referrals
     if contribution.get("user_id"):
