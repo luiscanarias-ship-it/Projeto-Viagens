@@ -795,38 +795,292 @@ const Admin = () => {
               exit={{ opacity: 0, y: -20 }}
               className="space-y-6"
             >
-              {/* Metrics Cards */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-white rounded-2xl p-5 shadow-lg border border-stone-100">
-                  <Users className="w-6 h-6 text-[#FFBE98] mb-2" />
-                  <p className="text-2xl font-bold text-[#2D2A26]">{usersDashboard.metrics.total_users}</p>
-                  <p className="text-xs text-[#6B6661]">Total Utilizadores</p>
-                </div>
-                <div className="bg-white rounded-2xl p-5 shadow-lg border border-stone-100">
-                  <Crown className="w-6 h-6 text-[#F2C94C] mb-2" />
-                  <p className="text-2xl font-bold text-[#2D2A26]">{usersDashboard.metrics.premium_users}</p>
-                  <p className="text-xs text-[#6B6661]">Premium</p>
-                </div>
-                <div className="bg-white rounded-2xl p-5 shadow-lg border border-stone-100">
-                  <TrendingUp className="w-6 h-6 text-green-500 mb-2" />
-                  <p className="text-2xl font-bold text-[#2D2A26]">€{usersDashboard.metrics.total_contributions_value.toLocaleString()}</p>
-                  <p className="text-xs text-[#6B6661]">Contribuições Totais</p>
-                </div>
-                <div className="bg-white rounded-2xl p-5 shadow-lg border border-stone-100">
-                  <UserPlus className="w-6 h-6 text-blue-500 mb-2" />
-                  <p className="text-2xl font-bold text-[#2D2A26]">{usersDashboard.metrics.weekly_signups}</p>
-                  <p className="text-xs text-[#6B6661]">Novos (7 dias)</p>
+              {/* Global Platform Stats Banner */}
+              <div className="bg-gradient-to-r from-[#FFBE98]/20 to-[#F2C94C]/20 rounded-2xl p-6 border border-[#FFBE98]/30">
+                <h3 className="font-bold text-[#2D2A26] mb-4 flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5 text-[#FFBE98]" />
+                  Impacto Global da Plataforma (desde o início)
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div>
+                    <p className="text-3xl font-bold text-[#2D2A26]">€{usersDashboard.metrics.total_contributions_value.toLocaleString()}</p>
+                    <p className="text-sm text-[#6B6661]">Total Angariado</p>
+                  </div>
+                  <div>
+                    <p className="text-3xl font-bold text-[#2D2A26]">{usersDashboard.metrics.total_contributions_count || 0}</p>
+                    <p className="text-sm text-[#6B6661]">Contribuições</p>
+                  </div>
+                  <div>
+                    <p className="text-3xl font-bold text-[#2D2A26]">{usersDashboard.metrics.total_users}</p>
+                    <p className="text-sm text-[#6B6661]">Membros</p>
+                  </div>
+                  <div>
+                    <p className="text-3xl font-bold text-[#FFBE98]">€{usersDashboard.metrics.total_sponsor_impact?.toLocaleString() || 0}</p>
+                    <p className="text-sm text-[#6B6661]">Gerado via Sponsors</p>
+                  </div>
                 </div>
               </div>
 
-              {/* Level Distribution & Top Sponsors */}
-              <div className="grid md:grid-cols-2 gap-4">
+              {/* Metrics Cards */}
+              <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+                <div className="bg-white rounded-2xl p-4 shadow-lg border border-stone-100">
+                  <Users className="w-5 h-5 text-[#FFBE98] mb-1" />
+                  <p className="text-xl font-bold text-[#2D2A26]">{usersDashboard.metrics.total_users}</p>
+                  <p className="text-xs text-[#6B6661]">Utilizadores</p>
+                </div>
+                <div className="bg-white rounded-2xl p-4 shadow-lg border border-stone-100">
+                  <Crown className="w-5 h-5 text-[#F2C94C] mb-1" />
+                  <p className="text-xl font-bold text-[#2D2A26]">{usersDashboard.metrics.premium_users}</p>
+                  <p className="text-xs text-[#6B6661]">Premium</p>
+                </div>
+                <div className="bg-white rounded-2xl p-4 shadow-lg border border-stone-100">
+                  <Star className="w-5 h-5 text-[#FFBE98] mb-1" />
+                  <p className="text-xl font-bold text-[#2D2A26]">{usersDashboard.metrics.sonhador_users}</p>
+                  <p className="text-xs text-[#6B6661]">Sonhadores</p>
+                </div>
+                <div className="bg-white rounded-2xl p-4 shadow-lg border border-stone-100">
+                  <CheckCircle className="w-5 h-5 text-green-500 mb-1" />
+                  <p className="text-xl font-bold text-[#2D2A26]">{usersDashboard.metrics.active_subscriptions}</p>
+                  <p className="text-xs text-[#6B6661]">Subscrições</p>
+                </div>
+                <div className="bg-white rounded-2xl p-4 shadow-lg border border-stone-100">
+                  <UserPlus className="w-5 h-5 text-blue-500 mb-1" />
+                  <p className="text-xl font-bold text-[#2D2A26]">{usersDashboard.metrics.weekly_signups}</p>
+                  <p className="text-xs text-[#6B6661]">Novos (7 dias)</p>
+                </div>
+                <div className="bg-white rounded-2xl p-4 shadow-lg border border-stone-100">
+                  <Award className="w-5 h-5 text-purple-500 mb-1" />
+                  <p className="text-xl font-bold text-[#2D2A26]">{usersDashboard.metrics.valid_referrals_total}</p>
+                  <p className="text-xs text-[#6B6661]">Referrals Válidos</p>
+                </div>
+              </div>
+
+              {/* Charts Row */}
+              <div className="grid md:grid-cols-3 gap-4">
+                {/* Signups Chart */}
+                <div className="bg-white rounded-2xl p-5 shadow-lg border border-stone-100">
+                  <h3 className="font-bold text-[#2D2A26] mb-4 text-sm">Registos (últimos meses)</h3>
+                  <div className="flex items-end gap-1 h-24">
+                    {(usersDashboard.charts?.signups_by_month || []).slice(-6).map((item, idx) => (
+                      <div key={idx} className="flex-1 flex flex-col items-center">
+                        <div 
+                          className="w-full bg-[#FFBE98] rounded-t"
+                          style={{ height: `${Math.max(10, (item.count / Math.max(...(usersDashboard.charts?.signups_by_month || []).map(i => i.count), 1)) * 80)}px` }}
+                        />
+                        <span className="text-[8px] text-[#6B6661] mt-1">{item.month?.slice(5)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Contributions Chart */}
+                <div className="bg-white rounded-2xl p-5 shadow-lg border border-stone-100">
+                  <h3 className="font-bold text-[#2D2A26] mb-4 text-sm">Contribuições (últimos meses)</h3>
+                  <div className="flex items-end gap-1 h-24">
+                    {(usersDashboard.charts?.contributions_by_month || []).slice(-6).map((item, idx) => (
+                      <div key={idx} className="flex-1 flex flex-col items-center">
+                        <div 
+                          className="w-full bg-green-400 rounded-t"
+                          style={{ height: `${Math.max(10, (item.amount / Math.max(...(usersDashboard.charts?.contributions_by_month || []).map(i => i.amount), 1)) * 80)}px` }}
+                        />
+                        <span className="text-[8px] text-[#6B6661] mt-1">€{item.amount}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Level Distribution */}
                 <div className="bg-white rounded-2xl p-5 shadow-lg border border-stone-100">
-                  <h3 className="font-bold text-[#2D2A26] mb-4">Distribuição por Nível</h3>
-                  <div className="space-y-3">
+                  <h3 className="font-bold text-[#2D2A26] mb-4 text-sm">Distribuição por Nível</h3>
+                  <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-[#6B6661]">Curioso</span>
+                      <span className="text-xs text-[#6B6661]">Curioso</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-24 h-2 bg-stone-100 rounded-full overflow-hidden">
+                          <div className="h-full bg-stone-400 rounded-full" style={{ width: `${(usersDashboard.level_distribution.curioso / usersDashboard.metrics.total_users * 100) || 0}%` }} />
+                        </div>
+                        <span className="text-xs font-medium w-6">{usersDashboard.level_distribution.curioso}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-[#FFBE98]">Sonhador</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-24 h-2 bg-stone-100 rounded-full overflow-hidden">
+                          <div className="h-full bg-[#FFBE98] rounded-full" style={{ width: `${(usersDashboard.level_distribution.sonhador / usersDashboard.metrics.total_users * 100) || 0}%` }} />
+                        </div>
+                        <span className="text-xs font-medium w-6">{usersDashboard.level_distribution.sonhador}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-[#F2C94C]">Premium</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-24 h-2 bg-stone-100 rounded-full overflow-hidden">
+                          <div className="h-full bg-[#F2C94C] rounded-full" style={{ width: `${(usersDashboard.level_distribution.premium / usersDashboard.metrics.total_users * 100) || 0}%` }} />
+                        </div>
+                        <span className="text-xs font-medium w-6">{usersDashboard.level_distribution.premium}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Top Sponsors */}
+              <div className="bg-white rounded-2xl p-5 shadow-lg border border-stone-100">
+                <h3 className="font-bold text-[#2D2A26] mb-4 flex items-center gap-2">
+                  <Star className="w-5 h-5 text-[#F2C94C]" />
+                  Top Sponsors (por Impacto €)
+                </h3>
+                {usersDashboard.top_sponsors.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+                    {usersDashboard.top_sponsors.map((sponsor, idx) => (
+                      <div key={sponsor.user_id} className="flex items-center gap-3 p-3 bg-stone-50 rounded-xl">
+                        <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${idx === 0 ? 'bg-[#F2C94C] text-white' : idx === 1 ? 'bg-stone-300 text-white' : 'bg-stone-200 text-stone-600'}`}>
+                          {idx + 1}
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm truncate">{sponsor.name}</p>
+                          <p className="text-xs text-[#6B6661]">{sponsor.referrals_count} convites</p>
+                        </div>
+                        <p className="text-sm font-bold text-[#FFBE98]">€{sponsor.impact_value.toLocaleString()}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-[#6B6661] text-center py-4">Ainda sem sponsors com impacto</p>
+                )}
+              </div>
+
+              {/* Users Table */}
+              <div className="bg-white rounded-2xl p-5 shadow-lg border border-stone-100">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+                  <h3 className="font-bold text-[#2D2A26]">Lista de Utilizadores ({getFilteredUsers().length})</h3>
+                  
+                  {/* Filters */}
+                  <div className="flex flex-wrap gap-2">
+                    <input
+                      type="text"
+                      placeholder="Pesquisar..."
+                      value={userSearch}
+                      onChange={(e) => setUserSearch(e.target.value)}
+                      className="px-3 py-1.5 border border-stone-200 rounded-lg text-sm w-40"
+                    />
+                    <select
+                      value={userLevelFilter}
+                      onChange={(e) => setUserLevelFilter(e.target.value)}
+                      className="px-3 py-1.5 border border-stone-200 rounded-lg text-sm"
+                    >
+                      <option value="all">Todos níveis</option>
+                      <option value="curioso">Curioso</option>
+                      <option value="sonhador">Sonhador</option>
+                      <option value="premium">Premium</option>
+                    </select>
+                    <select
+                      value={userSubscriptionFilter}
+                      onChange={(e) => setUserSubscriptionFilter(e.target.value)}
+                      className="px-3 py-1.5 border border-stone-200 rounded-lg text-sm"
+                    >
+                      <option value="all">Subscrição</option>
+                      <option value="active">Ativa</option>
+                      <option value="inactive">Inativa</option>
+                    </select>
+                    <select
+                      value={userSortBy}
+                      onChange={(e) => setUserSortBy(e.target.value)}
+                      className="px-3 py-1.5 border border-stone-200 rounded-lg text-sm"
+                    >
+                      <option value="referrals">Ordenar: Referrals</option>
+                      <option value="contributions">Ordenar: Contribuições</option>
+                      <option value="impact">Ordenar: Impacto</option>
+                      <option value="date">Ordenar: Data</option>
+                      <option value="name">Ordenar: Nome</option>
+                    </select>
+                    <button
+                      onClick={() => setUserSortOrder(userSortOrder === 'desc' ? 'asc' : 'desc')}
+                      className="px-3 py-1.5 border border-stone-200 rounded-lg text-sm hover:bg-stone-50"
+                    >
+                      {userSortOrder === 'desc' ? '↓' : '↑'}
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-stone-100">
+                        <th className="text-left py-3 px-2 text-[#6B6661] font-medium">Utilizador</th>
+                        <th className="text-left py-3 px-2 text-[#6B6661] font-medium">Nível</th>
+                        <th className="text-center py-3 px-2 text-[#6B6661] font-medium">Subs.</th>
+                        <th className="text-center py-3 px-2 text-[#6B6661] font-medium">Referrals</th>
+                        <th className="text-right py-3 px-2 text-[#6B6661] font-medium">Contribuições</th>
+                        <th className="text-right py-3 px-2 text-[#6B6661] font-medium">Impacto</th>
+                        <th className="text-center py-3 px-2 text-[#6B6661] font-medium">Membro desde</th>
+                        <th className="text-center py-3 px-2 text-[#6B6661] font-medium">Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {getFilteredUsers().map(u => (
+                        <tr key={u.user_id} className="border-b border-stone-50 hover:bg-stone-50 transition-colors">
+                          <td className="py-3 px-2">
+                            <div className="flex items-center gap-2">
+                              {u.avatar ? (
+                                <img src={u.avatar} alt="" className="w-8 h-8 rounded-full object-cover" />
+                              ) : (
+                                <div className="w-8 h-8 rounded-full bg-stone-200 flex items-center justify-center text-stone-500 text-xs font-medium">
+                                  {u.name?.charAt(0)?.toUpperCase() || '?'}
+                                </div>
+                              )}
+                              <div>
+                                <p className="font-medium text-[#2D2A26]">{u.name}</p>
+                                <p className="text-xs text-[#6B6661]">{u.email}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-3 px-2">{getLevelBadge(u.level)}</td>
+                          <td className="py-3 px-2 text-center">
+                            <button
+                              onClick={() => toggleSubscription(u.user_id)}
+                              disabled={updatingUser}
+                              className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors ${
+                                u.subscription_active 
+                                  ? 'bg-green-100 text-green-600 hover:bg-green-200' 
+                                  : 'bg-stone-100 text-stone-400 hover:bg-stone-200'
+                              }`}
+                              title={u.subscription_active ? 'Desativar' : 'Ativar'}
+                            >
+                              {u.subscription_active ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+                            </button>
+                          </td>
+                          <td className="py-3 px-2 text-center">
+                            <span className="font-medium">{u.valid_referrals_count}</span>
+                            <span className="text-[#6B6661]">/{u.referrals_made}</span>
+                          </td>
+                          <td className="py-3 px-2 text-right">
+                            <span className="font-medium">€{u.contributions_total.toLocaleString()}</span>
+                            <span className="text-[#6B6661] text-xs ml-1">({u.contributions_count})</span>
+                          </td>
+                          <td className="py-3 px-2 text-right">
+                            <span className={`font-medium ${u.sponsor_impact_value > 0 ? 'text-[#FFBE98]' : 'text-[#6B6661]'}`}>
+                              €{u.sponsor_impact_value.toLocaleString()}
+                            </span>
+                          </td>
+                          <td className="py-3 px-2 text-center text-xs text-[#6B6661]">
+                            {formatDate(u.registered_at)}
+                          </td>
+                          <td className="py-3 px-2 text-center">
+                            <button
+                              onClick={() => loadUserDetail(u.user_id)}
+                              className="p-2 hover:bg-stone-100 rounded-lg transition-colors"
+                              title="Ver detalhes"
+                            >
+                              <ChevronRight className="w-4 h-4 text-[#6B6661]" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
                       <div className="flex items-center gap-2">
                         <div className="w-32 h-2 bg-stone-100 rounded-full overflow-hidden">
                           <div 
