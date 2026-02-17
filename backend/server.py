@@ -939,6 +939,247 @@ async def get_payment_info():
         }
     }
 
+# ==================== STRIPE SUBSCRIPTIONS ====================
+
+@api_router.post("/subscription/create-checkout")
+async def create_subscription_checkout(request: Request):
+    """Create Stripe Checkout Session for Sonhador subscription (€10/month)"""
+    user = await require_auth(request)
+    
+    if not STRIPE_API_KEY or STRIPE_API_KEY == 'sk_test_emergent':
+        raise HTTPException(status_code=500, detail="Stripe não configurado")
+    
+    # Check if user already has active subscription
+    if user.get("subscription_active"):
+        raise HTTPException(status_code=400, detail="Já tens uma subscrição ativa")
+    
+    # Get frontend URL for redirects
+    frontend_url = os.environ.get('FRONTEND_URL', 'https://dream-trips-4.preview.emergentagent.com')
+    
+    try:
+        # Create Stripe Checkout Session
+        checkout_session = stripe.checkout.Session.create(
+            mode="subscription",
+            line_items=[{
+                "price": STRIPE_SONHADOR_PRICE_ID,
+                "quantity": 1
+            }],
+            client_reference_id=user.user_id,
+            customer_email=user.email,
+            success_url=f"{frontend_url}/dashboard?sub=success",
+            cancel_url=f"{frontend_url}/dashboard?sub=cancel",
+            metadata={
+                "user_id": user.user_id,
+                "product": "sonhador"
+            }
+        )
+        
+        # Log the checkout creation
+        await db.subscription_logs.insert_one({
+            "log_id": f"log_{uuid.uuid4().hex[:12]}",
+            "user_id": user.user_id,
+            "event": "checkout_created",
+            "session_id": checkout_session.id,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        })
+        
+        return {
+            "checkout_url": checkout_session.url,
+            "session_id": checkout_session.id
+        }
+        
+    except stripe.error.StripeError as e:
+        logging.error(f"Stripe error creating checkout: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Erro ao criar sessão de pagamento: {str(e)}")
+
+@api_router.post("/stripe/subscription-webhook")
+async def stripe_subscription_webhook(request: Request):
+    """Handle Stripe subscription webhooks"""
+    payload = await request.body()
+    sig_header = request.headers.get("stripe-signature")
+    
+    # Log raw webhook
+    await db.subscription_logs.insert_one({
+        "log_id": f"log_{uuid.uuid4().hex[:12]}",
+        "event": "webhook_received",
+        "payload_size": len(payload),
+        "created_at": datetime.now(timezone.utc).isoformat()
+    })
+    
+    try:
+        # Verify webhook signature if secret is configured
+        if STRIPE_WEBHOOK_SECRET:
+            event = stripe.Webhook.construct_event(
+                payload, sig_header, STRIPE_WEBHOOK_SECRET
+            )
+        else:
+            # For testing without webhook secret
+            import json
+            event = stripe.Event.construct_from(
+                json.loads(payload), stripe.api_key
+            )
+    except ValueError as e:
+        logging.error(f"Invalid webhook payload: {e}")
+        raise HTTPException(status_code=400, detail="Invalid payload")
+    except stripe.error.SignatureVerificationError as e:
+        logging.error(f"Invalid webhook signature: {e}")
+        raise HTTPException(status_code=400, detail="Invalid signature")
+    
+    event_type = event.type
+    logging.info(f"Processing Stripe webhook: {event_type}")
+    
+    # Handle checkout.session.completed - Subscription started
+    if event_type == "checkout.session.completed":
+        session = event.data.object
+        user_id = session.get("client_reference_id") or session.get("metadata", {}).get("user_id")
+        
+        if user_id and session.get("mode") == "subscription":
+            await activate_subscription(user_id, session.get("subscription"), session.get("customer"))
+            
+    # Handle invoice.paid - Payment successful
+    elif event_type == "invoice.paid":
+        invoice = event.data.object
+        customer_id = invoice.get("customer")
+        subscription_id = invoice.get("subscription")
+        
+        if subscription_id:
+            # Find user by stripe_customer_id or subscription_id
+            user = await db.users.find_one({
+                "$or": [
+                    {"stripe_customer_id": customer_id},
+                    {"stripe_subscription_id": subscription_id}
+                ]
+            }, {"_id": 0})
+            
+            if user:
+                await db.users.update_one(
+                    {"user_id": user["user_id"]},
+                    {"$set": {
+                        "subscription_active": True,
+                        "last_payment_at": datetime.now(timezone.utc).isoformat()
+                    }}
+                )
+    
+    # Handle invoice.payment_failed - Payment failed
+    elif event_type == "invoice.payment_failed":
+        invoice = event.data.object
+        customer_id = invoice.get("customer")
+        
+        user = await db.users.find_one({"stripe_customer_id": customer_id}, {"_id": 0})
+        if user:
+            await db.subscription_logs.insert_one({
+                "log_id": f"log_{uuid.uuid4().hex[:12]}",
+                "user_id": user["user_id"],
+                "event": "payment_failed",
+                "invoice_id": invoice.get("id"),
+                "created_at": datetime.now(timezone.utc).isoformat()
+            })
+            # Could notify user here (P2)
+    
+    # Handle customer.subscription.deleted - Subscription cancelled
+    elif event_type == "customer.subscription.deleted":
+        subscription = event.data.object
+        customer_id = subscription.get("customer")
+        
+        user = await db.users.find_one({"stripe_customer_id": customer_id}, {"_id": 0})
+        if user:
+            await deactivate_subscription(user["user_id"])
+    
+    # Log the processed event
+    await db.subscription_logs.insert_one({
+        "log_id": f"log_{uuid.uuid4().hex[:12]}",
+        "event": f"webhook_processed_{event_type}",
+        "event_id": event.id,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    })
+    
+    return {"status": "success"}
+
+async def activate_subscription(user_id: str, subscription_id: str = None, customer_id: str = None):
+    """Activate subscription and check Premium eligibility"""
+    user = await db.users.find_one({"user_id": user_id}, {"_id": 0})
+    if not user:
+        logging.error(f"User not found for subscription activation: {user_id}")
+        return
+    
+    # Update user with subscription data
+    update_data = {
+        "subscription_active": True,
+        "level": "sonhador",
+        "subscription_started_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    if subscription_id:
+        update_data["stripe_subscription_id"] = subscription_id
+    if customer_id:
+        update_data["stripe_customer_id"] = customer_id
+    
+    # Check Premium eligibility: subscription + 3 valid referrals
+    valid_referrals = user.get("valid_referrals_count", 0)
+    if valid_referrals >= 3:
+        update_data["level"] = "premium"
+        update_data["premium_unlocked_at"] = datetime.now(timezone.utc).isoformat()
+    
+    await db.users.update_one(
+        {"user_id": user_id},
+        {"$set": update_data}
+    )
+    
+    # Log activation
+    await db.subscription_logs.insert_one({
+        "log_id": f"log_{uuid.uuid4().hex[:12]}",
+        "user_id": user_id,
+        "event": "subscription_activated",
+        "level": update_data["level"],
+        "created_at": datetime.now(timezone.utc).isoformat()
+    })
+    
+    logging.info(f"Subscription activated for user {user_id}, level: {update_data['level']}")
+
+async def deactivate_subscription(user_id: str):
+    """Deactivate subscription - user loses Premium if had it"""
+    user = await db.users.find_one({"user_id": user_id}, {"_id": 0})
+    if not user:
+        return
+    
+    # Keep valid_referrals_count, just change level
+    new_level = "sonhador" if user.get("valid_referrals_count", 0) >= 1 else "curioso"
+    
+    await db.users.update_one(
+        {"user_id": user_id},
+        {"$set": {
+            "subscription_active": False,
+            "level": new_level,
+            "subscription_ended_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    # Log deactivation
+    await db.subscription_logs.insert_one({
+        "log_id": f"log_{uuid.uuid4().hex[:12]}",
+        "user_id": user_id,
+        "event": "subscription_deactivated",
+        "previous_level": user.get("level"),
+        "new_level": new_level,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    })
+    
+    logging.info(f"Subscription deactivated for user {user_id}, level changed to: {new_level}")
+
+@api_router.get("/subscription/status")
+async def get_subscription_status(request: Request):
+    """Get current user's subscription status"""
+    user = await require_auth(request)
+    
+    return {
+        "subscription_active": user.get("subscription_active", False),
+        "level": user.get("level", "curioso"),
+        "valid_referrals_count": user.get("valid_referrals_count", 0),
+        "subscription_started_at": user.get("subscription_started_at"),
+        "premium_unlocked_at": user.get("premium_unlocked_at"),
+        "can_upgrade_to_premium": user.get("subscription_active", False) and user.get("valid_referrals_count", 0) >= 3 and user.get("level") != "premium"
+    }
+
 # ==================== ADMIN STATS ====================
 
 @api_router.get("/admin/stats")
