@@ -792,6 +792,104 @@ async def get_journey_points(journey_id: str, request: Request):
     ).to_list(1000)
     return points
 
+# ==================== USER CONTRIBUTIONS ====================
+
+@api_router.get("/contributions/my-contributions")
+async def get_my_contributions(request: Request):
+    """Get all contributions for the authenticated user"""
+    user = await require_auth(request)
+    contributions = await db.contributions.find(
+        {"user_id": user.user_id, "status": "completed"},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
+    
+    # Calculate totals
+    total_amount = sum(c.get("amount", 0) for c in contributions)
+    total_count = len(contributions)
+    last_contribution = contributions[0] if contributions else None
+    
+    return {
+        "contributions": contributions,
+        "total_amount": total_amount,
+        "total_count": total_count,
+        "last_contribution": last_contribution
+    }
+
+@api_router.get("/dashboard/user-stats")
+async def get_user_dashboard_stats(request: Request):
+    """Get comprehensive stats for user dashboard"""
+    user = await require_auth(request)
+    user_id = user.user_id
+    
+    # Get full user data
+    user_data = await db.users.find_one({"user_id": user_id}, {"_id": 0, "password_hash": 0})
+    
+    # Get user's contributions
+    contributions = await db.contributions.find(
+        {"user_id": user_id, "status": "completed"},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
+    total_contributed = sum(c.get("amount", 0) for c in contributions)
+    
+    # Get sponsor links and calculate impact
+    sponsor_links = await db.sponsor_links.find(
+        {"user_id": user_id},
+        {"_id": 0}
+    ).to_list(100)
+    
+    # Calculate impact: sum of contributions from users who registered via this user's link
+    invited_users = await db.users.find(
+        {"sponsor_id": user_id},
+        {"_id": 0, "user_id": 1}
+    ).to_list(1000)
+    invited_user_ids = [u["user_id"] for u in invited_users]
+    
+    # Total contributed by invited users
+    invited_contributions = await db.contributions.find(
+        {"user_id": {"$in": invited_user_ids}, "status": "completed"},
+        {"_id": 0}
+    ).to_list(10000)
+    impact_amount = sum(c.get("amount", 0) for c in invited_contributions)
+    
+    # Get main journey (first active one)
+    main_journey = await db.journeys.find_one(
+        {"is_active": True, "status": "active"},
+        {"_id": 0}
+    )
+    
+    # Get main sponsor link for this journey
+    main_sponsor_link = None
+    if main_journey:
+        main_sponsor_link = await db.sponsor_links.find_one(
+            {"user_id": user_id, "journey_id": main_journey["journey_id"]},
+            {"_id": 0}
+        )
+    
+    return {
+        "user": {
+            "user_id": user_id,
+            "name": user_data.get("name"),
+            "email": user_data.get("email"),
+            "level": user_data.get("level", "curioso"),
+            "subscription_active": user_data.get("subscription_active", False),
+            "valid_referrals_count": user_data.get("valid_referrals_count", 0),
+            "premium_unlocked_at": user_data.get("premium_unlocked_at")
+        },
+        "contributions": {
+            "total_amount": total_contributed,
+            "total_count": len(contributions),
+            "last_contribution": contributions[0] if contributions else None
+        },
+        "invites": {
+            "total_invited": len(invited_users),
+            "total_contributed_by_invites": len([c for c in invited_contributions]),
+            "impact_amount": impact_amount,
+            "sponsor_links": sponsor_links
+        },
+        "main_journey": main_journey,
+        "main_sponsor_link": main_sponsor_link
+    }
+
 # ==================== USER PROFILE ====================
 
 @api_router.get("/profile")
