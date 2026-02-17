@@ -86,6 +86,7 @@ class UserCreate(BaseModel):
     password: str
     name: str
     surname: Optional[str] = None
+    sponsor_code: Optional[str] = None  # Link de sponsor usado no registo
 
 class UserLogin(BaseModel):
     email: EmailStr
@@ -110,6 +111,8 @@ class Journey(BaseModel):
     currency: str = "EUR"
     target_date: Optional[str] = None  # Data objetivo para o financiamento (formato: YYYY-MM-DD)
     is_active: bool = True
+    status: str = "active"  # active | funded | closed
+    owner_user_id: Optional[str] = None  # Admin que criou a viagem
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
