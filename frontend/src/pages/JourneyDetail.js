@@ -777,27 +777,40 @@ const JourneyDetail = () => {
                   <div className="space-y-2">
                     {paymentMethods.map((method) => {
                       const Icon = method.icon;
+                      const isRecommended = method.recommended;
                       const isAutomatic = method.type === 'automatic';
                       return (
                         <button
                           key={method.id}
-                          onClick={() => setSelectedMethod(method.id)}
+                          onClick={() => {
+                            setSelectedMethod(method.id);
+                            if (method.id !== 'crypto') {
+                              setSelectedCrypto(null);
+                            }
+                          }}
                           className={`w-full p-4 rounded-xl border-2 transition-all flex items-center gap-4 ${
                             selectedMethod === method.id
                               ? 'border-[#FFBE98] bg-[#FFBE98]/10'
+                              : isRecommended
+                              ? 'border-[#F7931A]/50 bg-gradient-to-r from-[#F7931A]/5 to-[#627EEA]/5 hover:border-[#F7931A]'
                               : isAutomatic
                               ? 'border-green-200 bg-green-50/50 hover:border-green-300'
                               : 'border-stone-200 hover:border-stone-300'
                           }`}
                           data-testid={`method-${method.id}`}
                         >
-                          <Icon className={`w-6 h-6 ${isAutomatic ? 'text-green-600' : 'text-[#6B6661]'}`} />
+                          <Icon className={`w-6 h-6 ${isRecommended ? 'text-[#F7931A]' : isAutomatic ? 'text-green-600' : 'text-[#6B6661]'}`} />
                           <div className="text-left flex-1">
                             <span className="font-medium block">{method.name}</span>
-                            <span className={`text-xs ${isAutomatic ? 'text-green-600' : 'text-[#6B6661]'}`}>
+                            <span className={`text-xs ${isRecommended ? 'text-[#F7931A]' : isAutomatic ? 'text-green-600' : 'text-[#6B6661]'}`}>
                               {method.description}
                             </span>
                           </div>
+                          {isRecommended && (
+                            <span className="text-xs bg-gradient-to-r from-[#F7931A] to-[#627EEA] text-white px-2 py-1 rounded-full font-medium">
+                              Recomendado
+                            </span>
+                          )}
                           {isAutomatic && (
                             <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
                               Auto
@@ -806,6 +819,39 @@ const JourneyDetail = () => {
                         </button>
                       );
                     })}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Crypto Type Selection */}
+              {selectedAmount && selectedMethod === 'crypto' && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <h3 className="font-semibold mb-4">Escolha a criptomoeda</h3>
+                  <div className="grid grid-cols-2 gap-2">
+                    {cryptoTypes.map((crypto) => (
+                      <button
+                        key={crypto.id}
+                        onClick={() => setSelectedCrypto(crypto.id)}
+                        className={`p-4 rounded-xl border-2 transition-all ${
+                          selectedCrypto === crypto.id
+                            ? 'border-[#FFBE98] bg-[#FFBE98]/10'
+                            : 'border-stone-200 hover:border-stone-300'
+                        }`}
+                        data-testid={`crypto-${crypto.id}`}
+                      >
+                        <div 
+                          className="w-10 h-10 rounded-full mx-auto mb-2 flex items-center justify-center"
+                          style={{ backgroundColor: `${crypto.color}20` }}
+                        >
+                          <Bitcoin className="w-5 h-5" style={{ color: crypto.color }} />
+                        </div>
+                        <p className="font-medium text-[#2D2A26]">{crypto.symbol}</p>
+                        <p className="text-xs text-[#6B6661]">{crypto.name}</p>
+                      </button>
+                    ))}
                   </div>
                 </motion.div>
               )}
