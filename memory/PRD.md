@@ -20,7 +20,23 @@ Criar uma plataforma de angariação de fundos chamada "4Luis" (4Luis.com) com c
 - **Sem valor livre** - apenas montantes predefinidos
 - **Zero comissões** - contribuições vão diretamente para o sonhador
 
-### Métodos de Pagamento
+### Visibilidade de Dados
+| Dado | Público | Admin |
+|------|---------|-------|
+| Barra de progresso | ✅ | ✅ |
+| Percentagem angariada | ✅ | ✅ |
+| Valor total (goal) | ❌ | ✅ |
+| Data objetivo | ✅ | ✅ |
+| Feed de contribuições | ✅ | ✅ |
+
+### Após 100% do Financiamento
+- A viagem **continua a aceitar contribuições**
+- A barra pode **ultrapassar os 100%**
+- Mostra banner: **"Financiamento total quase a fechar."**
+
+---
+
+## Métodos de Pagamento
 | Método | Tipo | Descrição |
 |--------|------|-----------|
 | **Stripe** | Automático | Cartão (Visa, Mastercard) |
@@ -30,7 +46,9 @@ Criar uma plataforma de angariação de fundos chamada "4Luis" (4Luis.com) com c
 | **Wise** | Direto | luis@4luis.com |
 | **Crypto** | Direto | USDT TRC20 |
 
-### Modelo de Contribuição (v2)
+---
+
+## Modelo de Contribuição (v2)
 ```json
 {
   "contribution_id": "string",
@@ -41,9 +59,22 @@ Criar uma plataforma de angariação de fundos chamada "4Luis" (4Luis.com) com c
   "status": "pending | confirmed | rejected",
   "is_main_trip": true,
   "validated_by": "admin_user_id | null",
-  "validated_at": "datetime | null"
+  "validated_at": "datetime | null",
+  "public_message": "string | null",
+  "show_name": true | false,
+  "contributor_name": "string | null"
 }
 ```
+
+---
+
+## Feed de Contribuições Públicas
+Cada contribuição mostra:
+- **Nome ou alias** do apoiante (ou "Sonhador Anónimo")
+- **Valor contribuído** (€)
+- **Mensagem opcional** do apoiante
+- **Data** da contribuição
+- Formato: **Feed cronológico**
 
 ---
 
@@ -65,7 +96,7 @@ THEN level = "embaixador"
 
 ---
 
-## Admin Reports (NOVO)
+## Admin Reports
 
 ### Endpoints
 - `GET /api/admin/contributions/reports` - Relatórios completos
@@ -82,15 +113,14 @@ THEN level = "embaixador"
 
 ## Endpoints Principais
 
-### Contribuições (v2)
+### Viagem
+- `GET /api/journeys/{id}/progress` - Progresso (% público, goal_amount só admin)
+- `GET /api/journeys/{id}/contributions` - Feed público de contribuições
+
+### Contribuições
 - `GET /api/contributions/config` - Configuração (valores fixos, métodos)
 - `GET /api/contributions/payment-info` - Info de pagamentos diretos
 - `POST /api/contributions/create` - Criar contribuição
-
-### Admin
-- `GET /api/admin/contributions/reports` - Relatórios
-- `GET /api/admin/contributions/pending` - Pendentes
-- `PUT /api/admin/contributions/{id}/validate` - Validar
 
 ---
 
@@ -100,9 +130,13 @@ THEN level = "embaixador"
 - [x] Modelo de utilizadores v2 (visitante/sonhador/embaixador)
 - [x] Dashboard do utilizador com progresso
 - [x] Valores fixos de contribuição
-- [x] 6 métodos de pagamento (Stripe, MBWay, PayPal, Revolut, Wise, Crypto)
-- [x] Relatórios admin (por valor, método, temporal)
-- [x] Validação de contribuições pelo admin
+- [x] 6 métodos de pagamento
+- [x] Relatórios admin
+- [x] Feed público de contribuições
+- [x] Mensagem pública opcional
+- [x] Opção de contribuir anonimamente
+- [x] Barra de progresso pode ultrapassar 100%
+- [x] Valor total oculto ao público
 
 ### P1 (Próximo)
 - [ ] Emails automáticos:
@@ -127,10 +161,15 @@ THEN level = "embaixador"
 
 ## Alterações Recentes
 
-### 2026-02-25
-- ✅ **Valores fixos**: €10, €20, €50, €100, €200, €500, €1000 (sem valor livre)
-- ✅ **6 métodos de pagamento**: Stripe (auto) + MBWay, PayPal, Revolut, Wise, Crypto (diretos)
-- ✅ **Modelo de contribuição v2**: Campos `validated_by`, `validated_at`, `is_main_trip`
-- ✅ **Relatórios admin**: Por valor, por método, histórico temporal
-- ✅ **UI atualizada**: Modal de pagamento com todos os métodos e instruções
-- ✅ **Zero comissões**: Nota visível no fluxo de pagamento
+### 2026-02-25 (Sessão 2)
+- ✅ **Feed de contribuições públicas**: Nome/alias, valor, mensagem, data
+- ✅ **Mensagem pública opcional**: Campo no modal de pagamento
+- ✅ **Toggle "Mostrar o meu nome"**: Opção de contribuir anonimamente
+- ✅ **Valor total oculto**: Só admin vê o goal_amount
+- ✅ **Barra pode exceder 100%**: Continua a aceitar contribuições após funding
+- ✅ **Banner de encerramento**: "Financiamento total quase a fechar."
+
+### 2026-02-25 (Sessão 1)
+- ✅ Valores fixos: €10, €20, €50, €100, €200, €500, €1000
+- ✅ 6 métodos de pagamento: Stripe, MBWay, PayPal, Revolut, Wise, Crypto
+- ✅ Relatórios admin: Por valor, método, histórico temporal
