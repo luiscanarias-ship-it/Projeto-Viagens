@@ -646,7 +646,7 @@ async def create_contribution(request: Request):
 
 @api_router.get("/contributions/payment-info")
 async def get_payment_info():
-    """Get direct payment information"""
+    """Get direct payment information including all crypto addresses"""
     return {
         "mbway": {
             "phone": "+351968068535",
@@ -663,10 +663,35 @@ async def get_payment_info():
             "email": "luis@4luis.com"
         },
         "crypto": {
-            "currency": "USDT",
-            "network": "Tron (TRC20)",
-            "address": "TGcWs89gTkkxARVT8UJsCFUMc9sQkvUmtL",
-            "warning": "Use a mesma rede de depósito (TRC20) para que as criptomoedas não se percam."
+            "btc": {
+                "name": "Bitcoin",
+                "symbol": "BTC",
+                "network": "Bitcoin Network",
+                "address": "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
+                "color": "#F7931A"
+            },
+            "eth": {
+                "name": "Ethereum",
+                "symbol": "ETH",
+                "network": "Ethereum (ERC20)",
+                "address": "0x742d35Cc6634C0532925a3b844Bc9e7595f2bD61",
+                "color": "#627EEA"
+            },
+            "usdt": {
+                "name": "Tether",
+                "symbol": "USDT",
+                "network": "Tron (TRC20)",
+                "address": "TGcWs89gTkkxARVT8UJsCFUMc9sQkvUmtL",
+                "color": "#26A17B",
+                "warning": "Use a mesma rede de depósito (TRC20) para que as criptomoedas não se percam."
+            },
+            "usdc": {
+                "name": "USD Coin",
+                "symbol": "USDC",
+                "network": "Ethereum (ERC20)",
+                "address": "0x742d35Cc6634C0532925a3b844Bc9e7595f2bD61",
+                "color": "#2775CA"
+            }
         },
         "note": "A plataforma não retém comissões. O valor integral vai diretamente para o sonhador."
     }
