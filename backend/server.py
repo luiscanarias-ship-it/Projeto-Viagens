@@ -2085,6 +2085,8 @@ async def confirm_contribution(contribution_id: str, request: Request):
                             "embaixador_unlocked_at": datetime.now(timezone.utc).isoformat()
                         }}
                     )
+                    # Send email notification to sponsor
+                    await send_ambassador_unlocked_email(sponsor_user_id)
     
     # Generate points if user has 3+ referrals
     if contribution.get("user_id"):
