@@ -81,6 +81,8 @@ const JourneyDetail = () => {
   const [processing, setProcessing] = useState(false);
   const [publicMessage, setPublicMessage] = useState('');
   const [showName, setShowName] = useState(true);
+  const [selectedCrypto, setSelectedCrypto] = useState(null);
+  const [txHash, setTxHash] = useState('');
   
   // Travel planning state
   const [travelResources, setTravelResources] = useState(null);
