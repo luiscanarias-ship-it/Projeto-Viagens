@@ -882,6 +882,57 @@ const JourneyDetail = () => {
                 </motion.div>
               )}
 
+              {/* Step 3: Public Message (Optional) */}
+              {selectedAmount && selectedMethod && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="space-y-4"
+                >
+                  <div>
+                    <label className="block text-sm font-medium text-[#2D2A26] mb-2">
+                      Deixar mensagem pública (opcional)
+                    </label>
+                    <textarea
+                      value={publicMessage}
+                      onChange={(e) => setPublicMessage(e.target.value)}
+                      placeholder="Escreve uma mensagem de apoio..."
+                      maxLength={200}
+                      rows={2}
+                      className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl resize-none focus:outline-none focus:border-[#FFBE98] transition-colors"
+                      data-testid="public-message-input"
+                    />
+                    <p className="text-xs text-[#6B6661] mt-1 text-right">
+                      {publicMessage.length}/200
+                    </p>
+                  </div>
+                  
+                  {/* Show name toggle */}
+                  <div className="flex items-center justify-between p-3 bg-stone-50 rounded-xl">
+                    <div className="flex items-center gap-2">
+                      <User className="w-4 h-4 text-[#6B6661]" />
+                      <span className="text-sm text-[#2D2A26]">Mostrar o meu nome</span>
+                    </div>
+                    <button
+                      onClick={() => setShowName(!showName)}
+                      className={`w-12 h-6 rounded-full transition-colors ${
+                        showName ? 'bg-[#FFBE98]' : 'bg-stone-300'
+                      }`}
+                      data-testid="show-name-toggle"
+                    >
+                      <div className={`w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                        showName ? 'translate-x-6' : 'translate-x-0.5'
+                      }`} />
+                    </button>
+                  </div>
+                  {!showName && (
+                    <p className="text-xs text-[#6B6661] bg-[#E6F4F1]/50 p-2 rounded">
+                      Aparecerás como "Sonhador Anónimo" na lista de apoiantes.
+                    </p>
+                  )}
+                </motion.div>
+              )}
+
               {/* Continue Button */}
               {selectedAmount && selectedMethod && (
                 <motion.div
