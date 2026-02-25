@@ -1,82 +1,76 @@
 <analysis>**original_problem_statement:**
-O utilizador quer construir uma plataforma de angariação de fundos (crowdfunding) chamada 4Luis para financiar viagens de sonho. O projeto evoluiu significativamente para incluir um modelo de utilizador com múltiplos níveis (, , ) e um sistema de subscrição paga (via Stripe) para desbloquear níveis mais altos.
+O utilizador pretende criar uma plataforma de angariação de fundos (crowdfunding) chamada 4Luis. Inicialmente focada em subscrições pagas, a plataforma evoluiu para um modelo de progressão de utilizador baseado no mérito e no envolvimento, removendo as subscrições. A monetização agora foca-se em contribuições diretas para uma única viagem principal de cada vez, com um forte incentivo ao uso de criptomoedas.
 
-**PRODUCT REQUIREMENTS (extraído do documento e conversa):**
-- **Modelo de Utilizador (v2):**
-    - **Níveis:**
-        - **Curioso:** Nível base para todos os utilizadores registados.
-        - **Sonhador:** Nível desbloqueado através de uma subscrição paga mensal de 10€ (Stripe).
-        - **Premium:** Nível desbloqueado automaticamente quando um Sonhador ativo refere 3 ou mais utilizadores que também fazem uma contribuição confirmada.
-    - **Sponsor System:** Os utilizadores podem referir outros. Quando um utilizador referido faz uma contribuição válida, o sponsor original ganha um convite válido. O sistema deve rastrear quem convidou quem e o impacto financeiro de cada sponsor.
-- **Admin Growth Dashboard:** Um painel de administração detalhado para monitorizar o crescimento da plataforma, incluindo:
-    - Métricas chave (total de utilizadores, subscrições ativas, valor total de contribuições, etc.).
-    - Gráficos de crescimento (novos utilizadores e contribuições ao longo do tempo).
-    - Tabelas de utilizadores com filtros, pesquisa e ordenação.
-    - Ações de gestão manual (ativar/desativar subscrições, alterar nível do utilizador).
-    - Platform Momentum Score para uma visão rápida da saúde da plataforma.
-- **Pagamentos:**
-    - **Contribuições:** Integração com Stripe para pagamentos únicos.
-    - **Subscrições:** Integração com Stripe Subscriptions para a subscrição Sonhador.
-- **Sistema de Sorteios (Raffles):** Um sorteio é automaticamente ativado para uma viagem quando esta atinge 100% do seu objetivo de financiamento. A gestão é feita pelo admin.
-- **Visibilidade de Dados:** O  de uma viagem é visível apenas para o admin. A barra de progresso, percentagem e data objetivo são visíveis publicamente.
-- **Funcionalidades Despriorizadas (Congeladas):** O sistema original de pontos e a gamificação associada estão em pausa.
+**PRODUCT REQUIREMENTS:**
+-   **Modelo de Utilizador (v3):**
+    -   **Visitante:** Não registado; pode ver a viagem principal.
+    -   **Sonhador:** Utilizador registado; pode contribuir, gerar um link de sponsor e convidar pessoas.
+    -   **Embaixador:** Um Sonhador que cumpriu dois requisitos: 1) fez pelo menos uma contribuição confirmada para a viagem principal e 2) tem 3 ou mais referrals válidos (convidados que também contribuíram). Os Embaixadores podem candidatar-se a criar as suas próprias viagens.
+
+-   **Modelo de Contribuição:**
+    -   As contribuições são para uma única viagem principal ativa.
+    -   Valores de contribuição fixos: 10€, 20€, 50€, 100€, 200€, 500€, 1000€.
+    -   Múltiplos métodos de pagamento: Stripe (automático), e pagamentos diretos que requerem validação manual do admin (MBWay, PayPal, Revolut, Criptomoedas).
+    -   Incentivo a pagamentos com Cripto (BTC, ETH, USDT, USDC) através de destaque visual na UI e reconhecimento especial no perfil/feed.
+    -   A plataforma não retém comissões.
+
+-   **Página da Viagem:**
+    -   A barra de progresso e a percentagem financiada são públicas.
+    -   O valor monetário total do objetivo () é visível apenas para o admin.
+    -   Um feed público e cronológico mostra as contribuições confirmadas (nome/alias, valor, mensagem opcional e um badge para pagamentos crypto).
+    -   Quando o financiamento atinge 100%, a viagem continua a aceitar contribuições, e a barra de progresso pode ultrapassar 100%, mostrando uma mensagem de destaque.
+
+-   **Lifecycle de Viagens de Embaixadores:**
+    -   Viagens criadas por embaixadores passam por vários estados:  ->  ->  ->  ->  -> .
+    -   A transição de  para  é automática quando o objetivo é atingido.
+    -   Viagens financiadas movem-se para uma secção de Sonhos Realizados.
+
+-   **Dashboards:**
+    -   **User Dashboard:** Mostra o estado do utilizador (/), o progresso para se tornar Embaixador (checklist), estatísticas de convites e contribuições pessoais.
+    -   **Admin Dashboard:** Relatórios de contribuições agregadas por valor e por método de pagamento.
 
 **User's preferred language**: Portuguese (Portugal)
 
 **what currently exists?**
-Uma aplicação full-stack (React + FastAPI) com as funcionalidades base implementadas. O trabalho mais recente focou-se numa refatoração profunda do modelo de dados para suportar o novo sistema de níveis de utilizador e sponsors. Foi implementado um Admin Growth Dashboard muito completo, com métricas, gráficos e ferramentas de gestão. A integração com Stripe Subscriptions foi iniciada: os endpoints de backend para criar a sessão de checkout e receber webhooks foram criados, e os CTAs (Call to Action) foram adicionados no frontend. A barra de progresso das viagens foi restaurada na UI, mas sem mostrar o valor monetário do objetivo.
+Uma aplicação full-stack (React + FastAPI) que implementa a maioria dos requisitos acima. O sistema de utilizadores / está funcional. O User Dashboard adapta-se dinamicamente ao nível do utilizador. O novo modelo de contribuições com valores fixos e múltiplos métodos de pagamento (incluindo Cripto com destaque) está implementado no frontend e backend. A página da viagem principal mostra o feed público de contribuições e a barra de progresso com o valor do objetivo oculto. Os endpoints de backend para a gestão do ciclo de vida das viagens dos embaixadores foram criados, juntamente com uma nova página frontend .
 
 **Last working item**:
--   **Last item agent was working**: O agente finalizou a implementação inicial da integração com Stripe Subscriptions. Adicionou os CTAs no frontend (, ) para os utilizadores se tornarem Sonhadores, criou os endpoints no backend (, ), e adicionou a variável  ao ficheiro  do backend com uma nota para o utilizador.
+-   **Last item agent was working**: Implementação do ciclo de vida (lifecycle) para as viagens dos embaixadores. O agente criou os novos estados no modelo , adicionou os endpoints de backend no  para um admin gerir estas viagens () e a lógica para mover automaticamente uma viagem para o estado  ao atingir o seu objetivo. No frontend, criou a página  e adicionou a secção Sonhos Realizados na Home.
 -   **Status**: IN PROGRESS
--   **Agent Testing Done**: N (Apenas os endpoints foram testados isoladamente via  após uma correção. O fluxo de webhook completo nunca foi testado.)
--   **Which testing method agent to use?**: backend testing agent. É crucial testar o endpoint  simulando os diferentes eventos do Stripe (, , etc.) para garantir que os campos  e  do utilizador são atualizados corretamente no banco de dados.
+-   **Agent Testing Done**: N
+-   **Which testing method agent to use?**: both. O agente de backend deve testar os novos endpoints de admin para criar, aprovar e gerir os estados das viagens de embaixador, e validar a transição automática para o estado financiada. O agente de frontend deve verificar se as viagens financiadas aparecem corretamente na nova secção Sonhos Realizados e na página .
 -   **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
--   **Issue 1**: O atributo  está a causar um erro no objeto . (Priority: P0 - BLOCKER)
-    -   **Attempted fixes**: O agente corrigiu o erro no endpoint de status da subscrição () alterando  para , , etc., pois  retorna um objeto Pydantic, não um dicionário.
-    -   **Next debug checklist**:
-        -   Verificar todos os endpoints que usam o  e recebem o objeto  para garantir que o acesso aos atributos é feito via  e não . O agente corrigiu dois locais, mas pode haver mais.
-        -   Focar especialmente no novo endpoint de webhook (), pois é complexo e foi escrito após a descoberta do bug.
-    -   **Why fix this issue and what will be achieved with the fix?**: A falha no acesso aos atributos do utilizador quebra a lógica de negócio principal, especialmente nos novos endpoints de subscrição. A correção é essencial para a funcionalidade do Stripe.
-    -   **Status**: IN PROGRESS
-    -   **Is recurring issue?**: Y (O agente corrigiu em um local, mas o padrão de erro pode existir em outros.)
-    -   **Should Test frontend/backend/both after fix?**: backend
-    -   **Blocked on other issue**: N/A
+Nenhum problema ou bug pendente foi identificado. O trabalho atual é a continuação do desenvolvimento de funcionalidades.
 
 **In progress Task List**:
--   **Task 1**: Concluir e testar a integração do Stripe Subscriptions. (Priority: P0)
-    -   **Where to resume**: O código base está implementado. O próximo passo crítico é testar o fluxo completo.
-        1.  **Testar Webhooks**: Usar o agente de testes de backend ou  para enviar payloads de teste para o endpoint  e verificar se a base de dados é atualizada corretamente.
-            -   Simular  -> Verificar se  vira  e  vira .
-            -   Simular  -> Verificar se  vira .
-            -   Verificar se a lógica do motor Premium (ativar nível Premium se ) é acionada após a ativação da subscrição.
-        2.  **Validação de Segurança**: Confirmar que o endpoint de criação de checkout () falha se o utilizador não estiver autenticado.
-    -   **What will be achieved with this?**: O motor de monetização principal da aplicação (subscrições Sonhador) estará funcional e seguro.
+-   **Task 1**: Concluir e testar o Lifecycle das viagens dos embaixadores. (Priority: P0)
+    -   **Where to resume**: Os ficheiros de backend () e frontend (, ) foram criados/modificados. Os próximos passos são:
+        1.  Implementar a UI no frontend para que um Embaixador possa submeter uma candidatura de viagem (o botão Candidatar-me a Embaixador existe mas não tem ação).
+        2.  Testar o fluxo completo: candidatura -> aprovação pelo admin -> contribuições -> financiamento automático -> mover para Sonhos Realizados.
+        3.  Testar os endpoints de admin para gestão manual dos estados.
+    -   **What will be achieved with this?**: Os utilizadores Embaixador poderão criar e financiar as suas próprias viagens, completando um ciclo de negócio central da plataforma.
     -   **Status**: IN PROGRESS
-    -   **Should Test frontend/backend/both after fix?**: backend
-    -   **Blocked on something**: **Issue 1**, que pode afetar a lógica dos webhooks.
+    -   **Should Test frontend/backend/both after fix?**: both
+    -   **Blocked on something**: N/A
 
 **Upcoming and Future Tasks**
 -   **Upcoming Tasks:**
-    -   **P1:** UI básica de progressão para utilizadores (mostrar-lhes o seu nível e progresso para o próximo).
-    -   **P2:** Implementar emails de confirmação automáticos (pós-subscrição, cancelamento, etc.).
+    -   **P1:** Implementar emails automáticos para eventos chave (registo, contribuição registada/confirmada, desbloqueio de Embaixador, viagem financiada).
 -   **Future Tasks:**
-    -   **P2:** Adicionar uma secção de testemunhos/mensagens de apoio em cada página de viagem.
     -   **P2:** Implementar um sistema de notificações dentro da aplicação.
-    -   **P3:** Reintroduzir e integrar o sistema de Pontos e a gamificação que foram congelados.
+    -   **P2:** Adicionar uma secção de testemunhos em cada página de viagem.
+    -   **P3:** Reintroduzir o sistema de Pontos e gamificação que foi congelado anteriormente.
 
 **Completed work in this session**
--   Implementado o **Admin Growth Dashboard** completo, com métricas globais, gráficos, tabelas de utilizadores com filtros/ordenação e ações de gestão.
--   Realizada uma **migração da base de dados** para adaptar os modelos  e  à nova lógica de negócio (níveis, sponsors, subscrições).
--   Corrigido o fluxo de registo para **capturar o ** quando um novo utilizador se regista através de um link de referência.
--   Implementados os **endpoints de backend para Stripe Subscriptions** e adicionados os CTAs correspondentes no frontend.
--   Restaurada a **barra de progresso** nas páginas de viagem (homepage e detalhe), ocultando o valor absoluto do objetivo.
--   Reimplementado o sistema de **Sorteios (Raffles)** no painel de admin, que é acionado quando uma viagem atinge o seu objetivo de financiamento.
--   Adicionada a nota um dos maiores sonhadores poderá ser convidado a viajar comigo na homepage.
--   Melhorado o estilo da dica de pontos a dobrar no dashboard do utilizador.
--   Corrigido o erro de sintaxe que quebrava a homepage no início da sessão.
+-   **Refatoração do Modelo de Utilizador:** O modelo foi alterado de um sistema de subscrição (, , ) para um modelo de mérito (, ) baseado em contribuições e referências.
+-   **Refatoração do User Dashboard:** O dashboard do utilizador foi completamente reescrito para se alinhar com o novo modelo /, mostrando uma checklist de progresso.
+-   **Novo Modelo de Contribuições:** Implementado um sistema de contribuições com valores fixos e múltiplos métodos de pagamento (Stripe, MBWay, PayPal, Revolut, Cripto).
+-   **Incentivo a Cripto:** Implementados destaques visuais na UI e reconhecimento especial (badges no feed) para contribuições em criptomoeda. Endereços de carteira foram corrigidos e atualizados conforme feedback do utilizador.
+-   **Atualização da Página da Viagem:** A página de detalhes da viagem foi atualizada para ocultar o valor do objetivo, mostrar uma barra de progresso pública e um feed de contribuições com mensagens e anonimato opcionais.
+-   **Correção de Webhooks:** A lógica de webhooks do Stripe (remanescente do modelo de subscrição) foi depurada e testada com sucesso, embora tenha sido posteriormente descontinuada em favor do novo modelo.
+-   **Criação de Relatórios de Admin:** Foram adicionados novos endpoints para o admin visualizar relatórios de contribuições por valor e por método de pagamento.
 
 **Earlier issues found/mentioned but not fixed**
 Nenhum.
@@ -90,83 +84,80 @@ Nenhum.
 
 
 **Key Technical Concepts**
--   **Backend**: FastAPI (Python), MongoDB (, ).
+-   **Backend**: FastAPI, MongoDB (com ).
 -   **Frontend**: React.js, TailwindCSS, , .
 -   **Database**: MongoDB.
--   **Pagamentos**: Stripe SDK (diretamente para Subscriptions),  (para contribuições únicas).
--   **Autenticação**: JWT (criado no backend).
+-   **Pagamentos**: Stripe SDK para pagamentos únicos, e um sistema de validação manual para pagamentos diretos (MBWay, PayPal, Cripto).
+-   **Autenticação**: JWT.
 
 **key DB schema**
 -   **users**: 
 -   **journeys**: 
 -   **contributions**: 
--   **sponsor_links**: 
--   **points**: Schema existe, mas a sua utilização está congelada.
 
 **changes in tech stack**
--   O SDK  foi instalado e é usado diretamente no  para a lógica de subscrições, pois a biblioteca  não suportava o modo .
+Nenhuma alteração fundamental na stack. O uso do SDK do Stripe foi simplificado de Subscrições para pagamentos únicos.
 
 **All files of reference**
--   : Ficheiro mais modificado. Contém toda a nova lógica para a migração de dados, o Admin Growth Dashboard, e a integração com Stripe Subscriptions.
--   : Ficheiro de frontend mais modificado. Contém toda a UI para o novo e complexo Growth Dashboard.
--   : Atualizado com o banner/CTA de subscrição e a lógica para iniciar o checkout.
--   : Modificado para capturar o  da URL e armazená-lo para ser usado durante o registo.
--   : Atualizado para incluir o banner/CTA de subscrição.
--   : Atualizado extensivamente para refletir a nova visão do produto.
+-   : Ficheiro central, modificado extensivamente para todas as novas funcionalidades.
+-   : Componente de frontend mais modificado, contém toda a nova UI de contribuição.
+-   : Reescrito para se adaptar ao novo modelo de utilizador.
+-   : Modificado para adicionar a nova secção Sonhos Realizados.
+-   : Novo ficheiro para listar viagens financiadas.
+-   : Atualizado múltiplas vezes para documentar as mudanças nos requisitos.
 
 **Areas that need refactoring**:
--    está criticamente sobrecarregado. A sua divisão em múltiplos s (e.g., , , ) é mais urgente do que nunca.
--    tornou-se um mega componente com mais de 1000 linhas, contendo toda a lógica do dashboard de utilizadores. Deve ser decomposto em componentes menores (e.g., , , ).
+-    atingiu um tamanho crítico e deve ser urgentemente dividido em múltiplos ficheiros por domínio (ex: , , ).
+-    é um mega componente com mais de 1000 linhas e deve ser decomposto em componentes menores (ex: , , ).
 
 **key api endpoints**
--   **** (GET): Novo endpoint que fornece todos os dados para o Admin Growth Dashboard.
--   **** (POST): Para o admin ativar/desativar uma subscrição manualmente.
--   **** (POST): Para o admin alterar o nível de um utilizador.
--   **** (POST): Cria uma sessão de checkout no Stripe para iniciar uma subscrição.
--   **** (POST): Recebe eventos do Stripe para gerir o ciclo de vida da subscrição.
--   **** (GET): Retorna o estado da subscrição do utilizador autenticado.
--    (POST): Endpoint de uso único para migrar dados de utilizadores e viagens existentes.
+-   : Retorna os dados para o dashboard do utilizador.
+-   : Cria um registo de contribuição para pagamentos diretos.
+-   : Retorna a configuração de pagamentos (valores fixos, métodos).
+-   : Endpoint de relatório para o admin.
+-   : Retorna as contribuições públicas para o feed.
+-   : Retorna o progresso atual de uma viagem.
+-   : Endpoint para o admin listar/gerir candidaturas de viagens.
+-   : Endpoint para o admin atualizar o estado de uma viagem de embaixador.
 
 **Critical Info for New Agent**
--   **Prioridade Máxima:** O utilizador deu instruções muito detalhadas para a implementação. A tarefa atual é a integração do Stripe Subscriptions. O próximo passo é **testar rigorosamente o webhook**, pois é a peça que liga o pagamento no Stripe à atualização do status do utilizador na aplicação.
--   **Modelo de Negócio:** O core da aplicação agora gira em torno dos níveis de utilizador ( ->  -> ). Entender este fluxo (registo -> subscrição -> referrals) é essencial.
--   **Variáveis de Ambiente:** O utilizador forneceu um  de teste (). O agente adicionou  ao  e deve instruir o utilizador sobre como obter e configurar este valor no dashboard do Stripe para que os webhooks funcionem.
--   **Risco Técnico:** O erro  foi corrigido em dois locais mas pode persistir noutros endpoints que usam , especialmente no novo código do webhook.
+-   **Atenção aos Pivots:** O produto mudou drasticamente. Ignore a lógica antiga de subscrições e os níveis /. A fonte de verdade é o modelo  ->  e o sistema de contribuições diretas.
+-   **Foco Atual:** A tarefa em curso é finalizar o ciclo de vida das viagens de embaixador. Isto envolve principalmente criar a UI para a candidatura e testar todo o fluxo.
+-   **Código Legado:** O ficheiro  é extremamente grande. Qualquer modificação deve ser feita com cuidado para evitar quebras. A refatoração é necessária, mas não foi solicitada pelo utilizador. Priorize a entrega de funcionalidades.
 
 **documents and test reports created in this job**
 -   
--   
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User**: Aprova o plano para implementar o Admin Growth Dashboard e pede para incluir métricas específicas como impacto financeiro global.
-2.  **Agent**: Confirma tecnicamente que consegue calcular todas as métricas pedidas.
-3.  **Agent**: Implementa a primeira versão do Admin Growth Dashboard, incluindo a nova tab, métricas e tabela de utilizadores.
-4.  **User**: Fornece uma especificação final para o Admin Growth Dashboard, focando em 3 perguntas-chave (crescimento, impacto, comunidade) e métricas oficiais, além de um Platform Momentum Score.
-5.  **Agent**: Atualiza o backend e frontend para corresponder à especificação final do dashboard, adicionando todas as métricas e gráficos.
-6.  **Agent**: Confirma que a nova dashboard está completa e pergunta se pode avançar com Stripe Subscriptions.
-7.  **User**: Fornece uma especificação detalhada para a integração do Stripe Subscriptions, incluindo o fluxo exato, endpoints de webhook necessários e regras de progressão de nível.
-8.  **Agent**: Inicia a implementação do Stripe Subscriptions, consultando o subagente de integrações e decidindo usar o SDK Stripe diretamente.
-9.  **Agent**: Pede ao utilizador uma chave de API Stripe válida, pois a de teste é um placeholder.
-10. **User**: Confirma que a chave será configurada no ambiente e fornece um  de teste para o produto Sonhador, instruindo o agente a continuar com a implementação do checkout e dos webhooks.
+1.  **User**: Pede para implementar o incentivo a pagamentos com criptomoeda (destaque visual, reconhecimento).
+2.  **Agent**: Implementa a UI/UX para pagamentos crypto, incluindo destaque, badges e um feed especial.
+3.  **User**: Testa e reporta que os endereços das wallets de crypto estão incorretos, exceto o de USDT.
+4.  **Agent**: Pede os endereços corretos.
+5.  **User**: Fornece os endereços corretos para BTC, ETH e pede para remover USDC.
+6.  **Agent**: Corrige os endereços e remove USDC.
+7.  **User**: Pede para re-adicionar USDC com um novo endereço.
+8.  **Agent**: Adiciona novamente USDC com o endereço correto e confirma a lista final.
+9.  **User**: Confirma a correção e pede para continuar (sim, continua).
+10. **User**: Define o próximo bloco: Lifecycle das viagens dos embaixadores, especificando os estados e as ações automáticas.
 
 **Project Health Check:**
--   **Broken**: A funcionalidade de Stripe Subscriptions está incompleta. O endpoint de webhook () existe mas não foi testado, o que significa que as subscrições pagas não ativarão o status Sonhador nos utilizadores.
--   **Mocked**: A integração com GPT-5.2 para tradução continua a ser um placeholder.
+-   **Broken**: A funcionalidade de candidatura a viagens de embaixador está incompleta. O botão na UI existe, mas não há um formulário ou lógica de submissão associada.
+-   **Mocked**: Nenhuma funcionalidade está atualmente mockada.
 
 **3rd Party Integrations**
--   **Stripe (Payments & Subscriptions)** — Usa  para pagamentos únicos e o SDK  diretamente para subscrições. Requer chaves de API do utilizador e um segredo de webhook.
+-   **Stripe (Payments)** — Usa o SDK  para pagamentos únicos com cartão. Requer chaves de API do utilizador.
 -   **Emergent-managed Google Auth (Authentication)** — Gerido pela plataforma.
--   **DiceBear (Avatars)** — Integrado no backend.
+-   **DiceBear (Avatars)** — Integrado no backend para gerar avatares.
 
 **Testing status**
--   **Testing agent used after significant changes**: YES, mas foi antes das últimas grandes alterações (migração de dados, admin dashboard, Stripe).
--   **Troubleshoot agent used after agent stuck in loop**: NO.
--   **Test files created**: .
--   **Known regressions**: Nenhuma regressão funcional, mas o novo fluxo de subscrição está por testar.
+-   **Testing agent used after significant changes**: NO
+-   **Troubleshoot agent used after agent stuck in loop**: NO
+-   **Test files created**: N/A
+-   **Known regressions**: N/A
 
 **Credentials to test flow:**
 -   **Admin**:  / 
 -   **Test User**:  / 
 
 **What agent forgot to execute**
-O agente não esqueceu nada, mas a tarefa de integração do Stripe é grande e foi interrompida antes da fase de testes de webhook, que é a mais crítica. O próximo agente deve focar-se exclusivamente em validar e robustecer essa parte do fluxo.</analysis>
+O agente seguiu as instruções do utilizador de forma consistente. A única parte esquecida na implementação do ciclo de vida das viagens é a UI e a lógica do lado do cliente para um Embaixador poder efetivamente submeter uma candidatura, que é o ponto de partida de todo o fluxo.</analysis>
