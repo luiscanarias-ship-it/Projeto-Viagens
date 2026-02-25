@@ -61,6 +61,8 @@ const JourneyDetail = () => {
   const { user, getAuthHeaders } = useAuth();
   
   const [journey, setJourney] = useState(null);
+  const [progress, setProgress] = useState(null);
+  const [contributions, setContributions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showPayment, setShowPayment] = useState(false);
   const [selectedAmount, setSelectedAmount] = useState(null);
@@ -68,6 +70,8 @@ const JourneyDetail = () => {
   const [paymentInfo, setPaymentInfo] = useState(null);
   const [copied, setCopied] = useState(false);
   const [processing, setProcessing] = useState(false);
+  const [publicMessage, setPublicMessage] = useState('');
+  const [showName, setShowName] = useState(true);
   
   // Travel planning state
   const [travelResources, setTravelResources] = useState(null);
