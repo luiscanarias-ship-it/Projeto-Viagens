@@ -126,7 +126,9 @@ const JourneyDetail = () => {
         origin_url: window.location.origin,
         sponsor_code: sponsorCode,
         contributor_name: user?.name || null,
-        contributor_email: user?.email || null
+        contributor_email: user?.email || null,
+        public_message: publicMessage || null,
+        show_name: showName
       }, {
         headers: getAuthHeaders(),
         withCredentials: true
@@ -140,6 +142,7 @@ const JourneyDetail = () => {
         setShowPayment(false);
         setSelectedAmount(null);
         setSelectedMethod(null);
+        setPublicMessage('');
       }
     } catch (error) {
       console.error('Payment error:', error);
