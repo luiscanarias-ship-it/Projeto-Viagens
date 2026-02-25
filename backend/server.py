@@ -701,7 +701,7 @@ async def create_journey(journey_data: JourneyCreate, request: Request):
     journey = Journey(**journey_data.model_dump())
     doc = journey.model_dump()
     doc["owner_user_id"] = user.user_id  # Admin que criou a viagem
-    doc["status"] = "active"  # Default status
+    doc["status"] = "ativa"  # Default status - Portuguese
     doc["created_at"] = doc["created_at"].isoformat()
     doc["updated_at"] = doc["updated_at"].isoformat()
     await db.journeys.insert_one(doc)
