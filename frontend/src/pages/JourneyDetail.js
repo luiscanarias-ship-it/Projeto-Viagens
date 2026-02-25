@@ -34,7 +34,7 @@ const cryptoTypes = [
 
 // Payment methods - CRYPTO FIRST (recommended)
 const paymentMethods = [
-  { id: 'crypto', name: 'Criptomoedas', icon: Bitcoin, description: 'BTC, ETH, USDT, USDC', type: 'direct', recommended: true },
+  { id: 'crypto', name: 'Criptomoedas', icon: Bitcoin, description: 'BTC, ETH, USDT', type: 'direct', recommended: true },
   { id: 'stripe', name: 'Cartão', icon: CreditCard, description: 'Visa, Mastercard (automático)', type: 'automatic', recommended: false },
   { id: 'mbway', name: 'MBWay', icon: Smartphone, description: 'Pagamento móvel Portugal', type: 'direct', recommended: false },
   { id: 'paypal', name: 'PayPal', icon: ExternalLink, description: 'paypal.me/LuisCanarias', type: 'direct', recommended: false },
