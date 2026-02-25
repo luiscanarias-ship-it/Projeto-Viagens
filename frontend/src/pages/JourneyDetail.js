@@ -857,7 +857,7 @@ const JourneyDetail = () => {
               )}
 
               {/* Payment Details */}
-              {selectedAmount && selectedMethod && selectedMethod !== 'stripe' && paymentInfo && (
+              {selectedAmount && selectedMethod && selectedMethod !== 'stripe' && paymentInfo && (selectedMethod !== 'crypto' || selectedCrypto) && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
