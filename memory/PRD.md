@@ -143,6 +143,7 @@ Valores fixos: €10, €20, €50, €100, €200, €500, €1000
 - [x] Transição automática para "financiada" quando objetivo atingido
 - [x] Sistema de emails mockado para notificações
 - [x] Endpoints admin para migração e gestão
+- [x] **Onboarding guiado (4 ecrãs)**: Introdução, Progressão, Impacto, Escolha de ação
 
 ### ✅ Concluído (Sessões Anteriores)
 - [x] Modelo de utilizadores v2 (visitante/sonhador/embaixador)
