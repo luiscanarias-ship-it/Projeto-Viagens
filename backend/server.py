@@ -1542,9 +1542,36 @@ async def confirm_contribution(contribution_id: str, request: Request):
             {"$inc": {"successful_referrals": 1}}
         )
     
-    # MOTOR PREMIUM: Se o utilizador que contribuiu tem sponsor_id, incrementar valid_referrals_count do sponsor
+    # MOTOR EMBAIXADOR v2: Verificar progressão do utilizador que contribuiu E do sponsor
     if contribution.get("user_id"):
         contributing_user = await db.users.find_one({"user_id": contribution["user_id"]}, {"_id": 0})
+        
+        # Marcar que o utilizador contribuiu para a viagem principal
+        # (consideramos a primeira viagem ativa como "principal")
+        main_journey = await db.journeys.find_one({"is_active": True, "status": "active"}, {"_id": 0})
+        is_main_trip = main_journey and contribution["journey_id"] == main_journey.get("journey_id")
+        
+        if is_main_trip and contributing_user:
+            # Atualizar contributed_to_main_trip
+            await db.users.update_one(
+                {"user_id": contribution["user_id"]},
+                {"$set": {"contributed_to_main_trip": True}}
+            )
+            
+            # Verificar se este utilizador agora qualifica para Embaixador
+            valid_refs = contributing_user.get("valid_referrals_count", 0)
+            current_level = contributing_user.get("level", "sonhador")
+            
+            if valid_refs >= 3 and current_level != "embaixador":
+                await db.users.update_one(
+                    {"user_id": contribution["user_id"]},
+                    {"$set": {
+                        "level": "embaixador",
+                        "embaixador_unlocked_at": datetime.now(timezone.utc).isoformat()
+                    }}
+                )
+        
+        # Se o utilizador que contribuiu tem sponsor, incrementar valid_referrals_count do sponsor
         if contributing_user and contributing_user.get("sponsor_id"):
             sponsor_user_id = contributing_user["sponsor_id"]
             
@@ -1554,20 +1581,20 @@ async def confirm_contribution(contribution_id: str, request: Request):
                 {"$inc": {"valid_referrals_count": 1}}
             )
             
-            # Verificar se sponsor atinge condições Premium
+            # Verificar se sponsor atinge condições Embaixador
             sponsor = await db.users.find_one({"user_id": sponsor_user_id}, {"_id": 0})
             if sponsor:
                 valid_refs = sponsor.get("valid_referrals_count", 0)
-                subscription = sponsor.get("subscription_active", False)
-                current_level = sponsor.get("level", "curioso")
+                contributed = sponsor.get("contributed_to_main_trip", False)
+                current_level = sponsor.get("level", "sonhador")
                 
-                # MOTOR PREMIUM: subscription_active + valid_referrals >= 3 = premium
-                if subscription and valid_refs >= 3 and current_level != "premium":
+                # MOTOR EMBAIXADOR: contributed_to_main_trip + valid_referrals >= 3 = embaixador
+                if contributed and valid_refs >= 3 and current_level != "embaixador":
                     await db.users.update_one(
                         {"user_id": sponsor_user_id},
                         {"$set": {
-                            "level": "premium",
-                            "premium_unlocked_at": datetime.now(timezone.utc).isoformat()
+                            "level": "embaixador",
+                            "embaixador_unlocked_at": datetime.now(timezone.utc).isoformat()
                         }}
                     )
     
