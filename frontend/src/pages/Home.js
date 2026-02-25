@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowDown, Users, Star, Camera, MapPin, Map, Hotel, Plane, MessageCircle, Sparkles, ChevronDown, ExternalLink, BookOpen, Compass, Globe } from 'lucide-react';
+import { ArrowDown, Users, Star, Camera, MapPin, Map, Hotel, Plane, MessageCircle, Sparkles, ChevronDown, ExternalLink, BookOpen, Compass, Globe, Trophy, Award } from 'lucide-react';
 import axios from 'axios';
 import { useLanguage } from '../contexts/LanguageContext';
 import JourneyCard from '../components/JourneyCard';
@@ -11,6 +11,7 @@ const API = `${BACKEND_URL}/api`;
 const Home = () => {
   const { t } = useLanguage();
   const [journeys, setJourneys] = useState([]);
+  const [realizedJourneys, setRealizedJourneys] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dreamersStats, setDreamersStats] = useState(null);
   const [gallery, setGallery] = useState([]);
@@ -26,13 +27,15 @@ const Home = () => {
         await axios.post(`${API}/seed-journeys`).catch(() => {});
         
         // Fetch all data in parallel
-        const [journeysRes, dreamersRes, galleryRes] = await Promise.all([
+        const [journeysRes, realizedRes, dreamersRes, galleryRes] = await Promise.all([
           axios.get(`${API}/journeys`),
+          axios.get(`${API}/journeys/realized`),
           axios.get(`${API}/dreamers-stats`),
           axios.get(`${API}/gallery`)
         ]);
         
         setJourneys(journeysRes.data);
+        setRealizedJourneys(realizedRes.data.journeys || []);
         setDreamersStats(dreamersRes.data);
         setGallery(galleryRes.data);
       } catch (error) {
