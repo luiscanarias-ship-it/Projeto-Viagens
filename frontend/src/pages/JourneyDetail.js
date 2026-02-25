@@ -641,25 +641,29 @@ const JourneyDetail = () => {
             </div>
 
             <div className="p-6 space-y-6">
+              {/* Note about no fees */}
+              <div className="bg-[#E6F4F1]/50 rounded-xl p-3 text-center">
+                <p className="text-sm text-[#2D2A26]">
+                  💚 A plataforma não retém comissões. O valor vai diretamente para o sonhador.
+                </p>
+              </div>
+
               {/* Step 1: Amount */}
               <div>
                 <h3 className="font-semibold mb-4">{t('payment.amount')}</h3>
                 <div className="grid grid-cols-4 gap-2">
                   {amounts.map((amt) => (
                     <button
-                      key={amt.key}
+                      key={amt.value}
                       onClick={() => setSelectedAmount(amt)}
                       className={`p-3 rounded-xl border-2 transition-all ${
-                        selectedAmount?.key === amt.key
+                        selectedAmount?.value === amt.value
                           ? 'border-[#FFBE98] bg-[#FFBE98]/10'
                           : 'border-stone-200 hover:border-stone-300'
                       }`}
-                      data-testid={`amount-${amt.key}`}
+                      data-testid={`amount-${amt.value}`}
                     >
                       <span className="font-semibold">€{amt.value}</span>
-                      <span className="text-xs text-[#6B6661] block">
-                        {amt.tickets} {t('payment.tickets')}
-                      </span>
                     </button>
                   ))}
                 </div>
@@ -675,7 +679,7 @@ const JourneyDetail = () => {
                   <div className="space-y-2">
                     {paymentMethods.map((method) => {
                       const Icon = method.icon;
-                      const isCrypto = method.id === 'crypto';
+                      const isAutomatic = method.type === 'automatic';
                       return (
                         <button
                           key={method.id}
@@ -683,22 +687,22 @@ const JourneyDetail = () => {
                           className={`w-full p-4 rounded-xl border-2 transition-all flex items-center gap-4 ${
                             selectedMethod === method.id
                               ? 'border-[#FFBE98] bg-[#FFBE98]/10'
-                              : isCrypto
-                              ? 'border-[#F2C94C]/50 bg-[#F2C94C]/5 hover:border-[#F2C94C]'
+                              : isAutomatic
+                              ? 'border-green-200 bg-green-50/50 hover:border-green-300'
                               : 'border-stone-200 hover:border-stone-300'
                           }`}
                           data-testid={`method-${method.id}`}
                         >
-                          <Icon className={`w-6 h-6 ${isCrypto ? 'text-[#F2C94C]' : 'text-[#6B6661]'}`} />
-                          <div className="text-left">
+                          <Icon className={`w-6 h-6 ${isAutomatic ? 'text-green-600' : 'text-[#6B6661]'}`} />
+                          <div className="text-left flex-1">
                             <span className="font-medium block">{method.name}</span>
-                            <span className={`text-xs ${isCrypto ? 'text-[#F2C94C]' : 'text-[#6B6661]'}`}>
+                            <span className={`text-xs ${isAutomatic ? 'text-green-600' : 'text-[#6B6661]'}`}>
                               {method.description}
                             </span>
                           </div>
-                          {isCrypto && (
-                            <span className="ml-auto text-xs bg-[#F2C94C] text-white px-2 py-1 rounded-full">
-                              2x
+                          {isAutomatic && (
+                            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                              Auto
                             </span>
                           )}
                         </button>
