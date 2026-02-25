@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, Heart, Copy, Check, CreditCard, Smartphone, Bitcoin, ExternalLink,
   Map, Hotel, Plane, MessageCircle, Sparkles, Send, ChevronDown, ChevronUp,
-  BookOpen, Compass, Globe
+  BookOpen, Compass, Globe, User, AlertCircle
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import axios from 'axios';
