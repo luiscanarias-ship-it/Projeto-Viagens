@@ -817,12 +817,18 @@ async def get_my_contributions(request: Request):
 
 @api_router.get("/dashboard/user-stats")
 async def get_user_dashboard_stats(request: Request):
-    """Get comprehensive stats for user dashboard"""
+    """Get comprehensive stats for user dashboard - Modelo v2: sonhador → embaixador"""
     user = await require_auth(request)
     user_id = user.user_id
     
     # Get full user data
     user_data = await db.users.find_one({"user_id": user_id}, {"_id": 0, "password_hash": 0})
+    
+    # Get main journey (first active one)
+    main_journey = await db.journeys.find_one(
+        {"is_active": True, "status": "active"},
+        {"_id": 0}
+    )
     
     # Get user's contributions
     contributions = await db.contributions.find(
@@ -830,6 +836,16 @@ async def get_user_dashboard_stats(request: Request):
         {"_id": 0}
     ).sort("created_at", -1).to_list(100)
     total_contributed = sum(c.get("amount", 0) for c in contributions)
+    
+    # Check if user has contributed to main trip
+    contributed_to_main = False
+    if main_journey:
+        main_trip_contribution = await db.contributions.find_one({
+            "user_id": user_id,
+            "journey_id": main_journey["journey_id"],
+            "status": "completed"
+        })
+        contributed_to_main = main_trip_contribution is not None
     
     # Get sponsor links and calculate impact
     sponsor_links = await db.sponsor_links.find(
@@ -844,18 +860,15 @@ async def get_user_dashboard_stats(request: Request):
     ).to_list(1000)
     invited_user_ids = [u["user_id"] for u in invited_users]
     
-    # Total contributed by invited users
+    # Total contributed by invited users (these are the "valid referrals")
     invited_contributions = await db.contributions.find(
         {"user_id": {"$in": invited_user_ids}, "status": "completed"},
         {"_id": 0}
     ).to_list(10000)
     impact_amount = sum(c.get("amount", 0) for c in invited_contributions)
     
-    # Get main journey (first active one)
-    main_journey = await db.journeys.find_one(
-        {"is_active": True, "status": "active"},
-        {"_id": 0}
-    )
+    # Count unique users who contributed (valid referrals)
+    valid_referrals_from_db = user_data.get("valid_referrals_count", 0)
     
     # Get main sponsor link for this journey
     main_sponsor_link = None
@@ -865,15 +878,20 @@ async def get_user_dashboard_stats(request: Request):
             {"_id": 0}
         )
     
+    # Calculate progression status
+    level = user_data.get("level", "sonhador")
+    can_become_embaixador = contributed_to_main and valid_referrals_from_db >= 3 and level != "embaixador"
+    
     return {
         "user": {
             "user_id": user_id,
             "name": user_data.get("name"),
             "email": user_data.get("email"),
-            "level": user_data.get("level", "curioso"),
-            "subscription_active": user_data.get("subscription_active", False),
-            "valid_referrals_count": user_data.get("valid_referrals_count", 0),
-            "premium_unlocked_at": user_data.get("premium_unlocked_at")
+            "level": level,  # sonhador | embaixador
+            "contributed_to_main_trip": contributed_to_main or user_data.get("contributed_to_main_trip", False),
+            "valid_referrals_count": valid_referrals_from_db,
+            "embaixador_unlocked_at": user_data.get("embaixador_unlocked_at"),
+            "can_become_embaixador": can_become_embaixador
         },
         "contributions": {
             "total_amount": total_contributed,
@@ -882,7 +900,7 @@ async def get_user_dashboard_stats(request: Request):
         },
         "invites": {
             "total_invited": len(invited_users),
-            "total_contributed_by_invites": len([c for c in invited_contributions]),
+            "total_contributed_by_invites": len(invited_contributions),
             "impact_amount": impact_amount,
             "sponsor_links": sponsor_links
         },
