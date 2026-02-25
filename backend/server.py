@@ -105,6 +105,16 @@ class User(UserBase):
     created_at: datetime
     picture: Optional[str] = None
 
+# Journey status lifecycle
+JOURNEY_STATUSES = {
+    "candidatura": {"name": "Candidatura", "description": "Aguarda aprovação do admin"},
+    "aprovada": {"name": "Aprovada", "description": "Aprovada, aguarda ativação"},
+    "ativa": {"name": "Ativa", "description": "Viagem ativa a receber contribuições"},
+    "financiada": {"name": "Financiada", "description": "Objetivo de financiamento atingido"},
+    "realizada": {"name": "Realizada", "description": "Viagem concluída"},
+    "encerrada": {"name": "Encerrada", "description": "Viagem encerrada"}
+}
+
 class Journey(BaseModel):
     journey_id: str = Field(default_factory=lambda: f"journey_{uuid.uuid4().hex[:12]}")
     name: str
@@ -116,10 +126,22 @@ class Journey(BaseModel):
     goal_amount: float
     current_amount: float = 0.0
     currency: str = "EUR"
-    target_date: Optional[str] = None  # Data objetivo para o financiamento (formato: YYYY-MM-DD)
+    target_date: Optional[str] = None
     is_active: bool = True
-    status: str = "active"  # active | funded | closed
-    owner_user_id: Optional[str] = None  # Admin que criou a viagem
+    is_main_trip: bool = False  # True for the main platform journey
+    status: str = "ativa"  # candidatura | aprovada | ativa | financiada | realizada | encerrada
+    # Ambassador journey fields
+    is_ambassador_journey: bool = False
+    ambassador_user_id: Optional[str] = None  # User ID of the ambassador who owns this journey
+    ambassador_name: Optional[str] = None
+    application_message: Optional[str] = None  # Message from ambassador when applying
+    approved_at: Optional[str] = None
+    funded_at: Optional[str] = None
+    realized_at: Optional[str] = None
+    closed_at: Optional[str] = None
+    # Admin fields
+    owner_user_id: Optional[str] = None  # Admin who created/approved the journey
+    admin_notes: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -144,6 +166,20 @@ class JourneyUpdate(BaseModel):
     goal_amount: Optional[float] = None
     target_date: Optional[str] = None
     is_active: Optional[bool] = None
+    status: Optional[str] = None
+
+# Ambassador journey application
+class AmbassadorJourneyApplication(BaseModel):
+    name: str
+    poetic_name: str
+    description: str
+    emotional_message: str
+    impact_description: str
+    image_url: Optional[str] = None
+    goal_amount: float
+    currency: str = "EUR"
+    target_date: Optional[str] = None
+    application_message: str  # Why they want to create this journey
 
 # ==================== CONTRIBUTION MODEL (v2) ====================
 
