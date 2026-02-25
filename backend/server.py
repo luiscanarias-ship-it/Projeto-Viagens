@@ -2153,16 +2153,8 @@ async def validate_contribution(contribution_id: str, request: Request):
             {"$inc": {"current_amount": contribution["amount"]}}
         )
         
-        # Check if journey reached goal
-        journey = await db.journeys.find_one(
-            {"journey_id": contribution["journey_id"]}, 
-            {"_id": 0}
-        )
-        if journey and journey.get("current_amount", 0) >= journey.get("goal_amount", float('inf')):
-            await db.journeys.update_one(
-                {"journey_id": contribution["journey_id"]},
-                {"$set": {"status": "funded"}}
-            )
+        # Check if journey reached goal - use helper function
+        await check_and_update_journey_funding_status(contribution["journey_id"])
         
         # MOTOR EMBAIXADOR: Update user progression
         if contribution.get("user_id"):
@@ -2174,7 +2166,7 @@ async def validate_contribution(contribution_id: str, request: Request):
             if user:
                 # Mark contributed to main trip
                 main_journey = await db.journeys.find_one(
-                    {"is_active": True, "status": "active"}, 
+                    {"$or": [{"is_main_trip": True}, {"is_active": True, "status": "ativa"}]}, 
                     {"_id": 0}
                 )
                 is_main = main_journey and contribution["journey_id"] == main_journey.get("journey_id")
