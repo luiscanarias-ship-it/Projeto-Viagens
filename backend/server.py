@@ -488,85 +488,165 @@ async def get_all_journeys_admin(request: Request):
 
 # ==================== CONTRIBUTIONS & PAYMENTS ====================
 
-# Predefined contribution amounts
-CONTRIBUTION_AMOUNTS = {
-    "5": 5.0, "10": 10.0, "20": 20.0, "50": 50.0,
-    "100": 100.0, "200": 200.0, "500": 500.0, "1000": 1000.0
-}
+# ==================== CONTRIBUTIONS & PAYMENTS (v2) ====================
 
-@api_router.post("/contributions/create-checkout")
-async def create_stripe_checkout(request: Request):
-    from emergentintegrations.payments.stripe.checkout import (
-        StripeCheckout, CheckoutSessionRequest, CheckoutSessionResponse
-    )
-    
+@api_router.get("/contributions/config")
+async def get_contribution_config():
+    """Get contribution configuration (fixed amounts and payment methods)"""
+    return {
+        "fixed_amounts": FIXED_CONTRIBUTION_AMOUNTS,
+        "payment_methods": PAYMENT_METHODS,
+        "currency": "EUR",
+        "note": "A plataforma não retém comissões. As contribuições vão diretamente para o sonhador."
+    }
+
+@api_router.post("/contributions/create")
+async def create_contribution(request: Request):
+    """Create a new contribution (for both Stripe and direct payments)"""
     data = await request.json()
-    amount_key = str(data.get("amount_key"))
+    amount = data.get("amount")
+    payment_method = data.get("payment_method")
     journey_id = data.get("journey_id")
-    origin_url = data.get("origin_url")
     sponsor_code = data.get("sponsor_code")
+    contributor_name = data.get("contributor_name")
+    contributor_email = data.get("contributor_email")
     
-    if amount_key not in CONTRIBUTION_AMOUNTS:
-        raise HTTPException(status_code=400, detail="Montante inválido")
+    # Validate amount
+    if amount not in FIXED_CONTRIBUTION_AMOUNTS:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Montante inválido. Valores permitidos: {FIXED_CONTRIBUTION_AMOUNTS}"
+        )
     
-    amount = CONTRIBUTION_AMOUNTS[amount_key]
+    # Validate payment method
+    if payment_method not in PAYMENT_METHODS:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Método de pagamento inválido. Métodos permitidos: {list(PAYMENT_METHODS.keys())}"
+        )
+    
+    # Check if journey exists and is the main trip
+    journey = await db.journeys.find_one({"journey_id": journey_id, "is_active": True}, {"_id": 0})
+    if not journey:
+        raise HTTPException(status_code=404, detail="Viagem não encontrada ou inativa")
+    
     user = await get_current_user(request)
     user_id = user.user_id if user else None
     
-    api_key = os.environ.get("STRIPE_API_KEY")
-    host_url = str(request.base_url).rstrip("/")
-    webhook_url = f"{host_url}/api/webhook/stripe"
-    
-    stripe_checkout = StripeCheckout(api_key=api_key, webhook_url=webhook_url)
-    
-    success_url = f"{origin_url}/payment-success?session_id={{CHECKOUT_SESSION_ID}}"
-    cancel_url = f"{origin_url}/journey/{journey_id}"
-    
-    checkout_request = CheckoutSessionRequest(
-        amount=amount,
-        currency="eur",
-        success_url=success_url,
-        cancel_url=cancel_url,
-        metadata={
-            "journey_id": journey_id,
-            "user_id": user_id or "anonymous",
-            "sponsor_code": sponsor_code or "",
-            "source": "4luis_platform"
-        }
-    )
-    
-    session: CheckoutSessionResponse = await stripe_checkout.create_checkout_session(checkout_request)
-    
-    # Create pending contribution record
     contribution_id = f"contrib_{uuid.uuid4().hex[:12]}"
-    contribution_doc = {
-        "contribution_id": contribution_id,
-        "journey_id": journey_id,
-        "user_id": user_id,
-        "amount": amount,
-        "currency": "EUR",
-        "payment_method": "stripe",
-        "is_crypto": False,
-        "status": "pending",
-        "tickets_count": 0,
-        "sponsor_link_id": sponsor_code,
-        "session_id": session.session_id,
-        "created_at": datetime.now(timezone.utc).isoformat()
+    
+    # For Stripe payments, create checkout session
+    if payment_method == "stripe":
+        from emergentintegrations.payments.stripe.checkout import (
+            StripeCheckout, CheckoutSessionRequest, CheckoutSessionResponse
+        )
+        
+        api_key = os.environ.get("STRIPE_API_KEY")
+        if not api_key or api_key == 'sk_test_emergent':
+            raise HTTPException(status_code=500, detail="Stripe não configurado")
+        
+        origin_url = data.get("origin_url", "https://crowdtrip.preview.emergentagent.com")
+        host_url = str(request.base_url).rstrip("/")
+        webhook_url = f"{host_url}/api/webhook/stripe"
+        
+        stripe_checkout = StripeCheckout(api_key=api_key, webhook_url=webhook_url)
+        
+        success_url = f"{origin_url}/payment-success?session_id={{CHECKOUT_SESSION_ID}}"
+        cancel_url = f"{origin_url}/journey/{journey_id}"
+        
+        checkout_request = CheckoutSessionRequest(
+            amount=float(amount),
+            currency="eur",
+            success_url=success_url,
+            cancel_url=cancel_url,
+            metadata={
+                "journey_id": journey_id,
+                "user_id": user_id or "anonymous",
+                "contribution_id": contribution_id,
+                "sponsor_code": sponsor_code or "",
+                "source": "4luis_platform"
+            }
+        )
+        
+        session: CheckoutSessionResponse = await stripe_checkout.create_checkout_session(checkout_request)
+        session_id = session.session_id
+        
+        # Create contribution record
+        contribution_doc = {
+            "contribution_id": contribution_id,
+            "journey_id": journey_id,
+            "user_id": user_id,
+            "amount": amount,
+            "currency": "EUR",
+            "payment_method": "stripe",
+            "status": "pending",
+            "is_main_trip": True,
+            "sponsor_link_id": sponsor_code,
+            "session_id": session_id,
+            "contributor_name": contributor_name or (user.name if user else None),
+            "contributor_email": contributor_email or (user.email if user else None),
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.contributions.insert_one(contribution_doc)
+        
+        return {
+            "contribution_id": contribution_id,
+            "payment_method": "stripe",
+            "checkout_url": session.url,
+            "session_id": session_id
+        }
+    
+    # For direct payments (MBWay, PayPal, Revolut, Wise, Crypto)
+    else:
+        contribution_doc = {
+            "contribution_id": contribution_id,
+            "journey_id": journey_id,
+            "user_id": user_id,
+            "amount": amount,
+            "currency": "EUR",
+            "payment_method": payment_method,
+            "status": "pending",  # Requires admin confirmation
+            "is_main_trip": True,
+            "sponsor_link_id": sponsor_code,
+            "contributor_name": contributor_name or (user.name if user else None),
+            "contributor_email": contributor_email or (user.email if user else None),
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.contributions.insert_one(contribution_doc)
+        
+        return {
+            "contribution_id": contribution_id,
+            "payment_method": payment_method,
+            "status": "pending",
+            "message": "Contribuição registada. Aguarda confirmação após o pagamento ser recebido."
+        }
+
+@api_router.get("/contributions/payment-info")
+async def get_payment_info():
+    """Get direct payment information"""
+    return {
+        "mbway": {
+            "phone": "+351968068535",
+            "name": "Luis"
+        },
+        "paypal": {
+            "link": "paypal.me/LuisCanarias"
+        },
+        "revolut": {
+            "tag": "@luis4dreams",
+            "note": "Usa o tag Revolut para enviar"
+        },
+        "wise": {
+            "email": "luis@4luis.com"
+        },
+        "crypto": {
+            "currency": "USDT",
+            "network": "Tron (TRC20)",
+            "address": "TGcWs89gTkkxARVT8UJsCFUMc9sQkvUmtL",
+            "warning": "Use a mesma rede de depósito (TRC20) para que as criptomoedas não se percam."
+        },
+        "note": "A plataforma não retém comissões. O valor integral vai diretamente para o sonhador."
     }
-    await db.contributions.insert_one(contribution_doc)
-    
-    # Create payment transaction record
-    await db.payment_transactions.insert_one({
-        "session_id": session.session_id,
-        "contribution_id": contribution_id,
-        "amount": amount,
-        "currency": "EUR",
-        "user_id": user_id,
-        "payment_status": "initiated",
-        "created_at": datetime.now(timezone.utc).isoformat()
-    })
-    
-    return {"url": session.url, "session_id": session.session_id}
 
 @api_router.get("/contributions/checkout-status/{session_id}")
 async def get_checkout_status(session_id: str, request: Request):
