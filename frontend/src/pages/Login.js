@@ -29,10 +29,12 @@ const Login = () => {
     try {
       if (isRegister) {
         await register(formData.email, formData.password, formData.name, formData.surname);
+        // Redirect new users to onboarding
+        navigate('/onboarding');
       } else {
         await login(formData.email, formData.password);
+        navigate('/dashboard');
       }
-      navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.detail || 'Erro ao autenticar');
     } finally {
