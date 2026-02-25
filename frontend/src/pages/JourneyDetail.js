@@ -183,7 +183,10 @@ const JourneyDetail = () => {
     "O que não posso deixar de visitar?"
   ];
 
-  const progress = journey ? Math.min((journey.current_amount / journey.goal_amount) * 100, 100) : 0;
+  // Use progress from API (can exceed 100%)
+  const progressPercent = progress?.percentage || 0;
+  const isFunded = progress?.is_funded || false;
+  const closingMessage = progress?.closing_message;
 
   if (loading) {
     return (
@@ -230,19 +233,27 @@ const JourneyDetail = () => {
       </div>
 
       <div className="max-w-6xl mx-auto px-6 md:px-12 py-12">
-        {/* Progress Bar */}
+        {/* Progress Bar - Always visible, percentage public, goal amount hidden */}
         <div className="bg-white rounded-3xl p-8 shadow-lg -mt-16 relative z-10 mb-8">
+          {/* Funded Banner */}
+          {isFunded && (
+            <div className="bg-gradient-to-r from-[#F2C94C]/20 to-[#FFBE98]/20 rounded-xl p-4 mb-4 flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-[#F2C94C]" />
+              <p className="text-[#2D2A26] font-medium">{closingMessage}</p>
+            </div>
+          )}
+          
           <div className="h-4 bg-stone-100 rounded-full overflow-hidden mb-4">
             <motion.div
               initial={{ width: 0 }}
-              animate={{ width: `${progress}%` }}
+              animate={{ width: `${Math.min(progressPercent, 100)}%` }}
               transition={{ duration: 1.5, ease: 'easeOut' }}
-              className="h-full progress-bar-warm rounded-full"
+              className={`h-full rounded-full ${isFunded ? 'bg-gradient-to-r from-[#F2C94C] to-[#FFBE98]' : 'progress-bar-warm'}`}
             />
           </div>
           <div className="flex items-center justify-center gap-4 flex-wrap">
-            <p className="text-2xl font-bold text-[#FFBE98]">
-              {Math.round(progress)}% angariado
+            <p className={`text-2xl font-bold ${isFunded ? 'text-[#F2C94C]' : 'text-[#FFBE98]'}`}>
+              {Math.round(progressPercent)}% angariado
             </p>
             {journey.target_date && (
               <p className="text-sm text-[#6B6661]">
