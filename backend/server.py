@@ -130,6 +130,10 @@ class Journey(BaseModel):
     is_active: bool = True
     is_main_trip: bool = False  # True for the main platform journey
     status: str = "ativa"  # candidatura | aprovada | ativa | financiada | realizada | encerrada
+    # Location fields for organization
+    region: Optional[str] = None  # Geographic region: europa, asia, africa, americas, oceania
+    country: Optional[str] = None  # Country name
+    city: Optional[str] = None  # City name
     # Ambassador journey fields
     is_ambassador_journey: bool = False
     ambassador_user_id: Optional[str] = None  # User ID of the ambassador who owns this journey
@@ -139,6 +143,9 @@ class Journey(BaseModel):
     funded_at: Optional[str] = None
     realized_at: Optional[str] = None
     closed_at: Optional[str] = None
+    # Story & photos for realized journeys
+    story: Optional[str] = None  # Story text after journey is realized
+    photos: Optional[List[str]] = None  # List of photo URLs
     # Admin fields
     owner_user_id: Optional[str] = None  # Admin who created/approved the journey
     admin_notes: Optional[str] = None
