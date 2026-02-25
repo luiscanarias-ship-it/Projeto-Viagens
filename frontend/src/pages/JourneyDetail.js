@@ -828,8 +828,25 @@ const JourneyDetail = () => {
                       )}
                     </button>
                   ) : (
-                    <p className="text-center text-sm text-[#6B6661]">
-                      Após o pagamento, entre em contacto para confirmar a sua contribuição.
+                    <button
+                      onClick={handlePayment}
+                      disabled={processing}
+                      className="w-full bg-[#2D2A26] text-white py-3 px-6 rounded-xl font-medium hover:bg-[#4A4640] transition-all flex items-center justify-center gap-2"
+                      data-testid="register-contribution-btn"
+                    >
+                      {processing ? (
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <>
+                          <Check className="w-5 h-5" />
+                          Registar contribuição de €{selectedAmount.value}
+                        </>
+                      )}
+                    </button>
+                  )}
+                  {selectedMethod !== 'stripe' && (
+                    <p className="text-center text-xs text-[#6B6661] mt-3">
+                      A contribuição ficará pendente até confirmação do pagamento pelo administrador.
                     </p>
                   )}
                 </motion.div>
