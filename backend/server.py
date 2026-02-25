@@ -154,8 +154,7 @@ FIXED_CONTRIBUTION_AMOUNTS = [10, 20, 50, 100, 200, 500, 1000]
 CRYPTO_TYPES = {
     "btc": {"name": "Bitcoin", "symbol": "BTC", "icon": "bitcoin", "color": "#F7931A"},
     "eth": {"name": "Ethereum", "symbol": "ETH", "icon": "ethereum", "color": "#627EEA"},
-    "usdt": {"name": "Tether", "symbol": "USDT", "icon": "dollar", "color": "#26A17B"},
-    "usdc": {"name": "USD Coin", "symbol": "USDC", "icon": "dollar", "color": "#2775CA"}
+    "usdt": {"name": "Tether", "symbol": "USDT", "icon": "dollar", "color": "#26A17B"}
 }
 
 # Payment methods - crypto is FIRST (recommended)
@@ -688,14 +687,14 @@ async def get_payment_info():
                 "name": "Bitcoin",
                 "symbol": "BTC",
                 "network": "Bitcoin Network",
-                "address": "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
+                "address": "bc1qw34att4qwerdapfpzy3e98xz894uy7kz3sd7vm",
                 "color": "#F7931A"
             },
             "eth": {
                 "name": "Ethereum",
                 "symbol": "ETH",
                 "network": "Ethereum (ERC20)",
-                "address": "0x742d35Cc6634C0532925a3b844Bc9e7595f2bD61",
+                "address": "0x48dF0E85dA06688445f3eEabaBE9DF57bA10A991",
                 "color": "#627EEA"
             },
             "usdt": {
@@ -705,13 +704,6 @@ async def get_payment_info():
                 "address": "TGcWs89gTkkxARVT8UJsCFUMc9sQkvUmtL",
                 "color": "#26A17B",
                 "warning": "Use a mesma rede de depósito (TRC20) para que as criptomoedas não se percam."
-            },
-            "usdc": {
-                "name": "USD Coin",
-                "symbol": "USDC",
-                "network": "Ethereum (ERC20)",
-                "address": "0x742d35Cc6634C0532925a3b844Bc9e7595f2bD61",
-                "color": "#2775CA"
             }
         },
         "note": "A plataforma não retém comissões. O valor integral vai diretamente para o sonhador."
