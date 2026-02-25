@@ -748,11 +748,17 @@ async def get_journey_public_contributions(journey_id: str):
         else:
             display_name = "Sonhador Anónimo"
         
+        # Check if crypto payment for badge
+        is_crypto = c.get("payment_method") == "crypto"
+        crypto_type = c.get("crypto_type") if is_crypto else None
+        
         public_feed.append({
             "contribution_id": c["contribution_id"],
             "display_name": display_name,
             "amount": c["amount"],
             "message": c.get("public_message"),
+            "is_crypto": is_crypto,
+            "crypto_type": crypto_type,
             "created_at": c.get("created_at") or c.get("confirmed_at")
         })
     
