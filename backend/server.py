@@ -287,13 +287,13 @@ async def register(user_data: UserCreate):
         "is_admin": is_admin,
         "avatar": None,
         "use_real_name": True,
-        # Novos campos ETAPA 1
+        # Modelo v2: visitante (não registado) | sonhador (registado) | embaixador (contribuiu + 3 referrals)
         "sponsor_id": sponsor_id,  # IMUTÁVEL - quem convidou este utilizador
-        "level": "curioso",  # curioso | sonhador | premium
-        "subscription_active": False,
+        "level": "sonhador",  # sonhador | embaixador (visitante = não registado)
+        "contributed_to_main_trip": False,  # Tem contribuição confirmada na viagem principal
         "valid_referrals_count": 0,  # Referências que confirmaram contribuição
         "registered_at": datetime.now(timezone.utc).isoformat(),
-        "premium_unlocked_at": None,
+        "embaixador_unlocked_at": None,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.users.insert_one(user_doc)
