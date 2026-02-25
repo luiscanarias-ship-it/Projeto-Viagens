@@ -336,6 +336,169 @@ async def require_admin(request: Request) -> User:
         raise HTTPException(status_code=403, detail="Acesso de administrador necessário")
     return user
 
+# ==================== EMAIL SYSTEM ====================
+
+EMAIL_TEMPLATES = {
+    "journey_funded": {
+        "subject": "Parabéns! A tua viagem foi financiada! - 4Luis",
+        "body": """
+Olá {ambassador_name},
+
+Temos ótimas notícias! A tua viagem "{journey_name}" atingiu o objetivo de financiamento!
+
+Valor total angariado: {amount_raised}€
+
+Este é um momento especial - graças à comunidade 4Luis, o teu sonho está mais perto de se tornar realidade.
+
+Próximos passos:
+1. Recebemos a confirmação do financiamento
+2. Em breve entraremos em contacto para os detalhes da viagem
+3. Prepara-te para viver esta aventura!
+
+Obrigado por fazeres parte da nossa comunidade de sonhadores.
+
+Com carinho,
+A equipa 4Luis
+
+---
+Este email foi enviado automaticamente. Não respondas diretamente.
+"""
+    },
+    "admin_journey_funded": {
+        "subject": "Viagem Financiada: {journey_name}",
+        "body": """
+ALERTA: Viagem Financiada
+
+Viagem: {journey_name}
+ID: {journey_id}
+Embaixador: {ambassador_name}
+Valor angariado: {amount_raised}€
+
+A viagem foi automaticamente movida para o estado "financiada".
+
+Ação necessária: Rever e aprovar os próximos passos com o embaixador.
+"""
+    },
+    "contribution_confirmed": {
+        "subject": "Contribuição confirmada - 4Luis",
+        "body": """
+Olá {contributor_name},
+
+A tua contribuição de {amount}€ para a viagem "{journey_name}" foi confirmada!
+
+Obrigado por fazeres parte desta comunidade de sonhadores. O teu apoio faz a diferença.
+
+{crypto_badge}
+
+Com gratidão,
+A equipa 4Luis
+"""
+    },
+    "welcome": {
+        "subject": "Bem-vindo à comunidade 4Luis!",
+        "body": """
+Olá {name},
+
+Bem-vindo à 4Luis - onde os sonhos ganham asas!
+
+Agora és um Sonhador. Eis o que podes fazer:
+- Contribuir para viagens de sonho
+- Convidar amigos com o teu link de sponsor
+- Tornar-te Embaixador e criar a tua própria viagem
+
+O teu link de convite: {sponsor_link}
+
+Obrigado por te juntares a nós!
+
+A equipa 4Luis
+"""
+    },
+    "ambassador_unlocked": {
+        "subject": "Parabéns, és agora Embaixador! - 4Luis",
+        "body": """
+Olá {name},
+
+Parabéns! Desbloqueaste o nível Embaixador na 4Luis!
+
+Isto significa que:
+✓ Contribuíste para a viagem principal
+✓ Convidaste 3 ou mais pessoas que também contribuíram
+
+Como Embaixador, agora podes:
+- Candidatar-te a criar a tua própria viagem de sonho
+- Receber contribuições da comunidade
+- Inspirar outros a sonhar
+
+Acede ao teu dashboard para começar: {dashboard_link}
+
+A equipa 4Luis
+"""
+    }
+}
+
+async def queue_email(to_email: str, to_name: str, subject: str, template: str, data: dict):
+    """
+    Queue an email for sending. This is a mock implementation that stores emails
+    in the database. Can be replaced with a real email service like Resend/SendGrid.
+    """
+    template_data = EMAIL_TEMPLATES.get(template, {})
+    
+    # Format subject and body with data
+    formatted_subject = subject
+    formatted_body = template_data.get("body", "")
+    
+    for key, value in data.items():
+        formatted_subject = formatted_subject.replace(f"{{{key}}}", str(value))
+        formatted_body = formatted_body.replace(f"{{{key}}}", str(value))
+    
+    email_doc = {
+        "email_id": f"email_{uuid.uuid4().hex[:12]}",
+        "to_email": to_email,
+        "to_name": to_name,
+        "subject": formatted_subject,
+        "body": formatted_body,
+        "template": template,
+        "data": data,
+        "status": "queued",  # queued | sent | failed
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "sent_at": None,
+        "error": None
+    }
+    
+    await db.email_queue.insert_one(email_doc)
+    logger.info(f"Email queued: {email_doc['email_id']} to {to_email} - {subject}")
+    
+    # TODO: Integrate with real email service (Resend, SendGrid, etc.)
+    # For now, mark as "sent" immediately (mock)
+    await db.email_queue.update_one(
+        {"email_id": email_doc["email_id"]},
+        {"$set": {"status": "sent", "sent_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    return email_doc["email_id"]
+
+async def send_contribution_confirmed_email(contribution: dict, journey: dict):
+    """Send email when a contribution is confirmed"""
+    if not contribution.get("contributor_email"):
+        return
+    
+    crypto_badge = ""
+    if contribution.get("payment_method") == "crypto":
+        crypto_badge = f"\n🏆 Badge especial: Contribuição em {contribution.get('crypto_type', 'crypto').upper()}!\n"
+    
+    await queue_email(
+        to_email=contribution["contributor_email"],
+        to_name=contribution.get("contributor_name", "Sonhador"),
+        subject="Contribuição confirmada - 4Luis",
+        template="contribution_confirmed",
+        data={
+            "contributor_name": contribution.get("contributor_name", "Sonhador"),
+            "amount": contribution.get("amount"),
+            "journey_name": journey.get("name", ""),
+            "crypto_badge": crypto_badge
+        }
+    )
+
 # ==================== AUTH ROUTES ====================
 
 @api_router.post("/auth/register")
