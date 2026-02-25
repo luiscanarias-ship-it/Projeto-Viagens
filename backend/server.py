@@ -512,6 +512,7 @@ async def get_contribution_config():
     return {
         "fixed_amounts": FIXED_CONTRIBUTION_AMOUNTS,
         "payment_methods": PAYMENT_METHODS,
+        "crypto_types": CRYPTO_TYPES,
         "currency": "EUR",
         "note": "A plataforma não retém comissões. As contribuições vão diretamente para o sonhador."
     }
