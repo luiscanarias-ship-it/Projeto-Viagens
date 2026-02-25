@@ -7,112 +7,114 @@ Criar uma plataforma de angariação de fundos chamada "4Luis" (4Luis.com) com c
 - **Frontend**: React 19 + TailwindCSS + Framer Motion
 - **Backend**: FastAPI (Python)
 - **Database**: MongoDB
-- **Pagamentos**: Stripe (apenas para contribuições)
+- **Pagamentos**: Stripe (automático) + MBWay/PayPal/Revolut/Wise/Crypto (diretos)
 - **Autenticação**: JWT + Google OAuth (Emergent Auth)
 
 ---
 
-## Modelo de Utilizadores v2 (ATUAL)
+## Modelo de Viagem Principal (v2 - ATUAL)
 
-### 3 Estados de Utilizador
+### Características
+- **Viagem única** ativa até financiamento total
+- **Valores fixos** de contribuição: €10, €20, €50, €100, €200, €500, €1000
+- **Sem valor livre** - apenas montantes predefinidos
+- **Zero comissões** - contribuições vão diretamente para o sonhador
 
+### Métodos de Pagamento
+| Método | Tipo | Descrição |
+|--------|------|-----------|
+| **Stripe** | Automático | Cartão (Visa, Mastercard) |
+| **MBWay** | Direto | +351968068535 |
+| **PayPal** | Direto | paypal.me/LuisCanarias |
+| **Revolut** | Direto | @luis4dreams |
+| **Wise** | Direto | luis@4luis.com |
+| **Crypto** | Direto | USDT TRC20 |
+
+### Modelo de Contribuição (v2)
+```json
+{
+  "contribution_id": "string",
+  "journey_id": "string",
+  "user_id": "string | null",
+  "amount": 10 | 20 | 50 | 100 | 200 | 500 | 1000,
+  "payment_method": "stripe | mbway | paypal | revolut | wise | crypto",
+  "status": "pending | confirmed | rejected",
+  "is_main_trip": true,
+  "validated_by": "admin_user_id | null",
+  "validated_at": "datetime | null"
+}
+```
+
+---
+
+## Modelo de Utilizadores (v2)
+
+### 3 Estados
 | Estado | Descrição | Requisitos |
 |--------|-----------|------------|
 | **Visitante** | Não registado | Pode ver viagens |
-| **Sonhador** | Utilizador registado | Pode contribuir, gerar links, convidar |
-| **Embaixador** | Sonhador ativo | Contribuiu + 3 referrals válidos |
+| **Sonhador** | Utilizador registado | Pode contribuir, convidar |
+| **Embaixador** | Sonhador ativo | Contribuiu + 3 referrals |
 
-### Motor de Progressão para Embaixador
+### Motor de Progressão
 ```
 IF contributed_to_main_trip = true
 AND valid_referrals_count >= 3
 THEN level = "embaixador"
 ```
 
-### Benefícios por Nível
-- **Sonhador**: Acesso completo à plataforma, pode convidar amigos
-- **Embaixador**: Pode candidatar-se a abrir viagem própria
-
-### Campos do Utilizador (Schema)
-```json
-{
-  "user_id": "string",
-  "email": "string",
-  "name": "string",
-  "level": "sonhador | embaixador",
-  "contributed_to_main_trip": "boolean",
-  "valid_referrals_count": "number",
-  "sponsor_id": "string (imutável)",
-  "embaixador_unlocked_at": "datetime | null"
-}
-```
-
 ---
 
-## User Dashboard v1 (Implementado)
+## Admin Reports (NOVO)
 
-### 5 Blocos do Dashboard
+### Endpoints
+- `GET /api/admin/contributions/reports` - Relatórios completos
+- `GET /api/admin/contributions/pending` - Contribuições pendentes
+- `PUT /api/admin/contributions/{id}/validate` - Validar contribuição
 
-1. **Estado Atual** - Badge com nível (Sonhador/Embaixador)
-2. **Progresso para Embaixador** - Checklist visual:
-   - [ ] Contribuir para viagem principal
-   - [ ] 3 referrals válidos (barra de progresso)
-3. **Convites** - Link de sponsor, copiar, partilhar, estatísticas
-4. **Contribuições Pessoais** - Total €, nº contribuições, última
-5. **Viagem Principal** - Progresso, valor, botão "Apoiar"
-
-### Adaptação por Nível
-- **Sonhador**: Mostra checklist de progresso
-- **Embaixador**: Mostra "Desbloqueado!" + CTA candidatura
-
----
-
-## Stripe (Contribuições)
-
-### Uso Atual
-- Stripe é usado **apenas para pagamentos de contribuições**
-- Removida a subscrição mensal como requisito de progressão
-
-### Endpoints de Contribuição
-- `POST /api/contributions/create-checkout` - Checkout Stripe
-- `GET /api/contributions/checkout-status/{session_id}` - Status
-- `POST /api/webhook/stripe` - Webhook de pagamentos
+### Métricas Disponíveis
+1. **Por Montante**: Contagem e total por valor (€10, €20, etc.)
+2. **Por Método**: Contagem e total por método de pagamento
+3. **Temporal**: Histórico diário (últimos 30 dias)
+4. **Resumo**: Total confirmado, média, pendentes
 
 ---
 
 ## Endpoints Principais
 
-### Dashboard
-- `GET /api/dashboard/user-stats` - Stats completos do user
-
-### Contribuições
-- `POST /api/contributions/create-checkout` - Iniciar pagamento
-- `GET /api/contributions/my-contributions` - Histórico
+### Contribuições (v2)
+- `GET /api/contributions/config` - Configuração (valores fixos, métodos)
+- `GET /api/contributions/payment-info` - Info de pagamentos diretos
+- `POST /api/contributions/create` - Criar contribuição
 
 ### Admin
-- `GET /api/admin/contributions` - Todas contribuições
-- `PUT /api/admin/contributions/{id}/confirm` - Confirmar manual
-- `GET /api/admin/users/dashboard` - Growth dashboard
+- `GET /api/admin/contributions/reports` - Relatórios
+- `GET /api/admin/contributions/pending` - Pendentes
+- `PUT /api/admin/contributions/{id}/validate` - Validar
 
 ---
 
 ## Backlog
 
+### ✅ Concluído
+- [x] Modelo de utilizadores v2 (visitante/sonhador/embaixador)
+- [x] Dashboard do utilizador com progresso
+- [x] Valores fixos de contribuição
+- [x] 6 métodos de pagamento (Stripe, MBWay, PayPal, Revolut, Wise, Crypto)
+- [x] Relatórios admin (por valor, método, temporal)
+- [x] Validação de contribuições pelo admin
+
 ### P1 (Próximo)
 - [ ] Emails automáticos:
-  - Boas-vindas ao Sonhador
-  - Convite aceite
-  - Contribuição de convidado
+  - Boas-vindas Sonhador
+  - Contribuição registada
+  - Contribuição confirmada
   - Embaixador desbloqueado
 
 ### P2 (Futuro)
-- [ ] Secção de testemunhos nas páginas de viagem
-- [ ] Sistema de notificações in-app
 - [ ] Formulário de candidatura Embaixador
-
-### P3 (Backlog)
-- [ ] Reintroduzir sistema de "Pontos"
-- [ ] Gamificação avançada
+- [ ] Notificações in-app
+- [ ] Secção de testemunhos
 
 ---
 
@@ -125,14 +127,10 @@ THEN level = "embaixador"
 
 ## Alterações Recentes
 
-### 2026-02-17
-- ✅ Implementado User Dashboard v1 com 5 blocos
-- ✅ Testados webhooks Stripe Subscriptions
-- ✅ Motor Premium validado (subscription + 3 referrals)
-
 ### 2026-02-25
-- ✅ **Atualização Modelo v2**: Removida subscrição como requisito
-- ✅ Novos estados: Visitante → Sonhador → Embaixador
-- ✅ Novo motor: contributed_to_main_trip + 3 referrals = embaixador
-- ✅ Dashboard atualizado com checklist de progresso
-- ✅ Migração de utilizadores existentes
+- ✅ **Valores fixos**: €10, €20, €50, €100, €200, €500, €1000 (sem valor livre)
+- ✅ **6 métodos de pagamento**: Stripe (auto) + MBWay, PayPal, Revolut, Wise, Crypto (diretos)
+- ✅ **Modelo de contribuição v2**: Campos `validated_by`, `validated_at`, `is_main_trip`
+- ✅ **Relatórios admin**: Por valor, por método, histórico temporal
+- ✅ **UI atualizada**: Modal de pagamento com todos os métodos e instruções
+- ✅ **Zero comissões**: Nota visível no fluxo de pagamento
