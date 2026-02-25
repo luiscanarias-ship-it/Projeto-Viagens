@@ -175,6 +175,8 @@ class Contribution(BaseModel):
     session_id: Optional[str] = None  # Stripe session if applicable
     contributor_name: Optional[str] = None  # For anonymous/unregistered
     contributor_email: Optional[str] = None
+    public_message: Optional[str] = None  # Public message from supporter
+    show_name: bool = True  # Whether to show real name or anonymous
     notes: Optional[str] = None  # Admin notes
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -185,6 +187,8 @@ class ContributionCreate(BaseModel):
     sponsor_code: Optional[str] = None
     contributor_name: Optional[str] = None
     contributor_email: Optional[str] = None
+    public_message: Optional[str] = None  # Optional public message
+    show_name: bool = True  # Show name publicly or anonymous
 
 class SponsorLink(BaseModel):
     link_id: str = Field(default_factory=lambda: f"sponsor_{uuid.uuid4().hex[:8]}")
