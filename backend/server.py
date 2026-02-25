@@ -2071,6 +2071,11 @@ async def confirm_contribution(contribution_id: str, request: Request):
             contribution.get("is_crypto", False)
         )
     
+    # Send confirmation email to contributor
+    journey = await db.journeys.find_one({"journey_id": contribution["journey_id"]}, {"_id": 0})
+    if journey:
+        await send_contribution_confirmed_email(contribution, journey)
+    
     return {"message": "Contribuição confirmada com sucesso"}
 
 @api_router.get("/admin/sponsors-report")
