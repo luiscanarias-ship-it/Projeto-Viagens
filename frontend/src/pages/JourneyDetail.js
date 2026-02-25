@@ -25,13 +25,22 @@ const amounts = [
   { value: 1000 }
 ];
 
+// Crypto types supported
+const cryptoTypes = [
+  { id: 'btc', name: 'Bitcoin', symbol: 'BTC', color: '#F7931A' },
+  { id: 'eth', name: 'Ethereum', symbol: 'ETH', color: '#627EEA' },
+  { id: 'usdt', name: 'Tether', symbol: 'USDT', color: '#26A17B' },
+  { id: 'usdc', name: 'USD Coin', symbol: 'USDC', color: '#2775CA' }
+];
+
+// Payment methods - CRYPTO FIRST (recommended)
 const paymentMethods = [
-  { id: 'stripe', name: 'Cartão', icon: CreditCard, description: 'Visa, Mastercard (automático)', type: 'automatic' },
-  { id: 'mbway', name: 'MBWay', icon: Smartphone, description: 'Pagamento móvel Portugal', type: 'direct' },
-  { id: 'paypal', name: 'PayPal', icon: ExternalLink, description: 'paypal.me/LuisCanarias', type: 'direct' },
-  { id: 'revolut', name: 'Revolut', icon: ExternalLink, description: '@luis4dreams', type: 'direct' },
-  { id: 'wise', name: 'Wise', icon: ExternalLink, description: 'Transferência internacional', type: 'direct' },
-  { id: 'crypto', name: 'Crypto', icon: Bitcoin, description: 'USDT (TRC20)', type: 'direct' }
+  { id: 'crypto', name: 'Criptomoedas', icon: Bitcoin, description: 'BTC, ETH, USDT, USDC', type: 'direct', recommended: true },
+  { id: 'stripe', name: 'Cartão', icon: CreditCard, description: 'Visa, Mastercard (automático)', type: 'automatic', recommended: false },
+  { id: 'mbway', name: 'MBWay', icon: Smartphone, description: 'Pagamento móvel Portugal', type: 'direct', recommended: false },
+  { id: 'paypal', name: 'PayPal', icon: ExternalLink, description: 'paypal.me/LuisCanarias', type: 'direct', recommended: false },
+  { id: 'revolut', name: 'Revolut', icon: ExternalLink, description: '@luis4dreams', type: 'direct', recommended: false },
+  { id: 'wise', name: 'Wise', icon: ExternalLink, description: 'Transferência internacional', type: 'direct', recommended: false }
 ];
 
 // Icon components for social/travel resources
