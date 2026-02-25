@@ -84,7 +84,7 @@ const JourneyDetail = () => {
       try {
         const [journeyRes, paymentRes, resourcesRes] = await Promise.all([
           axios.get(`${API}/journeys/${id}`),
-          axios.get(`${API}/payment-info`),
+          axios.get(`${API}/contributions/payment-info`),
           axios.get(`${API}/journey/${id}/travel-resources`)
         ]);
         setJourney(journeyRes.data);
