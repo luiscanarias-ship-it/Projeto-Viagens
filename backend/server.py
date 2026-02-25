@@ -1116,7 +1116,7 @@ async def stripe_webhook(request: Request):
 async def record_manual_contribution(request: Request):
     data = await request.json()
     journey_id = data.get("journey_id")
-    amount_key = str(data.get("amount_key"))
+    amount = data.get("amount")  # Direct amount value
     payment_method = data.get("payment_method")
     is_crypto = data.get("is_crypto", False)
     sponsor_code = data.get("sponsor_code")
@@ -1124,10 +1124,10 @@ async def record_manual_contribution(request: Request):
     surname = data.get("surname")
     email = data.get("email")
     
-    if amount_key not in CONTRIBUTION_AMOUNTS:
-        raise HTTPException(status_code=400, detail="Montante inválido")
+    # Validate amount against fixed amounts
+    if amount not in FIXED_CONTRIBUTION_AMOUNTS:
+        raise HTTPException(status_code=400, detail=f"Montante inválido. Valores permitidos: {FIXED_CONTRIBUTION_AMOUNTS}")
     
-    amount = CONTRIBUTION_AMOUNTS[amount_key]
     user = await get_current_user(request)
     
     # If user provides data, create/update user
