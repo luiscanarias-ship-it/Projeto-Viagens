@@ -2105,6 +2105,33 @@ async def confirm_contribution(contribution_id: str, request: Request):
     
     return {"message": "Contribuição confirmada com sucesso"}
 
+@api_router.get("/admin/emails")
+async def get_email_queue(request: Request, status: Optional[str] = None, limit: int = 50):
+    """Get email queue - Admin only"""
+    await require_admin(request)
+    
+    query = {}
+    if status:
+        query["status"] = status
+    
+    emails = await db.email_queue.find(query, {"_id": 0}).sort("created_at", -1).limit(limit).to_list(limit)
+    
+    # Stats
+    total = await db.email_queue.count_documents({})
+    sent = await db.email_queue.count_documents({"status": "sent"})
+    queued = await db.email_queue.count_documents({"status": "queued"})
+    failed = await db.email_queue.count_documents({"status": "failed"})
+    
+    return {
+        "emails": emails,
+        "stats": {
+            "total": total,
+            "sent": sent,
+            "queued": queued,
+            "failed": failed
+        }
+    }
+
 @api_router.get("/admin/sponsors-report")
 async def get_sponsors_report(request: Request):
     """Get report of sponsors who have 3+ successful referrals - Admin only"""
