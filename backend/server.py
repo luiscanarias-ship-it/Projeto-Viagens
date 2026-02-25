@@ -174,6 +174,11 @@ class JourneyUpdate(BaseModel):
     target_date: Optional[str] = None
     is_active: Optional[bool] = None
     status: Optional[str] = None
+    region: Optional[str] = None
+    country: Optional[str] = None
+    city: Optional[str] = None
+    story: Optional[str] = None
+    photos: Optional[List[str]] = None
 
 # Ambassador journey application
 class AmbassadorJourneyApplication(BaseModel):
