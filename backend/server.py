@@ -1773,17 +1773,266 @@ async def get_sponsors_report(request: Request):
 @api_router.put("/admin/contributions/{contribution_id}/reject")
 async def reject_contribution(contribution_id: str, request: Request):
     """Reject a contribution"""
-    await require_admin(request)
+    admin = await require_admin(request)
     
     result = await db.contributions.update_one(
         {"contribution_id": contribution_id},
-        {"$set": {"status": "rejected", "rejected_at": datetime.now(timezone.utc).isoformat()}}
+        {"$set": {
+            "status": "rejected", 
+            "validated_by": admin.user_id,
+            "validated_at": datetime.now(timezone.utc).isoformat()
+        }}
     )
     
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Contribuição não encontrada")
     
     return {"message": "Contribuição rejeitada"}
+
+# ==================== ADMIN CONTRIBUTION REPORTS ====================
+
+@api_router.get("/admin/contributions/reports")
+async def get_contribution_reports(request: Request):
+    """Get comprehensive contribution reports for admin"""
+    await require_admin(request)
+    
+    # Get all completed contributions
+    all_contributions = await db.contributions.find(
+        {"status": "confirmed"},
+        {"_id": 0}
+    ).to_list(10000)
+    
+    # Also include "completed" status for backwards compatibility
+    completed_contributions = await db.contributions.find(
+        {"status": "completed"},
+        {"_id": 0}
+    ).to_list(10000)
+    
+    contributions = all_contributions + completed_contributions
+    
+    # 1. Group by amount
+    by_amount = {}
+    for c in contributions:
+        amount = c.get("amount", 0)
+        if amount not in by_amount:
+            by_amount[amount] = {"count": 0, "total": 0}
+        by_amount[amount]["count"] += 1
+        by_amount[amount]["total"] += amount
+    
+    # Sort by amount
+    amount_report = [
+        {"amount": amt, "count": data["count"], "total": data["total"]}
+        for amt, data in sorted(by_amount.items())
+    ]
+    
+    # 2. Group by payment method
+    by_method = {}
+    for c in contributions:
+        method = c.get("payment_method", "unknown")
+        if method not in by_method:
+            by_method[method] = {"count": 0, "total": 0, "method_info": PAYMENT_METHODS.get(method, {})}
+        by_method[method]["count"] += 1
+        by_method[method]["total"] += c.get("amount", 0)
+    
+    method_report = [
+        {"method": method, "name": data["method_info"].get("name", method), "count": data["count"], "total": data["total"]}
+        for method, data in by_method.items()
+    ]
+    
+    # 3. Temporal history (last 30 days, grouped by day)
+    from collections import defaultdict
+    temporal = defaultdict(lambda: {"count": 0, "total": 0})
+    
+    for c in contributions:
+        created_at = c.get("created_at", "")
+        if isinstance(created_at, str):
+            day = created_at[:10]  # YYYY-MM-DD
+        else:
+            day = created_at.strftime("%Y-%m-%d")
+        temporal[day]["count"] += 1
+        temporal[day]["total"] += c.get("amount", 0)
+    
+    # Sort by date and get last 30 days
+    temporal_report = [
+        {"date": day, "count": data["count"], "total": data["total"]}
+        for day, data in sorted(temporal.items(), reverse=True)[:30]
+    ]
+    
+    # 4. Summary totals
+    total_amount = sum(c.get("amount", 0) for c in contributions)
+    total_count = len(contributions)
+    avg_contribution = total_amount / total_count if total_count > 0 else 0
+    
+    # 5. Pending contributions
+    pending = await db.contributions.find(
+        {"status": "pending"},
+        {"_id": 0}
+    ).to_list(1000)
+    pending_count = len(pending)
+    pending_amount = sum(c.get("amount", 0) for c in pending)
+    
+    return {
+        "summary": {
+            "total_confirmed": total_count,
+            "total_amount": total_amount,
+            "average_contribution": round(avg_contribution, 2),
+            "pending_count": pending_count,
+            "pending_amount": pending_amount
+        },
+        "by_amount": amount_report,
+        "by_payment_method": method_report,
+        "temporal_history": temporal_report
+    }
+
+@api_router.get("/admin/contributions/pending")
+async def get_pending_contributions(request: Request):
+    """Get all pending contributions that need admin validation"""
+    await require_admin(request)
+    
+    pending = await db.contributions.find(
+        {"status": "pending"},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(1000)
+    
+    # Enrich with user info
+    for contrib in pending:
+        if contrib.get("user_id"):
+            user = await db.users.find_one(
+                {"user_id": contrib["user_id"]}, 
+                {"_id": 0, "name": 1, "email": 1}
+            )
+            contrib["user_name"] = user.get("name") if user else contrib.get("contributor_name", "Desconhecido")
+            contrib["user_email"] = user.get("email") if user else contrib.get("contributor_email", "")
+        else:
+            contrib["user_name"] = contrib.get("contributor_name", "Anónimo")
+            contrib["user_email"] = contrib.get("contributor_email", "")
+        
+        journey = await db.journeys.find_one(
+            {"journey_id": contrib["journey_id"]}, 
+            {"_id": 0, "name": 1}
+        )
+        contrib["journey_name"] = journey.get("name") if journey else "Desconhecida"
+    
+    return {
+        "count": len(pending),
+        "contributions": pending
+    }
+
+@api_router.put("/admin/contributions/{contribution_id}/validate")
+async def validate_contribution(contribution_id: str, request: Request):
+    """Validate (confirm or reject) a contribution with notes"""
+    admin = await require_admin(request)
+    data = await request.json()
+    
+    action = data.get("action")  # "confirm" or "reject"
+    notes = data.get("notes", "")
+    
+    if action not in ["confirm", "reject"]:
+        raise HTTPException(status_code=400, detail="Ação inválida. Use 'confirm' ou 'reject'")
+    
+    contribution = await db.contributions.find_one(
+        {"contribution_id": contribution_id}, 
+        {"_id": 0}
+    )
+    if not contribution:
+        raise HTTPException(status_code=404, detail="Contribuição não encontrada")
+    
+    if contribution["status"] != "pending":
+        raise HTTPException(status_code=400, detail="Esta contribuição já foi processada")
+    
+    new_status = "confirmed" if action == "confirm" else "rejected"
+    
+    await db.contributions.update_one(
+        {"contribution_id": contribution_id},
+        {"$set": {
+            "status": new_status,
+            "validated_by": admin.user_id,
+            "validated_at": datetime.now(timezone.utc).isoformat(),
+            "notes": notes
+        }}
+    )
+    
+    # If confirmed, update journey amount and check progression
+    if action == "confirm":
+        # Update journey amount
+        await db.journeys.update_one(
+            {"journey_id": contribution["journey_id"]},
+            {"$inc": {"current_amount": contribution["amount"]}}
+        )
+        
+        # Check if journey reached goal
+        journey = await db.journeys.find_one(
+            {"journey_id": contribution["journey_id"]}, 
+            {"_id": 0}
+        )
+        if journey and journey.get("current_amount", 0) >= journey.get("goal_amount", float('inf')):
+            await db.journeys.update_one(
+                {"journey_id": contribution["journey_id"]},
+                {"$set": {"status": "funded"}}
+            )
+        
+        # MOTOR EMBAIXADOR: Update user progression
+        if contribution.get("user_id"):
+            user = await db.users.find_one(
+                {"user_id": contribution["user_id"]}, 
+                {"_id": 0}
+            )
+            
+            if user:
+                # Mark contributed to main trip
+                main_journey = await db.journeys.find_one(
+                    {"is_active": True, "status": "active"}, 
+                    {"_id": 0}
+                )
+                is_main = main_journey and contribution["journey_id"] == main_journey.get("journey_id")
+                
+                if is_main:
+                    await db.users.update_one(
+                        {"user_id": contribution["user_id"]},
+                        {"$set": {"contributed_to_main_trip": True}}
+                    )
+                    
+                    # Check embaixador eligibility
+                    valid_refs = user.get("valid_referrals_count", 0)
+                    if valid_refs >= 3 and user.get("level") != "embaixador":
+                        await db.users.update_one(
+                            {"user_id": contribution["user_id"]},
+                            {"$set": {
+                                "level": "embaixador",
+                                "embaixador_unlocked_at": datetime.now(timezone.utc).isoformat()
+                            }}
+                        )
+                
+                # Update sponsor's referral count
+                if user.get("sponsor_id"):
+                    sponsor_id = user["sponsor_id"]
+                    await db.users.update_one(
+                        {"user_id": sponsor_id},
+                        {"$inc": {"valid_referrals_count": 1}}
+                    )
+                    
+                    # Check sponsor's embaixador eligibility
+                    sponsor = await db.users.find_one(
+                        {"user_id": sponsor_id}, 
+                        {"_id": 0}
+                    )
+                    if sponsor:
+                        if (sponsor.get("contributed_to_main_trip") and 
+                            sponsor.get("valid_referrals_count", 0) >= 3 and 
+                            sponsor.get("level") != "embaixador"):
+                            await db.users.update_one(
+                                {"user_id": sponsor_id},
+                                {"$set": {
+                                    "level": "embaixador",
+                                    "embaixador_unlocked_at": datetime.now(timezone.utc).isoformat()
+                                }}
+                            )
+    
+    return {
+        "message": f"Contribuição {new_status}",
+        "contribution_id": contribution_id,
+        "status": new_status
+    }
 
 # ==================== ADMIN USER MANAGEMENT ====================
 
