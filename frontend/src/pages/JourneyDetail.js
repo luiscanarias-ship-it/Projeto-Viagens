@@ -29,12 +29,13 @@ const amounts = [
 const cryptoTypes = [
   { id: 'btc', name: 'Bitcoin', symbol: 'BTC', color: '#F7931A' },
   { id: 'eth', name: 'Ethereum', symbol: 'ETH', color: '#627EEA' },
-  { id: 'usdt', name: 'Tether', symbol: 'USDT', color: '#26A17B' }
+  { id: 'usdt', name: 'Tether', symbol: 'USDT', color: '#26A17B' },
+  { id: 'usdc', name: 'USD Coin', symbol: 'USDC', color: '#2775CA' }
 ];
 
 // Payment methods - CRYPTO FIRST (recommended)
 const paymentMethods = [
-  { id: 'crypto', name: 'Criptomoedas', icon: Bitcoin, description: 'BTC, ETH, USDT', type: 'direct', recommended: true },
+  { id: 'crypto', name: 'Criptomoedas', icon: Bitcoin, description: 'BTC, ETH, USDT, USDC', type: 'direct', recommended: true },
   { id: 'stripe', name: 'Cartão', icon: CreditCard, description: 'Visa, Mastercard (automático)', type: 'automatic', recommended: false },
   { id: 'mbway', name: 'MBWay', icon: Smartphone, description: 'Pagamento móvel Portugal', type: 'direct', recommended: false },
   { id: 'paypal', name: 'PayPal', icon: ExternalLink, description: 'paypal.me/LuisCanarias', type: 'direct', recommended: false },

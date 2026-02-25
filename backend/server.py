@@ -154,7 +154,8 @@ FIXED_CONTRIBUTION_AMOUNTS = [10, 20, 50, 100, 200, 500, 1000]
 CRYPTO_TYPES = {
     "btc": {"name": "Bitcoin", "symbol": "BTC", "icon": "bitcoin", "color": "#F7931A"},
     "eth": {"name": "Ethereum", "symbol": "ETH", "icon": "ethereum", "color": "#627EEA"},
-    "usdt": {"name": "Tether", "symbol": "USDT", "icon": "dollar", "color": "#26A17B"}
+    "usdt": {"name": "Tether", "symbol": "USDT", "icon": "dollar", "color": "#26A17B"},
+    "usdc": {"name": "USD Coin", "symbol": "USDC", "icon": "dollar", "color": "#2775CA"}
 }
 
 # Payment methods - crypto is FIRST (recommended)
@@ -704,6 +705,13 @@ async def get_payment_info():
                 "address": "TGcWs89gTkkxARVT8UJsCFUMc9sQkvUmtL",
                 "color": "#26A17B",
                 "warning": "Use a mesma rede de depósito (TRC20) para que as criptomoedas não se percam."
+            },
+            "usdc": {
+                "name": "USD Coin",
+                "symbol": "USDC",
+                "network": "XDC Network",
+                "address": "xdc48dF0E85dA06688445f3eEabaBE9DF57bA10A991",
+                "color": "#2775CA"
             }
         },
         "note": "A plataforma não retém comissões. O valor integral vai diretamente para o sonhador."
