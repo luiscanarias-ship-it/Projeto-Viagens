@@ -922,28 +922,48 @@ const JourneyDetail = () => {
                     </div>
                   )}
 
-                  {selectedMethod === 'crypto' && (
+                  {selectedMethod === 'crypto' && selectedCrypto && paymentInfo?.crypto?.[selectedCrypto] && (
                     <div className="text-center">
                       <p className="text-sm text-[#6B6661] mb-2">Envie equivalente a €{selectedAmount.value} em:</p>
                       <div className="bg-white p-4 rounded-xl inline-block mb-4">
-                        <QRCodeSVG value={paymentInfo.crypto.address} size={150} />
+                        <QRCodeSVG value={paymentInfo.crypto[selectedCrypto].address} size={150} />
                       </div>
-                      <p className="text-sm font-semibold text-[#2D2A26] mb-2">
-                        {paymentInfo.crypto.currency} ({paymentInfo.crypto.network})
+                      <p className="text-sm font-semibold mb-2" style={{ color: paymentInfo.crypto[selectedCrypto].color }}>
+                        {paymentInfo.crypto[selectedCrypto].symbol} ({paymentInfo.crypto[selectedCrypto].network})
                       </p>
                       <p className="text-xs font-mono bg-stone-100 p-2 rounded break-all">
-                        {paymentInfo.crypto.address}
+                        {paymentInfo.crypto[selectedCrypto].address}
                       </p>
                       <button
-                        onClick={() => copyToClipboard(paymentInfo.crypto.address)}
+                        onClick={() => copyToClipboard(paymentInfo.crypto[selectedCrypto].address)}
                         className="mt-4 flex items-center gap-2 mx-auto text-[#FFBE98]"
                       >
                         {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                         {copied ? 'Copiado!' : 'Copiar endereço'}
                       </button>
-                      <p className="mt-4 text-xs text-red-500 bg-red-50 p-3 rounded-xl">
-                        ⚠️ {paymentInfo.crypto.warning}
-                      </p>
+                      {paymentInfo.crypto[selectedCrypto].warning && (
+                        <p className="mt-4 text-xs text-red-500 bg-red-50 p-3 rounded-xl">
+                          ⚠️ {paymentInfo.crypto[selectedCrypto].warning}
+                        </p>
+                      )}
+                      
+                      {/* Transaction hash input */}
+                      <div className="mt-4 text-left">
+                        <label className="block text-xs font-medium text-[#6B6661] mb-2">
+                          Transaction Hash (opcional):
+                        </label>
+                        <input
+                          type="text"
+                          value={txHash}
+                          onChange={(e) => setTxHash(e.target.value)}
+                          placeholder="0x... ou hash da transação"
+                          className="w-full px-3 py-2 bg-white border border-stone-200 rounded-lg text-xs font-mono focus:outline-none focus:border-[#FFBE98]"
+                          data-testid="tx-hash-input"
+                        />
+                        <p className="text-xs text-[#6B6661] mt-1">
+                          Facilita a verificação da transação
+                        </p>
+                      </div>
                     </div>
                   )}
                 </motion.div>
