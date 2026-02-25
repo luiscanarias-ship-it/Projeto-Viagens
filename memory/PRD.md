@@ -186,6 +186,11 @@ Valores fixos: €10, €20, €50, €100, €200, €500, €1000
 - ✅ Sistema de emails mockado com templates (contribution_confirmed, ambassador_unlocked, journey_funded)
 - ✅ Migração de status 'active' → 'ativa' para consistência
 - ✅ Endpoint para definir viagem principal
+- ✅ **Onboarding guiado após registo (4 ecrãs)**:
+  - Ecrã 1: Introdução ao crowddreaming
+  - Ecrã 2: Progressão (contribuir → convidar → embaixador → viagem própria)
+  - Ecrã 3: Impacto da comunidade (100%, 0% comissões, ∞ sonhos)
+  - Ecrã 4: Escolha de ação inicial (apoiar viagem, explorar, planear)
 
 ### 2026-02-25 (Sessão 2)
 - ✅ Feed de contribuições públicas com nome/alias, valor, mensagem
