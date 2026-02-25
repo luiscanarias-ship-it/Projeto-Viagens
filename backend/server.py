@@ -536,6 +536,8 @@ async def create_contribution(request: Request):
     
     user = await get_current_user(request)
     user_id = user.user_id if user else None
+    public_message = data.get("public_message")
+    show_name = data.get("show_name", True)
     
     contribution_id = f"contrib_{uuid.uuid4().hex[:12]}"
     
@@ -589,6 +591,8 @@ async def create_contribution(request: Request):
             "session_id": session_id,
             "contributor_name": contributor_name or (user.name if user else None),
             "contributor_email": contributor_email or (user.email if user else None),
+            "public_message": public_message,
+            "show_name": show_name,
             "created_at": datetime.now(timezone.utc).isoformat()
         }
         await db.contributions.insert_one(contribution_doc)
@@ -614,6 +618,8 @@ async def create_contribution(request: Request):
             "sponsor_link_id": sponsor_code,
             "contributor_name": contributor_name or (user.name if user else None),
             "contributor_email": contributor_email or (user.email if user else None),
+            "public_message": public_message,
+            "show_name": show_name,
             "created_at": datetime.now(timezone.utc).isoformat()
         }
         await db.contributions.insert_one(contribution_doc)
