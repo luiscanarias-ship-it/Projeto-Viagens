@@ -3440,6 +3440,202 @@ async def seed_journeys():
     await db.journeys.insert_many(journeys)
     return {"message": "Dados de viagens criados com sucesso", "count": len(journeys)}
 
+# ==================== HOMEPAGE ENDPOINTS ====================
+
+@api_router.get("/homepage/main-journey")
+async def get_main_journey_details():
+    """Get the main journey with full details for homepage"""
+    # Find the main journey (is_main_trip=True or first active one)
+    journey = await db.journeys.find_one(
+        {"$or": [{"is_main_trip": True}, {"is_active": True, "status": "ativa"}]},
+        {"_id": 0, "goal_amount": 0, "admin_notes": 0}  # Hide sensitive fields
+    )
+    
+    if not journey:
+        return {"journey": None, "progress": None, "contributions": [], "updates": []}
+    
+    journey_id = journey["journey_id"]
+    
+    # Get progress (without goal amount)
+    current_amount = journey.get("current_amount", 0)
+    # We need to get goal_amount privately for percentage calculation
+    full_journey = await db.journeys.find_one({"journey_id": journey_id}, {"_id": 0})
+    goal_amount = full_journey.get("goal_amount", 1) if full_journey else 1
+    percentage = min((current_amount / goal_amount) * 100, 100) if goal_amount > 0 else 0
+    
+    progress = {
+        "current_amount": current_amount,
+        "percentage": round(percentage, 1),
+        "is_funded": percentage >= 100
+    }
+    
+    # Get recent contributions for the feed
+    contributions = await db.contributions.find(
+        {"journey_id": journey_id, "status": {"$in": ["confirmed", "completed"]}},
+        {"_id": 0}
+    ).sort("created_at", -1).limit(10).to_list(10)
+    
+    # Format contributions for public display
+    public_contributions = []
+    for c in contributions:
+        if c.get("show_name", True) and c.get("contributor_name"):
+            display_name = c.get("contributor_name")
+        else:
+            display_name = "Sonhador Anónimo"
+        
+        public_contributions.append({
+            "display_name": display_name,
+            "amount": c.get("amount"),
+            "message": c.get("public_message"),
+            "is_crypto": c.get("payment_method") == "crypto",
+            "crypto_type": c.get("crypto_type") if c.get("payment_method") == "crypto" else None,
+            "created_at": c.get("created_at")
+        })
+    
+    # Get journey updates (future feature - for now return empty)
+    updates = []
+    
+    return {
+        "journey": journey,
+        "progress": progress,
+        "contributions": public_contributions,
+        "updates": updates
+    }
+
+@api_router.get("/homepage/ambassador-journeys")
+async def get_active_ambassador_journeys():
+    """Get active ambassador journeys organized by region for 'Sonhos em Materialização' section"""
+    journeys = await db.journeys.find(
+        {
+            "is_ambassador_journey": True,
+            "status": "ativa",
+            "is_active": True
+        },
+        {"_id": 0, "goal_amount": 0, "admin_notes": 0, "application_message": 0}
+    ).sort("created_at", -1).to_list(100)
+    
+    # Organize by region
+    regions = {
+        "europa": {"name": "Europa", "journeys": []},
+        "asia": {"name": "Ásia", "journeys": []},
+        "africa": {"name": "África", "journeys": []},
+        "americas": {"name": "Américas", "journeys": []},
+        "oceania": {"name": "Oceânia", "journeys": []},
+        "outro": {"name": "Outros", "journeys": []}
+    }
+    
+    for j in journeys:
+        region = j.get("region", "outro") or "outro"
+        region = region.lower()
+        if region not in regions:
+            region = "outro"
+        
+        # Calculate progress percentage
+        full_journey = await db.journeys.find_one({"journey_id": j["journey_id"]}, {"_id": 0, "goal_amount": 1, "current_amount": 1})
+        if full_journey:
+            goal = full_journey.get("goal_amount", 1)
+            current = full_journey.get("current_amount", 0)
+            j["progress_percentage"] = round((current / goal) * 100, 1) if goal > 0 else 0
+        else:
+            j["progress_percentage"] = 0
+        
+        regions[region]["journeys"].append(j)
+    
+    # Filter out empty regions
+    result = {k: v for k, v in regions.items() if v["journeys"]}
+    
+    return {
+        "total_count": len(journeys),
+        "regions": result
+    }
+
+@api_router.get("/homepage/realized-journeys")
+async def get_realized_journeys_for_homepage():
+    """Get realized journeys organized by country for 'Sonhos Realizados' section"""
+    journeys = await db.journeys.find(
+        {"status": {"$in": ["financiada", "realizada"]}},
+        {"_id": 0, "goal_amount": 0, "admin_notes": 0, "application_message": 0}
+    ).sort("funded_at", -1).to_list(100)
+    
+    # Organize by country
+    countries = {}
+    
+    for j in journeys:
+        country = j.get("country") or j.get("name", "Destino").split(",")[-1].strip() or "Desconhecido"
+        
+        if country not in countries:
+            countries[country] = {
+                "name": country,
+                "region": j.get("region"),
+                "journeys": []
+            }
+        
+        countries[country]["journeys"].append(j)
+    
+    # Sort countries alphabetically
+    sorted_countries = dict(sorted(countries.items()))
+    
+    return {
+        "total_count": len(journeys),
+        "countries": sorted_countries
+    }
+
+# Curated content for "Sonhos Realizados" when there are no real cases yet
+@api_router.get("/homepage/curated-dreams")
+async def get_curated_dreams():
+    """Get curated content for Sonhos Realizados section when no real cases exist"""
+    # Check if there are real realized journeys
+    real_count = await db.journeys.count_documents({"status": {"$in": ["financiada", "realizada"]}})
+    
+    if real_count > 0:
+        return {"use_curated": False, "curated_dreams": []}
+    
+    # Return curated inspirational content
+    curated_dreams = [
+        {
+            "id": "curated_1",
+            "name": "Caminho de Santiago",
+            "country": "Espanha",
+            "region": "europa",
+            "image_url": "https://images.unsplash.com/photo-1543785734-4b6e564642f8?w=800",
+            "story": "Uma peregrinação de autodescoberta pelos caminhos ancestrais da Península Ibérica.",
+            "is_curated": True
+        },
+        {
+            "id": "curated_2",
+            "name": "Montanhas do Nepal",
+            "country": "Nepal",
+            "region": "asia",
+            "image_url": "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800",
+            "story": "Onde o céu encontra a terra, uma jornada de elevação espiritual nos Himalaias.",
+            "is_curated": True
+        },
+        {
+            "id": "curated_3",
+            "name": "Costa Amalfitana",
+            "country": "Itália",
+            "region": "europa",
+            "image_url": "https://images.unsplash.com/photo-1534113414509-0eec2bfb493f?w=800",
+            "story": "Cores vibrantes e paisagens deslumbrantes no coração do Mediterrâneo.",
+            "is_curated": True
+        },
+        {
+            "id": "curated_4",
+            "name": "Deserto do Sahara",
+            "country": "Marrocos",
+            "region": "africa",
+            "image_url": "https://images.unsplash.com/photo-1489493887464-892be6d1daae?w=800",
+            "story": "Noites estreladas e dunas infinitas, uma experiência de silêncio profundo.",
+            "is_curated": True
+        }
+    ]
+    
+    return {
+        "use_curated": True,
+        "curated_dreams": curated_dreams,
+        "message": "Estes são sonhos inspiracionais. Sê o primeiro a realizar o teu!"
+    }
+
 # ==================== ROOT ====================
 
 @api_router.get("/")
