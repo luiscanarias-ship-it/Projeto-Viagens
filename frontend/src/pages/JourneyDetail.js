@@ -111,22 +111,31 @@ const JourneyDetail = () => {
     setProcessing(true);
     
     try {
-      if (selectedMethod === 'stripe') {
-        const response = await axios.post(`${API}/contributions/create-checkout`, {
-          amount_key: selectedAmount.key,
-          journey_id: id,
-          origin_url: window.location.origin,
-          sponsor_code: sponsorCode
-        }, {
-          headers: getAuthHeaders(),
-          withCredentials: true
-        });
-        
-        window.location.href = response.data.url;
+      const response = await axios.post(`${API}/contributions/create`, {
+        amount: selectedAmount.value,
+        payment_method: selectedMethod,
+        journey_id: id,
+        origin_url: window.location.origin,
+        sponsor_code: sponsorCode,
+        contributor_name: user?.name || null,
+        contributor_email: user?.email || null
+      }, {
+        headers: getAuthHeaders(),
+        withCredentials: true
+      });
+      
+      if (selectedMethod === 'stripe' && response.data.checkout_url) {
+        window.location.href = response.data.checkout_url;
+      } else {
+        // Direct payment - show confirmation
+        alert('Contribuição registada! Após efetuar o pagamento, a sua contribuição será confirmada pelo administrador.');
+        setShowPayment(false);
+        setSelectedAmount(null);
+        setSelectedMethod(null);
       }
     } catch (error) {
       console.error('Payment error:', error);
-      alert('Erro ao processar pagamento. Tente novamente.');
+      alert(error.response?.data?.detail || 'Erro ao processar pagamento. Tente novamente.');
     } finally {
       setProcessing(false);
     }
