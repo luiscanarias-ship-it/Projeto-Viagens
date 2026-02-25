@@ -1339,29 +1339,6 @@ async def translate_texts(translation_req: TranslationRequest):
         logger.error(f"Translation error: {e}")
         return {"translations": translation_req.texts, "error": "Erro na tradução"}
 
-# ==================== PAYMENT INFO ====================
-
-@api_router.get("/payment-info")
-async def get_payment_info():
-    return {
-        "mbway": {
-            "phone": "+351968068535",
-            "name": "Luis"
-        },
-        "paypal": {
-            "link": "paypal.me/LuisCanarias"
-        },
-        "crypto": {
-            "currency": "USDT",
-            "network": "Tron (TRC20)",
-            "address": "TGcWs89gTkkxARVT8UJsCFUMc9sQkvUmtL",
-            "warning": "Use a mesma rede de depósito (TRC20) para que as criptomoedas não se percam."
-        },
-        "wise": {
-            "email": "luis@4luis.com"
-        }
-    }
-
 # ==================== STRIPE SUBSCRIPTIONS ====================
 
 @api_router.post("/subscription/create-checkout")
