@@ -721,7 +721,7 @@ const JourneyDetail = () => {
                 >
                   {selectedMethod === 'mbway' && (
                     <div className="text-center">
-                      <p className="text-sm text-[#6B6661] mb-2">Envie para:</p>
+                      <p className="text-sm text-[#6B6661] mb-2">Envie €{selectedAmount.value} para:</p>
                       <p className="text-2xl font-bold text-[#2D2A26]">{paymentInfo.mbway.phone}</p>
                       <p className="text-sm text-[#6B6661] mt-1">Nome: {paymentInfo.mbway.name}</p>
                       <button
@@ -736,25 +736,55 @@ const JourneyDetail = () => {
 
                   {selectedMethod === 'paypal' && (
                     <div className="text-center">
-                      <p className="text-sm text-[#6B6661] mb-4">Clique para abrir PayPal:</p>
+                      <p className="text-sm text-[#6B6661] mb-4">Envie €{selectedAmount.value} via PayPal:</p>
                       <a
-                        href={`https://${paymentInfo.paypal.link}`}
+                        href={`https://${paymentInfo.paypal.link}/${selectedAmount.value}EUR`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="btn-primary inline-flex items-center gap-2"
                       >
                         <ExternalLink className="w-4 h-4" />
-                        Abrir PayPal
+                        Abrir PayPal (€{selectedAmount.value})
                       </a>
+                    </div>
+                  )}
+
+                  {selectedMethod === 'revolut' && (
+                    <div className="text-center">
+                      <p className="text-sm text-[#6B6661] mb-2">Envie €{selectedAmount.value} para:</p>
+                      <p className="text-2xl font-bold text-[#2D2A26]">{paymentInfo.revolut.tag}</p>
+                      <p className="text-sm text-[#6B6661] mt-2">{paymentInfo.revolut.note}</p>
+                      <button
+                        onClick={() => copyToClipboard(paymentInfo.revolut.tag)}
+                        className="mt-4 flex items-center gap-2 mx-auto text-[#FFBE98]"
+                      >
+                        {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                        {copied ? 'Copiado!' : 'Copiar tag'}
+                      </button>
+                    </div>
+                  )}
+
+                  {selectedMethod === 'wise' && (
+                    <div className="text-center">
+                      <p className="text-sm text-[#6B6661] mb-2">Envie €{selectedAmount.value} para:</p>
+                      <p className="text-xl font-bold text-[#2D2A26]">{paymentInfo.wise.email}</p>
+                      <button
+                        onClick={() => copyToClipboard(paymentInfo.wise.email)}
+                        className="mt-4 flex items-center gap-2 mx-auto text-[#FFBE98]"
+                      >
+                        {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                        {copied ? 'Copiado!' : 'Copiar email'}
+                      </button>
                     </div>
                   )}
 
                   {selectedMethod === 'crypto' && (
                     <div className="text-center">
+                      <p className="text-sm text-[#6B6661] mb-2">Envie equivalente a €{selectedAmount.value} em:</p>
                       <div className="bg-white p-4 rounded-xl inline-block mb-4">
                         <QRCodeSVG value={paymentInfo.crypto.address} size={150} />
                       </div>
-                      <p className="text-sm text-[#6B6661] mb-2">
+                      <p className="text-sm font-semibold text-[#2D2A26] mb-2">
                         {paymentInfo.crypto.currency} ({paymentInfo.crypto.network})
                       </p>
                       <p className="text-xs font-mono bg-stone-100 p-2 rounded break-all">
