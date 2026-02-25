@@ -610,8 +610,9 @@ const JourneyDetail = () => {
             </motion.div>
           </div>
 
-          {/* Right Column - Support Card */}
-          <div className="lg:col-span-1">
+          {/* Right Column - Support Card + Contributions Feed */}
+          <div className="lg:col-span-1 space-y-6">
+            {/* Support Card */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -626,13 +627,67 @@ const JourneyDetail = () => {
                 {t('journey.support_btn')}
               </button>
               
-              <div className="bg-gradient-to-r from-[#F2C94C]/20 to-[#E0C097]/20 rounded-2xl p-4">
+              <div className="bg-gradient-to-r from-[#E6F4F1]/50 to-[#E6F4F1]/30 rounded-2xl p-4">
                 <p className="text-sm text-[#2D2A26] flex items-start gap-2">
-                  <Bitcoin className="w-5 h-5 text-[#F2C94C] flex-shrink-0 mt-0.5" />
-                  <span>{t('journey.crypto_bonus')}</span>
+                  <Heart className="w-5 h-5 text-[#FFBE98] flex-shrink-0 mt-0.5" />
+                  <span>A plataforma não retém comissões. O valor integral vai para o sonhador.</span>
                 </p>
               </div>
             </motion.div>
+
+            {/* Contributions Feed */}
+            {contributions.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 }}
+                className="bg-white rounded-3xl p-6 shadow-lg border border-stone-100"
+              >
+                <h3 className="font-bold text-[#2D2A26] mb-4 flex items-center gap-2">
+                  <Heart className="w-5 h-5 text-[#FFBE98]" />
+                  Apoiantes ({contributions.length})
+                </h3>
+                
+                <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+                  {contributions.map((contrib, idx) => (
+                    <motion.div
+                      key={contrib.contribution_id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: idx * 0.05 }}
+                      className="p-4 bg-stone-50 rounded-xl"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-gradient-to-br from-[#FFBE98] to-[#F2C94C] rounded-full flex items-center justify-center flex-shrink-0">
+                          <User className="w-5 h-5 text-white" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="font-medium text-[#2D2A26] truncate">
+                              {contrib.display_name}
+                            </p>
+                            <span className="text-[#FFBE98] font-bold whitespace-nowrap">
+                              €{contrib.amount}
+                            </span>
+                          </div>
+                          {contrib.message && (
+                            <p className="text-sm text-[#6B6661] mt-1 italic">
+                              "{contrib.message}"
+                            </p>
+                          )}
+                          <p className="text-xs text-[#6B6661]/60 mt-1">
+                            {new Date(contrib.created_at).toLocaleDateString('pt-PT', {
+                              day: 'numeric',
+                              month: 'short'
+                            })}
+                          </p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
           </div>
         </div>
       </div>
