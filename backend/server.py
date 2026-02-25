@@ -3871,6 +3871,43 @@ async def get_curated_dreams():
 
 # ==================== ROOT ====================
 
+@api_router.post("/admin/migrate-journey-status")
+async def migrate_journey_status(request: Request):
+    """One-time migration: Update all journeys with status='active' to status='ativa'"""
+    await require_admin(request)
+    
+    result = await db.journeys.update_many(
+        {"status": "active"},
+        {"$set": {"status": "ativa"}}
+    )
+    
+    return {
+        "message": f"Migrated {result.modified_count} journeys from 'active' to 'ativa'",
+        "modified_count": result.modified_count
+    }
+
+@api_router.post("/admin/set-main-journey/{journey_id}")
+async def set_main_journey(journey_id: str, request: Request):
+    """Set a journey as the main platform journey"""
+    await require_admin(request)
+    
+    # First, unset any existing main journey
+    await db.journeys.update_many(
+        {"is_main_trip": True},
+        {"$set": {"is_main_trip": False}}
+    )
+    
+    # Set the new main journey
+    result = await db.journeys.update_one(
+        {"journey_id": journey_id},
+        {"$set": {"is_main_trip": True}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Viagem não encontrada")
+    
+    return {"message": f"Journey {journey_id} set as main trip"}
+
 @api_router.get("/")
 async def root():
     return {"message": "4Luis API - Onde os sonhos ganham asas"}
