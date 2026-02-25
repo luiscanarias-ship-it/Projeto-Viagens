@@ -2,9 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
-  Crown, Star, Sparkles, Users, Copy, Check, Share2, 
+  Crown, Star, Users, Copy, Check, Share2, 
   Wallet, TrendingUp, MapPin, Heart, User, Camera, 
-  Eye, EyeOff, Save, ExternalLink
+  Eye, EyeOff, Save, ExternalLink, Award, CheckCircle
 } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
@@ -22,24 +22,11 @@ const Dashboard = () => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [copiedLink, setCopiedLink] = useState(false);
-  const [startingCheckout, setStartingCheckout] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
 
   const passedUser = location.state?.user;
-
-  // Check for subscription success/cancel from URL
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const subStatus = params.get('sub');
-    if (subStatus === 'success') {
-      window.history.replaceState({}, '', '/dashboard');
-      checkAuth();
-    } else if (subStatus === 'cancel') {
-      window.history.replaceState({}, '', '/dashboard');
-    }
-  }, [location.search, checkAuth]);
 
   useEffect(() => {
     if (!authLoading && !user && !passedUser) {
@@ -68,25 +55,6 @@ const Dashboard = () => {
       fetchData();
     }
   }, [user, authLoading, passedUser, navigate, getAuthHeaders]);
-
-  const startSubscriptionCheckout = async () => {
-    setStartingCheckout(true);
-    try {
-      const headers = getAuthHeaders();
-      const response = await axios.post(`${API}/subscription/create-checkout`, {}, { 
-        headers, 
-        withCredentials: true 
-      });
-      
-      if (response.data.checkout_url) {
-        window.location.href = response.data.checkout_url;
-      }
-    } catch (error) {
-      console.error('Error starting checkout:', error);
-      alert(error.response?.data?.detail || 'Erro ao iniciar pagamento');
-      setStartingCheckout(false);
-    }
-  };
 
   const createSponsorLink = async (journeyId) => {
     try {
@@ -225,16 +193,18 @@ const Dashboard = () => {
   }
 
   const { user: userData, contributions, invites, main_journey, main_sponsor_link } = dashboardData;
-  const level = userData?.level || 'curioso';
-  const subscriptionActive = userData?.subscription_active || false;
+  const level = userData?.level || 'sonhador';
+  const contributedToMainTrip = userData?.contributed_to_main_trip || false;
   const validReferrals = userData?.valid_referrals_count || 0;
-  const isPremium = level === 'premium';
-  const isSonhador = subscriptionActive && level === 'sonhador';
-  const isCurioso = !subscriptionActive || level === 'curioso';
+  const isEmbaixador = level === 'embaixador';
+  const isSonhador = level === 'sonhador';
 
-  // Progress calculation
-  const progressPercent = Math.min((validReferrals / 3) * 100, 100);
+  // Progress calculation for Embaixador
+  // Requirements: contributed_to_main_trip + 3 valid referrals
+  const hasContribution = contributedToMainTrip || contributions?.total_count > 0;
+  const referralsProgress = Math.min(validReferrals, 3);
   const referralsNeeded = Math.max(3 - validReferrals, 0);
+  const progressPercent = (referralsProgress / 3) * 100;
 
   // Get or create sponsor link for main journey
   const sponsorLinkId = main_sponsor_link?.link_id;
@@ -252,7 +222,7 @@ const Dashboard = () => {
           animate={{ opacity: 1, y: 0 }}
           className="relative overflow-hidden rounded-3xl"
         >
-          {isPremium ? (
+          {isEmbaixador ? (
             <div className="bg-gradient-to-br from-[#F2C94C] via-[#FFBE98] to-[#F2C94C] p-6 md:p-8">
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
@@ -260,12 +230,12 @@ const Dashboard = () => {
                 </div>
                 <div>
                   <p className="text-white/80 text-sm font-medium">Estado</p>
-                  <h2 className="text-2xl md:text-3xl font-bold text-white">Premium</h2>
-                  <p className="text-white/70 text-sm mt-1">Acesso completo a todos os benefícios</p>
+                  <h2 className="text-2xl md:text-3xl font-bold text-white">Embaixador</h2>
+                  <p className="text-white/70 text-sm mt-1">Podes candidatar-te a abrir viagem própria</p>
                 </div>
               </div>
             </div>
-          ) : isSonhador ? (
+          ) : (
             <div className="bg-gradient-to-br from-[#FFBE98] to-[#E0C097] p-6 md:p-8">
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 bg-white/25 rounded-2xl flex items-center justify-center backdrop-blur-sm">
@@ -273,48 +243,15 @@ const Dashboard = () => {
                 </div>
                 <div>
                   <p className="text-white/80 text-sm font-medium">Estado</p>
-                  <h2 className="text-2xl md:text-3xl font-bold text-white">Sonhador ativo</h2>
-                  <p className="text-white/70 text-sm mt-1">Subscrição ativa</p>
+                  <h2 className="text-2xl md:text-3xl font-bold text-white">Sonhador</h2>
+                  <p className="text-white/70 text-sm mt-1">Utilizador registado da plataforma</p>
                 </div>
-              </div>
-            </div>
-          ) : (
-            <div className="bg-gradient-to-br from-[#2D2A26] to-[#4A4640] p-6 md:p-8">
-              <div className="flex items-center justify-between flex-wrap gap-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 bg-[#FFBE98]/20 rounded-2xl flex items-center justify-center">
-                    <Sparkles className="w-9 h-9 text-[#FFBE98]" />
-                  </div>
-                  <div>
-                    <p className="text-white/60 text-sm font-medium">Estado</p>
-                    <h2 className="text-2xl md:text-3xl font-bold text-white">Curioso</h2>
-                    <p className="text-white/50 text-sm mt-1">Ainda não és sonhador</p>
-                  </div>
-                </div>
-                <button
-                  onClick={startSubscriptionCheckout}
-                  disabled={startingCheckout}
-                  className="px-6 py-3 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-bold hover:bg-[#FFAB7D] transition-all disabled:opacity-50 flex items-center gap-2 shadow-lg"
-                  data-testid="subscribe-btn"
-                >
-                  {startingCheckout ? (
-                    <>
-                      <div className="w-5 h-5 border-2 border-[#2D2A26] border-t-transparent rounded-full animate-spin" />
-                      A processar...
-                    </>
-                  ) : (
-                    <>
-                      <Star className="w-5 h-5" />
-                      Tornar-me Sonhador
-                    </>
-                  )}
-                </button>
               </div>
             </div>
           )}
         </motion.div>
 
-        {/* BLOCO 2 — Progresso para Premium */}
+        {/* BLOCO 2 — Progresso para Embaixador */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -326,68 +263,118 @@ const Dashboard = () => {
               <TrendingUp className="w-6 h-6 text-[#F2C94C]" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-[#2D2A26]">Progresso para Premium</h3>
-              <p className="text-sm text-[#6B6661]">Motor principal de progressão</p>
+              <h3 className="text-lg font-bold text-[#2D2A26]">Progresso para Embaixador</h3>
+              <p className="text-sm text-[#6B6661]">Contribui e convida para subir de nível</p>
             </div>
           </div>
 
-          {isPremium ? (
+          {isEmbaixador ? (
             <div className="text-center py-6">
               <div className="w-20 h-20 bg-gradient-to-br from-[#F2C94C] to-[#FFBE98] rounded-full flex items-center justify-center mx-auto mb-4">
                 <Crown className="w-10 h-10 text-white" />
               </div>
-              <h4 className="text-xl font-bold text-[#2D2A26] mb-2">Premium Desbloqueado!</h4>
+              <h4 className="text-xl font-bold text-[#2D2A26] mb-2">Embaixador Desbloqueado!</h4>
               <p className="text-[#6B6661]">
-                Continua a convidar e a apoiar para manter vantagens e acesso prioritário.
+                Podes agora candidatar-te a abrir a tua própria viagem na plataforma.
               </p>
+              <button
+                onClick={() => navigate('/contact')}
+                className="mt-4 px-6 py-3 bg-gradient-to-r from-[#F2C94C] to-[#FFBE98] text-white rounded-xl font-bold hover:shadow-lg transition-all"
+              >
+                Candidatar-me a Embaixador
+              </button>
             </div>
           ) : (
             <>
-              {/* Progress Stats */}
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <Users className="w-5 h-5 text-[#FFBE98]" />
-                  <span className="font-semibold text-[#2D2A26]">Convites válidos:</span>
+              {/* Requirements Checklist */}
+              <div className="space-y-4 mb-6">
+                {/* Requirement 1: Contribute to main trip */}
+                <div className={`flex items-center gap-3 p-4 rounded-xl ${
+                  hasContribution ? 'bg-green-50 border border-green-200' : 'bg-stone-50'
+                }`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                    hasContribution ? 'bg-green-500' : 'bg-stone-200'
+                  }`}>
+                    {hasContribution ? (
+                      <CheckCircle className="w-5 h-5 text-white" />
+                    ) : (
+                      <span className="text-stone-500 font-bold">1</span>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <p className={`font-medium ${hasContribution ? 'text-green-700' : 'text-[#2D2A26]'}`}>
+                      Contribuir para a viagem principal
+                    </p>
+                    <p className={`text-sm ${hasContribution ? 'text-green-600' : 'text-[#6B6661]'}`}>
+                      {hasContribution ? 'Contribuição confirmada!' : 'Faz uma contribuição para a viagem em destaque'}
+                    </p>
+                  </div>
                 </div>
-                <span className="text-2xl font-bold text-[#F2C94C]">{validReferrals} / 3</span>
-              </div>
 
-              {/* Progress Bar */}
-              <div className="relative h-4 bg-stone-100 rounded-full overflow-hidden mb-4">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${progressPercent}%` }}
-                  transition={{ duration: 1, ease: "easeOut" }}
-                  className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#FFBE98] to-[#F2C94C] rounded-full"
-                />
-                {/* Progress indicators */}
-                <div className="absolute inset-0 flex justify-between px-1">
-                  {[1, 2, 3].map((num) => (
-                    <div
-                      key={num}
-                      className={`w-3 h-3 rounded-full my-0.5 ${
-                        validReferrals >= num ? 'bg-white' : 'bg-stone-300'
+                {/* Requirement 2: 3 valid referrals */}
+                <div className={`p-4 rounded-xl ${
+                  validReferrals >= 3 ? 'bg-green-50 border border-green-200' : 'bg-stone-50'
+                }`}>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                      validReferrals >= 3 ? 'bg-green-500' : 'bg-stone-200'
+                    }`}>
+                      {validReferrals >= 3 ? (
+                        <CheckCircle className="w-5 h-5 text-white" />
+                      ) : (
+                        <span className="text-stone-500 font-bold">2</span>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <p className={`font-medium ${validReferrals >= 3 ? 'text-green-700' : 'text-[#2D2A26]'}`}>
+                          Referrals válidos
+                        </p>
+                        <span className={`text-lg font-bold ${validReferrals >= 3 ? 'text-green-600' : 'text-[#F2C94C]'}`}>
+                          {validReferrals} / 3
+                        </span>
+                      </div>
+                      <p className={`text-sm ${validReferrals >= 3 ? 'text-green-600' : 'text-[#6B6661]'}`}>
+                        {validReferrals >= 3 
+                          ? 'Objetivo atingido!' 
+                          : `Convida amigos que façam contribuições confirmadas`}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Progress Bar */}
+                  <div className="relative h-3 bg-stone-200 rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${progressPercent}%` }}
+                      transition={{ duration: 1, ease: "easeOut" }}
+                      className={`absolute inset-y-0 left-0 rounded-full ${
+                        validReferrals >= 3 
+                          ? 'bg-green-500' 
+                          : 'bg-gradient-to-r from-[#FFBE98] to-[#F2C94C]'
                       }`}
                     />
-                  ))}
+                  </div>
                 </div>
               </div>
 
               {/* Status Message */}
-              {isCurioso ? (
-                <div className="p-4 bg-[#FFF8F0] rounded-xl border border-[#FFBE98]/30">
-                  <p className="text-sm text-[#2D2A26]">
-                    <strong className="text-[#FFBE98]">Ativa a subscrição</strong> para que os teus convites contem e possas desbloquear Premium.
+              {hasContribution && validReferrals >= 3 ? (
+                <div className="p-4 bg-green-50 rounded-xl border border-green-200 text-center">
+                  <p className="text-green-700 font-medium">
+                    🎉 Parabéns! Cumpres todos os requisitos. O teu nível será atualizado em breve!
                   </p>
                 </div>
-              ) : referralsNeeded > 0 ? (
-                <p className="text-center text-[#6B6661]">
-                  Faltam <span className="font-bold text-[#F2C94C]">{referralsNeeded}</span> para desbloquear Premium
-                </p>
               ) : (
-                <p className="text-center text-green-600 font-medium">
-                  Já tens 3 referrals! O Premium será ativado automaticamente.
-                </p>
+                <div className="p-4 bg-[#FFF8F0] rounded-xl border border-[#FFBE98]/30">
+                  <p className="text-sm text-[#2D2A26]">
+                    {!hasContribution && referralsNeeded > 0 
+                      ? `Falta contribuir para a viagem principal e convidar ${referralsNeeded} amigo${referralsNeeded > 1 ? 's' : ''} que contribuam.`
+                      : !hasContribution 
+                        ? 'Falta apenas contribuir para a viagem principal!'
+                        : `Faltam ${referralsNeeded} referral${referralsNeeded > 1 ? 's' : ''} válido${referralsNeeded > 1 ? 's' : ''} para desbloquear Embaixador.`}
+                  </p>
+                </div>
               )}
             </>
           )}
