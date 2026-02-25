@@ -637,6 +637,8 @@ async def create_contribution(request: Request):
             "amount": amount,
             "currency": "EUR",
             "payment_method": payment_method,
+            "crypto_type": crypto_type if payment_method == "crypto" else None,
+            "tx_hash": tx_hash if payment_method == "crypto" else None,
             "status": "pending",  # Requires admin confirmation
             "is_main_trip": True,
             "sponsor_link_id": sponsor_code,
@@ -648,9 +650,17 @@ async def create_contribution(request: Request):
         }
         await db.contributions.insert_one(contribution_doc)
         
+        # Update user's crypto badge if this is a crypto contribution
+        if payment_method == "crypto" and user_id:
+            await db.users.update_one(
+                {"user_id": user_id},
+                {"$set": {"has_crypto_contribution": True}}
+            )
+        
         return {
             "contribution_id": contribution_id,
             "payment_method": payment_method,
+            "crypto_type": crypto_type,
             "status": "pending",
             "message": "Contribuição registada. Aguarda confirmação após o pagamento ser recebido."
         }
