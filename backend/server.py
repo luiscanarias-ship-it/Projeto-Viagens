@@ -547,6 +547,17 @@ async def create_contribution(request: Request):
     if not journey:
         raise HTTPException(status_code=404, detail="Viagem não encontrada ou inativa")
     
+    # Validate crypto_type if payment_method is crypto
+    crypto_type = data.get("crypto_type")
+    tx_hash = data.get("tx_hash")
+    
+    if payment_method == "crypto":
+        if not crypto_type or crypto_type not in CRYPTO_TYPES:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Tipo de criptomoeda inválido. Tipos permitidos: {list(CRYPTO_TYPES.keys())}"
+            )
+    
     user = await get_current_user(request)
     user_id = user.user_id if user else None
     public_message = data.get("public_message")
