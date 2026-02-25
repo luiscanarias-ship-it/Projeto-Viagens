@@ -7,110 +7,132 @@ Criar uma plataforma de angariação de fundos chamada "4Luis" (4Luis.com) com c
 - **Frontend**: React 19 + TailwindCSS + Framer Motion
 - **Backend**: FastAPI (Python)
 - **Database**: MongoDB
-- **Pagamentos**: Stripe Subscriptions + MBWay + PayPal + Crypto
+- **Pagamentos**: Stripe (apenas para contribuições)
 - **Autenticação**: JWT + Google OAuth (Emergent Auth)
 
-## Stripe Subscriptions (Implementado)
+---
 
-### Produto
-- **Nome**: Sonhador
-- **Preço**: €10/mês (recorrente)
-- **price_id**: `price_1T1sngEBabTiQNkcaNBfBaHR`
+## Modelo de Utilizadores v2 (ATUAL)
 
-### Endpoints
-- `POST /api/subscription/create-checkout` - Cria sessão de checkout Stripe
-- `POST /api/stripe/subscription-webhook` - Webhook handler
-- `GET /api/subscription/status` - Estado da subscrição do utilizador
+### 3 Estados de Utilizador
 
-### Webhooks Configurados
-1. `checkout.session.completed` → Ativa Sonhador
-2. `invoice.paid` → Reforça estado ativo
-3. `invoice.payment_failed` → Log de falha
-4. `customer.subscription.deleted` → Desativa subscrição
+| Estado | Descrição | Requisitos |
+|--------|-----------|------------|
+| **Visitante** | Não registado | Pode ver viagens |
+| **Sonhador** | Utilizador registado | Pode contribuir, gerar links, convidar |
+| **Embaixador** | Sonhador ativo | Contribuiu + 3 referrals válidos |
 
-### Fluxo
-1. Utilizador clica CTA "Junta-te como Sonhador"
-2. Redireciona para Stripe Checkout
-3. Pagamento aprovado
-4. Webhook recebido → `subscription_active = true`, `level = "sonhador"`
-5. Se `valid_referrals_count >= 3` → `level = "premium"`
-
-### Regras Premium
+### Motor de Progressão para Embaixador
 ```
-IF subscription_active = true
+IF contributed_to_main_trip = true
 AND valid_referrals_count >= 3
-THEN level = "premium"
+THEN level = "embaixador"
 ```
 
-### CTAs Implementados
-- ✅ Dashboard (banner principal)
-- ✅ Homepage (secção entre comunidade e viagens)
+### Benefícios por Nível
+- **Sonhador**: Acesso completo à plataforma, pode convidar amigos
+- **Embaixador**: Pode candidatar-se a abrir viagem própria
 
-## Configuração Stripe (Necessário)
-
-1. **STRIPE_API_KEY** no backend/.env (chave secreta)
-2. **Webhook Endpoint** no Stripe Dashboard:
-   - URL: `https://crowdtrip.preview.emergentagent.com/api/stripe/subscription-webhook`
-   - Eventos: `checkout.session.completed`, `invoice.paid`, `invoice.payment_failed`, `customer.subscription.deleted`
-3. **STRIPE_WEBHOOK_SECRET** no backend/.env (obtido após criar webhook)
-
-## Schema da Base de Dados
-
-### USERS (campos de subscrição)
-```
-subscription_active: boolean
-level: "curioso" | "sonhador" | "premium"
-stripe_customer_id: string
-stripe_subscription_id: string
-subscription_started_at: datetime
-subscription_ended_at: datetime
-last_payment_at: datetime
+### Campos do Utilizador (Schema)
+```json
+{
+  "user_id": "string",
+  "email": "string",
+  "name": "string",
+  "level": "sonhador | embaixador",
+  "contributed_to_main_trip": "boolean",
+  "valid_referrals_count": "number",
+  "sponsor_id": "string (imutável)",
+  "embaixador_unlocked_at": "datetime | null"
+}
 ```
 
-### SUBSCRIPTION_LOGS
-```
-log_id: string
-user_id: string
-event: string
-session_id: string
-created_at: datetime
-```
+---
 
-## Admin Growth Dashboard
+## User Dashboard v1 (Implementado)
 
-### 3 Perguntas Fundamentais
-1. **A crescer?** - Novos users, sonhadores, premium (7 dias)
-2. **Impacto real?** - Total €, contribuições, média, sponsor impact
-3. **Quem puxa?** - Top sponsors, top contribuidores
+### 5 Blocos do Dashboard
 
-### Métricas
-- Platform Momentum Score
-- total_users, active_users, premium_users
-- total_contributions_value, average_contribution
-- valid_referrals_total, journeys_funded
+1. **Estado Atual** - Badge com nível (Sonhador/Embaixador)
+2. **Progresso para Embaixador** - Checklist visual:
+   - [ ] Contribuir para viagem principal
+   - [ ] 3 referrals válidos (barra de progresso)
+3. **Convites** - Link de sponsor, copiar, partilhar, estatísticas
+4. **Contribuições Pessoais** - Total €, nº contribuições, última
+5. **Viagem Principal** - Progresso, valor, botão "Apoiar"
 
-### Gráficos
-- Evolução utilizadores
-- Evolução financeira
-- Evolução referrals
-- Distribuição níveis
+### Adaptação por Nível
+- **Sonhador**: Mostra checklist de progresso
+- **Embaixador**: Mostra "Desbloqueado!" + CTA candidatura
+
+---
+
+## Stripe (Contribuições)
+
+### Uso Atual
+- Stripe é usado **apenas para pagamentos de contribuições**
+- Removida a subscrição mensal como requisito de progressão
+
+### Endpoints de Contribuição
+- `POST /api/contributions/create-checkout` - Checkout Stripe
+- `GET /api/contributions/checkout-status/{session_id}` - Status
+- `POST /api/webhook/stripe` - Webhook de pagamentos
+
+---
+
+## Endpoints Principais
+
+### Dashboard
+- `GET /api/dashboard/user-stats` - Stats completos do user
+
+### Contribuições
+- `POST /api/contributions/create-checkout` - Iniciar pagamento
+- `GET /api/contributions/my-contributions` - Histórico
+
+### Admin
+- `GET /api/admin/contributions` - Todas contribuições
+- `PUT /api/admin/contributions/{id}/confirm` - Confirmar manual
+- `GET /api/admin/users/dashboard` - Growth dashboard
+
+---
 
 ## Backlog
 
 ### P1 (Próximo)
-- [ ] Testar fluxo completo de subscrição com Stripe real
-- [ ] Configurar webhook no Stripe Dashboard
+- [ ] Emails automáticos:
+  - Boas-vindas ao Sonhador
+  - Convite aceite
+  - Contribuição de convidado
+  - Embaixador desbloqueado
 
-### P2
-- [ ] UI de progressão para utilizadores
-- [ ] Emails automáticos (ativação, cancelamento, Premium)
-- [ ] Portal de gestão de subscrição (cancelar/alterar)
+### P2 (Futuro)
+- [ ] Secção de testemunhos nas páginas de viagem
+- [ ] Sistema de notificações in-app
+- [ ] Formulário de candidatura Embaixador
 
-## Credenciais
-- **Admin**: admin@4luis.com / Admin1
-- **Test User**: test@test.com / test
+### P3 (Backlog)
+- [ ] Reintroduzir sistema de "Pontos"
+- [ ] Gamificação avançada
 
-## URLs
-- **Webhook**: `/api/stripe/subscription-webhook`
-- **Checkout**: `/api/subscription/create-checkout`
-- **Status**: `/api/subscription/status`
+---
+
+## Credenciais de Teste
+
+- **Admin**: `admin@4luis.com` / `Admin1`
+- **Test User**: `test@test.com` / `test`
+
+---
+
+## Alterações Recentes
+
+### 2026-02-17
+- ✅ Implementado User Dashboard v1 com 5 blocos
+- ✅ Testados webhooks Stripe Subscriptions
+- ✅ Motor Premium validado (subscription + 3 referrals)
+
+### 2026-02-25
+- ✅ **Atualização Modelo v2**: Removida subscrição como requisito
+- ✅ Novos estados: Visitante → Sonhador → Embaixador
+- ✅ Novo motor: contributed_to_main_trip + 3 referrals = embaixador
+- ✅ Dashboard atualizado com checklist de progresso
+- ✅ Migração de utilizadores existentes
