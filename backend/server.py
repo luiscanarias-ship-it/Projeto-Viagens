@@ -499,6 +499,29 @@ async def send_contribution_confirmed_email(contribution: dict, journey: dict):
         }
     )
 
+async def send_ambassador_unlocked_email(user_id: str):
+    """Send email when a user unlocks Ambassador level"""
+    user = await db.users.find_one({"user_id": user_id}, {"_id": 0})
+    if not user or not user.get("email"):
+        return
+    
+    # Get user's sponsor link for the dashboard link
+    frontend_url = "https://journey-fund-3.preview.emergentagent.com"
+    dashboard_link = f"{frontend_url}/dashboard"
+    
+    await queue_email(
+        to_email=user["email"],
+        to_name=user.get("name", "Embaixador"),
+        subject="Parabéns, és agora Embaixador! - 4Luis",
+        template="ambassador_unlocked",
+        data={
+            "name": user.get("name", "Embaixador"),
+            "dashboard_link": dashboard_link
+        }
+    )
+    
+    logger.info(f"Ambassador unlocked email sent to user {user_id}")
+
 # ==================== AUTH ROUTES ====================
 
 @api_router.post("/auth/register")
