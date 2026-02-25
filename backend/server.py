@@ -2683,19 +2683,53 @@ async def check_and_update_journey_funding_status(journey_id: str):
             "created_at": datetime.now(timezone.utc).isoformat()
         })
         
-        # If ambassador journey, notify ambassador
+        # If ambassador journey, notify ambassador and send email
         if journey.get("is_ambassador_journey") and journey.get("ambassador_user_id"):
+            ambassador_user_id = journey["ambassador_user_id"]
+            
+            # Create in-app notification
             await db.notifications.insert_one({
                 "notification_id": f"notif_{uuid.uuid4().hex[:12]}",
                 "type": "your_journey_funded",
                 "title": "A tua viagem foi financiada!",
                 "message": f"Parabéns! A tua viagem '{journey.get('name')}' atingiu o objetivo de financiamento.",
                 "journey_id": journey_id,
-                "user_id": journey["ambassador_user_id"],
+                "user_id": ambassador_user_id,
                 "read": False,
                 "created_at": datetime.now(timezone.utc).isoformat()
             })
+            
+            # Send email to ambassador
+            ambassador = await db.users.find_one({"user_id": ambassador_user_id}, {"_id": 0})
+            if ambassador and ambassador.get("email"):
+                await queue_email(
+                    to_email=ambassador["email"],
+                    to_name=ambassador.get("name", "Embaixador"),
+                    subject="Parabéns! A tua viagem foi financiada! - 4Luis",
+                    template="journey_funded",
+                    data={
+                        "ambassador_name": ambassador.get("name"),
+                        "journey_name": journey.get("name"),
+                        "journey_id": journey_id,
+                        "amount_raised": current_amount
+                    }
+                )
         
+        # Also send email to admin
+        await queue_email(
+            to_email="admin@4luis.com",
+            to_name="Admin 4Luis",
+            subject=f"Viagem Financiada: {journey.get('name')}",
+            template="admin_journey_funded",
+            data={
+                "journey_name": journey.get("name"),
+                "journey_id": journey_id,
+                "amount_raised": current_amount,
+                "ambassador_name": journey.get("ambassador_name", "N/A")
+            }
+        )
+        
+        logger.info(f"Journey {journey_id} automatically moved to 'financiada' status")
         return "financiada"
     
     return current_status
