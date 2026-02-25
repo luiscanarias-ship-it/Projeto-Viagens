@@ -14,22 +14,24 @@ import { useAuth } from '../contexts/AuthContext';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
+// Fixed contribution amounts (v2 - no custom values)
 const amounts = [
-  { key: '5', value: 5, tickets: 1 },
-  { key: '10', value: 10, tickets: 2 },
-  { key: '20', value: 20, tickets: 4 },
-  { key: '50', value: 50, tickets: 10 },
-  { key: '100', value: 100, tickets: 20 },
-  { key: '200', value: 200, tickets: 40 },
-  { key: '500', value: 500, tickets: 100 },
-  { key: '1000', value: 1000, tickets: 200 }
+  { value: 10 },
+  { value: 20 },
+  { value: 50 },
+  { value: 100 },
+  { value: 200 },
+  { value: 500 },
+  { value: 1000 }
 ];
 
 const paymentMethods = [
-  { id: 'stripe', name: 'Cartão', icon: CreditCard, description: 'Visa, Mastercard, etc.' },
-  { id: 'mbway', name: 'MBWay', icon: Smartphone, description: 'Pagamento móvel' },
-  { id: 'paypal', name: 'PayPal', icon: ExternalLink, description: 'paypal.me/LuisCanarias' },
-  { id: 'crypto', name: 'Crypto', icon: Bitcoin, description: 'Seja um sonhador moderno - Pontos a dobrar!' }
+  { id: 'stripe', name: 'Cartão', icon: CreditCard, description: 'Visa, Mastercard (automático)', type: 'automatic' },
+  { id: 'mbway', name: 'MBWay', icon: Smartphone, description: 'Pagamento móvel Portugal', type: 'direct' },
+  { id: 'paypal', name: 'PayPal', icon: ExternalLink, description: 'paypal.me/LuisCanarias', type: 'direct' },
+  { id: 'revolut', name: 'Revolut', icon: ExternalLink, description: '@luis4dreams', type: 'direct' },
+  { id: 'wise', name: 'Wise', icon: ExternalLink, description: 'Transferência internacional', type: 'direct' },
+  { id: 'crypto', name: 'Crypto', icon: Bitcoin, description: 'USDT (TRC20)', type: 'direct' }
 ];
 
 // Icon components for social/travel resources
