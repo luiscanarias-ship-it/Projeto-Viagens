@@ -150,14 +150,22 @@ class JourneyUpdate(BaseModel):
 # Fixed contribution amounts (no custom values allowed)
 FIXED_CONTRIBUTION_AMOUNTS = [10, 20, 50, 100, 200, 500, 1000]
 
-# Payment methods
+# Crypto types supported
+CRYPTO_TYPES = {
+    "btc": {"name": "Bitcoin", "symbol": "BTC", "icon": "bitcoin", "color": "#F7931A"},
+    "eth": {"name": "Ethereum", "symbol": "ETH", "icon": "ethereum", "color": "#627EEA"},
+    "usdt": {"name": "Tether", "symbol": "USDT", "icon": "dollar", "color": "#26A17B"},
+    "usdc": {"name": "USD Coin", "symbol": "USDC", "icon": "dollar", "color": "#2775CA"}
+}
+
+# Payment methods - crypto is FIRST (recommended)
 PAYMENT_METHODS = {
-    "stripe": {"name": "Cartão (Stripe)", "type": "automatic", "icon": "credit-card"},
-    "mbway": {"name": "MBWay", "type": "direct", "icon": "smartphone"},
-    "paypal": {"name": "PayPal", "type": "direct", "icon": "paypal"},
-    "revolut": {"name": "Revolut", "type": "direct", "icon": "wallet"},
-    "wise": {"name": "Wise", "type": "direct", "icon": "globe"},
-    "crypto": {"name": "Criptomoedas", "type": "direct", "icon": "bitcoin"}
+    "crypto": {"name": "Criptomoedas", "type": "direct", "icon": "bitcoin", "recommended": True},
+    "stripe": {"name": "Cartão (Stripe)", "type": "automatic", "icon": "credit-card", "recommended": False},
+    "mbway": {"name": "MBWay", "type": "direct", "icon": "smartphone", "recommended": False},
+    "paypal": {"name": "PayPal", "type": "direct", "icon": "paypal", "recommended": False},
+    "revolut": {"name": "Revolut", "type": "direct", "icon": "wallet", "recommended": False},
+    "wise": {"name": "Wise", "type": "direct", "icon": "globe", "recommended": False}
 }
 
 class Contribution(BaseModel):
@@ -166,7 +174,9 @@ class Contribution(BaseModel):
     user_id: Optional[str] = None
     amount: int  # Fixed amounts only: 10, 20, 50, 100, 200, 500, 1000
     currency: str = "EUR"
-    payment_method: str  # stripe, mbway, paypal, revolut, wise, crypto
+    payment_method: str  # crypto, stripe, mbway, paypal, revolut, wise
+    crypto_type: Optional[str] = None  # btc, eth, usdt, usdc (only for crypto payments)
+    tx_hash: Optional[str] = None  # Transaction hash for crypto payments
     status: str = "pending"  # pending | confirmed | rejected
     is_main_trip: bool = True  # Always true for now (single main trip)
     validated_by: Optional[str] = None  # Admin user_id who validated
@@ -184,6 +194,8 @@ class ContributionCreate(BaseModel):
     journey_id: str
     amount: int  # Must be one of FIXED_CONTRIBUTION_AMOUNTS
     payment_method: str  # Must be one of PAYMENT_METHODS
+    crypto_type: Optional[str] = None  # Required if payment_method is crypto
+    tx_hash: Optional[str] = None  # Optional tx hash for verification
     sponsor_code: Optional[str] = None
     contributor_name: Optional[str] = None
     contributor_email: Optional[str] = None
