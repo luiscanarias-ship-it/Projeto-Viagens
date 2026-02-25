@@ -676,18 +676,31 @@ const JourneyDetail = () => {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: idx * 0.05 }}
-                      className="p-4 bg-stone-50 rounded-xl"
+                      className={`p-4 rounded-xl ${contrib.is_crypto ? 'bg-gradient-to-r from-[#F7931A]/5 to-[#627EEA]/5 border border-[#F7931A]/20' : 'bg-stone-50'}`}
                     >
                       <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-[#FFBE98] to-[#F2C94C] rounded-full flex items-center justify-center flex-shrink-0">
-                          <User className="w-5 h-5 text-white" />
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                          contrib.is_crypto 
+                            ? 'bg-gradient-to-br from-[#F7931A] to-[#627EEA]' 
+                            : 'bg-gradient-to-br from-[#FFBE98] to-[#F2C94C]'
+                        }`}>
+                          {contrib.is_crypto ? (
+                            <Bitcoin className="w-5 h-5 text-white" />
+                          ) : (
+                            <User className="w-5 h-5 text-white" />
+                          )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between gap-2">
-                            <p className="font-medium text-[#2D2A26] truncate">
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium text-[#2D2A26] truncate flex-1">
                               {contrib.display_name}
                             </p>
-                            <span className="text-[#FFBE98] font-bold whitespace-nowrap">
+                            {contrib.is_crypto && (
+                              <span className="text-xs bg-gradient-to-r from-[#F7931A] to-[#627EEA] text-white px-2 py-0.5 rounded-full font-medium uppercase">
+                                {contrib.crypto_type || 'Crypto'}
+                              </span>
+                            )}
+                            <span className={`font-bold whitespace-nowrap ${contrib.is_crypto ? 'text-[#F7931A]' : 'text-[#FFBE98]'}`}>
                               €{contrib.amount}
                             </span>
                           </div>
