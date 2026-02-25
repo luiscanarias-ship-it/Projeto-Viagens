@@ -2667,6 +2667,265 @@ async def migrate_existing_users(request: Request):
         "message": "Migração concluída"
     }
 
+# ==================== AMBASSADOR JOURNEYS ====================
+
+async def check_and_update_journey_funding_status(journey_id: str):
+    """Check if journey reached funding goal and update status automatically"""
+    journey = await db.journeys.find_one({"journey_id": journey_id}, {"_id": 0})
+    if not journey:
+        return None
+    
+    current_amount = journey.get("current_amount", 0)
+    goal_amount = journey.get("goal_amount", 1)
+    current_status = journey.get("status", "ativa")
+    
+    # Check if funded (100%+)
+    if current_amount >= goal_amount and current_status == "ativa":
+        # Update status to "financiada"
+        await db.journeys.update_one(
+            {"journey_id": journey_id},
+            {"$set": {
+                "status": "financiada",
+                "funded_at": datetime.now(timezone.utc).isoformat(),
+                "is_active": False,  # Remove from active journeys
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            }}
+        )
+        
+        # Create notification for admin
+        await db.notifications.insert_one({
+            "notification_id": f"notif_{uuid.uuid4().hex[:12]}",
+            "type": "journey_funded",
+            "title": "Viagem Financiada!",
+            "message": f"A viagem '{journey.get('name')}' atingiu o objetivo de financiamento.",
+            "journey_id": journey_id,
+            "for_admin": True,
+            "read": False,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        })
+        
+        # If ambassador journey, notify ambassador
+        if journey.get("is_ambassador_journey") and journey.get("ambassador_user_id"):
+            await db.notifications.insert_one({
+                "notification_id": f"notif_{uuid.uuid4().hex[:12]}",
+                "type": "your_journey_funded",
+                "title": "A tua viagem foi financiada!",
+                "message": f"Parabéns! A tua viagem '{journey.get('name')}' atingiu o objetivo de financiamento.",
+                "journey_id": journey_id,
+                "user_id": journey["ambassador_user_id"],
+                "read": False,
+                "created_at": datetime.now(timezone.utc).isoformat()
+            })
+        
+        return "financiada"
+    
+    return current_status
+
+@api_router.post("/ambassador/journey/apply")
+async def apply_for_ambassador_journey(request: Request):
+    """Submit an application for an ambassador journey"""
+    user = await require_auth(request)
+    
+    # Check if user is an ambassador
+    user_data = await db.users.find_one({"user_id": user.user_id}, {"_id": 0})
+    if not user_data or user_data.get("level") != "embaixador":
+        raise HTTPException(status_code=403, detail="Apenas embaixadores podem candidatar-se a criar viagens")
+    
+    data = await request.json()
+    
+    # Validate required fields
+    required = ["name", "poetic_name", "description", "emotional_message", "impact_description", "goal_amount", "application_message"]
+    for field in required:
+        if not data.get(field):
+            raise HTTPException(status_code=400, detail=f"Campo obrigatório em falta: {field}")
+    
+    journey_id = f"journey_{uuid.uuid4().hex[:12]}"
+    
+    journey_doc = {
+        "journey_id": journey_id,
+        "name": data["name"],
+        "poetic_name": data["poetic_name"],
+        "description": data["description"],
+        "emotional_message": data["emotional_message"],
+        "impact_description": data["impact_description"],
+        "image_url": data.get("image_url", "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800"),
+        "goal_amount": float(data["goal_amount"]),
+        "current_amount": 0.0,
+        "currency": data.get("currency", "EUR"),
+        "target_date": data.get("target_date"),
+        "is_active": False,  # Not active until approved
+        "is_main_trip": False,
+        "status": "candidatura",  # Application status
+        "is_ambassador_journey": True,
+        "ambassador_user_id": user.user_id,
+        "ambassador_name": user_data.get("name"),
+        "application_message": data["application_message"],
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.journeys.insert_one(journey_doc)
+    
+    # Notify admin
+    await db.notifications.insert_one({
+        "notification_id": f"notif_{uuid.uuid4().hex[:12]}",
+        "type": "ambassador_journey_application",
+        "title": "Nova Candidatura de Viagem",
+        "message": f"{user_data.get('name')} submeteu uma candidatura para a viagem '{data['name']}'.",
+        "journey_id": journey_id,
+        "user_id": user.user_id,
+        "for_admin": True,
+        "read": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    })
+    
+    return {
+        "message": "Candidatura submetida com sucesso",
+        "journey_id": journey_id,
+        "status": "candidatura"
+    }
+
+@api_router.get("/ambassador/my-journeys")
+async def get_my_ambassador_journeys(request: Request):
+    """Get all journeys created by the current ambassador"""
+    user = await require_auth(request)
+    
+    journeys = await db.journeys.find(
+        {"ambassador_user_id": user.user_id},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
+    
+    return {
+        "count": len(journeys),
+        "journeys": journeys
+    }
+
+@api_router.get("/admin/ambassador-journeys")
+async def get_ambassador_journeys(request: Request, status: Optional[str] = None):
+    """Get all ambassador journeys - Admin only"""
+    await require_admin(request)
+    
+    query = {"is_ambassador_journey": True}
+    if status:
+        query["status"] = status
+    
+    journeys = await db.journeys.find(query, {"_id": 0}).sort("created_at", -1).to_list(100)
+    
+    # Group by status
+    by_status = {}
+    for s in JOURNEY_STATUSES:
+        by_status[s] = [j for j in journeys if j.get("status") == s]
+    
+    return {
+        "total": len(journeys),
+        "by_status": by_status,
+        "journeys": journeys
+    }
+
+@api_router.put("/admin/ambassador-journeys/{journey_id}/status")
+async def update_ambassador_journey_status(journey_id: str, request: Request):
+    """Update ambassador journey status - Admin only"""
+    admin = await require_admin(request)
+    data = await request.json()
+    
+    new_status = data.get("status")
+    admin_notes = data.get("admin_notes")
+    
+    if new_status not in JOURNEY_STATUSES:
+        raise HTTPException(status_code=400, detail=f"Estado inválido. Estados permitidos: {list(JOURNEY_STATUSES.keys())}")
+    
+    journey = await db.journeys.find_one({"journey_id": journey_id}, {"_id": 0})
+    if not journey:
+        raise HTTPException(status_code=404, detail="Viagem não encontrada")
+    
+    update_data = {
+        "status": new_status,
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    # Set timestamps based on status
+    if new_status == "aprovada":
+        update_data["approved_at"] = datetime.now(timezone.utc).isoformat()
+        update_data["owner_user_id"] = admin.user_id
+    elif new_status == "ativa":
+        update_data["is_active"] = True
+    elif new_status == "financiada":
+        update_data["funded_at"] = datetime.now(timezone.utc).isoformat()
+        update_data["is_active"] = False
+    elif new_status == "realizada":
+        update_data["realized_at"] = datetime.now(timezone.utc).isoformat()
+        update_data["is_active"] = False
+    elif new_status == "encerrada":
+        update_data["closed_at"] = datetime.now(timezone.utc).isoformat()
+        update_data["is_active"] = False
+    
+    if admin_notes:
+        update_data["admin_notes"] = admin_notes
+    
+    await db.journeys.update_one(
+        {"journey_id": journey_id},
+        {"$set": update_data}
+    )
+    
+    # Notify ambassador
+    if journey.get("ambassador_user_id"):
+        status_messages = {
+            "aprovada": "A tua candidatura de viagem foi aprovada!",
+            "ativa": "A tua viagem está agora ativa e a receber contribuições!",
+            "financiada": "Parabéns! A tua viagem foi totalmente financiada!",
+            "realizada": "A tua viagem foi marcada como realizada!",
+            "encerrada": "A tua viagem foi encerrada."
+        }
+        
+        if new_status in status_messages:
+            await db.notifications.insert_one({
+                "notification_id": f"notif_{uuid.uuid4().hex[:12]}",
+                "type": f"journey_status_{new_status}",
+                "title": f"Viagem: {JOURNEY_STATUSES[new_status]['name']}",
+                "message": status_messages[new_status],
+                "journey_id": journey_id,
+                "user_id": journey["ambassador_user_id"],
+                "read": False,
+                "created_at": datetime.now(timezone.utc).isoformat()
+            })
+    
+    return {
+        "message": f"Estado atualizado para '{JOURNEY_STATUSES[new_status]['name']}'",
+        "journey_id": journey_id,
+        "new_status": new_status
+    }
+
+@api_router.get("/journeys/realized")
+async def get_realized_journeys():
+    """Get all realized/funded journeys (Sonhos Realizados section)"""
+    journeys = await db.journeys.find(
+        {"status": {"$in": ["financiada", "realizada"]}},
+        {"_id": 0, "goal_amount": 0}  # Hide goal_amount from public
+    ).sort("funded_at", -1).to_list(100)
+    
+    return {
+        "count": len(journeys),
+        "journeys": journeys
+    }
+
+@api_router.get("/journeys/active")
+async def get_active_journeys():
+    """Get all active journeys accepting contributions"""
+    journeys = await db.journeys.find(
+        {"status": "ativa", "is_active": True},
+        {"_id": 0, "goal_amount": 0}  # Hide goal_amount from public
+    ).sort("created_at", -1).to_list(100)
+    
+    # Add progress percentage
+    for j in journeys:
+        # Calculate progress without revealing goal
+        j["is_funded"] = False
+    
+    return {
+        "count": len(journeys),
+        "journeys": journeys
+    }
+
 # ==================== RAFFLE SYSTEM ====================
 
 @api_router.get("/admin/journeys-ready-for-raffle")
