@@ -1,9 +1,13 @@
 import React, { useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import axios from 'axios';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
 
 const AuthCallback = () => {
-  const { processGoogleSession } = useAuth();
+  const { processGoogleSession, getAuthHeaders } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const hasProcessed = useRef(false);
@@ -22,6 +26,25 @@ const AuthCallback = () => {
       if (sessionId) {
         try {
           const user = await processGoogleSession(sessionId);
+          
+          // Check if user has completed onboarding
+          try {
+            const onboardingRes = await axios.get(`${API}/user/onboarding-status`, {
+              headers: getAuthHeaders(),
+              withCredentials: true
+            });
+            
+            if (!onboardingRes.data.onboarding_completed) {
+              // New user or hasn't completed onboarding
+              navigate('/onboarding', { replace: true });
+              return;
+            }
+          } catch (e) {
+            // If error checking onboarding, redirect to onboarding to be safe
+            navigate('/onboarding', { replace: true });
+            return;
+          }
+          
           // Navigate to dashboard with user data
           navigate('/dashboard', { state: { user }, replace: true });
         } catch (error) {
@@ -34,7 +57,7 @@ const AuthCallback = () => {
     };
 
     processSession();
-  }, [location, processGoogleSession, navigate]);
+  }, [location, processGoogleSession, navigate, getAuthHeaders]);
 
   return (
     <div className="min-h-screen flex items-center justify-center" data-testid="auth-callback">
