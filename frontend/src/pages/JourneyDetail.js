@@ -127,6 +127,12 @@ const JourneyDetail = () => {
   const handlePayment = async () => {
     if (!selectedAmount || !selectedMethod) return;
     
+    // If crypto, require crypto type selection
+    if (selectedMethod === 'crypto' && !selectedCrypto) {
+      alert('Por favor selecione o tipo de criptomoeda');
+      return;
+    }
+    
     setProcessing(true);
     
     try {
@@ -139,7 +145,9 @@ const JourneyDetail = () => {
         contributor_name: user?.name || null,
         contributor_email: user?.email || null,
         public_message: publicMessage || null,
-        show_name: showName
+        show_name: showName,
+        crypto_type: selectedMethod === 'crypto' ? selectedCrypto : null,
+        tx_hash: selectedMethod === 'crypto' && txHash ? txHash : null
       }, {
         headers: getAuthHeaders(),
         withCredentials: true
@@ -153,6 +161,8 @@ const JourneyDetail = () => {
         setShowPayment(false);
         setSelectedAmount(null);
         setSelectedMethod(null);
+        setSelectedCrypto(null);
+        setTxHash('');
         setPublicMessage('');
       }
     } catch (error) {
