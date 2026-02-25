@@ -1840,13 +1840,8 @@ async def confirm_contribution(contribution_id: str, request: Request):
         {"$inc": {"current_amount": contribution["amount"]}}
     )
     
-    # Check if journey reached goal - update status to "funded"
-    journey = await db.journeys.find_one({"journey_id": contribution["journey_id"]}, {"_id": 0})
-    if journey and journey.get("current_amount", 0) >= journey.get("goal_amount", float('inf')):
-        await db.journeys.update_one(
-            {"journey_id": contribution["journey_id"]},
-            {"$set": {"status": "funded"}}
-        )
+    # Check if journey reached goal - update status automatically
+    await check_and_update_journey_funding_status(contribution["journey_id"])
     
     # Update sponsor link if applicable
     if contribution.get("sponsor_link_id"):
@@ -1860,8 +1855,11 @@ async def confirm_contribution(contribution_id: str, request: Request):
         contributing_user = await db.users.find_one({"user_id": contribution["user_id"]}, {"_id": 0})
         
         # Marcar que o utilizador contribuiu para a viagem principal
-        # (consideramos a primeira viagem ativa como "principal")
-        main_journey = await db.journeys.find_one({"is_active": True, "status": "active"}, {"_id": 0})
+        # (consideramos a primeira viagem ativa como "principal" ou is_main_trip=True)
+        main_journey = await db.journeys.find_one(
+            {"$or": [{"is_main_trip": True}, {"is_active": True, "status": "ativa"}]}, 
+            {"_id": 0}
+        )
         is_main_trip = main_journey and contribution["journey_id"] == main_journey.get("journey_id")
         
         if is_main_trip and contributing_user:
