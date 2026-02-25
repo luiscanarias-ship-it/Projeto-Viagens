@@ -658,6 +658,90 @@ async def get_payment_info():
         "note": "A plataforma não retém comissões. O valor integral vai diretamente para o sonhador."
     }
 
+@api_router.get("/journeys/{journey_id}/contributions")
+async def get_journey_public_contributions(journey_id: str):
+    """Get public feed of confirmed contributions for a journey"""
+    # Get confirmed contributions only
+    contributions = await db.contributions.find(
+        {
+            "journey_id": journey_id,
+            "status": {"$in": ["confirmed", "completed"]}
+        },
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
+    
+    public_feed = []
+    for c in contributions:
+        # Determine display name
+        if c.get("show_name", True):
+            # Try to get user info if user_id exists
+            if c.get("user_id"):
+                user = await db.users.find_one({"user_id": c["user_id"]}, {"_id": 0, "name": 1, "anonymous_alias": 1, "use_real_name": 1})
+                if user:
+                    if user.get("use_real_name", True):
+                        display_name = user.get("name", c.get("contributor_name", "Apoiante"))
+                    else:
+                        display_name = user.get("anonymous_alias", "Sonhador Anónimo")
+                else:
+                    display_name = c.get("contributor_name", "Apoiante")
+            else:
+                display_name = c.get("contributor_name", "Apoiante")
+        else:
+            display_name = "Sonhador Anónimo"
+        
+        public_feed.append({
+            "contribution_id": c["contribution_id"],
+            "display_name": display_name,
+            "amount": c["amount"],
+            "message": c.get("public_message"),
+            "created_at": c.get("created_at") or c.get("confirmed_at")
+        })
+    
+    return {
+        "count": len(public_feed),
+        "contributions": public_feed
+    }
+
+@api_router.get("/journeys/{journey_id}/progress")
+async def get_journey_progress(journey_id: str, request: Request):
+    """Get journey progress - percentage is public, goal amount is admin-only"""
+    journey = await db.journeys.find_one({"journey_id": journey_id}, {"_id": 0})
+    if not journey:
+        raise HTTPException(status_code=404, detail="Viagem não encontrada")
+    
+    current_amount = journey.get("current_amount", 0)
+    goal_amount = journey.get("goal_amount", 1)
+    
+    # Calculate percentage (can exceed 100%)
+    percentage = (current_amount / goal_amount) * 100 if goal_amount > 0 else 0
+    is_funded = percentage >= 100
+    
+    # Check if user is admin to include goal_amount
+    is_admin = False
+    try:
+        user = await get_current_user(request)
+        if user:
+            user_data = await db.users.find_one({"user_id": user.user_id}, {"_id": 0})
+            is_admin = user_data.get("is_admin", False) if user_data else False
+    except:
+        pass
+    
+    response = {
+        "journey_id": journey_id,
+        "current_amount": current_amount,
+        "percentage": round(percentage, 1),
+        "is_funded": is_funded,
+        "status": journey.get("status", "active"),
+        "target_date": journey.get("target_date"),
+        "closing_message": "Financiamento total quase a fechar." if is_funded else None
+    }
+    
+    # Only include goal_amount for admins
+    if is_admin:
+        response["goal_amount"] = goal_amount
+    
+    return response
+
 @api_router.get("/contributions/checkout-status/{session_id}")
 async def get_checkout_status(session_id: str, request: Request):
     from emergentintegrations.payments.stripe.checkout import StripeCheckout
