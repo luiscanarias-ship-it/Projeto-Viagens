@@ -86,14 +86,18 @@ const JourneyDetail = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [journeyRes, paymentRes, resourcesRes] = await Promise.all([
+        const [journeyRes, paymentRes, resourcesRes, progressRes, contribRes] = await Promise.all([
           axios.get(`${API}/journeys/${id}`),
           axios.get(`${API}/contributions/payment-info`),
-          axios.get(`${API}/journey/${id}/travel-resources`)
+          axios.get(`${API}/journey/${id}/travel-resources`),
+          axios.get(`${API}/journeys/${id}/progress`),
+          axios.get(`${API}/journeys/${id}/contributions`)
         ]);
         setJourney(journeyRes.data);
         setPaymentInfo(paymentRes.data);
         setTravelResources(resourcesRes.data);
+        setProgress(progressRes.data);
+        setContributions(contribRes.data.contributions || []);
       } catch (error) {
         console.error('Error fetching journey:', error);
         navigate('/');
