@@ -145,26 +145,46 @@ class JourneyUpdate(BaseModel):
     target_date: Optional[str] = None
     is_active: Optional[bool] = None
 
+# ==================== CONTRIBUTION MODEL (v2) ====================
+
+# Fixed contribution amounts (no custom values allowed)
+FIXED_CONTRIBUTION_AMOUNTS = [10, 20, 50, 100, 200, 500, 1000]
+
+# Payment methods
+PAYMENT_METHODS = {
+    "stripe": {"name": "Cartão (Stripe)", "type": "automatic", "icon": "credit-card"},
+    "mbway": {"name": "MBWay", "type": "direct", "icon": "smartphone"},
+    "paypal": {"name": "PayPal", "type": "direct", "icon": "paypal"},
+    "revolut": {"name": "Revolut", "type": "direct", "icon": "wallet"},
+    "wise": {"name": "Wise", "type": "direct", "icon": "globe"},
+    "crypto": {"name": "Criptomoedas", "type": "direct", "icon": "bitcoin"}
+}
+
 class Contribution(BaseModel):
     contribution_id: str = Field(default_factory=lambda: f"contrib_{uuid.uuid4().hex[:12]}")
     journey_id: str
     user_id: Optional[str] = None
-    amount: float
+    amount: int  # Fixed amounts only: 10, 20, 50, 100, 200, 500, 1000
     currency: str = "EUR"
-    payment_method: str
-    is_crypto: bool = False
-    status: str = "pending"  # pending, completed, failed
-    points_count: int = 0  # Changed from tickets_count to points_count
+    payment_method: str  # stripe, mbway, paypal, revolut, wise, crypto
+    status: str = "pending"  # pending | confirmed | rejected
+    is_main_trip: bool = True  # Always true for now (single main trip)
+    validated_by: Optional[str] = None  # Admin user_id who validated
+    validated_at: Optional[str] = None  # Datetime of validation
     sponsor_link_id: Optional[str] = None
-    session_id: Optional[str] = None
+    session_id: Optional[str] = None  # Stripe session if applicable
+    contributor_name: Optional[str] = None  # For anonymous/unregistered
+    contributor_email: Optional[str] = None
+    notes: Optional[str] = None  # Admin notes
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class ContributionCreate(BaseModel):
     journey_id: str
-    amount: float
-    payment_method: str
-    is_crypto: bool = False
+    amount: int  # Must be one of FIXED_CONTRIBUTION_AMOUNTS
+    payment_method: str  # Must be one of PAYMENT_METHODS
     sponsor_code: Optional[str] = None
+    contributor_name: Optional[str] = None
+    contributor_email: Optional[str] = None
 
 class SponsorLink(BaseModel):
     link_id: str = Field(default_factory=lambda: f"sponsor_{uuid.uuid4().hex[:8]}")
