@@ -1403,6 +1403,40 @@ async def get_user_dashboard_stats(request: Request):
 
 # ==================== USER PROFILE ====================
 
+@api_router.post("/user/complete-onboarding")
+async def complete_onboarding(request: Request):
+    """Mark user onboarding as complete"""
+    user = await require_auth(request)
+    data = await request.json()
+    
+    initial_action = data.get("initial_action")  # support, explore, plan
+    
+    await db.users.update_one(
+        {"user_id": user.user_id},
+        {"$set": {
+            "onboarding_completed": True,
+            "onboarding_completed_at": datetime.now(timezone.utc).isoformat(),
+            "onboarding_initial_action": initial_action
+        }}
+    )
+    
+    return {
+        "message": "Onboarding completo",
+        "initial_action": initial_action
+    }
+
+@api_router.get("/user/onboarding-status")
+async def get_onboarding_status(request: Request):
+    """Check if user has completed onboarding"""
+    user = await require_auth(request)
+    user_data = await db.users.find_one({"user_id": user.user_id}, {"_id": 0})
+    
+    return {
+        "onboarding_completed": user_data.get("onboarding_completed", False),
+        "onboarding_completed_at": user_data.get("onboarding_completed_at"),
+        "initial_action": user_data.get("onboarding_initial_action")
+    }
+
 @api_router.get("/profile")
 async def get_user_profile(request: Request):
     """Get current user profile with privacy settings"""
