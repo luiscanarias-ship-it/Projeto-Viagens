@@ -13,6 +13,7 @@ import JourneyDetail from "./pages/JourneyDetail";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
 import PaymentSuccess from "./pages/PaymentSuccess";
+import Onboarding from "./pages/Onboarding";
 
 // Router wrapper to handle auth callback
 const AppRouter = () => {
@@ -21,6 +22,11 @@ const AppRouter = () => {
   // Check URL fragment for session_id (Google Auth callback)
   if (location.hash?.includes('session_id=')) {
     return <AuthCallback />;
+  }
+
+  // Onboarding page without header/footer
+  if (location.pathname === '/onboarding') {
+    return <Onboarding />;
   }
 
   return (
@@ -35,6 +41,7 @@ const AppRouter = () => {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/payment-success" element={<PaymentSuccess />} />
+          <Route path="/onboarding" element={<Onboarding />} />
         </Routes>
       </main>
       <Footer />
