@@ -218,6 +218,11 @@ Valores fixos: €10, €20, €50, €100, €200, €500, €1000
   - Controlos de Boost (-10, +10)
   - Botão Ocultar/Mostrar das listagens
   - Botão Recalcular Scores para todas as viagens
+- ✅ **Ciclo de Vida Completo do Embaixador TESTADO**:
+  - Candidatura → Aprovação → Ativa (visível em "Sonhos em Materialização")
+  - Financiamento automático quando atinge 100% → Notificação + Email
+  - Realizada → Move para "Sonhos Realizados"
+  - Dashboard atualizado com stats corretas
 - ✅ Novo estado de candidatura: `ajustes_pedidos`
 - ✅ Emails transacionais para mudanças de estado de candidaturas
 
