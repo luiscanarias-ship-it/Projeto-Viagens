@@ -45,6 +45,14 @@ const Admin = () => {
   const [ambassadorApplications, setAmbassadorApplications] = useState(null);
   const [loadingApplications, setLoadingApplications] = useState(false);
   const [applicationStatusFilter, setApplicationStatusFilter] = useState('candidatura');
+  // Candidatura detail modal state
+  const [selectedApplication, setSelectedApplication] = useState(null);
+  const [applicationDetails, setApplicationDetails] = useState(null);
+  const [loadingDetails, setLoadingDetails] = useState(false);
+  // Adjustment request state
+  const [showAdjustmentModal, setShowAdjustmentModal] = useState(false);
+  const [adjustmentRequest, setAdjustmentRequest] = useState('');
+  const [adjustmentJourneyId, setAdjustmentJourneyId] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     poetic_name: '',
