@@ -116,6 +116,7 @@ class User(UserBase):
 # Journey status lifecycle
 JOURNEY_STATUSES = {
     "candidatura": {"name": "Candidatura", "description": "Aguarda aprovação do admin"},
+    "ajustes_pedidos": {"name": "Ajustes Pedidos", "description": "Admin pediu ajustes ao embaixador"},
     "aprovada": {"name": "Aprovada", "description": "Aprovada, aguarda ativação"},
     "ativa": {"name": "Ativa", "description": "Viagem ativa a receber contribuições"},
     "financiada": {"name": "Financiada", "description": "Objetivo de financiamento atingido"},
