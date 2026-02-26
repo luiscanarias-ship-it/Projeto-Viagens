@@ -196,6 +196,7 @@ class JourneyUpdate(BaseModel):
     city: Optional[str] = None
     story: Optional[str] = None
     photos: Optional[List[str]] = None
+    show_goal_amount: Optional[bool] = None  # Added: Toggle public visibility of goal amount
 
 # Ambassador journey application
 class AmbassadorJourneyApplication(BaseModel):
