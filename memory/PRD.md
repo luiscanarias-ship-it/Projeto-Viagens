@@ -141,9 +141,12 @@ Valores fixos: €10, €20, €50, €100, €200, €500, €1000
 - [x] Sonhos Realizados (por país, fotos/histórias, conteúdo curado)
 - [x] Lifecycle completo de viagens: candidatura → ativa → financiada → realizada
 - [x] Transição automática para "financiada" quando objetivo atingido
-- [x] Sistema de emails mockado para notificações
 - [x] Endpoints admin para migração e gestão
 - [x] **Onboarding guiado (4 ecrãs)**: Introdução, Progressão, Impacto, Escolha de ação
+- [x] **Emails comportamentais com Resend** (3 eventos):
+  - Nova contribuição → email ao contribuidor
+  - Contribuição de convidado → email ao sponsor + admin
+  - Utilizador torna-se Embaixador → email de desbloqueio
 
 ### ✅ Concluído (Sessões Anteriores)
 - [x] Modelo de utilizadores v2 (visitante/sonhador/embaixador)
