@@ -1024,6 +1024,31 @@ async def get_journey(journey_id: str):
     journey = await db.journeys.find_one({"journey_id": journey_id}, {"_id": 0})
     if not journey:
         raise HTTPException(status_code=404, detail="Viagem não encontrada")
+    
+    # If this is an ambassador journey, include ambassador info
+    if journey.get("is_ambassador_journey") and journey.get("ambassador_user_id"):
+        ambassador = await db.users.find_one(
+            {"user_id": journey["ambassador_user_id"]},
+            {"_id": 0, "password_hash": 0, "email": 0}
+        )
+        if ambassador:
+            # Determine display name based on privacy settings
+            use_real_name = ambassador.get("use_real_name", True)
+            if use_real_name:
+                display_name = ambassador.get("name", "Embaixador")
+                display_avatar = ambassador.get("avatar") or f"https://api.dicebear.com/7.x/initials/svg?seed={ambassador.get('name', 'E')}"
+            else:
+                display_name = ambassador.get("anonymous_alias") or "Sonhador"
+                display_avatar = ambassador.get("anonymous_avatar") or f"https://api.dicebear.com/7.x/shapes/svg?seed={journey['ambassador_user_id']}"
+            
+            journey["ambassador_info"] = {
+                "user_id": journey["ambassador_user_id"],
+                "display_name": display_name,
+                "avatar": display_avatar,
+                "country": ambassador.get("country"),
+                "level": ambassador.get("level", "sonhador")
+            }
+    
     return journey
 
 @api_router.post("/admin/journeys")
