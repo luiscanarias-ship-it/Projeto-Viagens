@@ -14,6 +14,7 @@ import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import Onboarding from "./pages/Onboarding";
+import AmbassadorProfile from "./pages/AmbassadorProfile";
 
 // Router wrapper to handle auth callback
 const AppRouter = () => {
