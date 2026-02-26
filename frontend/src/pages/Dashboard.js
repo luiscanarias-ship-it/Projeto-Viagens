@@ -777,6 +777,18 @@ const Dashboard = () => {
           )}
         </motion.div>
       </div>
+      
+      {/* Journey Application Modal */}
+      <JourneyApplicationModal
+        isOpen={showApplicationModal}
+        onClose={() => setShowApplicationModal(false)}
+        onSuccess={(data) => {
+          // Refresh journeys list
+          setMyJourneys(prev => [data.journey, ...prev]);
+          alert('Candidatura submetida com sucesso! Vamos analisá-la em breve.');
+        }}
+        authHeaders={getAuthHeaders()}
+      />
     </div>
   );
 };
