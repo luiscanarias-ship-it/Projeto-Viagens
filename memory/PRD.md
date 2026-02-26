@@ -154,6 +154,14 @@ Valores fixos: €10, €20, €50, €100, €200, €500, €1000
   - Impacto social (pessoas convidadas, contribuições geradas)
   - Viagens realizadas (fotos, histórias)
   - Link para perfil na página de detalhes da viagem
+- [x] **UI de Candidatura para Embaixador Abrir Viagem** (5 passos):
+  - Step 1: Destino (nome, país, cidade, descrição, nome poético)
+  - Step 2: Plano de viagem (cidades, duração, atividades)
+  - Step 3: Calendário (datas aproximadas, flexibilidade)
+  - Step 4: Motivação & Objetivo financeiro (100€-50.000€)
+  - Step 5: Métodos de pagamento (Stripe, MBWay, PayPal, Revolut, Wise, Crypto)
+  - Validação completa em cada passo
+  - Email automático ao admin quando candidatura é submetida
 
 ### ✅ Concluído (Sessões Anteriores)
 - [x] Modelo de utilizadores v2 (visitante/sonhador/embaixador)
