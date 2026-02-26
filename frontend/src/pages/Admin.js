@@ -325,6 +325,120 @@ const Admin = () => {
     }
   };
 
+  // Load full application details with ambassador history
+  const loadApplicationDetails = async (journeyId) => {
+    setLoadingDetails(true);
+    try {
+      const headers = getAuthHeaders();
+      const response = await axios.get(`${API}/admin/ambassador-journeys/${journeyId}/details`, { headers, withCredentials: true });
+      setApplicationDetails(response.data);
+      setSelectedApplication(journeyId);
+    } catch (error) {
+      console.error('Error loading application details:', error);
+      alert('Erro ao carregar detalhes da candidatura');
+    } finally {
+      setLoadingDetails(false);
+    }
+  };
+
+  // Close application details modal
+  const closeApplicationDetails = () => {
+    setSelectedApplication(null);
+    setApplicationDetails(null);
+  };
+
+  // Approve application (auto-activates by default)
+  const approveApplication = async (journeyId, autoActivate = true) => {
+    try {
+      const headers = getAuthHeaders();
+      const response = await axios.put(
+        `${API}/admin/ambassador-journeys/${journeyId}/status`,
+        { status: 'aprovada', auto_activate: autoActivate },
+        { headers, withCredentials: true }
+      );
+      
+      const newStatus = response.data.new_status;
+      alert(response.data.is_now_live 
+        ? `✅ Viagem aprovada e ativada! Já está visível em "Sonhos em Materialização". ${response.data.email_sent ? 'Email enviado ao embaixador.' : ''}`
+        : '✅ Candidatura aprovada!'
+      );
+      
+      // Reload applications list
+      const status = applicationStatusFilter ? `?status=${applicationStatusFilter}` : '';
+      const res = await axios.get(`${API}/admin/ambassador-journeys${status}`, { headers });
+      setAmbassadorApplications(res.data);
+      closeApplicationDetails();
+    } catch (error) {
+      console.error('Error approving application:', error);
+      alert('Erro ao aprovar candidatura');
+    }
+  };
+
+  // Reject application
+  const rejectApplication = async (journeyId, reason) => {
+    if (!window.confirm('Tem certeza que deseja rejeitar esta candidatura?')) return;
+    
+    try {
+      const headers = getAuthHeaders();
+      await axios.put(
+        `${API}/admin/ambassador-journeys/${journeyId}/status`,
+        { status: 'encerrada', admin_notes: reason || 'Candidatura rejeitada pelo admin' },
+        { headers, withCredentials: true }
+      );
+      
+      alert('Candidatura rejeitada');
+      
+      // Reload applications list
+      const status = applicationStatusFilter ? `?status=${applicationStatusFilter}` : '';
+      const res = await axios.get(`${API}/admin/ambassador-journeys${status}`, { headers });
+      setAmbassadorApplications(res.data);
+      closeApplicationDetails();
+    } catch (error) {
+      console.error('Error rejecting application:', error);
+      alert('Erro ao rejeitar candidatura');
+    }
+  };
+
+  // Request adjustments
+  const requestAdjustments = async () => {
+    if (!adjustmentRequest.trim()) {
+      alert('Por favor escreve o que precisa de ser ajustado');
+      return;
+    }
+    
+    try {
+      const headers = getAuthHeaders();
+      await axios.put(
+        `${API}/admin/ambassador-journeys/${adjustmentJourneyId}/status`,
+        { status: 'ajustes_pedidos', adjustment_request: adjustmentRequest },
+        { headers, withCredentials: true }
+      );
+      
+      alert('✅ Pedido de ajustes enviado ao embaixador');
+      
+      // Reload applications list
+      const status = applicationStatusFilter ? `?status=${applicationStatusFilter}` : '';
+      const res = await axios.get(`${API}/admin/ambassador-journeys${status}`, { headers });
+      setAmbassadorApplications(res.data);
+      
+      // Reset state
+      setShowAdjustmentModal(false);
+      setAdjustmentRequest('');
+      setAdjustmentJourneyId(null);
+      closeApplicationDetails();
+    } catch (error) {
+      console.error('Error requesting adjustments:', error);
+      alert('Erro ao pedir ajustes');
+    }
+  };
+
+  // Open adjustment modal
+  const openAdjustmentModal = (journeyId) => {
+    setAdjustmentJourneyId(journeyId);
+    setAdjustmentRequest('');
+    setShowAdjustmentModal(true);
+  };
+
   const getLevelBadge = (level) => {
     const badges = {
       curioso: { bg: 'bg-stone-100', text: 'text-stone-600', label: 'Curioso' },
