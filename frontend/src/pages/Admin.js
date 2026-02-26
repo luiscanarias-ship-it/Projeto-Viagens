@@ -2212,6 +2212,293 @@ const Admin = () => {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Application Details Modal */}
+        <AnimatePresence>
+          {selectedApplication && applicationDetails && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+              onClick={closeApplicationDetails}
+            >
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                className="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-y-auto"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Header */}
+                <div className="sticky top-0 bg-white border-b border-stone-100 p-6 flex items-start justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold text-[#2D2A26]">{applicationDetails.journey?.name}</h2>
+                    <p className="text-[#6B6661]">Candidatura de {applicationDetails.ambassador?.name}</p>
+                  </div>
+                  <button
+                    onClick={closeApplicationDetails}
+                    className="p-2 hover:bg-stone-100 rounded-full transition-colors"
+                  >
+                    <X className="w-6 h-6 text-[#6B6661]" />
+                  </button>
+                </div>
+
+                <div className="p-6 space-y-6">
+                  {/* Journey Details */}
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <img 
+                        src={applicationDetails.journey?.image_url || 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400'} 
+                        alt={applicationDetails.journey?.name}
+                        className="w-full h-48 object-cover rounded-xl"
+                      />
+                    </div>
+                    <div className="space-y-4">
+                      <div>
+                        <h3 className="text-sm font-medium text-[#6B6661] mb-1">Descrição</h3>
+                        <p className="text-[#2D2A26]">{applicationDetails.journey?.description}</p>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <h3 className="text-sm font-medium text-[#6B6661] mb-1">Objetivo</h3>
+                          <p className="text-xl font-bold text-[#FFBE98]">€{applicationDetails.journey?.goal_amount?.toLocaleString()}</p>
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-medium text-[#6B6661] mb-1">Destino</h3>
+                          <p className="text-[#2D2A26]">{applicationDetails.journey?.country || applicationDetails.journey?.region || 'N/A'}</p>
+                        </div>
+                        {applicationDetails.journey?.target_date && (
+                          <div>
+                            <h3 className="text-sm font-medium text-[#6B6661] mb-1">Data Prevista</h3>
+                            <p className="text-[#2D2A26]">{new Date(applicationDetails.journey?.target_date).toLocaleDateString('pt-PT')}</p>
+                          </div>
+                        )}
+                        <div>
+                          <h3 className="text-sm font-medium text-[#6B6661] mb-1">Estado</h3>
+                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                            applicationDetails.journey?.status === 'candidatura' ? 'bg-[#F2C94C]/20 text-[#F2C94C]' :
+                            applicationDetails.journey?.status === 'ajustes_pedidos' ? 'bg-orange-100 text-orange-600' :
+                            applicationDetails.journey?.status === 'aprovada' ? 'bg-blue-100 text-blue-600' :
+                            applicationDetails.journey?.status === 'ativa' ? 'bg-green-100 text-green-600' :
+                            'bg-stone-100 text-stone-600'
+                          }`}>
+                            {applicationDetails.journey?.status === 'ajustes_pedidos' ? 'Ajustes Pedidos' : applicationDetails.journey?.status}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Application Message */}
+                  {applicationDetails.journey?.application_message && (
+                    <div className="bg-stone-50 rounded-xl p-4">
+                      <h3 className="text-sm font-medium text-[#6B6661] mb-2 flex items-center gap-2">
+                        <MessageSquare className="w-4 h-4" />
+                        Mensagem do Embaixador
+                      </h3>
+                      <p className="text-[#2D2A26] italic">"{applicationDetails.journey?.application_message}"</p>
+                    </div>
+                  )}
+
+                  {/* Ambassador Profile */}
+                  <div className="border border-stone-100 rounded-xl p-5">
+                    <h3 className="text-lg font-bold text-[#2D2A26] mb-4 flex items-center gap-2">
+                      <Users className="w-5 h-5 text-[#FFBE98]" />
+                      Perfil do Embaixador
+                    </h3>
+                    <div className="flex items-start gap-4">
+                      {applicationDetails.ambassador?.avatar ? (
+                        <img src={applicationDetails.ambassador.avatar} alt="" className="w-16 h-16 rounded-full object-cover" />
+                      ) : (
+                        <div className="w-16 h-16 rounded-full bg-[#FFBE98]/20 flex items-center justify-center text-[#FFBE98] text-xl font-bold">
+                          {applicationDetails.ambassador?.name?.charAt(0)?.toUpperCase() || '?'}
+                        </div>
+                      )}
+                      <div className="flex-1">
+                        <h4 className="font-bold text-[#2D2A26]">{applicationDetails.ambassador?.name}</h4>
+                        <p className="text-sm text-[#6B6661]">{applicationDetails.ambassador?.email}</p>
+                        <p className="text-xs text-[#6B6661] mt-1">
+                          Membro desde {applicationDetails.ambassador?.registered_at ? new Date(applicationDetails.ambassador.registered_at).toLocaleDateString('pt-PT') : 'N/A'}
+                        </p>
+                        <div className="flex gap-4 mt-3">
+                          <span className={`px-2 py-1 rounded-lg text-xs font-medium ${
+                            applicationDetails.ambassador?.level === 'embaixador' ? 'bg-[#FFBE98]/20 text-[#FFBE98]' :
+                            applicationDetails.ambassador?.level === 'sonhador' ? 'bg-blue-100 text-blue-600' :
+                            'bg-stone-100 text-stone-600'
+                          }`}>
+                            {applicationDetails.ambassador?.level || 'curioso'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Ambassador History */}
+                  <div className="grid md:grid-cols-2 gap-6">
+                    {/* Contributions History */}
+                    <div className="border border-stone-100 rounded-xl p-5">
+                      <h3 className="text-sm font-bold text-[#2D2A26] mb-3 flex items-center gap-2">
+                        <History className="w-4 h-4 text-green-500" />
+                        Histórico de Contribuições
+                      </h3>
+                      <div className="text-center mb-4 p-3 bg-green-50 rounded-lg">
+                        <p className="text-2xl font-bold text-green-600">€{applicationDetails.ambassador_history?.total_contributed?.toLocaleString() || 0}</p>
+                        <p className="text-xs text-green-600">Total contribuído</p>
+                      </div>
+                      {applicationDetails.ambassador_history?.contributions?.length > 0 ? (
+                        <div className="space-y-2 max-h-32 overflow-y-auto">
+                          {applicationDetails.ambassador_history.contributions.slice(0, 5).map((c, i) => (
+                            <div key={i} className="flex justify-between items-center text-sm p-2 bg-stone-50 rounded-lg">
+                              <span className="text-[#6B6661]">{new Date(c.created_at).toLocaleDateString('pt-PT')}</span>
+                              <span className="font-medium text-green-600">€{c.amount}</span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-[#6B6661] text-center">Sem contribuições registadas</p>
+                      )}
+                    </div>
+
+                    {/* Referrals History */}
+                    <div className="border border-stone-100 rounded-xl p-5">
+                      <h3 className="text-sm font-bold text-[#2D2A26] mb-3 flex items-center gap-2">
+                        <UserPlus className="w-4 h-4 text-purple-500" />
+                        Referrals (Convites)
+                      </h3>
+                      <div className="text-center mb-4 p-3 bg-purple-50 rounded-lg">
+                        <p className="text-2xl font-bold text-purple-600">{applicationDetails.ambassador_history?.valid_referrals_count || 0}</p>
+                        <p className="text-xs text-purple-600">Referrals válidos</p>
+                      </div>
+                      {applicationDetails.ambassador_history?.referrals?.length > 0 ? (
+                        <div className="space-y-2 max-h-32 overflow-y-auto">
+                          {applicationDetails.ambassador_history.referrals.slice(0, 5).map((r, i) => (
+                            <div key={i} className="flex justify-between items-center text-sm p-2 bg-stone-50 rounded-lg">
+                              <span className="text-[#2D2A26]">{r.name}</span>
+                              <span className={`text-xs px-2 py-0.5 rounded-full ${r.has_contributed ? 'bg-green-100 text-green-600' : 'bg-stone-200 text-stone-600'}`}>
+                                {r.has_contributed ? 'Contribuiu' : 'Pendente'}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-[#6B6661] text-center">Sem convites registados</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Other Journeys */}
+                  {applicationDetails.ambassador_history?.journeys_created?.length > 0 && (
+                    <div className="border border-stone-100 rounded-xl p-5">
+                      <h3 className="text-sm font-bold text-[#2D2A26] mb-3">Outras Viagens deste Embaixador</h3>
+                      <div className="space-y-2">
+                        {applicationDetails.ambassador_history.journeys_created.map((j, i) => (
+                          <div key={i} className="flex justify-between items-center text-sm p-2 bg-stone-50 rounded-lg">
+                            <span className="text-[#2D2A26]">{j.name}</span>
+                            <span className={`text-xs px-2 py-0.5 rounded-full ${
+                              j.status === 'ativa' ? 'bg-green-100 text-green-600' :
+                              j.status === 'financiada' ? 'bg-purple-100 text-purple-600' :
+                              j.status === 'realizada' ? 'bg-[#FFBE98]/20 text-[#FFBE98]' :
+                              'bg-stone-200 text-stone-600'
+                            }`}>
+                              {j.status}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Actions */}
+                  {(applicationDetails.journey?.status === 'candidatura' || applicationDetails.journey?.status === 'ajustes_pedidos') && (
+                    <div className="flex gap-3 pt-4 border-t border-stone-100">
+                      <button
+                        onClick={() => approveApplication(applicationDetails.journey?.journey_id)}
+                        className="flex-1 px-6 py-3 bg-green-500 text-white rounded-xl font-medium hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
+                      >
+                        <CheckCircle className="w-5 h-5" />
+                        Aprovar e Ativar Viagem
+                      </button>
+                      <button
+                        onClick={() => openAdjustmentModal(applicationDetails.journey?.journey_id)}
+                        className="px-6 py-3 bg-orange-100 text-orange-600 rounded-xl font-medium hover:bg-orange-200 transition-colors flex items-center gap-2"
+                      >
+                        <MessageSquare className="w-5 h-5" />
+                        Pedir Ajustes
+                      </button>
+                      <button
+                        onClick={() => rejectApplication(applicationDetails.journey?.journey_id)}
+                        className="px-6 py-3 bg-red-100 text-red-600 rounded-xl font-medium hover:bg-red-200 transition-colors flex items-center gap-2"
+                      >
+                        <XCircle className="w-5 h-5" />
+                        Rejeitar
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Loading Details Overlay */}
+        {loadingDetails && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+            <div className="bg-white rounded-2xl p-8">
+              <div className="w-8 h-8 border-4 border-[#FFBE98] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+              <p className="text-[#6B6661]">A carregar detalhes...</p>
+            </div>
+          </div>
+        )}
+
+        {/* Adjustment Request Modal */}
+        <AnimatePresence>
+          {showAdjustmentModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+              onClick={() => setShowAdjustmentModal(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                className="bg-white rounded-2xl w-full max-w-lg p-6"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <h3 className="text-xl font-bold text-[#2D2A26] mb-2 flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5 text-orange-500" />
+                  Pedir Ajustes ao Embaixador
+                </h3>
+                <p className="text-sm text-[#6B6661] mb-4">
+                  Descreve o que precisa de ser alterado ou melhorado na candidatura. O embaixador receberá um email com estas instruções.
+                </p>
+                <textarea
+                  value={adjustmentRequest}
+                  onChange={(e) => setAdjustmentRequest(e.target.value)}
+                  placeholder="Ex: Por favor adiciona mais detalhes sobre o itinerário da viagem e uma imagem mais representativa do destino..."
+                  className="w-full h-32 p-4 border border-stone-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-[#FFBE98]/50"
+                />
+                <div className="flex gap-3 mt-4">
+                  <button
+                    onClick={() => setShowAdjustmentModal(false)}
+                    className="flex-1 px-4 py-3 bg-stone-100 text-[#6B6661] rounded-xl font-medium hover:bg-stone-200 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={requestAdjustments}
+                    className="flex-1 px-4 py-3 bg-orange-500 text-white rounded-xl font-medium hover:bg-orange-600 transition-colors"
+                  >
+                    Enviar Pedido
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
