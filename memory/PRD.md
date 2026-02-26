@@ -195,13 +195,22 @@ Valores fixos: €10, €20, €50, €100, €200, €500, €1000
 ## Alterações Recentes
 
 ### 2026-02-26 (Sessão 4 - Atual)
-- ✅ **Tab Candidaturas no Admin**: 
+- ✅ **Tab Candidaturas no Admin** (COMPLETA): 
   - Lista candidaturas de embaixadores agrupadas por estado
-  - Filtro por estado (candidatura, aprovada, ativa, financiada, realizada, encerrada)
-  - Resumo de contagem por estado
-  - Botões de ação: Aprovar, Rejeitar (para candidatura), Ativar (para aprovada)
-  - Progresso de angariação para viagens ativas
-  - Marcar como Realizada para viagens financiadas
+  - Filtro por estado (candidatura, ajustes_pedidos, aprovada, ativa, financiada, realizada, encerrada)
+  - **Modal de Detalhes**: abre com todos os dados da candidatura
+    - Dados da viagem: nome, descrição, objetivo, destino, data prevista
+    - Mensagem do embaixador
+    - Perfil do embaixador: nome, email, nível
+    - **Histórico do embaixador**: total contribuído + lista de contribuições
+    - **Referrals**: contagem de válidos + lista com estado (contribuiu/pendente)
+    - Outras viagens criadas pelo embaixador
+  - **Aprovar e Ativar**: 
+    - Muda estado diretamente para 'ativa' (auto-activate)
+    - Publica na secção "Sonhos em Materialização"
+    - Envia email ao embaixador via Resend
+  - **Pedir Ajustes**: modal para escrever feedback, envia email ao embaixador
+  - **Rejeitar**: encerra a candidatura
 - ✅ **Tab Visibilidade no Admin** (completada):
   - Lista viagens ativas com visibility_score calculado
   - Critérios de score: Progresso (30%), Atividade recente (25%), Nº contribuições (20%), Impacto social (15%), Novidade (10%)
@@ -209,7 +218,8 @@ Valores fixos: €10, €20, €50, €100, €200, €500, €1000
   - Controlos de Boost (-10, +10)
   - Botão Ocultar/Mostrar das listagens
   - Botão Recalcular Scores para todas as viagens
-- ✅ Carregamento automático de candidaturas pendentes no Admin
+- ✅ Novo estado de candidatura: `ajustes_pedidos`
+- ✅ Emails transacionais para mudanças de estado de candidaturas
 
 ### 2026-02-25 (Sessão 3)
 - ✅ Nova estrutura da homepage com 4 secções ordenadas
