@@ -1,76 +1,79 @@
 <analysis>**original_problem_statement:**
-O utilizador pretende criar uma plataforma de angariação de fundos (crowdfunding) chamada 4Luis. Inicialmente focada em subscrições pagas, a plataforma evoluiu para um modelo de progressão de utilizador baseado no mérito e no envolvimento, removendo as subscrições. A monetização agora foca-se em contribuições diretas para uma única viagem principal de cada vez, com um forte incentivo ao uso de criptomoedas.
+O utilizador pretende criar uma plataforma de angariação de fundos (crowdfunding) chamada 4Luis. A plataforma evoluiu de um modelo de subscrição paga para um modelo de progressão de utilizador baseado no mérito, onde os utilizadores se tornam Embaixadores através de contribuições e convites. A monetização foca-se em contribuições diretas para viagens, com um incentivo ao uso de criptomoedas.
 
 **PRODUCT REQUIREMENTS:**
--   **Modelo de Utilizador (v3):**
-    -   **Visitante:** Não registado; pode ver a viagem principal.
-    -   **Sonhador:** Utilizador registado; pode contribuir, gerar um link de sponsor e convidar pessoas.
-    -   **Embaixador:** Um Sonhador que cumpriu dois requisitos: 1) fez pelo menos uma contribuição confirmada para a viagem principal e 2) tem 3 ou mais referrals válidos (convidados que também contribuíram). Os Embaixadores podem candidatar-se a criar as suas próprias viagens.
-
--   **Modelo de Contribuição:**
-    -   As contribuições são para uma única viagem principal ativa.
-    -   Valores de contribuição fixos: 10€, 20€, 50€, 100€, 200€, 500€, 1000€.
-    -   Múltiplos métodos de pagamento: Stripe (automático), e pagamentos diretos que requerem validação manual do admin (MBWay, PayPal, Revolut, Criptomoedas).
-    -   Incentivo a pagamentos com Cripto (BTC, ETH, USDT, USDC) através de destaque visual na UI e reconhecimento especial no perfil/feed.
-    -   A plataforma não retém comissões.
-
--   **Página da Viagem:**
-    -   A barra de progresso e a percentagem financiada são públicas.
-    -   O valor monetário total do objetivo () é visível apenas para o admin.
-    -   Um feed público e cronológico mostra as contribuições confirmadas (nome/alias, valor, mensagem opcional e um badge para pagamentos crypto).
-    -   Quando o financiamento atinge 100%, a viagem continua a aceitar contribuições, e a barra de progresso pode ultrapassar 100%, mostrando uma mensagem de destaque.
-
--   **Lifecycle de Viagens de Embaixadores:**
-    -   Viagens criadas por embaixadores passam por vários estados:  ->  ->  ->  ->  -> .
-    -   A transição de  para  é automática quando o objetivo é atingido.
-    -   Viagens financiadas movem-se para uma secção de Sonhos Realizados.
-
--   **Dashboards:**
-    -   **User Dashboard:** Mostra o estado do utilizador (/), o progresso para se tornar Embaixador (checklist), estatísticas de convites e contribuições pessoais.
-    -   **Admin Dashboard:** Relatórios de contribuições agregadas por valor e por método de pagamento.
+1.  **Estrutura da Homepage:**
+    *   Viagem principal (experiência viva, progresso, contribuições, updates).
+    *   Planeia a tua viagem (ferramenta existente).
+    *   Sonhos em fase de materialização (viagens de embaixadores em angariação, organizadas por região, com destaque para as mais relevantes).
+    *   Sonhos realizados (organizados por país, com fotos e histórias).
+2.  **Lifecycle das Viagens dos Embaixadores:**
+    *   Estados:  ->  ->  ->  ->  -> .
+    *   Transição automática para  ao atingir o objetivo.
+    *   Notificações por email (Resend) para o embaixador e admin quando a viagem é financiada.
+3.  **Onboarding Guiado:**
+    *   Fluxo de 3-4 ecrãs após o registo para introduzir o conceito, a progressão e o impacto comunitário.
+    *   O utilizador escolhe uma ação inicial.
+4.  **Emails Comportamentais (Transacionais):**
+    *   Integrar com **Resend**.
+    *   Enviar emails para: nova contribuição, contribuição de um convidado (para o sponsor e admin), e quando um utilizador se torna Embaixador.
+5.  **Perfil Público do Embaixador:**
+    *   Página pública com identidade, impacto social (contribuições, convites), viagem atual e histórico de viagens.
+6.  **UI de Candidatura de Viagem:**
+    *   Formulário completo em várias etapas para embaixadores submeterem novas candidaturas de viagem, cobrindo destino, objetivo financeiro, plano, etc.
+7.  **Critérios de Destaque para Viagens:**
+    *   Implementar um algoritmo de visibilidade (baseado em progresso, atividade, contribuições) e permitir que o admin possa destacar viagens manualmente.
 
 **User's preferred language**: Portuguese (Portugal)
 
 **what currently exists?**
-Uma aplicação full-stack (React + FastAPI) que implementa a maioria dos requisitos acima. O sistema de utilizadores / está funcional. O User Dashboard adapta-se dinamicamente ao nível do utilizador. O novo modelo de contribuições com valores fixos e múltiplos métodos de pagamento (incluindo Cripto com destaque) está implementado no frontend e backend. A página da viagem principal mostra o feed público de contribuições e a barra de progresso com o valor do objetivo oculto. Os endpoints de backend para a gestão do ciclo de vida das viagens dos embaixadores foram criados, juntamente com uma nova página frontend .
+Uma aplicação full-stack (React + FastAPI) com um sistema de utilizadores /, um modelo de contribuições diretas e uma homepage reestruturada. Foi implementado um fluxo de onboarding guiado para novos utilizadores, perfis públicos para embaixadores e um formulário de candidatura de viagens. O sistema de emails transacionais foi integrado com o Resend e está funcional. A lógica de backend para um algoritmo de visibilidade e para a curadoria de viagens por parte do admin foi criada.
 
 **Last working item**:
--   **Last item agent was working**: Implementação do ciclo de vida (lifecycle) para as viagens dos embaixadores. O agente criou os novos estados no modelo , adicionou os endpoints de backend no  para um admin gerir estas viagens () e a lógica para mover automaticamente uma viagem para o estado  ao atingir o seu objetivo. No frontend, criou a página  e adicionou a secção Sonhos Realizados na Home.
--   **Status**: IN PROGRESS
+-   **Last item agent was working**: Implementação do sistema de destaque e visibilidade para viagens. O agente adicionou campos (, ) e endpoints de admin (, ) no backend. Em seguida, começou a atualizar o painel de admin () para adicionar uma tab de Visibilidade. No processo, o agente introduziu um erro crítico ao duplicar um grande bloco de código no ficheiro .
+-   **Status**: BLOCKED
 -   **Agent Testing Done**: N
--   **Which testing method agent to use?**: both. O agente de backend deve testar os novos endpoints de admin para criar, aprovar e gerir os estados das viagens de embaixador, e validar a transição automática para o estado financiada. O agente de frontend deve verificar se as viagens financiadas aparecem corretamente na nova secção Sonhos Realizados e na página .
+-   **Which testing method agent to use?**: both. O agente de backend precisa de corrigir o erro fatal em  e depois testar os novos endpoints de admin. O agente de frontend precisa de concluir e testar a nova secção Visibilidade no painel de admin.
 -   **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
-Nenhum problema ou bug pendente foi identificado. O trabalho atual é a continuação do desenvolvimento de funcionalidades.
+-   **Issue 1**: Código Duplicado e Erro Fatal no Backend (Priority: P0 - BLOCKER)
+    -   **Description**: O agente duplicou um grande bloco de código (aproximadamente 240 linhas) relacionado com as candidaturas de viagens de embaixadores no ficheiro . A duplicação está entre as linhas 3654 e 3895, e impede o servidor de iniciar.
+    -   **Attempted fixes**: O agente identificou o bloco de código duplicado, mas não chegou a removê-lo.
+    -   **Next debug checklist**:
+        1.  Abrir o ficheiro .
+        2.  Remover o bloco de código duplicado que começa na linha  e termina na linha  (a secção que começa com  e as suas funções associadas). A primeira definição destes endpoints, que está mais acima no ficheiro, é a correta e deve ser mantida.
+        3.  Executar o linter de Python para confirmar que não existem mais erros de sintaxe ou redefinição.
+        4.  Reiniciar o serviço do backend e verificar os logs para garantir que inicia corretamente.
+    -   **Why fix this issue and what will be achieved with the fix?**: É um erro fatal que impede o funcionamento de toda a aplicação. A sua resolução é obrigatória para continuar qualquer desenvolvimento.
+    -   **Status**: IN PROGRESS
+    -   **Is recurring issue?**: N
+    -   **Should Test frontend/backend/both after fix?**: backend
+    -   **Blocked on other issue**: N/A
 
 **In progress Task List**:
--   **Task 1**: Concluir e testar o Lifecycle das viagens dos embaixadores. (Priority: P0)
-    -   **Where to resume**: Os ficheiros de backend () e frontend (, ) foram criados/modificados. Os próximos passos são:
-        1.  Implementar a UI no frontend para que um Embaixador possa submeter uma candidatura de viagem (o botão Candidatar-me a Embaixador existe mas não tem ação).
-        2.  Testar o fluxo completo: candidatura -> aprovação pelo admin -> contribuições -> financiamento automático -> mover para Sonhos Realizados.
-        3.  Testar os endpoints de admin para gestão manual dos estados.
-    -   **What will be achieved with this?**: Os utilizadores Embaixador poderão criar e financiar as suas próprias viagens, completando um ciclo de negócio central da plataforma.
+-   **Task 1**: Concluir a implementação do sistema de destaque e visibilidade. (Priority: P1)
+    -   **Where to resume**: Após resolver o Issue 1, o agente deve continuar a trabalhar no ficheiro . A tab Visibilidade foi adicionada, mas falta implementar o componente que lista as viagens ativas, mostra o seu , e permite ao admin usar os botões para destacar/remover destaque de uma viagem (chamando o endpoint ).
+    -   **What will be achieved with this?**: O admin terá controlo total sobre a curadoria das viagens, permitindo destacar as mais promissoras ou relevantes, o que melhora a qualidade do conteúdo apresentado aos utilizadores.
     -   **Status**: IN PROGRESS
     -   **Should Test frontend/backend/both after fix?**: both
-    -   **Blocked on something**: N/A
+    -   **Blocked on something**: Issue 1: Código Duplicado e Erro Fatal no Backend.
 
 **Upcoming and Future Tasks**
 -   **Upcoming Tasks:**
-    -   **P1:** Implementar emails automáticos para eventos chave (registo, contribuição registada/confirmada, desbloqueio de Embaixador, viagem financiada).
+    -   **P1**: Testar de ponta a ponta o ciclo de vida completo da viagem de um embaixador. O fluxo (candidatura -> aprovação -> angariação -> financiada -> movida para Sonhos Realizados) foi implementado em partes, mas nunca foi testado na sua totalidade.
 -   **Future Tasks:**
-    -   **P2:** Implementar um sistema de notificações dentro da aplicação.
-    -   **P2:** Adicionar uma secção de testemunhos em cada página de viagem.
-    -   **P3:** Reintroduzir o sistema de Pontos e gamificação que foi congelado anteriormente.
+    -   **P2**: Implementar um sistema de notificações dentro da aplicação (ícone de sino na navbar, etc.).
+    -   **P2**: Adicionar uma secção de testemunhos de contribuidores em cada página de viagem.
+    -   **P3**: Reintroduzir o sistema de Pontos e gamificação que foi congelado em fases anteriores do projeto.
 
 **Completed work in this session**
--   **Refatoração do Modelo de Utilizador:** O modelo foi alterado de um sistema de subscrição (, , ) para um modelo de mérito (, ) baseado em contribuições e referências.
--   **Refatoração do User Dashboard:** O dashboard do utilizador foi completamente reescrito para se alinhar com o novo modelo /, mostrando uma checklist de progresso.
--   **Novo Modelo de Contribuições:** Implementado um sistema de contribuições com valores fixos e múltiplos métodos de pagamento (Stripe, MBWay, PayPal, Revolut, Cripto).
--   **Incentivo a Cripto:** Implementados destaques visuais na UI e reconhecimento especial (badges no feed) para contribuições em criptomoeda. Endereços de carteira foram corrigidos e atualizados conforme feedback do utilizador.
--   **Atualização da Página da Viagem:** A página de detalhes da viagem foi atualizada para ocultar o valor do objetivo, mostrar uma barra de progresso pública e um feed de contribuições com mensagens e anonimato opcionais.
--   **Correção de Webhooks:** A lógica de webhooks do Stripe (remanescente do modelo de subscrição) foi depurada e testada com sucesso, embora tenha sido posteriormente descontinuada em favor do novo modelo.
--   **Criação de Relatórios de Admin:** Foram adicionados novos endpoints para o admin visualizar relatórios de contribuições por valor e por método de pagamento.
+-   **Refatoração da Homepage**: A página  foi reescrita para incluir as secções Viagem Principal, Sonhos em Fase de Materialização e Sonhos Realizados com conteúdo curado.
+-   **Implementação do Onboarding**: Criado um fluxo de onboarding guiado em vários passos () para novos utilizadores após o registo.
+-   **Integração de Emails Transacionais**: O sistema de emails foi migrado de um mock para uma integração real com **Resend**, com templates HTML e lógica para enviar emails em eventos chave (nova contribuição, convidado contribui, utilizador torna-se embaixador).
+-   **Perfil Público do Embaixador**: Criado o endpoint de backend e a página de frontend () para mostrar o perfil público de um embaixador.
+-   **UI de Candidatura de Viagem**: Implementado um modal () com um formulário de várias etapas para embaixadores submeterem as suas candidaturas de viagem.
+-   **Backend para Visibilidade de Viagens**: Adicionada a lógica no  para calcular um  e permitir que o admin destaque viagens manualmente.
 
 **Earlier issues found/mentioned but not fixed**
 Nenhum.
@@ -86,71 +89,73 @@ Nenhum.
 **Key Technical Concepts**
 -   **Backend**: FastAPI, MongoDB (com ).
 -   **Frontend**: React.js, TailwindCSS, , .
--   **Database**: MongoDB.
--   **Pagamentos**: Stripe SDK para pagamentos únicos, e um sistema de validação manual para pagamentos diretos (MBWay, PayPal, Cripto).
+-   **Emails**: Resend.
 -   **Autenticação**: JWT.
 
 **key DB schema**
 -   **users**: 
 -   **journeys**: 
--   **contributions**: 
+-   **email_queue**: 
 
 **changes in tech stack**
-Nenhuma alteração fundamental na stack. O uso do SDK do Stripe foi simplificado de Subscrições para pagamentos únicos.
+-   Adicionado o serviço **Resend** para envio de emails transacionais.
+-   Instalado o pacote  no backend.
 
 **All files of reference**
--   : Ficheiro central, modificado extensivamente para todas as novas funcionalidades.
--   : Componente de frontend mais modificado, contém toda a nova UI de contribuição.
--   : Reescrito para se adaptar ao novo modelo de utilizador.
--   : Modificado para adicionar a nova secção Sonhos Realizados.
--   : Novo ficheiro para listar viagens financiadas.
--   : Atualizado múltiplas vezes para documentar as mudanças nos requisitos.
+-   : Ficheiro central, onde toda a lógica de backend foi adicionada (e duplicada).
+-   : Totalmente reescrito com a nova estrutura.
+-   : Modificado para adicionar a tab de Visibilidade.
+-   : Modificado para incluir o modal de candidatura de viagem.
+-   : Novo ficheiro para o fluxo de onboarding.
+-   : Novo ficheiro para o perfil público.
+-   : Novo ficheiro para o formulário de candidatura.
+-   : Atualizado com os novos requisitos e funcionalidades implementadas.
 
 **Areas that need refactoring**:
--    atingiu um tamanho crítico e deve ser urgentemente dividido em múltiplos ficheiros por domínio (ex: , , ).
--    é um mega componente com mais de 1000 linhas e deve ser decomposto em componentes menores (ex: , , ).
+-    é a maior preocupação. Com mais de 4000 linhas, tornou-se extremamente difícil de manter. A sua divisão em múltiplos ficheiros por  (ex: , , ) é crítica para a saúde a longo prazo do projeto.
+-    também está a ficar muito grande e complexo, e beneficiaria de ser dividido em componentes mais pequenos para cada tab de gestão.
 
 **key api endpoints**
--   : Retorna os dados para o dashboard do utilizador.
--   : Cria um registo de contribuição para pagamentos diretos.
--   : Retorna a configuração de pagamentos (valores fixos, métodos).
--   : Endpoint de relatório para o admin.
--   : Retorna as contribuições públicas para o feed.
--   : Retorna o progresso atual de uma viagem.
--   : Endpoint para o admin listar/gerir candidaturas de viagens.
--   : Endpoint para o admin atualizar o estado de uma viagem de embaixador.
+-   : Obtém todos os dados necessários para a nova homepage.
+-   : Marca o onboarding de um utilizador como concluído.
+-   : Retorna os dados para o perfil público de um embaixador.
+-   : Endpoint para um embaixador submeter uma candidatura de viagem.
+-   : Endpoint para o admin destacar ou remover o destaque de uma viagem.
+-   : Endpoint para recalcular os scores de visibilidade de todas as viagens.
+-   : Endpoint para o admin visualizar a fila de emails.
 
 **Critical Info for New Agent**
--   **Atenção aos Pivots:** O produto mudou drasticamente. Ignore a lógica antiga de subscrições e os níveis /. A fonte de verdade é o modelo  ->  e o sistema de contribuições diretas.
--   **Foco Atual:** A tarefa em curso é finalizar o ciclo de vida das viagens de embaixador. Isto envolve principalmente criar a UI para a candidatura e testar todo o fluxo.
--   **Código Legado:** O ficheiro  é extremamente grande. Qualquer modificação deve ser feita com cuidado para evitar quebras. A refatoração é necessária, mas não foi solicitada pelo utilizador. Priorize a entrega de funcionalidades.
+-   **P0 Blocker**: A sua primeira ação TEM de ser corrigir o erro fatal em  removendo o código duplicado, caso contrário nada na aplicação funcionará.
+-   **Continuar a Tarefa**: Após corrigir o backend, a tarefa seguinte é completar a UI de gestão de visibilidade no ficheiro .
+-   **Risco de Refatoração**: O ficheiro  é um grande risco técnico. Embora o utilizador não o tenha pedido, qualquer nova funcionalidade aumenta a complexidade e o risco de erros. Proponha a refatoração como um passo necessário para garantir a estabilidade futura.
 
 **documents and test reports created in this job**
+-    (atualizado)
 -   
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User**: Pede para implementar o incentivo a pagamentos com criptomoeda (destaque visual, reconhecimento).
-2.  **Agent**: Implementa a UI/UX para pagamentos crypto, incluindo destaque, badges e um feed especial.
-3.  **User**: Testa e reporta que os endereços das wallets de crypto estão incorretos, exceto o de USDT.
-4.  **Agent**: Pede os endereços corretos.
-5.  **User**: Fornece os endereços corretos para BTC, ETH e pede para remover USDC.
-6.  **Agent**: Corrige os endereços e remove USDC.
-7.  **User**: Pede para re-adicionar USDC com um novo endereço.
-8.  **Agent**: Adiciona novamente USDC com o endereço correto e confirma a lista final.
-9.  **User**: Confirma a correção e pede para continuar (sim, continua).
-10. **User**: Define o próximo bloco: Lifecycle das viagens dos embaixadores, especificando os estados e as ações automáticas.
+1.  **User**: Pede para implementar o perfil público do Embaixador.
+2.  **Agent**: Implementa o perfil.
+3.  **User**: Pede para implementar a UI de candidatura para Embaixadores criarem uma viagem.
+4.  **Agent**: Implementa o formulário.
+5.  **User**: Pede para implementar critérios de destaque para as viagens, incluindo um algoritmo e curadoria do admin.
+6.  **Agent**: Começa a implementação.
+7.  **Agent**: (Silenciosamente) Introduz um erro de código duplicado no backend.
+8.  **User**: ja adicionei mais creditos, podes retomar a tarefa (User adds more credits and asks the agent to resume).
+9.  **Agent**: Confirma que vai continuar e tenta corrigir o erro que introduziu.
+10. **Agent**: Falha ao tentar corrigir antes do final da sessão.
 
 **Project Health Check:**
--   **Broken**: A funcionalidade de candidatura a viagens de embaixador está incompleta. O botão na UI existe, mas não há um formulário ou lógica de submissão associada.
--   **Mocked**: Nenhuma funcionalidade está atualmente mockada.
+-   **Broken**: O backend está completamente inoperacional devido a um erro de sintaxe (código duplicado) em . A funcionalidade de gestão de visibilidade no admin está incompleta.
+-   **Mocked**: Nenhuma funcionalidade está mockada.
 
 **3rd Party Integrations**
--   **Stripe (Payments)** — Usa o SDK  para pagamentos únicos com cartão. Requer chaves de API do utilizador.
--   **Emergent-managed Google Auth (Authentication)** — Gerido pela plataforma.
--   **DiceBear (Avatars)** — Integrado no backend para gerar avatares.
+-   **Stripe (Payments)** — Usa o SDK  para pagamentos únicos com cartão.
+-   **DiceBear (Avatars)** — Usado no backend para gerar avatares.
+-   **Resend (Transactional Emails)** — Integrado para enviar emails comportamentais.
 
 **Testing status**
--   **Testing agent used after significant changes**: NO
+-   **Testing agent used after significant changes**: YES, uma vez.
 -   **Troubleshoot agent used after agent stuck in loop**: NO
 -   **Test files created**: N/A
 -   **Known regressions**: N/A
@@ -160,4 +165,6 @@ Nenhuma alteração fundamental na stack. O uso do SDK do Stripe foi simplificad
 -   **Test User**:  / 
 
 **What agent forgot to execute**
-O agente seguiu as instruções do utilizador de forma consistente. A única parte esquecida na implementação do ciclo de vida das viagens é a UI e a lógica do lado do cliente para um Embaixador poder efetivamente submeter uma candidatura, que é o ponto de partida de todo o fluxo.</analysis>
+-   O agente falhou em manter a integridade do código, introduzindo um erro fatal () ao duplicar código em  e não o corrigindo.
+-   A tarefa de implementar a UI de gestão de visibilidade no painel de admin () ficou incompleta.
+-   O teste end-to-end do ciclo de vida das viagens de embaixadores, uma tarefa pendente do fork anterior, continua por fazer.</analysis>

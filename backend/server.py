@@ -353,7 +353,7 @@ async def require_admin(request: Request) -> User:
 
 # ==================== EMAIL SYSTEM (RESEND) ====================
 
-FRONTEND_URL = "https://journey-fund-3.preview.emergentagent.com"
+FRONTEND_URL = "https://journey-curator-2.preview.emergentagent.com"
 
 def get_email_base_template(content: str, title: str = "4Luis") -> str:
     """Base HTML email template with 4Luis branding"""
@@ -1173,7 +1173,7 @@ async def create_contribution(request: Request):
         if not api_key or api_key == 'sk_test_emergent':
             raise HTTPException(status_code=500, detail="Stripe não configurado")
         
-        origin_url = data.get("origin_url", "https://journey-fund-3.preview.emergentagent.com")
+        origin_url = data.get("origin_url", "https://journey-curator-2.preview.emergentagent.com")
         host_url = str(request.base_url).rstrip("/")
         webhook_url = f"{host_url}/api/webhook/stripe"
         
@@ -2115,7 +2115,7 @@ async def create_subscription_checkout(request: Request):
         raise HTTPException(status_code=400, detail="Já tens uma subscrição ativa")
     
     # Get frontend URL for redirects
-    frontend_url = os.environ.get('FRONTEND_URL', 'https://journey-fund-3.preview.emergentagent.com')
+    frontend_url = os.environ.get('FRONTEND_URL', 'https://journey-curator-2.preview.emergentagent.com')
     
     try:
         # Create Stripe Checkout Session
