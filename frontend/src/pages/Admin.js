@@ -779,6 +779,15 @@ const Admin = () => {
                             <option value="true">Ativa</option>
                             <option value="false">Inativa</option>
                           </select>
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={editingJourney.show_goal_amount || false}
+                              onChange={(e) => setEditingJourney({ ...editingJourney, show_goal_amount: e.target.checked })}
+                              className="w-4 h-4 rounded border-stone-300 text-[#FFBE98] focus:ring-[#FFBE98]"
+                            />
+                            <span className="text-sm text-[#6B6661]">Mostrar objetivo €</span>
+                          </label>
                         </div>
                         <div className="flex gap-2">
                           <button
