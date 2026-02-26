@@ -3720,12 +3720,24 @@ async def get_ambassador_journey_details(journey_id: str, request: Request):
 
 @api_router.put("/admin/ambassador-journeys/{journey_id}/status")
 async def update_ambassador_journey_status(journey_id: str, request: Request):
-    """Update ambassador journey status - Admin only"""
+    """Update ambassador journey status - Admin only
+    
+    Actions:
+    - candidatura → aprovada: Approves the application
+    - candidatura → ajustes_pedidos: Request adjustments from ambassador
+    - ajustes_pedidos → candidatura: Ambassador resubmits (allow)
+    - aprovada → ativa: Activates journey for fundraising, publishes in "Sonhos em materialização"
+    - ativa → financiada: When fully funded (usually automatic)
+    - financiada → realizada: Mark as completed
+    - any → encerrada: Close/reject the journey
+    """
     admin = await require_admin(request)
     data = await request.json()
     
     new_status = data.get("status")
     admin_notes = data.get("admin_notes")
+    adjustment_request = data.get("adjustment_request")  # Message when requesting adjustments
+    auto_activate = data.get("auto_activate", True)  # Auto-activate after approval
     
     if new_status not in JOURNEY_STATUSES:
         raise HTTPException(status_code=400, detail=f"Estado inválido. Estados permitidos: {list(JOURNEY_STATUSES.keys())}")
@@ -3734,23 +3746,48 @@ async def update_ambassador_journey_status(journey_id: str, request: Request):
     if not journey:
         raise HTTPException(status_code=404, detail="Viagem não encontrada")
     
+    # Get ambassador details for email
+    ambassador = None
+    if journey.get("ambassador_user_id"):
+        ambassador = await db.users.find_one(
+            {"user_id": journey["ambassador_user_id"]},
+            {"_id": 0, "email": 1, "name": 1}
+        )
+    
     update_data = {
         "status": new_status,
         "updated_at": datetime.now(timezone.utc).isoformat()
     }
     
-    # Set timestamps based on status
+    # Set timestamps and flags based on status
     if new_status == "aprovada":
         update_data["approved_at"] = datetime.now(timezone.utc).isoformat()
-        update_data["owner_user_id"] = admin.user_id
+        update_data["approved_by"] = admin.user_id
+        
+        # If auto_activate is True, also activate immediately
+        if auto_activate:
+            update_data["status"] = "ativa"
+            update_data["is_active"] = True
+            update_data["activated_at"] = datetime.now(timezone.utc).isoformat()
+            new_status = "ativa"  # Update for email and notification
+            
+    elif new_status == "ajustes_pedidos":
+        update_data["adjustment_request"] = adjustment_request or admin_notes
+        update_data["adjustment_requested_at"] = datetime.now(timezone.utc).isoformat()
+        update_data["adjustment_requested_by"] = admin.user_id
+        
     elif new_status == "ativa":
         update_data["is_active"] = True
+        update_data["activated_at"] = datetime.now(timezone.utc).isoformat()
+        
     elif new_status == "financiada":
         update_data["funded_at"] = datetime.now(timezone.utc).isoformat()
         update_data["is_active"] = False
+        
     elif new_status == "realizada":
         update_data["realized_at"] = datetime.now(timezone.utc).isoformat()
         update_data["is_active"] = False
+        
     elif new_status == "encerrada":
         update_data["closed_at"] = datetime.now(timezone.utc).isoformat()
         update_data["is_active"] = False
@@ -3763,33 +3800,117 @@ async def update_ambassador_journey_status(journey_id: str, request: Request):
         {"$set": update_data}
     )
     
-    # Notify ambassador
-    if journey.get("ambassador_user_id"):
-        status_messages = {
-            "aprovada": "A tua candidatura de viagem foi aprovada!",
-            "ativa": "A tua viagem está agora ativa e a receber contribuições!",
-            "financiada": "Parabéns! A tua viagem foi totalmente financiada!",
-            "realizada": "A tua viagem foi marcada como realizada!",
-            "encerrada": "A tua viagem foi encerrada."
+    # Notify ambassador (in-app notification)
+    status_messages = {
+        "aprovada": "A tua candidatura de viagem foi aprovada! Vamos ativá-la para receber contribuições.",
+        "ajustes_pedidos": f"O admin pediu ajustes à tua candidatura: {adjustment_request or admin_notes or 'Por favor revê os detalhes.'}",
+        "ativa": "🎉 A tua viagem está agora ATIVA e visível na secção 'Sonhos em Materialização'! Partilha com a tua rede para começar a receber contribuições.",
+        "financiada": "🎊 Parabéns! A tua viagem foi totalmente financiada! O teu sonho vai realizar-se!",
+        "realizada": "A tua viagem foi marcada como realizada! Podes adicionar fotos e contar a tua história.",
+        "encerrada": "A tua candidatura/viagem foi encerrada."
+    }
+    
+    if journey.get("ambassador_user_id") and new_status in status_messages:
+        await db.notifications.insert_one({
+            "notification_id": f"notif_{uuid.uuid4().hex[:12]}",
+            "type": f"journey_status_{new_status}",
+            "title": f"Viagem: {JOURNEY_STATUSES[new_status]['name']}",
+            "message": status_messages[new_status],
+            "journey_id": journey_id,
+            "user_id": journey["ambassador_user_id"],
+            "read": False,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        })
+    
+    # Send email to ambassador
+    if ambassador and ambassador.get("email") and RESEND_API_KEY:
+        email_subjects = {
+            "aprovada": "🎉 A tua viagem foi aprovada - 4Luis",
+            "ajustes_pedidos": "📝 Pedido de ajustes à tua candidatura - 4Luis",
+            "ativa": "🚀 A tua viagem está ATIVA - 4Luis",
+            "financiada": "🎊 A tua viagem foi FINANCIADA - 4Luis",
+            "realizada": "✨ Viagem marcada como realizada - 4Luis",
+            "encerrada": "Atualização sobre a tua viagem - 4Luis"
         }
         
-        if new_status in status_messages:
-            await db.notifications.insert_one({
-                "notification_id": f"notif_{uuid.uuid4().hex[:12]}",
-                "type": f"journey_status_{new_status}",
-                "title": f"Viagem: {JOURNEY_STATUSES[new_status]['name']}",
-                "message": status_messages[new_status],
-                "journey_id": journey_id,
-                "user_id": journey["ambassador_user_id"],
-                "read": False,
-                "created_at": datetime.now(timezone.utc).isoformat()
-            })
+        email_bodies = {
+            "aprovada": f"""
+                <div style="font-family: system-ui, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <h1 style="color: #FFBE98;">🎉 Parabéns, {ambassador.get('name', 'Embaixador')}!</h1>
+                    <p>A tua candidatura para a viagem <strong>"{journey.get('name')}"</strong> foi aprovada!</p>
+                    <p>A tua viagem está agora ativa e visível na secção <strong>"Sonhos em Materialização"</strong> da nossa homepage.</p>
+                    <p>Começa já a partilhar o link da tua viagem com amigos e família para começares a receber contribuições!</p>
+                    <a href="https://4luis.com/journeys/{journey_id}" style="display: inline-block; background: #FFBE98; color: #2D2A26; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 16px;">Ver a minha viagem</a>
+                    <p style="margin-top: 24px; color: #6B6661; font-size: 14px;">Com carinho,<br>Equipa 4Luis</p>
+                </div>
+            """,
+            "ajustes_pedidos": f"""
+                <div style="font-family: system-ui, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <h1 style="color: #F2C94C;">📝 Pedido de Ajustes</h1>
+                    <p>Olá {ambassador.get('name', 'Embaixador')},</p>
+                    <p>Analisámos a tua candidatura para a viagem <strong>"{journey.get('name')}"</strong> e precisamos de alguns ajustes antes de a aprovar.</p>
+                    <div style="background: #FFF8E1; border-left: 4px solid #F2C94C; padding: 16px; margin: 16px 0;">
+                        <strong>Feedback do Admin:</strong><br>
+                        {adjustment_request or admin_notes or 'Por favor revê os detalhes da tua candidatura.'}
+                    </div>
+                    <p>Por favor acede ao teu painel e faz as alterações necessárias.</p>
+                    <a href="https://4luis.com/dashboard" style="display: inline-block; background: #FFBE98; color: #2D2A26; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 16px;">Ir para o Meu Painel</a>
+                    <p style="margin-top: 24px; color: #6B6661; font-size: 14px;">Com carinho,<br>Equipa 4Luis</p>
+                </div>
+            """,
+            "ativa": f"""
+                <div style="font-family: system-ui, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <h1 style="color: #4CAF50;">🚀 A tua viagem está ATIVA!</h1>
+                    <p>Olá {ambassador.get('name', 'Embaixador')},</p>
+                    <p>A tua viagem <strong>"{journey.get('name')}"</strong> está agora ativa e a receber contribuições!</p>
+                    <p>A viagem está visível na secção <strong>"Sonhos em Materialização"</strong> da nossa homepage.</p>
+                    <p><strong>Próximos passos:</strong></p>
+                    <ul>
+                        <li>Partilha o link da tua viagem nas redes sociais</li>
+                        <li>Envia para amigos e família</li>
+                        <li>Mantém a tua comunidade atualizada sobre o progresso</li>
+                    </ul>
+                    <a href="https://4luis.com/journeys/{journey_id}" style="display: inline-block; background: #FFBE98; color: #2D2A26; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 16px;">Ver a minha viagem</a>
+                    <p style="margin-top: 24px; color: #6B6661; font-size: 14px;">Com carinho,<br>Equipa 4Luis</p>
+                </div>
+            """,
+            "financiada": f"""
+                <div style="font-family: system-ui, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <h1 style="color: #9C27B0;">🎊 O TEU SONHO VAI REALIZAR-SE!</h1>
+                    <p>Olá {ambassador.get('name', 'Embaixador')},</p>
+                    <p>Temos uma notícia incrível: A tua viagem <strong>"{journey.get('name')}"</strong> foi <strong>totalmente financiada</strong>!</p>
+                    <p>Graças à generosidade da comunidade 4Luis, vais poder realizar este sonho.</p>
+                    <p>Entraremos em contacto em breve para coordenar os próximos passos.</p>
+                    <p>Obrigado por fazeres parte desta comunidade! 💜</p>
+                    <p style="margin-top: 24px; color: #6B6661; font-size: 14px;">Com muito carinho,<br>Equipa 4Luis</p>
+                </div>
+            """
+        }
+        
+        if new_status in email_subjects and new_status in email_bodies:
+            try:
+                resend.emails.send({
+                    "from": SENDER_EMAIL,
+                    "to": [ambassador["email"]],
+                    "subject": email_subjects[new_status],
+                    "html": email_bodies[new_status]
+                })
+            except Exception as e:
+                logging.error(f"Failed to send email to ambassador: {e}")
     
-    return {
+    # Return response with activation info
+    response_data = {
         "message": f"Estado atualizado para '{JOURNEY_STATUSES[new_status]['name']}'",
         "journey_id": journey_id,
         "new_status": new_status
     }
+    
+    if new_status == "ativa":
+        response_data["is_now_live"] = True
+        response_data["published_in"] = "Sonhos em Materialização"
+        response_data["email_sent"] = bool(ambassador and ambassador.get("email") and RESEND_API_KEY)
+    
+    return response_data
 
 # ==================== VISIBILITY & FEATURING SYSTEM ====================
 
