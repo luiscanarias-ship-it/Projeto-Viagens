@@ -4062,6 +4062,35 @@ async def recalculate_all_visibility_scores(request: Request):
         "updated_count": updated
     }
 
+@api_router.put("/admin/journeys/{journey_id}/show-goal")
+async def toggle_journey_show_goal(journey_id: str, request: Request):
+    """Toggle whether to show goal amount publicly - Admin only"""
+    await require_admin(request)
+    
+    data = await request.json()
+    show_goal = data.get("show_goal_amount")
+    
+    if show_goal is None:
+        raise HTTPException(status_code=400, detail="show_goal_amount é obrigatório")
+    
+    journey = await db.journeys.find_one({"journey_id": journey_id}, {"_id": 0})
+    if not journey:
+        raise HTTPException(status_code=404, detail="Viagem não encontrada")
+    
+    await db.journeys.update_one(
+        {"journey_id": journey_id},
+        {"$set": {
+            "show_goal_amount": bool(show_goal),
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {
+        "message": f"Visibilidade do objetivo {'ativada' if show_goal else 'desativada'}",
+        "journey_id": journey_id,
+        "show_goal_amount": bool(show_goal)
+    }
+
 @api_router.get("/admin/journeys-visibility")
 async def get_journeys_with_visibility(request: Request, status: Optional[str] = None):
     """Get all journeys with visibility data - Admin only"""
