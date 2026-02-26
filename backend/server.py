@@ -732,6 +732,129 @@ async def send_ambassador_unlocked_email(user_id: str):
     
     logger.info(f"Ambassador unlocked email sent to user {user_id}")
 
+def get_journey_funded_email_html(ambassador_name: str, journey_name: str, amount_raised: float) -> str:
+    """HTML template for journey funded notification to ambassador"""
+    content = f"""
+    <div style="text-align: center; margin-bottom: 24px;">
+        <span style="font-size: 64px;">🎉</span>
+    </div>
+    
+    <h1 style="margin: 0 0 16px 0; color: #2D2A26; font-size: 28px; text-align: center;">
+        A tua viagem foi financiada!
+    </h1>
+    
+    <p style="margin: 0 0 24px 0; color: #6B6661; font-size: 16px; text-align: center; line-height: 1.6;">
+        Parabéns, {ambassador_name}! A comunidade 4Luis acreditou no teu sonho.
+    </p>
+    
+    <div style="background: linear-gradient(135deg, #FFBE9820, #E6F4F120); border-radius: 12px; padding: 32px; text-align: center; margin-bottom: 24px;">
+        <p style="margin: 0 0 8px 0; color: #6B6661; font-size: 14px;">Viagem</p>
+        <p style="margin: 0 0 16px 0; color: #2D2A26; font-size: 24px; font-weight: bold;">{journey_name}</p>
+        <p style="margin: 0 0 8px 0; color: #6B6661; font-size: 14px;">Valor angariado</p>
+        <p style="margin: 0; color: #FFBE98; font-size: 36px; font-weight: bold;">{amount_raised}€</p>
+    </div>
+    
+    <div style="background-color: #FAFAF9; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+        <p style="margin: 0 0 16px 0; color: #2D2A26; font-weight: bold;">Próximos passos:</p>
+        <p style="margin: 0 0 8px 0; color: #6B6661; font-size: 14px;">1. ✅ Confirmação do financiamento recebida</p>
+        <p style="margin: 0 0 8px 0; color: #6B6661; font-size: 14px;">2. 📧 Entraremos em contacto para os detalhes</p>
+        <p style="margin: 0; color: #6B6661; font-size: 14px;">3. ✈️ Prepara-te para viver esta aventura!</p>
+    </div>
+    
+    <p style="margin: 0 0 24px 0; color: #6B6661; font-size: 16px; line-height: 1.6; text-align: center; font-style: italic;">
+        "Quando os sonhos têm asas, voam mais alto."
+    </p>
+    
+    <div style="text-align: center;">
+        <a href="{FRONTEND_URL}/dashboard" style="display: inline-block; padding: 14px 32px; background-color: #FFBE98; color: #2D2A26; text-decoration: none; border-radius: 12px; font-weight: bold;">
+            Ver o meu Dashboard
+        </a>
+    </div>
+    """
+    return get_email_base_template(content, "Viagem Financiada! - 4Luis")
+
+def get_admin_journey_funded_html(journey_name: str, journey_id: str, amount_raised: float, ambassador_name: str) -> str:
+    """HTML template for admin notification when a journey is funded"""
+    content = f"""
+    <h1 style="margin: 0 0 16px 0; color: #2D2A26; font-size: 24px;">🎯 Viagem Financiada!</h1>
+    
+    <div style="background-color: #E6F4F1; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+            <tr>
+                <td style="padding-bottom: 12px;">
+                    <p style="margin: 0; color: #6B6661; font-size: 12px; text-transform: uppercase;">Viagem</p>
+                    <p style="margin: 4px 0 0 0; color: #2D2A26; font-size: 18px; font-weight: bold;">{journey_name}</p>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding-bottom: 12px;">
+                    <p style="margin: 0; color: #6B6661; font-size: 12px; text-transform: uppercase;">ID</p>
+                    <p style="margin: 4px 0 0 0; color: #6B6661; font-size: 14px; font-family: monospace;">{journey_id}</p>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding-bottom: 12px;">
+                    <p style="margin: 0; color: #6B6661; font-size: 12px; text-transform: uppercase;">Embaixador</p>
+                    <p style="margin: 4px 0 0 0; color: #2D2A26; font-size: 16px;">{ambassador_name}</p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p style="margin: 0; color: #6B6661; font-size: 12px; text-transform: uppercase;">Valor Angariado</p>
+                    <p style="margin: 4px 0 0 0; color: #FFBE98; font-size: 24px; font-weight: bold;">{amount_raised}€</p>
+                </td>
+            </tr>
+        </table>
+    </div>
+    
+    <div style="background-color: #FEF3C7; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+        <p style="margin: 0; color: #92400E; font-size: 14px;">
+            ⚠️ <strong>Ação necessária:</strong> Rever e aprovar os próximos passos com o embaixador.
+        </p>
+    </div>
+    
+    <div style="text-align: center;">
+        <a href="{FRONTEND_URL}/admin" style="display: inline-block; padding: 14px 32px; background-color: #2D2A26; color: #ffffff; text-decoration: none; border-radius: 12px; font-weight: bold;">
+            Abrir Painel Admin
+        </a>
+    </div>
+    """
+    return get_email_base_template(content, "[Admin] Viagem Financiada - 4Luis")
+
+async def send_journey_funded_emails(journey: dict, ambassador_user: dict, amount_raised: float):
+    """Send emails when a journey reaches its funding goal"""
+    journey_name = journey.get("name", "")
+    journey_id = journey.get("journey_id", "")
+    ambassador_name = ambassador_user.get("name", "Embaixador") if ambassador_user else journey.get("ambassador_name", "N/A")
+    
+    # Email to ambassador
+    if ambassador_user and ambassador_user.get("email"):
+        ambassador_html = get_journey_funded_email_html(
+            ambassador_name=ambassador_name,
+            journey_name=journey_name,
+            amount_raised=amount_raised
+        )
+        
+        await send_email_resend(
+            to_email=ambassador_user["email"],
+            subject=f"🎉 A tua viagem '{journey_name}' foi financiada!",
+            html_content=ambassador_html
+        )
+    
+    # Email to admin
+    admin_html = get_admin_journey_funded_html(
+        journey_name=journey_name,
+        journey_id=journey_id,
+        amount_raised=amount_raised,
+        ambassador_name=ambassador_name
+    )
+    
+    await send_email_resend(
+        to_email=ADMIN_EMAIL,
+        subject=f"[Admin] Viagem Financiada: {journey_name}",
+        html_content=admin_html
+    )
+
 # ==================== AUTH ROUTES ====================
 
 @api_router.post("/auth/register")
