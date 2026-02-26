@@ -474,7 +474,7 @@ const Admin = () => {
         <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
           {[
             { id: 'journeys', label: 'Viagens', icon: null },
-            { id: 'candidaturas', label: 'Candidaturas', icon: null },
+            { id: 'candidaturas', label: 'Candidaturas', icon: ambassadorApplications?.by_status?.candidatura?.length || null },
             { id: 'visibility', label: 'Visibilidade', icon: null },
             { id: 'contributions', label: 'Contribuições', icon: pendingContributions.length > 0 ? pendingContributions.length : null },
             { id: 'users', label: 'Utilizadores', icon: usersDashboard?.metrics?.premium_users || null },
