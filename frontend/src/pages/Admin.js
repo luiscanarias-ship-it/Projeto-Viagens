@@ -935,6 +935,8 @@ const Admin = () => {
                           className={`p-5 border rounded-2xl transition-all ${
                             application.status === 'candidatura' 
                               ? 'border-[#F2C94C] bg-[#F2C94C]/5' 
+                              : application.status === 'ajustes_pedidos'
+                              ? 'border-orange-300 bg-orange-50/50'
                               : application.status === 'aprovada' 
                               ? 'border-blue-200 bg-blue-50/50'
                               : application.status === 'ativa'
@@ -947,22 +949,29 @@ const Admin = () => {
                             <img 
                               src={application.image_url || 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=200'} 
                               alt={application.name} 
-                              className="w-24 h-24 rounded-xl object-cover flex-shrink-0"
+                              className="w-24 h-24 rounded-xl object-cover flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+                              onClick={() => loadApplicationDetails(application.journey_id)}
                             />
                             
                             {/* Content */}
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-2">
-                                <h3 className="font-bold text-[#2D2A26] truncate">{application.name}</h3>
+                                <h3 
+                                  className="font-bold text-[#2D2A26] truncate cursor-pointer hover:text-[#FFBE98] transition-colors"
+                                  onClick={() => loadApplicationDetails(application.journey_id)}
+                                >
+                                  {application.name}
+                                </h3>
                                 <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                                   application.status === 'candidatura' ? 'bg-[#F2C94C]/20 text-[#F2C94C]' :
+                                  application.status === 'ajustes_pedidos' ? 'bg-orange-100 text-orange-600' :
                                   application.status === 'aprovada' ? 'bg-blue-100 text-blue-600' :
                                   application.status === 'ativa' ? 'bg-green-100 text-green-600' :
                                   application.status === 'financiada' ? 'bg-purple-100 text-purple-600' :
                                   application.status === 'realizada' ? 'bg-[#FFBE98]/20 text-[#FFBE98]' :
                                   'bg-stone-100 text-stone-600'
                                 }`}>
-                                  {application.status}
+                                  {application.status === 'ajustes_pedidos' ? 'Ajustes Pedidos' : application.status}
                                 </span>
                               </div>
                               
@@ -993,78 +1002,57 @@ const Admin = () => {
                                 </span>
                               </div>
 
-                              {/* Application Message */}
+                              {/* Application Message Preview */}
                               {application.application_message && (
                                 <div className="mt-3 p-3 bg-stone-50 rounded-lg">
                                   <p className="text-xs text-[#6B6661] font-medium mb-1">Mensagem do embaixador:</p>
-                                  <p className="text-sm text-[#2D2A26] italic">"{application.application_message}"</p>
+                                  <p className="text-sm text-[#2D2A26] italic line-clamp-2">"{application.application_message}"</p>
+                                </div>
+                              )}
+                              
+                              {/* Adjustment Request Warning */}
+                              {application.status === 'ajustes_pedidos' && application.adjustment_request && (
+                                <div className="mt-3 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                                  <p className="text-xs text-orange-600 font-medium mb-1 flex items-center gap-1">
+                                    <AlertCircle className="w-3 h-3" />
+                                    Ajustes pedidos:
+                                  </p>
+                                  <p className="text-sm text-orange-700">{application.adjustment_request}</p>
                                 </div>
                               )}
                             </div>
 
                             {/* Actions */}
                             <div className="flex flex-col gap-2 flex-shrink-0">
-                              {application.status === 'candidatura' && (
+                              {/* View Details button - Always visible */}
+                              <button
+                                onClick={() => loadApplicationDetails(application.journey_id)}
+                                className="px-4 py-2 bg-stone-100 text-[#6B6661] rounded-lg text-sm font-medium hover:bg-stone-200 transition-colors flex items-center gap-1"
+                                data-testid={`details-${application.journey_id}`}
+                              >
+                                <Eye className="w-4 h-4" />
+                                Ver Detalhes
+                              </button>
+                              
+                              {(application.status === 'candidatura' || application.status === 'ajustes_pedidos') && (
                                 <>
                                   <button
-                                    onClick={async () => {
-                                      try {
-                                        await axios.put(
-                                          `${API}/admin/ambassador-journeys/${application.journey_id}/status`,
-                                          { status: 'aprovada' },
-                                          { headers: getAuthHeaders() }
-                                        );
-                                        setAmbassadorApplications(prev => ({
-                                          ...prev,
-                                          journeys: prev.journeys.map(j => 
-                                            j.journey_id === application.journey_id 
-                                              ? {...j, status: 'aprovada'} 
-                                              : j
-                                          ),
-                                          by_status: {
-                                            ...prev.by_status,
-                                            candidatura: prev.by_status.candidatura.filter(j => j.journey_id !== application.journey_id),
-                                            aprovada: [...(prev.by_status.aprovada || []), {...application, status: 'aprovada'}]
-                                          }
-                                        }));
-                                      } catch (e) {
-                                        console.error(e);
-                                        alert('Erro ao aprovar candidatura');
-                                      }
-                                    }}
+                                    onClick={() => approveApplication(application.journey_id)}
                                     className="px-4 py-2 bg-green-100 text-green-600 rounded-lg text-sm font-medium hover:bg-green-200 transition-colors flex items-center gap-1"
                                     data-testid={`approve-${application.journey_id}`}
                                   >
                                     <CheckCircle className="w-4 h-4" />
-                                    Aprovar
+                                    Aprovar e Ativar
                                   </button>
                                   <button
-                                    onClick={async () => {
-                                      if (!window.confirm('Tem certeza que deseja rejeitar esta candidatura?')) return;
-                                      try {
-                                        await axios.put(
-                                          `${API}/admin/ambassador-journeys/${application.journey_id}/status`,
-                                          { status: 'encerrada', admin_notes: 'Candidatura rejeitada pelo admin' },
-                                          { headers: getAuthHeaders() }
-                                        );
-                                        setAmbassadorApplications(prev => ({
-                                          ...prev,
-                                          journeys: prev.journeys.map(j => 
-                                            j.journey_id === application.journey_id 
-                                              ? {...j, status: 'encerrada'} 
-                                              : j
-                                          ),
-                                          by_status: {
-                                            ...prev.by_status,
-                                            candidatura: prev.by_status.candidatura.filter(j => j.journey_id !== application.journey_id),
-                                            encerrada: [...(prev.by_status.encerrada || []), {...application, status: 'encerrada'}]
-                                          }
-                                        }));
-                                      } catch (e) {
-                                        console.error(e);
-                                        alert('Erro ao rejeitar candidatura');
-                                      }
-                                    }}
+                                    onClick={() => openAdjustmentModal(application.journey_id)}
+                                    className="px-4 py-2 bg-orange-100 text-orange-600 rounded-lg text-sm font-medium hover:bg-orange-200 transition-colors flex items-center gap-1"
+                                  >
+                                    <MessageSquare className="w-4 h-4" />
+                                    Pedir Ajustes
+                                  </button>
+                                  <button
+                                    onClick={() => rejectApplication(application.journey_id)}
                                     className="px-4 py-2 bg-red-100 text-red-600 rounded-lg text-sm font-medium hover:bg-red-200 transition-colors flex items-center gap-1"
                                   >
                                     <XCircle className="w-4 h-4" />
@@ -1077,24 +1065,16 @@ const Admin = () => {
                                 <button
                                   onClick={async () => {
                                     try {
+                                      const headers = getAuthHeaders();
                                       await axios.put(
                                         `${API}/admin/ambassador-journeys/${application.journey_id}/status`,
                                         { status: 'ativa' },
-                                        { headers: getAuthHeaders() }
+                                        { headers }
                                       );
-                                      setAmbassadorApplications(prev => ({
-                                        ...prev,
-                                        journeys: prev.journeys.map(j => 
-                                          j.journey_id === application.journey_id 
-                                            ? {...j, status: 'ativa'} 
-                                            : j
-                                        ),
-                                        by_status: {
-                                          ...prev.by_status,
-                                          aprovada: prev.by_status.aprovada.filter(j => j.journey_id !== application.journey_id),
-                                          ativa: [...(prev.by_status.ativa || []), {...application, status: 'ativa'}]
-                                        }
-                                      }));
+                                      // Reload
+                                      const status = applicationStatusFilter ? `?status=${applicationStatusFilter}` : '';
+                                      const res = await axios.get(`${API}/admin/ambassador-journeys${status}`, { headers });
+                                      setAmbassadorApplications(res.data);
                                     } catch (e) {
                                       console.error(e);
                                       alert('Erro ao ativar viagem');
@@ -1104,17 +1084,17 @@ const Admin = () => {
                                   data-testid={`activate-${application.journey_id}`}
                                 >
                                   <Eye className="w-4 h-4" />
-                                  Ativar
+                                  Ativar Viagem
                                 </button>
                               )}
 
                               {application.status === 'ativa' && (
-                                <div className="text-center">
-                                  <div className="text-xs text-[#6B6661] mb-1">Progresso</div>
-                                  <div className="text-lg font-bold text-[#2D2A26]">
+                                <div className="text-center p-2 bg-green-50 rounded-lg">
+                                  <div className="text-xs text-green-600 mb-1">Progresso</div>
+                                  <div className="text-lg font-bold text-green-700">
                                     {((application.current_amount / application.goal_amount) * 100).toFixed(0)}%
                                   </div>
-                                  <div className="text-xs text-[#6B6661]">
+                                  <div className="text-xs text-green-600">
                                     €{application.current_amount?.toLocaleString()} / €{application.goal_amount?.toLocaleString()}
                                   </div>
                                 </div>
@@ -1124,19 +1104,16 @@ const Admin = () => {
                                 <button
                                   onClick={async () => {
                                     try {
+                                      const headers = getAuthHeaders();
                                       await axios.put(
                                         `${API}/admin/ambassador-journeys/${application.journey_id}/status`,
                                         { status: 'realizada' },
-                                        { headers: getAuthHeaders() }
+                                        { headers }
                                       );
-                                      setAmbassadorApplications(prev => ({
-                                        ...prev,
-                                        journeys: prev.journeys.map(j => 
-                                          j.journey_id === application.journey_id 
-                                            ? {...j, status: 'realizada'} 
-                                            : j
-                                        )
-                                      }));
+                                      // Reload
+                                      const status = applicationStatusFilter ? `?status=${applicationStatusFilter}` : '';
+                                      const res = await axios.get(`${API}/admin/ambassador-journeys${status}`, { headers });
+                                      setAmbassadorApplications(res.data);
                                     } catch (e) {
                                       console.error(e);
                                       alert('Erro ao marcar como realizada');
