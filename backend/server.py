@@ -4769,31 +4769,22 @@ async def get_main_journey_details():
 @api_router.get("/homepage/ambassador-journeys")
 async def get_active_ambassador_journeys():
     """Get active ambassador journeys organized by region for 'Sonhos em Materialização' section"""
+    # Query excludes hidden journeys
     journeys = await db.journeys.find(
         {
             "is_ambassador_journey": True,
             "status": "ativa",
-            "is_active": True
+            "is_active": True,
+            "hide_from_listings": {"$ne": True}
         },
         {"_id": 0, "goal_amount": 0, "admin_notes": 0, "application_message": 0}
-    ).sort("created_at", -1).to_list(100)
+    ).sort("visibility_score", -1).to_list(100)  # Sort by visibility score
     
-    # Organize by region
-    regions = {
-        "europa": {"name": "Europa", "journeys": []},
-        "asia": {"name": "Ásia", "journeys": []},
-        "africa": {"name": "África", "journeys": []},
-        "americas": {"name": "Américas", "journeys": []},
-        "oceania": {"name": "Oceânia", "journeys": []},
-        "outro": {"name": "Outros", "journeys": []}
-    }
+    # Separate featured journeys
+    featured = []
+    regular = []
     
     for j in journeys:
-        region = j.get("region", "outro") or "outro"
-        region = region.lower()
-        if region not in regions:
-            region = "outro"
-        
         # Calculate progress percentage
         full_journey = await db.journeys.find_one({"journey_id": j["journey_id"]}, {"_id": 0, "goal_amount": 1, "current_amount": 1})
         if full_journey:
@@ -4803,14 +4794,38 @@ async def get_active_ambassador_journeys():
         else:
             j["progress_percentage"] = 0
         
+        if j.get("is_featured"):
+            featured.append(j)
+        else:
+            regular.append(j)
+    
+    # Sort featured by featured_order
+    featured.sort(key=lambda x: x.get("featured_order", 0))
+    
+    # Organize regular journeys by region
+    regions = {
+        "europa": {"name": "Europa", "journeys": []},
+        "asia": {"name": "Ásia", "journeys": []},
+        "africa": {"name": "África", "journeys": []},
+        "americas": {"name": "Américas", "journeys": []},
+        "oceania": {"name": "Oceânia", "journeys": []},
+        "outro": {"name": "Outros", "journeys": []}
+    }
+    
+    for j in regular:
+        region = j.get("region", "outro") or "outro"
+        region = region.lower()
+        if region not in regions:
+            region = "outro"
         regions[region]["journeys"].append(j)
     
     # Filter out empty regions
-    result = {k: v for k, v in regions.items() if v["journeys"]}
+    regions_filtered = {k: v for k, v in regions.items() if v["journeys"]}
     
     return {
         "total_count": len(journeys),
-        "regions": result
+        "featured": featured,
+        "regions": regions_filtered
     }
 
 @api_router.get("/homepage/realized-journeys")
