@@ -6,6 +6,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
 import random
+import asyncio
 from pathlib import Path
 from pydantic import BaseModel, Field, EmailStr
 from typing import List, Optional, Dict, Any
@@ -15,6 +16,7 @@ import bcrypt
 import jwt
 import httpx
 import stripe
+import resend
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -35,8 +37,14 @@ STRIPE_SONHADOR_PRICE_ID = "price_1T1sngEBabTiQNkcaNBfBaHR"
 STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET', '')
 stripe.api_key = STRIPE_API_KEY
 
+# Resend Email Config
+RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '')
+SENDER_EMAIL = os.environ.get('SENDER_EMAIL', 'onboarding@resend.dev')
+resend.api_key = RESEND_API_KEY
+
 # Admin password
 ADMIN_PASSWORD = "Admin1"
+ADMIN_EMAIL = "admin@4luis.com"
 
 app = FastAPI(title="4Luis API")
 api_router = APIRouter(prefix="/api")
