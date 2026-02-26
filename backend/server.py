@@ -3967,6 +3967,200 @@ async def update_ambassador_journey_status(journey_id: str, request: Request):
         "new_status": new_status
     }
 
+# ==================== VISIBILITY & FEATURING SYSTEM ====================
+
+async def calculate_journey_visibility_score(journey: dict) -> float:
+    """
+    Calculate visibility score for a journey based on multiple criteria.
+    Score components (all normalized to 0-100):
+    - Funding progress (30%): Higher progress = higher visibility
+    - Recent activity (25%): More recent contributions = higher visibility
+    - Number of contributions (20%): More contributions = higher visibility
+    - Ambassador social impact (15%): More referrals = higher visibility
+    - Recency bonus (10%): Newer journeys get a slight boost
+    """
+    journey_id = journey.get("journey_id")
+    
+    # 1. Funding Progress (30%)
+    goal = journey.get("goal_amount", 1)
+    current = journey.get("current_amount", 0)
+    funding_percentage = min((current / goal) * 100, 100) if goal > 0 else 0
+    funding_score = funding_percentage * 0.30
+    
+    # 2. Recent Activity (25%) - Contributions in last 7 days
+    seven_days_ago = (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()
+    recent_contributions = await db.contributions.count_documents({
+        "journey_id": journey_id,
+        "status": {"$in": ["confirmed", "completed"]},
+        "created_at": {"$gte": seven_days_ago}
+    })
+    activity_score = min(recent_contributions * 10, 100) * 0.25
+    
+    # 3. Total Contributions (20%)
+    total_contributions = await db.contributions.count_documents({
+        "journey_id": journey_id,
+        "status": {"$in": ["confirmed", "completed"]}
+    })
+    contribution_score = min(total_contributions * 5, 100) * 0.20
+    
+    # 4. Ambassador Social Impact (15%)
+    social_score = 0
+    if journey.get("ambassador_user_id"):
+        ambassador = await db.users.find_one(
+            {"user_id": journey["ambassador_user_id"]},
+            {"_id": 0, "valid_referrals_count": 1}
+        )
+        if ambassador:
+            referrals = ambassador.get("valid_referrals_count", 0)
+            social_score = min(referrals * 10, 100) * 0.15
+    
+    # 5. Recency Bonus (10%) - Decays over 30 days
+    created_at = journey.get("created_at")
+    if created_at:
+        if isinstance(created_at, str):
+            created_at = datetime.fromisoformat(created_at.replace('Z', '+00:00'))
+        days_old = (datetime.now(timezone.utc) - created_at).days
+        recency_factor = max(0, (30 - days_old) / 30)
+        recency_score = recency_factor * 100 * 0.10
+    else:
+        recency_score = 0
+    
+    # Calculate total score
+    base_score = funding_score + activity_score + contribution_score + social_score + recency_score
+    
+    # Apply admin boost (-100 to +100)
+    admin_boost = journey.get("visibility_boost", 0)
+    final_score = max(0, min(200, base_score + admin_boost))
+    
+    # Featured journeys get +100 bonus
+    if journey.get("is_featured"):
+        final_score += 100
+    
+    return round(final_score, 2)
+
+@api_router.post("/admin/journeys/{journey_id}/update-visibility")
+async def update_journey_visibility(journey_id: str, request: Request):
+    """Update journey visibility settings - Admin only"""
+    await require_admin(request)
+    data = await request.json()
+    
+    journey = await db.journeys.find_one({"journey_id": journey_id}, {"_id": 0})
+    if not journey:
+        raise HTTPException(status_code=404, detail="Viagem não encontrada")
+    
+    update_data = {"updated_at": datetime.now(timezone.utc).isoformat()}
+    
+    # Feature/Unfeature
+    if "is_featured" in data:
+        update_data["is_featured"] = data["is_featured"]
+        if data["is_featured"]:
+            update_data["featured_at"] = datetime.now(timezone.utc).isoformat()
+        else:
+            update_data["featured_at"] = None
+    
+    # Featured order
+    if "featured_order" in data:
+        update_data["featured_order"] = int(data["featured_order"])
+    
+    # Visibility boost (-100 to +100)
+    if "visibility_boost" in data:
+        boost = float(data["visibility_boost"])
+        update_data["visibility_boost"] = max(-100, min(100, boost))
+    
+    # Hide from listings
+    if "hide_from_listings" in data:
+        update_data["hide_from_listings"] = data["hide_from_listings"]
+    
+    await db.journeys.update_one(
+        {"journey_id": journey_id},
+        {"$set": update_data}
+    )
+    
+    # Recalculate visibility score
+    updated_journey = await db.journeys.find_one({"journey_id": journey_id}, {"_id": 0})
+    new_score = await calculate_journey_visibility_score(updated_journey)
+    await db.journeys.update_one(
+        {"journey_id": journey_id},
+        {"$set": {"visibility_score": new_score}}
+    )
+    
+    return {
+        "message": "Visibilidade atualizada",
+        "journey_id": journey_id,
+        "is_featured": update_data.get("is_featured", journey.get("is_featured")),
+        "visibility_boost": update_data.get("visibility_boost", journey.get("visibility_boost")),
+        "new_visibility_score": new_score
+    }
+
+@api_router.post("/admin/recalculate-all-visibility")
+async def recalculate_all_visibility_scores(request: Request):
+    """Recalculate visibility scores for all active journeys - Admin only"""
+    await require_admin(request)
+    
+    journeys = await db.journeys.find(
+        {"status": {"$in": ["ativa", "financiada"]}},
+        {"_id": 0}
+    ).to_list(1000)
+    
+    updated = 0
+    for journey in journeys:
+        score = await calculate_journey_visibility_score(journey)
+        await db.journeys.update_one(
+            {"journey_id": journey["journey_id"]},
+            {"$set": {"visibility_score": score}}
+        )
+        updated += 1
+    
+    return {
+        "message": f"Visibilidade recalculada para {updated} viagens",
+        "updated_count": updated
+    }
+
+@api_router.get("/admin/journeys-visibility")
+async def get_journeys_with_visibility(request: Request, status: Optional[str] = None):
+    """Get all journeys with visibility data - Admin only"""
+    await require_admin(request)
+    
+    query = {}
+    if status:
+        query["status"] = status
+    
+    journeys = await db.journeys.find(query, {"_id": 0}).sort("visibility_score", -1).to_list(100)
+    
+    # Recalculate scores on the fly for accuracy
+    for journey in journeys:
+        journey["calculated_score"] = await calculate_journey_visibility_score(journey)
+    
+    return {
+        "count": len(journeys),
+        "journeys": journeys
+    }
+
+@api_router.get("/journeys/featured")
+async def get_featured_journeys():
+    """Get featured journeys for public display"""
+    journeys = await db.journeys.find(
+        {
+            "is_featured": True,
+            "status": "ativa",
+            "hide_from_listings": {"$ne": True}
+        },
+        {"_id": 0, "goal_amount": 0, "admin_notes": 0}
+    ).sort("featured_order", 1).to_list(10)
+    
+    # Add progress percentage
+    for journey in journeys:
+        full = await db.journeys.find_one({"journey_id": journey["journey_id"]}, {"_id": 0, "goal_amount": 1})
+        if full:
+            goal = full.get("goal_amount", 1)
+            current = journey.get("current_amount", 0)
+            journey["progress_percentage"] = round((current / goal) * 100, 1) if goal > 0 else 0
+    
+    return {
+        "count": len(journeys),
+        "journeys": journeys
+    }
+
 @api_router.get("/journeys/realized")
 async def get_realized_journeys():
     """Get all realized/funded journeys (Sonhos Realizados section)"""
