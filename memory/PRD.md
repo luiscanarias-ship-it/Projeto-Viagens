@@ -223,6 +223,13 @@ Valores fixos: €10, €20, €50, €100, €200, €500, €1000
   - Financiamento automático quando atinge 100% → Notificação + Email
   - Realizada → Move para "Sonhos Realizados"
   - Dashboard atualizado com stats corretas
+- ✅ **Publicação de Viagens de Embaixadores Aprovadas**:
+  - Ao aprovar candidatura, viagem torna-se imediatamente visível
+  - Publicada em "Sonhos em Fase de Materialização"
+  - SEM destaque automático (is_featured: false)
+  - SEM boost inicial (visibility_boost: 0)
+  - Entra no algoritmo normal de visibilidade (score inicial: 10)
+  - Admin mantém controlo total: destacar, ocultar, ajustar visibilidade
 - ✅ **Visibilidade do Objetivo Financeiro** (show_goal_amount):
   - Por defeito apenas percentagem visível (show_goal_amount: false)
   - Quando true, mostra €X / €Y + percentagem
