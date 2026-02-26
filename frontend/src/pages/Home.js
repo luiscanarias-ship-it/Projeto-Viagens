@@ -189,7 +189,14 @@ const Home = () => {
                     <div className="mb-6">
                       <div className="flex justify-between items-center mb-2">
                         <span className="text-white/80 text-sm">Progresso</span>
-                        <span className="text-white font-bold text-lg">{mainJourney.progress.percentage}%</span>
+                        <div className="flex items-center gap-2">
+                          {mainJourney.progress.show_goal_amount && mainJourney.progress.goal_amount ? (
+                            <span className="text-white/80 text-sm">
+                              €{mainJourney.progress.current_amount?.toLocaleString()} / €{mainJourney.progress.goal_amount?.toLocaleString()}
+                            </span>
+                          ) : null}
+                          <span className="text-white font-bold text-lg">{mainJourney.progress.percentage}%</span>
+                        </div>
                       </div>
                       <div className="h-3 bg-white/20 rounded-full overflow-hidden">
                         <motion.div
