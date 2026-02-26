@@ -287,15 +287,47 @@ const Dashboard = () => {
                 <Crown className="w-10 h-10 text-white" />
               </div>
               <h4 className="text-xl font-bold text-[#2D2A26] mb-2">Embaixador Desbloqueado!</h4>
-              <p className="text-[#6B6661]">
+              <p className="text-[#6B6661] mb-4">
                 Podes agora candidatar-te a abrir a tua própria viagem na plataforma.
               </p>
-              <button
-                onClick={() => navigate('/contact')}
-                className="mt-4 px-6 py-3 bg-gradient-to-r from-[#F2C94C] to-[#FFBE98] text-white rounded-xl font-bold hover:shadow-lg transition-all"
-              >
-                Candidatar-me a Embaixador
-              </button>
+              
+              {/* Check if user has pending/active journey */}
+              {myJourneys.some(j => ['candidatura', 'aprovada', 'ativa'].includes(j.status)) ? (
+                <div className="bg-[#E6F4F1] rounded-xl p-4 text-left">
+                  <p className="text-sm text-[#2D2A26] font-medium mb-2">A tua viagem atual:</p>
+                  {myJourneys.filter(j => ['candidatura', 'aprovada', 'ativa'].includes(j.status)).map(j => (
+                    <div key={j.journey_id} className="flex items-center gap-3 p-3 bg-white rounded-lg">
+                      <Plane className="w-5 h-5 text-[#FFBE98]" />
+                      <div className="flex-1">
+                        <p className="font-medium text-[#2D2A26]">{j.name}</p>
+                        <p className="text-xs text-[#6B6661]">
+                          Estado: <span className={`font-medium ${
+                            j.status === 'ativa' ? 'text-green-600' : 
+                            j.status === 'aprovada' ? 'text-blue-600' : 'text-amber-600'
+                          }`}>{j.status}</span>
+                        </p>
+                      </div>
+                      {j.status === 'ativa' && (
+                        <a 
+                          href={`/journey/${j.journey_id}`}
+                          className="text-[#FFBE98] hover:text-[#E6A07C] text-sm font-medium"
+                        >
+                          Ver →
+                        </a>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <button
+                  onClick={() => setShowApplicationModal(true)}
+                  className="px-6 py-3 bg-gradient-to-r from-[#F2C94C] to-[#FFBE98] text-white rounded-xl font-bold hover:shadow-lg transition-all flex items-center gap-2 mx-auto"
+                  data-testid="open-application-btn"
+                >
+                  <Plane className="w-5 h-5" />
+                  Candidatar-me a Abrir Viagem
+                </button>
+              )}
             </div>
           ) : (
             <>
