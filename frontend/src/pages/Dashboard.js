@@ -4,10 +4,11 @@ import { motion } from 'framer-motion';
 import { 
   Crown, Star, Users, Copy, Check, Share2, 
   Wallet, TrendingUp, MapPin, Heart, User, Camera, 
-  Eye, EyeOff, Save, ExternalLink, Award, CheckCircle
+  Eye, EyeOff, Save, ExternalLink, Award, CheckCircle, Plane
 } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
+import JourneyApplicationModal from '../components/JourneyApplicationModal';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -25,6 +26,8 @@ const Dashboard = () => {
   const [savingProfile, setSavingProfile] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [showApplicationModal, setShowApplicationModal] = useState(false);
+  const [myJourneys, setMyJourneys] = useState([]);
 
   const passedUser = location.state?.user;
 
