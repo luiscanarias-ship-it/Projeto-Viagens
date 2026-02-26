@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit2, Trash2, Save, X, BarChart3, Settings, CheckCircle, XCircle, Mail, Users, Award, Gift, Crown, TrendingUp, UserPlus, ChevronRight, Star } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, X, BarChart3, Settings, CheckCircle, XCircle, Mail, Users, Award, Gift, Crown, TrendingUp, UserPlus, ChevronRight, Star, FileText, Clock, MapPin, Target, Calendar, Eye } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
