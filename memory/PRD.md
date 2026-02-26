@@ -223,6 +223,13 @@ Valores fixos: €10, €20, €50, €100, €200, €500, €1000
   - Financiamento automático quando atinge 100% → Notificação + Email
   - Realizada → Move para "Sonhos Realizados"
   - Dashboard atualizado com stats corretas
+- ✅ **Visibilidade do Objetivo Financeiro** (show_goal_amount):
+  - Por defeito apenas percentagem visível (show_goal_amount: false)
+  - Quando true, mostra €X / €Y + percentagem
+  - Aplicável a viagem principal e viagens de embaixadores
+  - Admin pode alterar via checkbox "Mostrar objetivo €" no modo de edição
+  - Badge na lista de viagens: "% Apenas" (cinzento) ou "€ Público" (verde)
+  - Endpoint dedicado: PUT /api/admin/journeys/{id}/show-goal
 - ✅ Novo estado de candidatura: `ajustes_pedidos`
 - ✅ Emails transacionais para mudanças de estado de candidaturas
 
