@@ -384,7 +384,50 @@ const Home = () => {
           </motion.div>
 
           {ambassadorJourneys?.total_count > 0 ? (
-            <div className="space-y-8">
+            <div className="space-y-10">
+              {/* Featured Journeys Section */}
+              {ambassadorJourneys.featured?.length > 0 && (
+                <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-8 h-8 bg-gradient-to-br from-[#F2C94C] to-[#FFBE98] rounded-full flex items-center justify-center">
+                      <Star className="w-4 h-4 text-white" />
+                    </div>
+                    <h3 className="text-xl font-bold text-[#2D2A26]">Em Destaque</h3>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {ambassadorJourneys.featured.map((journey) => (
+                      <Link key={journey.journey_id} to={`/journey/${journey.journey_id}`}
+                        className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all group border-2 border-[#FFBE98]/30">
+                        <div className="relative h-56 overflow-hidden">
+                          <img src={journey.image_url} alt={journey.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                          <div className="absolute top-4 left-4 px-3 py-1 bg-gradient-to-r from-[#F2C94C] to-[#FFBE98] rounded-full text-white text-sm font-medium flex items-center gap-1">
+                            <Star className="w-3 h-3" /> Destaque
+                          </div>
+                          <div className="absolute top-4 right-4 px-3 py-1 bg-white/90 rounded-full text-sm font-medium">
+                            {journey.progress_percentage}%
+                          </div>
+                          <div className="absolute bottom-4 left-4 right-4">
+                            <h4 className="text-xl font-bold text-white mb-1">{journey.name}</h4>
+                            <p className="text-white/80 text-sm">por {journey.ambassador_name}</p>
+                          </div>
+                        </div>
+                        <div className="p-5">
+                          <p className="text-sm text-[#6B6661] mb-4 line-clamp-2">{journey.description}</p>
+                          <div className="h-3 bg-stone-100 rounded-full overflow-hidden">
+                            <div className="h-full bg-gradient-to-r from-[#FFBE98] to-[#E6A07C] rounded-full transition-all" 
+                              style={{ width: `${journey.progress_percentage}%` }} />
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Regular Journeys by Region */}
               {Object.entries(ambassadorJourneys.regions || {}).map(([regionKey, region]) => (
                 <motion.div key={regionKey} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
                   <div className="flex items-center gap-3 mb-4">
