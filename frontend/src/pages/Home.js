@@ -414,7 +414,11 @@ const Home = () => {
                             <Star className="w-3 h-3" /> Destaque
                           </div>
                           <div className="absolute top-4 right-4 px-3 py-1 bg-white/90 rounded-full text-sm font-medium">
-                            {journey.progress_percentage}%
+                            {journey.show_goal_amount && journey.goal_amount ? (
+                              <span>€{journey.current_amount?.toLocaleString()} / €{journey.goal_amount?.toLocaleString()}</span>
+                            ) : (
+                              <span>{journey.progress_percentage}%</span>
+                            )}
                           </div>
                           <div className="absolute bottom-4 left-4 right-4">
                             <h4 className="text-xl font-bold text-white mb-1">{journey.name}</h4>
@@ -451,7 +455,11 @@ const Home = () => {
                           <img src={journey.image_url} alt={journey.name}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                           <div className="absolute top-4 right-4 px-3 py-1 bg-white/90 rounded-full text-sm font-medium">
-                            {journey.progress_percentage}%
+                            {journey.show_goal_amount && journey.goal_amount ? (
+                              <span>€{journey.current_amount?.toLocaleString()} / €{journey.goal_amount?.toLocaleString()}</span>
+                            ) : (
+                              <span>{journey.progress_percentage}%</span>
+                            )}
                           </div>
                         </div>
                         <div className="p-5">
