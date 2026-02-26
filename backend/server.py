@@ -1828,6 +1828,180 @@ async def generate_anonymous_identity(request: Request):
         "anonymous_avatar": new_avatar
     }
 
+# ==================== PUBLIC AMBASSADOR PROFILE ====================
+
+@api_router.get("/ambassador/{user_id}/public-profile")
+async def get_ambassador_public_profile(user_id: str):
+    """Get public profile of an ambassador - accessible to everyone"""
+    
+    # Get user data
+    user = await db.users.find_one({"user_id": user_id}, {"_id": 0, "password_hash": 0, "email": 0})
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="Utilizador não encontrado")
+    
+    # Check if user is an ambassador (or has contributed - we show profiles for active community members)
+    is_ambassador = user.get("level") == "embaixador"
+    
+    # Get display name based on privacy settings
+    use_real_name = user.get("use_real_name", True)
+    if use_real_name:
+        display_name = user.get("name", "Sonhador")
+        display_avatar = user.get("avatar") or f"https://api.dicebear.com/7.x/initials/svg?seed={user.get('name', 'S')}"
+    else:
+        display_name = user.get("anonymous_alias") or user.get("alias") or "Sonhador Anónimo"
+        display_avatar = user.get("anonymous_avatar") or f"https://api.dicebear.com/7.x/shapes/svg?seed={user_id}"
+    
+    # === BASIC IDENTITY ===
+    identity = {
+        "display_name": display_name,
+        "avatar": display_avatar,
+        "level": user.get("level", "sonhador"),
+        "is_ambassador": is_ambassador,
+        "country": user.get("country"),
+        "bio": user.get("bio"),
+        "member_since": user.get("created_at"),
+        "embaixador_unlocked_at": user.get("embaixador_unlocked_at")
+    }
+    
+    # === CURRENT JOURNEY (if ambassador) ===
+    current_journey = None
+    if is_ambassador:
+        # Find their active journey
+        journey = await db.journeys.find_one(
+            {"ambassador_user_id": user_id, "status": {"$in": ["ativa", "aprovada", "candidatura"]}},
+            {"_id": 0, "goal_amount": 0, "admin_notes": 0}
+        )
+        if journey:
+            # Get progress
+            full_journey = await db.journeys.find_one({"journey_id": journey["journey_id"]}, {"_id": 0})
+            goal = full_journey.get("goal_amount", 1) if full_journey else 1
+            current = journey.get("current_amount", 0)
+            percentage = round((current / goal) * 100, 1) if goal > 0 else 0
+            
+            current_journey = {
+                "journey_id": journey.get("journey_id"),
+                "name": journey.get("name"),
+                "poetic_name": journey.get("poetic_name"),
+                "description": journey.get("description"),
+                "image_url": journey.get("image_url"),
+                "status": journey.get("status"),
+                "country": journey.get("country"),
+                "city": journey.get("city"),
+                "progress_percentage": percentage,
+                "current_amount": current
+            }
+    
+    # === PREVIOUS CONTRIBUTIONS ===
+    contributions = await db.contributions.find(
+        {"user_id": user_id, "status": {"$in": ["confirmed", "completed"]}},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
+    
+    total_contributed = sum(c.get("amount", 0) for c in contributions)
+    
+    # Check if contributed to main journey
+    main_journey = await db.journeys.find_one(
+        {"$or": [{"is_main_trip": True}, {"is_active": True, "status": "ativa"}]},
+        {"_id": 0, "journey_id": 1}
+    )
+    contributed_to_main = False
+    if main_journey:
+        main_contribution = await db.contributions.find_one({
+            "user_id": user_id,
+            "journey_id": main_journey["journey_id"],
+            "status": {"$in": ["confirmed", "completed"]}
+        })
+        contributed_to_main = main_contribution is not None
+    
+    contributions_summary = {
+        "total_amount": total_contributed,
+        "total_count": len(contributions),
+        "contributed_to_main_journey": contributed_to_main,
+        "has_crypto_contributions": any(c.get("payment_method") == "crypto" for c in contributions)
+    }
+    
+    # === SOCIAL IMPACT ===
+    # Get referral stats
+    invited_users = await db.users.find(
+        {"sponsor_id": user_id},
+        {"_id": 0, "user_id": 1}
+    ).to_list(1000)
+    invited_user_ids = [u["user_id"] for u in invited_users]
+    
+    # Count contributions from invited users
+    contributions_from_invites = 0
+    amount_from_invites = 0
+    if invited_user_ids:
+        invite_contributions = await db.contributions.find(
+            {"user_id": {"$in": invited_user_ids}, "status": {"$in": ["confirmed", "completed"]}},
+            {"_id": 0}
+        ).to_list(1000)
+        contributions_from_invites = len(invite_contributions)
+        amount_from_invites = sum(c.get("amount", 0) for c in invite_contributions)
+    
+    social_impact = {
+        "people_invited": len(invited_users),
+        "valid_referrals": user.get("valid_referrals_count", 0),
+        "contributions_generated": contributions_from_invites,
+        "amount_generated": amount_from_invites
+    }
+    
+    # === REALIZED JOURNEYS (past journeys) ===
+    realized_journeys = []
+    if is_ambassador:
+        past_journeys = await db.journeys.find(
+            {"ambassador_user_id": user_id, "status": {"$in": ["financiada", "realizada", "encerrada"]}},
+            {"_id": 0, "goal_amount": 0, "admin_notes": 0}
+        ).sort("funded_at", -1).to_list(50)
+        
+        for j in past_journeys:
+            realized_journeys.append({
+                "journey_id": j.get("journey_id"),
+                "name": j.get("name"),
+                "image_url": j.get("image_url"),
+                "country": j.get("country"),
+                "status": j.get("status"),
+                "story": j.get("story"),
+                "photos": j.get("photos", []),
+                "funded_at": j.get("funded_at"),
+                "realized_at": j.get("realized_at")
+            })
+    
+    # === TESTIMONIALS (future feature - placeholder) ===
+    testimonials = []
+    # TODO: Implement testimonials collection
+    
+    return {
+        "identity": identity,
+        "current_journey": current_journey,
+        "contributions": contributions_summary,
+        "social_impact": social_impact,
+        "realized_journeys": realized_journeys,
+        "testimonials": testimonials
+    }
+
+@api_router.put("/profile/public-info")
+async def update_public_profile_info(request: Request):
+    """Update public profile information (country, bio)"""
+    user = await require_auth(request)
+    data = await request.json()
+    
+    allowed_fields = ["country", "bio"]
+    updates = {k: v for k, v in data.items() if k in allowed_fields}
+    
+    if "bio" in updates and len(updates["bio"]) > 500:
+        raise HTTPException(status_code=400, detail="Bio não pode exceder 500 caracteres")
+    
+    updates["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    await db.users.update_one(
+        {"user_id": user.user_id},
+        {"$set": updates}
+    )
+    
+    return {"message": "Perfil atualizado com sucesso"}
+
 @api_router.post("/profile/avatar")
 async def upload_avatar(request: Request):
     """Upload user avatar image (accepts base64 encoded image)"""
