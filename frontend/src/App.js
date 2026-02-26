@@ -43,6 +43,7 @@ const AppRouter = () => {
           <Route path="/admin" element={<Admin />} />
           <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="/ambassador/:userId" element={<AmbassadorProfile />} />
         </Routes>
       </main>
       <Footer />
