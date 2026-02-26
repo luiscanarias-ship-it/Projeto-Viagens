@@ -438,7 +438,6 @@ def get_referral_contribution_email_html(sponsor_name: str, invitee_name: str, a
     progress_to_ambassador = ""
     
     # Calculate progress
-    referrals_needed = max(0, 3 - valid_referrals)
     contribution_check = "✅" if contributed_to_main else "⬜"
     referrals_check = "✅" if valid_referrals >= 3 else "⬜"
     
