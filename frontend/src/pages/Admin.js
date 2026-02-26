@@ -41,6 +41,10 @@ const Admin = () => {
   // Visibility state
   const [visibilityJourneys, setVisibilityJourneys] = useState([]);
   const [loadingVisibility, setLoadingVisibility] = useState(false);
+  // Candidaturas state
+  const [ambassadorApplications, setAmbassadorApplications] = useState(null);
+  const [loadingApplications, setLoadingApplications] = useState(false);
+  const [applicationStatusFilter, setApplicationStatusFilter] = useState('candidatura');
   const [formData, setFormData] = useState({
     name: '',
     poetic_name: '',
