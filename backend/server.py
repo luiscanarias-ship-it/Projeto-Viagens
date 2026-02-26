@@ -162,6 +162,7 @@ class Journey(BaseModel):
     visibility_score: float = 0.0  # Calculated score for sorting
     visibility_boost: float = 0.0  # Manual boost by admin (-100 to +100)
     hide_from_listings: bool = False  # Admin can hide journey from listings
+    show_goal_amount: bool = False  # If true, show total goal publicly; if false, show only percentage
     # Admin fields
     owner_user_id: Optional[str] = None  # Admin who created/approved the journey
     admin_notes: Optional[str] = None
