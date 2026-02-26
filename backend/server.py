@@ -2321,7 +2321,8 @@ async def confirm_contribution(contribution_id: str, request: Request):
                 current_level = sponsor.get("level", "sonhador")
                 
                 # MOTOR EMBAIXADOR: contributed_to_main_trip + valid_referrals >= 3 = embaixador
-                if contributed and valid_refs >= 3 and current_level != "embaixador":
+                was_already_ambassador = current_level == "embaixador"
+                if contributed and valid_refs >= 3 and not was_already_ambassador:
                     await db.users.update_one(
                         {"user_id": sponsor_user_id},
                         {"$set": {
@@ -2329,8 +2330,20 @@ async def confirm_contribution(contribution_id: str, request: Request):
                             "embaixador_unlocked_at": datetime.now(timezone.utc).isoformat()
                         }}
                     )
-                    # Send email notification to sponsor
+                    # EMAIL 3: Send ambassador unlock email to sponsor
                     await send_ambassador_unlocked_email(sponsor_user_id)
+                
+                # EMAIL 2: Send referral contribution emails (to sponsor + admin)
+                journey_for_email = await db.journeys.find_one({"journey_id": contribution["journey_id"]}, {"_id": 0})
+                if journey_for_email:
+                    # Refresh sponsor data to get updated valid_referrals_count
+                    sponsor_updated = await db.users.find_one({"user_id": sponsor_user_id}, {"_id": 0})
+                    await send_referral_contribution_emails(
+                        contribution=contribution,
+                        journey=journey_for_email,
+                        contributor_user=contributing_user,
+                        sponsor_user=sponsor_updated
+                    )
     
     # Generate points if user has 3+ referrals
     if contribution.get("user_id"):
@@ -2342,10 +2355,10 @@ async def confirm_contribution(contribution_id: str, request: Request):
             contribution.get("is_crypto", False)
         )
     
-    # Send confirmation email to contributor
+    # EMAIL 1: Send confirmation email to contributor
     journey = await db.journeys.find_one({"journey_id": contribution["journey_id"]}, {"_id": 0})
     if journey:
-        await send_contribution_confirmed_email(contribution, journey)
+        await send_contribution_email(contribution, journey)
     
     return {"message": "Contribuição confirmada com sucesso"}
 
