@@ -4658,7 +4658,7 @@ async def get_main_journey_details():
     # Find the main journey (is_main_trip=True or first active one)
     journey = await db.journeys.find_one(
         {"$or": [{"is_main_trip": True}, {"is_active": True, "status": "ativa"}]},
-        {"_id": 0, "goal_amount": 0, "admin_notes": 0}  # Hide sensitive fields
+        {"_id": 0, "admin_notes": 0}  # Keep goal_amount, we'll filter it based on show_goal_amount
     )
     
     if not journey:
@@ -4666,18 +4666,26 @@ async def get_main_journey_details():
     
     journey_id = journey["journey_id"]
     
-    # Get progress (without goal amount)
+    # Get progress info
     current_amount = journey.get("current_amount", 0)
-    # We need to get goal_amount privately for percentage calculation
-    full_journey = await db.journeys.find_one({"journey_id": journey_id}, {"_id": 0})
-    goal_amount = full_journey.get("goal_amount", 1) if full_journey else 1
+    goal_amount = journey.get("goal_amount", 1)
     percentage = min((current_amount / goal_amount) * 100, 100) if goal_amount > 0 else 0
+    show_goal = journey.get("show_goal_amount", False)
     
     progress = {
         "current_amount": current_amount,
         "percentage": round(percentage, 1),
-        "is_funded": percentage >= 100
+        "is_funded": percentage >= 100,
+        "show_goal_amount": show_goal
     }
+    
+    # Only include goal_amount if show_goal_amount is True
+    if show_goal:
+        progress["goal_amount"] = goal_amount
+    
+    # Remove goal_amount from journey if not showing
+    if not show_goal:
+        journey.pop("goal_amount", None)
     
     # Get recent contributions for the feed
     contributions = await db.contributions.find(
