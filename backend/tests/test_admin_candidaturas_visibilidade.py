@@ -31,7 +31,7 @@ class TestAuth:
         """Test admin login to get auth token"""
         response = api_client.post(f"{BASE_URL}/api/auth/login", json={
             "email": "admin@4luis.com",
-            "password": "Admin1"
+            "password": "admin_password"
         })
         assert response.status_code == 200, f"Admin login failed: {response.text}"
         data = response.json()
@@ -53,7 +53,7 @@ class TestCandidaturas:
         # Login as admin
         response = session.post(f"{BASE_URL}/api/auth/login", json={
             "email": "admin@4luis.com",
-            "password": "Admin1"
+            "password": "admin_password"
         })
         if response.status_code == 200:
             token = response.json().get("token")
@@ -105,7 +105,7 @@ class TestVisibilidade:
         session.headers.update({"Content-Type": "application/json"})
         response = session.post(f"{BASE_URL}/api/auth/login", json={
             "email": "admin@4luis.com",
-            "password": "Admin1"
+            "password": "admin_password"
         })
         if response.status_code == 200:
             token = response.json().get("token")
@@ -151,7 +151,7 @@ class TestVisibilityActions:
         session.headers.update({"Content-Type": "application/json"})
         response = session.post(f"{BASE_URL}/api/auth/login", json={
             "email": "admin@4luis.com",
-            "password": "Admin1"
+            "password": "admin_password"
         })
         if response.status_code == 200:
             token = response.json().get("token")
@@ -244,7 +244,7 @@ class TestApplicationStatusChange:
         session.headers.update({"Content-Type": "application/json"})
         response = session.post(f"{BASE_URL}/api/auth/login", json={
             "email": "admin@4luis.com",
-            "password": "Admin1"
+            "password": "admin_password"
         })
         if response.status_code == 200:
             token = response.json().get("token")
