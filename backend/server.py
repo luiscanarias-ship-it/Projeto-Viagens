@@ -344,188 +344,390 @@ async def require_admin(request: Request) -> User:
         raise HTTPException(status_code=403, detail="Acesso de administrador necessário")
     return user
 
-# ==================== EMAIL SYSTEM ====================
+# ==================== EMAIL SYSTEM (RESEND) ====================
 
-EMAIL_TEMPLATES = {
-    "journey_funded": {
-        "subject": "Parabéns! A tua viagem foi financiada! - 4Luis",
-        "body": """
-Olá {ambassador_name},
+FRONTEND_URL = "https://journey-fund-3.preview.emergentagent.com"
 
-Temos ótimas notícias! A tua viagem "{journey_name}" atingiu o objetivo de financiamento!
-
-Valor total angariado: {amount_raised}€
-
-Este é um momento especial - graças à comunidade 4Luis, o teu sonho está mais perto de se tornar realidade.
-
-Próximos passos:
-1. Recebemos a confirmação do financiamento
-2. Em breve entraremos em contacto para os detalhes da viagem
-3. Prepara-te para viver esta aventura!
-
-Obrigado por fazeres parte da nossa comunidade de sonhadores.
-
-Com carinho,
-A equipa 4Luis
-
----
-Este email foi enviado automaticamente. Não respondas diretamente.
+def get_email_base_template(content: str, title: str = "4Luis") -> str:
+    """Base HTML email template with 4Luis branding"""
+    return f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title}</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #FAFAF9;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #FAFAF9;">
+        <tr>
+            <td align="center" style="padding: 40px 20px;">
+                <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="background-color: #ffffff; border-radius: 16px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+                    <!-- Header -->
+                    <tr>
+                        <td align="center" style="padding: 32px 40px 24px 40px; border-bottom: 1px solid #E6F4F1;">
+                            <span style="font-size: 28px; font-weight: bold; color: #FFBE98;">4Luis</span>
+                            <p style="margin: 8px 0 0 0; color: #6B6661; font-size: 14px;">Onde os sonhos ganham asas</p>
+                        </td>
+                    </tr>
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 32px 40px;">
+                            {content}
+                        </td>
+                    </tr>
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 24px 40px; background-color: #FAFAF9; border-radius: 0 0 16px 16px;">
+                            <p style="margin: 0; color: #6B6661; font-size: 12px; text-align: center;">
+                                Este é um email transacional automático da 4Luis.<br>
+                                <a href="{FRONTEND_URL}" style="color: #FFBE98; text-decoration: none;">4Luis.com</a>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
 """
-    },
-    "admin_journey_funded": {
-        "subject": "Viagem Financiada: {journey_name}",
-        "body": """
-ALERTA: Viagem Financiada
 
-Viagem: {journey_name}
-ID: {journey_id}
-Embaixador: {ambassador_name}
-Valor angariado: {amount_raised}€
-
-A viagem foi automaticamente movida para o estado "financiada".
-
-Ação necessária: Rever e aprovar os próximos passos com o embaixador.
-"""
-    },
-    "contribution_confirmed": {
-        "subject": "Contribuição confirmada - 4Luis",
-        "body": """
-Olá {contributor_name},
-
-A tua contribuição de {amount}€ para a viagem "{journey_name}" foi confirmada!
-
-Obrigado por fazeres parte desta comunidade de sonhadores. O teu apoio faz a diferença.
-
-{crypto_badge}
-
-Com gratidão,
-A equipa 4Luis
-"""
-    },
-    "welcome": {
-        "subject": "Bem-vindo à comunidade 4Luis!",
-        "body": """
-Olá {name},
-
-Bem-vindo à 4Luis - onde os sonhos ganham asas!
-
-Agora és um Sonhador. Eis o que podes fazer:
-- Contribuir para viagens de sonho
-- Convidar amigos com o teu link de sponsor
-- Tornar-te Embaixador e criar a tua própria viagem
-
-O teu link de convite: {sponsor_link}
-
-Obrigado por te juntares a nós!
-
-A equipa 4Luis
-"""
-    },
-    "ambassador_unlocked": {
-        "subject": "Parabéns, és agora Embaixador! - 4Luis",
-        "body": """
-Olá {name},
-
-Parabéns! Desbloqueaste o nível Embaixador na 4Luis!
-
-Isto significa que:
-✓ Contribuíste para a viagem principal
-✓ Convidaste 3 ou mais pessoas que também contribuíram
-
-Como Embaixador, agora podes:
-- Candidatar-te a criar a tua própria viagem de sonho
-- Receber contribuições da comunidade
-- Inspirar outros a sonhar
-
-Acede ao teu dashboard para começar: {dashboard_link}
-
-A equipa 4Luis
-"""
-    }
-}
-
-async def queue_email(to_email: str, to_name: str, subject: str, template: str, data: dict):
+def get_contribution_email_html(contributor_name: str, amount: float, journey_name: str, is_crypto: bool = False, crypto_type: str = None) -> str:
+    """HTML template for contribution confirmation email"""
+    crypto_badge = ""
+    if is_crypto and crypto_type:
+        crypto_badge = f"""
+        <div style="margin: 24px 0; padding: 16px; background: linear-gradient(135deg, #F7931A20, #627EEA20); border-radius: 12px; text-align: center;">
+            <span style="font-size: 24px;">🏆</span>
+            <p style="margin: 8px 0 0 0; color: #2D2A26; font-weight: bold;">Contribuição em {crypto_type.upper()}</p>
+            <p style="margin: 4px 0 0 0; color: #6B6661; font-size: 14px;">Badge especial de cripto-sonhador!</p>
+        </div>
+        """
+    
+    content = f"""
+    <h1 style="margin: 0 0 16px 0; color: #2D2A26; font-size: 24px;">Obrigado, {contributor_name}! 💜</h1>
+    <p style="margin: 0 0 24px 0; color: #6B6661; font-size: 16px; line-height: 1.6;">
+        A tua contribuição foi confirmada com sucesso.
+    </p>
+    
+    <div style="background-color: #E6F4F1; border-radius: 12px; padding: 24px; text-align: center; margin-bottom: 24px;">
+        <p style="margin: 0 0 8px 0; color: #6B6661; font-size: 14px;">Contribuíste</p>
+        <p style="margin: 0; color: #2D2A26; font-size: 36px; font-weight: bold;">{amount}€</p>
+        <p style="margin: 8px 0 0 0; color: #6B6661; font-size: 14px;">para "{journey_name}"</p>
+    </div>
+    
+    {crypto_badge}
+    
+    <p style="margin: 0 0 24px 0; color: #6B6661; font-size: 16px; line-height: 1.6;">
+        Graças a ti, este sonho está mais perto de se tornar realidade. 
+        Cada contribuição é um gesto fraternal que faz a diferença.
+    </p>
+    
+    <div style="text-align: center;">
+        <a href="{FRONTEND_URL}/dashboard" style="display: inline-block; padding: 14px 32px; background-color: #FFBE98; color: #2D2A26; text-decoration: none; border-radius: 12px; font-weight: bold;">
+            Ver o meu Dashboard
+        </a>
+    </div>
     """
-    Queue an email for sending. This is a mock implementation that stores emails
-    in the database. Can be replaced with a real email service like Resend/SendGrid.
+    return get_email_base_template(content, "Contribuição Confirmada - 4Luis")
+
+def get_referral_contribution_email_html(sponsor_name: str, invitee_name: str, amount: float, journey_name: str, 
+                                         valid_referrals: int, contributed_to_main: bool) -> str:
+    """HTML template for sponsor notification when their referral contributes"""
+    progress_to_ambassador = ""
+    
+    # Calculate progress
+    referrals_needed = max(0, 3 - valid_referrals)
+    contribution_check = "✅" if contributed_to_main else "⬜"
+    referrals_check = "✅" if valid_referrals >= 3 else "⬜"
+    
+    if contributed_to_main and valid_referrals >= 3:
+        progress_to_ambassador = """
+        <div style="margin: 24px 0; padding: 16px; background: linear-gradient(135deg, #FFBE9820, #E6F4F120); border-radius: 12px; text-align: center; border: 2px solid #FFBE98;">
+            <span style="font-size: 32px;">🎉</span>
+            <p style="margin: 8px 0 0 0; color: #2D2A26; font-weight: bold; font-size: 18px;">Parabéns! És agora Embaixador!</p>
+            <p style="margin: 4px 0 0 0; color: #6B6661; font-size: 14px;">Podes criar a tua própria viagem de sonho.</p>
+        </div>
+        """
+    else:
+        progress_to_ambassador = f"""
+        <div style="margin: 24px 0; padding: 16px; background-color: #FAFAF9; border-radius: 12px;">
+            <p style="margin: 0 0 12px 0; color: #2D2A26; font-weight: bold;">Progresso para Embaixador:</p>
+            <p style="margin: 0 0 8px 0; color: #6B6661; font-size: 14px;">
+                {contribution_check} Contribuir para a viagem principal
+            </p>
+            <p style="margin: 0; color: #6B6661; font-size: 14px;">
+                {referrals_check} 3 convites válidos ({valid_referrals}/3)
+            </p>
+        </div>
+        """
+    
+    content = f"""
+    <h1 style="margin: 0 0 16px 0; color: #2D2A26; font-size: 24px;">Boa notícia, {sponsor_name}! 🌟</h1>
+    <p style="margin: 0 0 24px 0; color: #6B6661; font-size: 16px; line-height: 1.6;">
+        Alguém que convidaste acabou de contribuir para um sonho!
+    </p>
+    
+    <div style="background-color: #E6F4F1; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+            <tr>
+                <td style="padding-bottom: 12px;">
+                    <p style="margin: 0; color: #6B6661; font-size: 14px;">Convidado</p>
+                    <p style="margin: 4px 0 0 0; color: #2D2A26; font-size: 18px; font-weight: bold;">{invitee_name}</p>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding-bottom: 12px;">
+                    <p style="margin: 0; color: #6B6661; font-size: 14px;">Contribuiu</p>
+                    <p style="margin: 4px 0 0 0; color: #FFBE98; font-size: 24px; font-weight: bold;">{amount}€</p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p style="margin: 0; color: #6B6661; font-size: 14px;">Para a viagem</p>
+                    <p style="margin: 4px 0 0 0; color: #2D2A26; font-size: 16px;">{journey_name}</p>
+                </td>
+            </tr>
+        </table>
+    </div>
+    
+    {progress_to_ambassador}
+    
+    <p style="margin: 0 0 24px 0; color: #6B6661; font-size: 16px; line-height: 1.6;">
+        O teu impacto na comunidade está a crescer. Continua a partilhar o teu link de convite!
+    </p>
+    
+    <div style="text-align: center;">
+        <a href="{FRONTEND_URL}/dashboard" style="display: inline-block; padding: 14px 32px; background-color: #FFBE98; color: #2D2A26; text-decoration: none; border-radius: 12px; font-weight: bold;">
+            Ver o meu Dashboard
+        </a>
+    </div>
     """
-    template_data = EMAIL_TEMPLATES.get(template, {})
+    return get_email_base_template(content, "O teu convidado contribuiu! - 4Luis")
+
+def get_admin_referral_notification_html(sponsor_name: str, sponsor_email: str, invitee_name: str, 
+                                          invitee_email: str, amount: float, journey_name: str) -> str:
+    """HTML template for admin notification when a referral contributes"""
+    content = f"""
+    <h1 style="margin: 0 0 16px 0; color: #2D2A26; font-size: 24px;">📊 Nova Contribuição via Referral</h1>
     
-    # Format subject and body with data
-    formatted_subject = subject
-    formatted_body = template_data.get("body", "")
+    <div style="background-color: #FAFAF9; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+            <tr>
+                <td colspan="2" style="padding-bottom: 16px; border-bottom: 1px solid #E6F4F1;">
+                    <p style="margin: 0; color: #6B6661; font-size: 12px; text-transform: uppercase;">Contribuidor</p>
+                    <p style="margin: 4px 0 0 0; color: #2D2A26; font-size: 16px; font-weight: bold;">{invitee_name}</p>
+                    <p style="margin: 2px 0 0 0; color: #6B6661; font-size: 14px;">{invitee_email}</p>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" style="padding: 16px 0; border-bottom: 1px solid #E6F4F1;">
+                    <p style="margin: 0; color: #6B6661; font-size: 12px; text-transform: uppercase;">Sponsor (quem convidou)</p>
+                    <p style="margin: 4px 0 0 0; color: #2D2A26; font-size: 16px; font-weight: bold;">{sponsor_name}</p>
+                    <p style="margin: 2px 0 0 0; color: #6B6661; font-size: 14px;">{sponsor_email}</p>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding-top: 16px; width: 50%;">
+                    <p style="margin: 0; color: #6B6661; font-size: 12px; text-transform: uppercase;">Valor</p>
+                    <p style="margin: 4px 0 0 0; color: #FFBE98; font-size: 24px; font-weight: bold;">{amount}€</p>
+                </td>
+                <td style="padding-top: 16px; width: 50%;">
+                    <p style="margin: 0; color: #6B6661; font-size: 12px; text-transform: uppercase;">Viagem</p>
+                    <p style="margin: 4px 0 0 0; color: #2D2A26; font-size: 16px;">{journey_name}</p>
+                </td>
+            </tr>
+        </table>
+    </div>
     
-    for key, value in data.items():
-        formatted_subject = formatted_subject.replace(f"{{{key}}}", str(value))
-        formatted_body = formatted_body.replace(f"{{{key}}}", str(value))
+    <div style="text-align: center;">
+        <a href="{FRONTEND_URL}/admin" style="display: inline-block; padding: 14px 32px; background-color: #2D2A26; color: #ffffff; text-decoration: none; border-radius: 12px; font-weight: bold;">
+            Abrir Painel Admin
+        </a>
+    </div>
+    """
+    return get_email_base_template(content, "Notificação Admin - Contribuição Referral")
+
+def get_ambassador_unlocked_email_html(name: str) -> str:
+    """HTML template for ambassador unlock notification"""
+    content = f"""
+    <div style="text-align: center; margin-bottom: 24px;">
+        <span style="font-size: 64px;">🎖️</span>
+    </div>
     
+    <h1 style="margin: 0 0 16px 0; color: #2D2A26; font-size: 28px; text-align: center;">
+        Parabéns, {name}!
+    </h1>
+    <p style="margin: 0 0 24px 0; color: #FFBE98; font-size: 20px; text-align: center; font-style: italic;">
+        És agora Embaixador 4Luis
+    </p>
+    
+    <div style="background-color: #E6F4F1; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+        <p style="margin: 0 0 16px 0; color: #2D2A26; font-weight: bold;">O que conquistaste:</p>
+        <p style="margin: 0 0 8px 0; color: #6B6661; font-size: 14px;">✅ Contribuíste para a viagem principal</p>
+        <p style="margin: 0; color: #6B6661; font-size: 14px;">✅ Convidaste 3+ pessoas que também contribuíram</p>
+    </div>
+    
+    <div style="background: linear-gradient(135deg, #FFBE9820, #E6F4F120); border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+        <p style="margin: 0 0 16px 0; color: #2D2A26; font-weight: bold;">Como Embaixador, agora podes:</p>
+        <p style="margin: 0 0 8px 0; color: #6B6661; font-size: 14px;">🌟 Candidatar-te a criar a tua própria viagem de sonho</p>
+        <p style="margin: 0 0 8px 0; color: #6B6661; font-size: 14px;">💜 Receber contribuições da comunidade</p>
+        <p style="margin: 0; color: #6B6661; font-size: 14px;">✨ Inspirar outros a sonhar</p>
+    </div>
+    
+    <div style="text-align: center;">
+        <a href="{FRONTEND_URL}/dashboard" style="display: inline-block; padding: 16px 40px; background-color: #FFBE98; color: #2D2A26; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 16px;">
+            Começar a Criar o Meu Sonho
+        </a>
+    </div>
+    """
+    return get_email_base_template(content, "Parabéns Embaixador! - 4Luis")
+
+async def send_email_resend(to_email: str, subject: str, html_content: str) -> dict:
+    """Send email using Resend API (non-blocking)"""
+    if not RESEND_API_KEY:
+        logger.warning("RESEND_API_KEY not configured, email not sent")
+        return {"status": "skipped", "reason": "API key not configured"}
+    
+    email_id = f"email_{uuid.uuid4().hex[:12]}"
+    
+    # Log email to database
     email_doc = {
-        "email_id": f"email_{uuid.uuid4().hex[:12]}",
+        "email_id": email_id,
         "to_email": to_email,
-        "to_name": to_name,
-        "subject": formatted_subject,
-        "body": formatted_body,
-        "template": template,
-        "data": data,
-        "status": "queued",  # queued | sent | failed
+        "subject": subject,
+        "status": "sending",
         "created_at": datetime.now(timezone.utc).isoformat(),
         "sent_at": None,
         "error": None
     }
-    
     await db.email_queue.insert_one(email_doc)
-    logger.info(f"Email queued: {email_doc['email_id']} to {to_email} - {subject}")
     
-    # TODO: Integrate with real email service (Resend, SendGrid, etc.)
-    # For now, mark as "sent" immediately (mock)
-    await db.email_queue.update_one(
-        {"email_id": email_doc["email_id"]},
-        {"$set": {"status": "sent", "sent_at": datetime.now(timezone.utc).isoformat()}}
-    )
-    
-    return email_doc["email_id"]
+    try:
+        params = {
+            "from": SENDER_EMAIL,
+            "to": [to_email],
+            "subject": subject,
+            "html": html_content
+        }
+        
+        # Run sync SDK in thread to keep FastAPI non-blocking
+        result = await asyncio.to_thread(resend.Emails.send, params)
+        
+        await db.email_queue.update_one(
+            {"email_id": email_id},
+            {"$set": {
+                "status": "sent",
+                "sent_at": datetime.now(timezone.utc).isoformat(),
+                "resend_id": result.get("id")
+            }}
+        )
+        
+        logger.info(f"Email sent successfully: {email_id} to {to_email}")
+        return {"status": "sent", "email_id": email_id, "resend_id": result.get("id")}
+        
+    except Exception as e:
+        error_msg = str(e)
+        await db.email_queue.update_one(
+            {"email_id": email_id},
+            {"$set": {"status": "failed", "error": error_msg}}
+        )
+        logger.error(f"Failed to send email {email_id}: {error_msg}")
+        return {"status": "failed", "email_id": email_id, "error": error_msg}
 
-async def send_contribution_confirmed_email(contribution: dict, journey: dict):
-    """Send email when a contribution is confirmed"""
+# ==================== BEHAVIORAL EMAIL FUNCTIONS ====================
+
+async def send_contribution_email(contribution: dict, journey: dict):
+    """
+    EMAIL 1: Send email to contributor when contribution is confirmed
+    """
     if not contribution.get("contributor_email"):
         return
     
-    crypto_badge = ""
-    if contribution.get("payment_method") == "crypto":
-        crypto_badge = f"\n🏆 Badge especial: Contribuição em {contribution.get('crypto_type', 'crypto').upper()}!\n"
+    is_crypto = contribution.get("payment_method") == "crypto"
+    crypto_type = contribution.get("crypto_type") if is_crypto else None
     
-    await queue_email(
+    html = get_contribution_email_html(
+        contributor_name=contribution.get("contributor_name", "Sonhador"),
+        amount=contribution.get("amount"),
+        journey_name=journey.get("name", ""),
+        is_crypto=is_crypto,
+        crypto_type=crypto_type
+    )
+    
+    await send_email_resend(
         to_email=contribution["contributor_email"],
-        to_name=contribution.get("contributor_name", "Sonhador"),
-        subject="Contribuição confirmada - 4Luis",
-        template="contribution_confirmed",
-        data={
-            "contributor_name": contribution.get("contributor_name", "Sonhador"),
-            "amount": contribution.get("amount"),
-            "journey_name": journey.get("name", ""),
-            "crypto_badge": crypto_badge
-        }
+        subject=f"Contribuição de {contribution.get('amount')}€ confirmada - 4Luis",
+        html_content=html
+    )
+
+async def send_referral_contribution_emails(contribution: dict, journey: dict, contributor_user: dict, sponsor_user: dict):
+    """
+    EMAIL 2: When an invited user contributes, notify:
+    - The sponsor (who invited them)
+    - The admin (internal notification)
+    """
+    sponsor_email = sponsor_user.get("email")
+    sponsor_name = sponsor_user.get("name", "Sonhador")
+    invitee_name = contributor_user.get("name", contribution.get("contributor_name", "Sonhador"))
+    invitee_email = contributor_user.get("email", contribution.get("contributor_email", ""))
+    amount = contribution.get("amount")
+    journey_name = journey.get("name", "")
+    
+    # Get sponsor's progress to ambassador
+    valid_referrals = sponsor_user.get("valid_referrals_count", 0)
+    contributed_to_main = sponsor_user.get("contributed_to_main_trip", False)
+    
+    # EMAIL 2a: Email to sponsor
+    if sponsor_email:
+        sponsor_html = get_referral_contribution_email_html(
+            sponsor_name=sponsor_name,
+            invitee_name=invitee_name,
+            amount=amount,
+            journey_name=journey_name,
+            valid_referrals=valid_referrals,
+            contributed_to_main=contributed_to_main
+        )
+        
+        await send_email_resend(
+            to_email=sponsor_email,
+            subject=f"🌟 {invitee_name} contribuiu {amount}€ - O teu convite funcionou!",
+            html_content=sponsor_html
+        )
+    
+    # EMAIL 2b: Internal email to admin
+    admin_html = get_admin_referral_notification_html(
+        sponsor_name=sponsor_name,
+        sponsor_email=sponsor_email or "N/A",
+        invitee_name=invitee_name,
+        invitee_email=invitee_email,
+        amount=amount,
+        journey_name=journey_name
+    )
+    
+    await send_email_resend(
+        to_email=ADMIN_EMAIL,
+        subject=f"[Admin] Contribuição Referral: {invitee_name} → {amount}€",
+        html_content=admin_html
     )
 
 async def send_ambassador_unlocked_email(user_id: str):
-    """Send email when a user unlocks Ambassador level"""
+    """
+    EMAIL 3: Send email when a user unlocks Ambassador level
+    """
     user = await db.users.find_one({"user_id": user_id}, {"_id": 0})
     if not user or not user.get("email"):
         return
     
-    # Get user's sponsor link for the dashboard link
-    frontend_url = "https://journey-fund-3.preview.emergentagent.com"
-    dashboard_link = f"{frontend_url}/dashboard"
+    html = get_ambassador_unlocked_email_html(
+        name=user.get("name", "Embaixador")
+    )
     
-    await queue_email(
+    await send_email_resend(
         to_email=user["email"],
-        to_name=user.get("name", "Embaixador"),
-        subject="Parabéns, és agora Embaixador! - 4Luis",
-        template="ambassador_unlocked",
-        data={
-            "name": user.get("name", "Embaixador"),
-            "dashboard_link": dashboard_link
-        }
+        subject="🎖️ Parabéns! És agora Embaixador 4Luis!",
+        html_content=html
     )
     
     logger.info(f"Ambassador unlocked email sent to user {user_id}")
