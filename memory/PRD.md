@@ -147,6 +147,13 @@ Valores fixos: €10, €20, €50, €100, €200, €500, €1000
   - Nova contribuição → email ao contribuidor
   - Contribuição de convidado → email ao sponsor + admin
   - Utilizador torna-se Embaixador → email de desbloqueio
+- [x] **Perfil Público do Embaixador** (`/ambassador/:userId`):
+  - Identidade básica (nome/alias, país, bio, membro desde)
+  - Viagem atual (se embaixador) com progresso e botão apoiar
+  - Contribuições anteriores (total, badges crypto, apoio à viagem principal)
+  - Impacto social (pessoas convidadas, contribuições geradas)
+  - Viagens realizadas (fotos, histórias)
+  - Link para perfil na página de detalhes da viagem
 
 ### ✅ Concluído (Sessões Anteriores)
 - [x] Modelo de utilizadores v2 (visitante/sonhador/embaixador)
