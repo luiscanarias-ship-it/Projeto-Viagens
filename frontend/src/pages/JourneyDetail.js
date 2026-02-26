@@ -320,6 +320,46 @@ const JourneyDetail = () => {
               </p>
             </div>
 
+            {/* Ambassador Info (if ambassador journey) */}
+            {journey.ambassador_info && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 }}
+                className="bg-white rounded-2xl p-6 border border-stone-100 shadow-sm"
+              >
+                <h3 className="text-lg font-bold text-[#2D2A26] mb-4 flex items-center gap-2">
+                  <User className="w-5 h-5 text-[#FFBE98]" />
+                  Sobre o Embaixador
+                </h3>
+                <a 
+                  href={`/ambassador/${journey.ambassador_info.user_id}`}
+                  className="flex items-center gap-4 p-3 -m-3 rounded-xl hover:bg-stone-50 transition-colors group"
+                  data-testid="ambassador-profile-link"
+                >
+                  <img 
+                    src={journey.ambassador_info.avatar} 
+                    alt={journey.ambassador_info.display_name}
+                    className="w-14 h-14 rounded-full object-cover border-2 border-[#FFBE98]/30"
+                  />
+                  <div className="flex-1">
+                    <p className="font-bold text-[#2D2A26] group-hover:text-[#FFBE98] transition-colors">
+                      {journey.ambassador_info.display_name}
+                    </p>
+                    {journey.ambassador_info.country && (
+                      <p className="text-sm text-[#6B6661] flex items-center gap-1">
+                        <Globe className="w-3 h-3" /> {journey.ambassador_info.country}
+                      </p>
+                    )}
+                    <span className="inline-block mt-1 px-2 py-0.5 bg-gradient-to-r from-[#FFBE98]/20 to-[#E6F4F1]/20 rounded-full text-xs font-medium text-[#FFBE98]">
+                      Embaixador 4Luis
+                    </span>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-[#6B6661] group-hover:text-[#FFBE98] transition-colors" />
+                </a>
+              </motion.div>
+            )}
+
             {/* ==================== TRAVEL PLANNING SECTION ==================== */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
