@@ -709,6 +709,209 @@ const Admin = () => {
             </motion.div>
           )}
 
+          {/* Visibility Tab */}
+          {activeTab === 'visibility' && (
+            <motion.div
+              key="visibility"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="bg-white rounded-3xl p-6 shadow-lg border border-stone-100"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-xl font-bold flex items-center gap-2">
+                    <Star className="w-5 h-5 text-[#FFBE98]" />
+                    Gestão de Visibilidade
+                  </h2>
+                  <p className="text-sm text-[#6B6661] mt-1">Destaque viagens e ajuste a sua visibilidade na plataforma</p>
+                </div>
+                <button
+                  onClick={async () => {
+                    setLoadingVisibility(true);
+                    try {
+                      await axios.post(`${API}/admin/recalculate-all-visibility`, {}, { headers: getAuthHeaders() });
+                      const res = await axios.get(`${API}/admin/journeys-visibility?status=ativa`, { headers: getAuthHeaders() });
+                      setVisibilityJourneys(res.data.journeys || []);
+                    } catch (e) {
+                      console.error(e);
+                    }
+                    setLoadingVisibility(false);
+                  }}
+                  className="px-4 py-2 bg-stone-100 hover:bg-stone-200 rounded-xl text-sm font-medium transition-colors"
+                >
+                  Recalcular Scores
+                </button>
+              </div>
+
+              {/* Load visibility data on first view */}
+              {visibilityJourneys.length === 0 && !loadingVisibility && (
+                <div className="text-center py-12">
+                  <Star className="w-12 h-12 text-stone-200 mx-auto mb-4" />
+                  <p className="text-[#6B6661] mb-4">Carrega as viagens para gerir visibilidade</p>
+                  <button
+                    onClick={async () => {
+                      setLoadingVisibility(true);
+                      try {
+                        const res = await axios.get(`${API}/admin/journeys-visibility?status=ativa`, { headers: getAuthHeaders() });
+                        setVisibilityJourneys(res.data.journeys || []);
+                      } catch (e) {
+                        console.error(e);
+                      }
+                      setLoadingVisibility(false);
+                    }}
+                    className="px-6 py-3 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-medium hover:bg-[#FFAB7D] transition-colors"
+                  >
+                    Carregar Viagens
+                  </button>
+                </div>
+              )}
+
+              {loadingVisibility && (
+                <div className="flex items-center justify-center py-12">
+                  <div className="w-8 h-8 border-4 border-[#FFBE98] border-t-transparent rounded-full animate-spin" />
+                </div>
+              )}
+
+              {visibilityJourneys.length > 0 && (
+                <div className="space-y-4">
+                  {/* Legend */}
+                  <div className="bg-stone-50 rounded-xl p-4 mb-6">
+                    <p className="text-sm text-[#6B6661] mb-2"><strong>Critérios de Score:</strong></p>
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs text-[#6B6661]">
+                      <span>• Progresso (30%)</span>
+                      <span>• Atividade recente (25%)</span>
+                      <span>• Nº contribuições (20%)</span>
+                      <span>• Impacto social (15%)</span>
+                      <span>• Novidade (10%)</span>
+                    </div>
+                  </div>
+
+                  {visibilityJourneys.map((journey) => (
+                    <div key={journey.journey_id} className={`p-4 border rounded-xl transition-all ${journey.is_featured ? 'border-[#FFBE98] bg-[#FFBE98]/5' : 'border-stone-200'}`}>
+                      <div className="flex items-start gap-4">
+                        <img src={journey.image_url} alt={journey.name} className="w-20 h-20 rounded-lg object-cover" />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-bold text-[#2D2A26] truncate">{journey.name}</h3>
+                            {journey.is_featured && (
+                              <span className="px-2 py-0.5 bg-[#FFBE98] text-white text-xs rounded-full flex items-center gap-1">
+                                <Star className="w-3 h-3" /> Destaque
+                              </span>
+                            )}
+                            {journey.hide_from_listings && (
+                              <span className="px-2 py-0.5 bg-red-100 text-red-600 text-xs rounded-full">Oculta</span>
+                            )}
+                          </div>
+                          <p className="text-sm text-[#6B6661] mb-2">por {journey.ambassador_name} • {journey.country || 'N/A'}</p>
+                          
+                          <div className="flex items-center gap-4 text-xs text-[#6B6661]">
+                            <span>Score: <strong className="text-[#FFBE98]">{journey.calculated_score?.toFixed(1) || journey.visibility_score?.toFixed(1) || '0'}</strong></span>
+                            <span>Boost: <strong className={journey.visibility_boost > 0 ? 'text-green-600' : journey.visibility_boost < 0 ? 'text-red-600' : ''}>{journey.visibility_boost || 0}</strong></span>
+                            <span>Progresso: {((journey.current_amount / journey.goal_amount) * 100).toFixed(0)}%</span>
+                          </div>
+                        </div>
+                        
+                        <div className="flex flex-col gap-2">
+                          {/* Feature/Unfeature */}
+                          <button
+                            onClick={async () => {
+                              try {
+                                await axios.post(`${API}/admin/journeys/${journey.journey_id}/update-visibility`, 
+                                  { is_featured: !journey.is_featured },
+                                  { headers: getAuthHeaders() }
+                                );
+                                setVisibilityJourneys(prev => prev.map(j => 
+                                  j.journey_id === journey.journey_id ? {...j, is_featured: !j.is_featured} : j
+                                ));
+                              } catch (e) {
+                                console.error(e);
+                              }
+                            }}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                              journey.is_featured 
+                                ? 'bg-[#FFBE98] text-white hover:bg-[#E6A07C]' 
+                                : 'bg-stone-100 text-[#6B6661] hover:bg-stone-200'
+                            }`}
+                          >
+                            {journey.is_featured ? '★ Remover Destaque' : '☆ Destacar'}
+                          </button>
+                          
+                          {/* Boost controls */}
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={async () => {
+                                const newBoost = Math.max(-100, (journey.visibility_boost || 0) - 10);
+                                try {
+                                  await axios.post(`${API}/admin/journeys/${journey.journey_id}/update-visibility`, 
+                                    { visibility_boost: newBoost },
+                                    { headers: getAuthHeaders() }
+                                  );
+                                  setVisibilityJourneys(prev => prev.map(j => 
+                                    j.journey_id === journey.journey_id ? {...j, visibility_boost: newBoost} : j
+                                  ));
+                                } catch (e) {
+                                  console.error(e);
+                                }
+                              }}
+                              className="px-2 py-1 bg-red-50 text-red-600 rounded text-xs hover:bg-red-100"
+                            >
+                              -10
+                            </button>
+                            <span className="text-xs w-8 text-center">{journey.visibility_boost || 0}</span>
+                            <button
+                              onClick={async () => {
+                                const newBoost = Math.min(100, (journey.visibility_boost || 0) + 10);
+                                try {
+                                  await axios.post(`${API}/admin/journeys/${journey.journey_id}/update-visibility`, 
+                                    { visibility_boost: newBoost },
+                                    { headers: getAuthHeaders() }
+                                  );
+                                  setVisibilityJourneys(prev => prev.map(j => 
+                                    j.journey_id === journey.journey_id ? {...j, visibility_boost: newBoost} : j
+                                  ));
+                                } catch (e) {
+                                  console.error(e);
+                                }
+                              }}
+                              className="px-2 py-1 bg-green-50 text-green-600 rounded text-xs hover:bg-green-100"
+                            >
+                              +10
+                            </button>
+                          </div>
+                          
+                          {/* Hide toggle */}
+                          <button
+                            onClick={async () => {
+                              try {
+                                await axios.post(`${API}/admin/journeys/${journey.journey_id}/update-visibility`, 
+                                  { hide_from_listings: !journey.hide_from_listings },
+                                  { headers: getAuthHeaders() }
+                                );
+                                setVisibilityJourneys(prev => prev.map(j => 
+                                  j.journey_id === journey.journey_id ? {...j, hide_from_listings: !j.hide_from_listings} : j
+                                ));
+                              } catch (e) {
+                                console.error(e);
+                              }
+                            }}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                              journey.hide_from_listings 
+                                ? 'bg-red-100 text-red-600 hover:bg-red-200' 
+                                : 'bg-stone-100 text-[#6B6661] hover:bg-stone-200'
+                            }`}
+                          >
+                            {journey.hide_from_listings ? 'Mostrar' : 'Ocultar'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          )}
+
           {/* Contributions Tab */}
           {activeTab === 'contributions' && (
             <motion.div
