@@ -38,6 +38,9 @@ const Admin = () => {
   const [userSubscriptionFilter, setUserSubscriptionFilter] = useState('all');
   const [userSortBy, setUserSortBy] = useState('referrals');
   const [userSortOrder, setUserSortOrder] = useState('desc');
+  // Visibility state
+  const [visibilityJourneys, setVisibilityJourneys] = useState([]);
+  const [loadingVisibility, setLoadingVisibility] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     poetic_name: '',
