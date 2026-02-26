@@ -3781,6 +3781,16 @@ async def update_ambassador_journey_status(journey_id: str, request: Request):
     elif new_status == "ativa":
         update_data["is_active"] = True
         update_data["activated_at"] = datetime.now(timezone.utc).isoformat()
+        # Explicitly set visibility fields to default values (no automatic featuring or boost)
+        update_data["is_featured"] = False
+        update_data["visibility_boost"] = 0.0
+        update_data["hide_from_listings"] = False
+        # Calculate initial visibility score based on journey attributes
+        goal = journey.get("goal_amount", 1)
+        current = journey.get("current_amount", 0)
+        progress = (current / goal * 100) if goal > 0 else 0
+        # Initial score: only based on newness (10% weight = 10 points max for new journeys)
+        update_data["visibility_score"] = 10.0  # New journey starts with base score
         
     elif new_status == "financiada":
         update_data["funded_at"] = datetime.now(timezone.utc).isoformat()
