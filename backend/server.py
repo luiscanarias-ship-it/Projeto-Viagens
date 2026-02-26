@@ -4723,7 +4723,7 @@ async def get_main_journey_details():
 @api_router.get("/homepage/ambassador-journeys")
 async def get_active_ambassador_journeys():
     """Get active ambassador journeys organized by region for 'Sonhos em Materialização' section"""
-    # Query excludes hidden journeys
+    # Query excludes hidden journeys - keep goal_amount and show_goal_amount for processing
     journeys = await db.journeys.find(
         {
             "is_ambassador_journey": True,
@@ -4731,7 +4731,7 @@ async def get_active_ambassador_journeys():
             "is_active": True,
             "hide_from_listings": {"$ne": True}
         },
-        {"_id": 0, "goal_amount": 0, "admin_notes": 0, "application_message": 0}
+        {"_id": 0, "admin_notes": 0, "application_message": 0}
     ).sort("visibility_score", -1).to_list(100)  # Sort by visibility score
     
     # Separate featured journeys
@@ -4740,13 +4740,15 @@ async def get_active_ambassador_journeys():
     
     for j in journeys:
         # Calculate progress percentage
-        full_journey = await db.journeys.find_one({"journey_id": j["journey_id"]}, {"_id": 0, "goal_amount": 1, "current_amount": 1})
-        if full_journey:
-            goal = full_journey.get("goal_amount", 1)
-            current = full_journey.get("current_amount", 0)
-            j["progress_percentage"] = round((current / goal) * 100, 1) if goal > 0 else 0
-        else:
-            j["progress_percentage"] = 0
+        goal = j.get("goal_amount", 1)
+        current = j.get("current_amount", 0)
+        j["progress_percentage"] = round((current / goal) * 100, 1) if goal > 0 else 0
+        
+        # Handle show_goal_amount visibility
+        show_goal = j.get("show_goal_amount", False)
+        j["show_goal_amount"] = show_goal
+        if not show_goal:
+            j.pop("goal_amount", None)
         
         if j.get("is_featured"):
             featured.append(j)
