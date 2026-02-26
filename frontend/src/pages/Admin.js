@@ -714,6 +714,324 @@ const Admin = () => {
             </motion.div>
           )}
 
+          {/* Candidaturas Tab */}
+          {activeTab === 'candidaturas' && (
+            <motion.div
+              key="candidaturas"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="bg-white rounded-3xl p-6 shadow-lg border border-stone-100"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-xl font-bold flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-[#FFBE98]" />
+                    Candidaturas de Embaixadores
+                  </h2>
+                  <p className="text-sm text-[#6B6661] mt-1">Aprovar ou rejeitar candidaturas de viagens de embaixadores</p>
+                </div>
+                <div className="flex gap-2">
+                  <select
+                    value={applicationStatusFilter}
+                    onChange={(e) => setApplicationStatusFilter(e.target.value)}
+                    className="px-3 py-2 border border-stone-200 rounded-xl text-sm"
+                  >
+                    <option value="">Todos os estados</option>
+                    <option value="candidatura">Pendentes</option>
+                    <option value="aprovada">Aprovadas</option>
+                    <option value="ativa">Ativas</option>
+                    <option value="financiada">Financiadas</option>
+                    <option value="realizada">Realizadas</option>
+                    <option value="encerrada">Encerradas</option>
+                  </select>
+                  <button
+                    onClick={async () => {
+                      setLoadingApplications(true);
+                      try {
+                        const status = applicationStatusFilter ? `?status=${applicationStatusFilter}` : '';
+                        const res = await axios.get(`${API}/admin/ambassador-journeys${status}`, { headers: getAuthHeaders() });
+                        setAmbassadorApplications(res.data);
+                      } catch (e) {
+                        console.error(e);
+                      }
+                      setLoadingApplications(false);
+                    }}
+                    className="px-4 py-2 bg-[#FFBE98] text-[#2D2A26] rounded-xl text-sm font-medium hover:bg-[#FFAB7D] transition-colors"
+                  >
+                    Carregar
+                  </button>
+                </div>
+              </div>
+
+              {loadingApplications && (
+                <div className="flex items-center justify-center py-12">
+                  <div className="w-8 h-8 border-4 border-[#FFBE98] border-t-transparent rounded-full animate-spin" />
+                </div>
+              )}
+
+              {!loadingApplications && !ambassadorApplications && (
+                <div className="text-center py-12">
+                  <FileText className="w-12 h-12 text-stone-200 mx-auto mb-4" />
+                  <p className="text-[#6B6661] mb-4">Clica em "Carregar" para ver as candidaturas</p>
+                </div>
+              )}
+
+              {ambassadorApplications && (
+                <div className="space-y-6">
+                  {/* Summary by Status */}
+                  <div className="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6">
+                    {Object.entries(ambassadorApplications.by_status || {}).map(([status, items]) => (
+                      <div 
+                        key={status}
+                        onClick={() => setApplicationStatusFilter(status)}
+                        className={`p-3 rounded-xl border cursor-pointer transition-all ${
+                          applicationStatusFilter === status 
+                            ? 'border-[#FFBE98] bg-[#FFBE98]/10' 
+                            : 'border-stone-100 hover:border-stone-200'
+                        }`}
+                      >
+                        <p className="text-2xl font-bold text-[#2D2A26]">{items.length}</p>
+                        <p className="text-xs text-[#6B6661] capitalize">{status}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Applications List */}
+                  {ambassadorApplications.journeys?.length === 0 ? (
+                    <p className="text-center text-[#6B6661] py-8">Nenhuma candidatura encontrada com este filtro.</p>
+                  ) : (
+                    <div className="space-y-4">
+                      {ambassadorApplications.journeys?.map((application) => (
+                        <div 
+                          key={application.journey_id}
+                          className={`p-5 border rounded-2xl transition-all ${
+                            application.status === 'candidatura' 
+                              ? 'border-[#F2C94C] bg-[#F2C94C]/5' 
+                              : application.status === 'aprovada' 
+                              ? 'border-blue-200 bg-blue-50/50'
+                              : application.status === 'ativa'
+                              ? 'border-green-200 bg-green-50/50'
+                              : 'border-stone-100'
+                          }`}
+                        >
+                          <div className="flex items-start gap-4">
+                            {/* Image */}
+                            <img 
+                              src={application.image_url || 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=200'} 
+                              alt={application.name} 
+                              className="w-24 h-24 rounded-xl object-cover flex-shrink-0"
+                            />
+                            
+                            {/* Content */}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-2">
+                                <h3 className="font-bold text-[#2D2A26] truncate">{application.name}</h3>
+                                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                                  application.status === 'candidatura' ? 'bg-[#F2C94C]/20 text-[#F2C94C]' :
+                                  application.status === 'aprovada' ? 'bg-blue-100 text-blue-600' :
+                                  application.status === 'ativa' ? 'bg-green-100 text-green-600' :
+                                  application.status === 'financiada' ? 'bg-purple-100 text-purple-600' :
+                                  application.status === 'realizada' ? 'bg-[#FFBE98]/20 text-[#FFBE98]' :
+                                  'bg-stone-100 text-stone-600'
+                                }`}>
+                                  {application.status}
+                                </span>
+                              </div>
+                              
+                              <p className="text-sm text-[#6B6661] mb-3 line-clamp-2">{application.description}</p>
+                              
+                              <div className="flex flex-wrap gap-4 text-xs text-[#6B6661]">
+                                <span className="flex items-center gap-1">
+                                  <Users className="w-3 h-3" />
+                                  {application.ambassador_name}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <MapPin className="w-3 h-3" />
+                                  {application.country || application.region || 'N/A'}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Target className="w-3 h-3" />
+                                  €{application.goal_amount?.toLocaleString()}
+                                </span>
+                                {application.target_date && (
+                                  <span className="flex items-center gap-1">
+                                    <Calendar className="w-3 h-3" />
+                                    {new Date(application.target_date).toLocaleDateString('pt-PT')}
+                                  </span>
+                                )}
+                                <span className="flex items-center gap-1">
+                                  <Clock className="w-3 h-3" />
+                                  {new Date(application.created_at).toLocaleDateString('pt-PT')}
+                                </span>
+                              </div>
+
+                              {/* Application Message */}
+                              {application.application_message && (
+                                <div className="mt-3 p-3 bg-stone-50 rounded-lg">
+                                  <p className="text-xs text-[#6B6661] font-medium mb-1">Mensagem do embaixador:</p>
+                                  <p className="text-sm text-[#2D2A26] italic">"{application.application_message}"</p>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Actions */}
+                            <div className="flex flex-col gap-2 flex-shrink-0">
+                              {application.status === 'candidatura' && (
+                                <>
+                                  <button
+                                    onClick={async () => {
+                                      try {
+                                        await axios.put(
+                                          `${API}/admin/ambassador-journeys/${application.journey_id}/status`,
+                                          { status: 'aprovada' },
+                                          { headers: getAuthHeaders() }
+                                        );
+                                        setAmbassadorApplications(prev => ({
+                                          ...prev,
+                                          journeys: prev.journeys.map(j => 
+                                            j.journey_id === application.journey_id 
+                                              ? {...j, status: 'aprovada'} 
+                                              : j
+                                          ),
+                                          by_status: {
+                                            ...prev.by_status,
+                                            candidatura: prev.by_status.candidatura.filter(j => j.journey_id !== application.journey_id),
+                                            aprovada: [...(prev.by_status.aprovada || []), {...application, status: 'aprovada'}]
+                                          }
+                                        }));
+                                      } catch (e) {
+                                        console.error(e);
+                                        alert('Erro ao aprovar candidatura');
+                                      }
+                                    }}
+                                    className="px-4 py-2 bg-green-100 text-green-600 rounded-lg text-sm font-medium hover:bg-green-200 transition-colors flex items-center gap-1"
+                                    data-testid={`approve-${application.journey_id}`}
+                                  >
+                                    <CheckCircle className="w-4 h-4" />
+                                    Aprovar
+                                  </button>
+                                  <button
+                                    onClick={async () => {
+                                      if (!window.confirm('Tem certeza que deseja rejeitar esta candidatura?')) return;
+                                      try {
+                                        await axios.put(
+                                          `${API}/admin/ambassador-journeys/${application.journey_id}/status`,
+                                          { status: 'encerrada', admin_notes: 'Candidatura rejeitada pelo admin' },
+                                          { headers: getAuthHeaders() }
+                                        );
+                                        setAmbassadorApplications(prev => ({
+                                          ...prev,
+                                          journeys: prev.journeys.map(j => 
+                                            j.journey_id === application.journey_id 
+                                              ? {...j, status: 'encerrada'} 
+                                              : j
+                                          ),
+                                          by_status: {
+                                            ...prev.by_status,
+                                            candidatura: prev.by_status.candidatura.filter(j => j.journey_id !== application.journey_id),
+                                            encerrada: [...(prev.by_status.encerrada || []), {...application, status: 'encerrada'}]
+                                          }
+                                        }));
+                                      } catch (e) {
+                                        console.error(e);
+                                        alert('Erro ao rejeitar candidatura');
+                                      }
+                                    }}
+                                    className="px-4 py-2 bg-red-100 text-red-600 rounded-lg text-sm font-medium hover:bg-red-200 transition-colors flex items-center gap-1"
+                                  >
+                                    <XCircle className="w-4 h-4" />
+                                    Rejeitar
+                                  </button>
+                                </>
+                              )}
+                              
+                              {application.status === 'aprovada' && (
+                                <button
+                                  onClick={async () => {
+                                    try {
+                                      await axios.put(
+                                        `${API}/admin/ambassador-journeys/${application.journey_id}/status`,
+                                        { status: 'ativa' },
+                                        { headers: getAuthHeaders() }
+                                      );
+                                      setAmbassadorApplications(prev => ({
+                                        ...prev,
+                                        journeys: prev.journeys.map(j => 
+                                          j.journey_id === application.journey_id 
+                                            ? {...j, status: 'ativa'} 
+                                            : j
+                                        ),
+                                        by_status: {
+                                          ...prev.by_status,
+                                          aprovada: prev.by_status.aprovada.filter(j => j.journey_id !== application.journey_id),
+                                          ativa: [...(prev.by_status.ativa || []), {...application, status: 'ativa'}]
+                                        }
+                                      }));
+                                    } catch (e) {
+                                      console.error(e);
+                                      alert('Erro ao ativar viagem');
+                                    }
+                                  }}
+                                  className="px-4 py-2 bg-blue-100 text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-200 transition-colors flex items-center gap-1"
+                                  data-testid={`activate-${application.journey_id}`}
+                                >
+                                  <Eye className="w-4 h-4" />
+                                  Ativar
+                                </button>
+                              )}
+
+                              {application.status === 'ativa' && (
+                                <div className="text-center">
+                                  <div className="text-xs text-[#6B6661] mb-1">Progresso</div>
+                                  <div className="text-lg font-bold text-[#2D2A26]">
+                                    {((application.current_amount / application.goal_amount) * 100).toFixed(0)}%
+                                  </div>
+                                  <div className="text-xs text-[#6B6661]">
+                                    €{application.current_amount?.toLocaleString()} / €{application.goal_amount?.toLocaleString()}
+                                  </div>
+                                </div>
+                              )}
+
+                              {application.status === 'financiada' && (
+                                <button
+                                  onClick={async () => {
+                                    try {
+                                      await axios.put(
+                                        `${API}/admin/ambassador-journeys/${application.journey_id}/status`,
+                                        { status: 'realizada' },
+                                        { headers: getAuthHeaders() }
+                                      );
+                                      setAmbassadorApplications(prev => ({
+                                        ...prev,
+                                        journeys: prev.journeys.map(j => 
+                                          j.journey_id === application.journey_id 
+                                            ? {...j, status: 'realizada'} 
+                                            : j
+                                        )
+                                      }));
+                                    } catch (e) {
+                                      console.error(e);
+                                      alert('Erro ao marcar como realizada');
+                                    }
+                                  }}
+                                  className="px-4 py-2 bg-[#FFBE98] text-white rounded-lg text-sm font-medium hover:bg-[#E6A07C] transition-colors flex items-center gap-1"
+                                >
+                                  <CheckCircle className="w-4 h-4" />
+                                  Marcar Realizada
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </motion.div>
+          )}
+
           {/* Visibility Tab */}
           {activeTab === 'visibility' && (
             <motion.div
