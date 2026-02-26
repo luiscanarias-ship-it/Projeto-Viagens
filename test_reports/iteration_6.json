@@ -1,0 +1,98 @@
+{
+  "summary": "Completed testing of Admin Candidaturas and Visibilidade features for 4Luis crowdfunding platform. All 18 backend API tests passed (100%). Frontend admin tabs working correctly with all action buttons functional.",
+  
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+
+  "passed_tests": [
+    "Backend: Admin login with correct credentials (admin@4luis.com / admin_password)",
+    "Backend: GET /api/admin/ambassador-journeys - list all ambassador applications",
+    "Backend: GET /api/admin/ambassador-journeys?status=candidatura - filter by status",
+    "Backend: Filter ambassador journeys by all statuses (candidatura, aprovada, ativa, financiada, realizada, encerrada)",
+    "Backend: GET /api/admin/journeys-visibility - list journeys with visibility data",
+    "Backend: GET /api/admin/journeys-visibility?status=ativa - filter by status",
+    "Backend: POST /api/admin/recalculate-all-visibility - recalculate scores",
+    "Backend: POST /api/admin/journeys/{id}/update-visibility - feature journey (is_featured: true)",
+    "Backend: POST /api/admin/journeys/{id}/update-visibility - boost +10",
+    "Backend: POST /api/admin/journeys/{id}/update-visibility - boost -10",
+    "Backend: POST /api/admin/journeys/{id}/update-visibility - hide from listings",
+    "Backend: POST /api/admin/journeys/{id}/update-visibility - unhide",
+    "Backend: POST /api/admin/journeys/{id}/update-visibility - reset visibility",
+    "Backend: PUT /api/admin/ambassador-journeys/{id}/status - validates journey existence",
+    "Backend: PUT /api/admin/ambassador-journeys/{id}/status - validates status values",
+    "Backend: Admin endpoints require authentication (401 for unauthenticated)",
+    "Frontend: Admin page loads with all 8 tabs",
+    "Frontend: Candidaturas tab - displays title, subtitle, status filter, Carregar button",
+    "Frontend: Candidaturas tab - status summary cards (candidatura, aprovada, ativa, financiada, realizada, encerrada)",
+    "Frontend: Visibilidade tab - displays title, Recalcular Scores button",
+    "Frontend: Visibilidade tab - score criteria legend displayed",
+    "Frontend: Visibilidade tab - journey list with scores, boost values, progress percentages",
+    "Frontend: Visibilidade tab - Destacar button works (toggles to Remover Destaque)",
+    "Frontend: Visibilidade tab - +10/-10 boost buttons present and functional",
+    "Frontend: Visibilidade tab - Ocultar button present"
+  ],
+
+  "test_report_links": [
+    "/app/backend/tests/test_admin_candidaturas_visibilidade.py",
+    "/app/test_reports/pytest/admin_candidaturas_visibility_results.xml"
+  ],
+  
+  "action_items": [],
+  
+  "critical_code_review_comments": [
+    "All requested features are implemented and working correctly",
+    "Candidaturas tab properly filters ambassador journeys by status",
+    "Visibilidade tab implements all visibility controls (feature, boost, hide)",
+    "Recalculate scores functionality works as expected"
+  ],
+  
+  "updated_files": [
+    "/app/backend/tests/test_admin_candidaturas_visibilidade.py"
+  ],
+  
+  "success_rate": {
+    "backend": "100% (18/18 tests passed)",
+    "frontend": "100% (all tabs and actions working)"
+  },
+  
+  "test_credentials": {
+    "admin": "admin@4luis.com / admin_password"
+  },
+  
+  "seed_data_creation": "None - tested with existing journeys (China, Paris, Japão, etc.)",
+  
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  
+  "context_for_next_testing_agent": "Admin Candidaturas and Visibilidade features fully implemented. No ambassador applications exist currently (0 in all status categories). 6 journeys exist for visibility management. Featured 'China' journey during testing - may want to reset. Admin credentials: admin@4luis.com / admin_password (NOT Admin1 as in code)",
+  
+  "mocked_apis": {
+    "has_mocked_apis": false,
+    "mocked_apis_list": []
+  },
+
+  "features_verified": {
+    "candidaturas_tab": {
+      "list_applications": "Working - shows ambassador journeys grouped by status",
+      "status_filter": "Working - dropdown with all status options",
+      "aprovar_button": "Present - shown for candidatura status applications",
+      "rejeitar_button": "Present - shown for candidatura status applications", 
+      "ativar_button": "Present - shown for aprovada status applications"
+    },
+    "visibilidade_tab": {
+      "list_journeys": "Working - shows all journeys with visibility data",
+      "destacar_button": "Working - toggles featured status",
+      "boost_controls": "Working - +10/-10 buttons update visibility boost",
+      "ocultar_button": "Working - toggles hide_from_listings",
+      "recalcular_scores": "Working - recalculates visibility scores for all journeys"
+    }
+  }
+}
