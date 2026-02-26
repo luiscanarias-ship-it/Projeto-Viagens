@@ -3301,35 +3301,12 @@ async def check_and_update_journey_funding_status(journey_id: str):
                 "created_at": datetime.now(timezone.utc).isoformat()
             })
             
-            # Send email to ambassador
+            # Send emails to ambassador and admin
             ambassador = await db.users.find_one({"user_id": ambassador_user_id}, {"_id": 0})
-            if ambassador and ambassador.get("email"):
-                await queue_email(
-                    to_email=ambassador["email"],
-                    to_name=ambassador.get("name", "Embaixador"),
-                    subject="Parabéns! A tua viagem foi financiada! - 4Luis",
-                    template="journey_funded",
-                    data={
-                        "ambassador_name": ambassador.get("name"),
-                        "journey_name": journey.get("name"),
-                        "journey_id": journey_id,
-                        "amount_raised": current_amount
-                    }
-                )
-        
-        # Also send email to admin
-        await queue_email(
-            to_email="admin@4luis.com",
-            to_name="Admin 4Luis",
-            subject=f"Viagem Financiada: {journey.get('name')}",
-            template="admin_journey_funded",
-            data={
-                "journey_name": journey.get("name"),
-                "journey_id": journey_id,
-                "amount_raised": current_amount,
-                "ambassador_name": journey.get("ambassador_name", "N/A")
-            }
-        )
+            await send_journey_funded_emails(journey, ambassador, current_amount)
+        else:
+            # Just send email to admin for non-ambassador journeys
+            await send_journey_funded_emails(journey, None, current_amount)
         
         logger.info(f"Journey {journey_id} automatically moved to 'financiada' status")
         return "financiada"
