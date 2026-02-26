@@ -3651,6 +3651,72 @@ async def get_ambassador_journeys(request: Request, status: Optional[str] = None
         "journeys": journeys
     }
 
+@api_router.get("/admin/ambassador-journeys/{journey_id}/details")
+async def get_ambassador_journey_details(journey_id: str, request: Request):
+    """Get full details of an ambassador journey application including ambassador history - Admin only"""
+    await require_admin(request)
+    
+    journey = await db.journeys.find_one({"journey_id": journey_id}, {"_id": 0})
+    if not journey:
+        raise HTTPException(status_code=404, detail="Candidatura não encontrada")
+    
+    # Get ambassador details
+    ambassador = None
+    ambassador_history = {
+        "contributions": [],
+        "total_contributed": 0,
+        "referrals": [],
+        "valid_referrals_count": 0,
+        "journeys_created": []
+    }
+    
+    if journey.get("ambassador_user_id"):
+        ambassador = await db.users.find_one(
+            {"user_id": journey["ambassador_user_id"]},
+            {"_id": 0, "password_hash": 0}
+        )
+        
+        if ambassador:
+            # Get ambassador's contributions
+            contributions = await db.contributions.find(
+                {"user_id": journey["ambassador_user_id"], "status": {"$in": ["confirmed", "completed"]}},
+                {"_id": 0}
+            ).sort("created_at", -1).to_list(50)
+            
+            ambassador_history["contributions"] = contributions
+            ambassador_history["total_contributed"] = sum(c.get("amount", 0) for c in contributions)
+            
+            # Get ambassador's referrals
+            referrals = await db.users.find(
+                {"sponsor_id": journey["ambassador_user_id"]},
+                {"_id": 0, "user_id": 1, "name": 1, "email": 1, "registered_at": 1}
+            ).sort("registered_at", -1).to_list(50)
+            
+            # Check which referrals have contributed
+            for ref in referrals:
+                ref_contributions = await db.contributions.count_documents({
+                    "user_id": ref["user_id"],
+                    "status": {"$in": ["confirmed", "completed"]}
+                })
+                ref["has_contributed"] = ref_contributions > 0
+            
+            ambassador_history["referrals"] = referrals
+            ambassador_history["valid_referrals_count"] = ambassador.get("valid_referrals_count", 0)
+            
+            # Get other journeys created by this ambassador
+            other_journeys = await db.journeys.find(
+                {"ambassador_user_id": journey["ambassador_user_id"], "journey_id": {"$ne": journey_id}},
+                {"_id": 0, "journey_id": 1, "name": 1, "status": 1, "current_amount": 1, "goal_amount": 1, "created_at": 1}
+            ).sort("created_at", -1).to_list(10)
+            
+            ambassador_history["journeys_created"] = other_journeys
+    
+    return {
+        "journey": journey,
+        "ambassador": ambassador,
+        "ambassador_history": ambassador_history
+    }
+
 @api_router.put("/admin/ambassador-journeys/{journey_id}/status")
 async def update_ambassador_journey_status(journey_id: str, request: Request):
     """Update ambassador journey status - Admin only"""
