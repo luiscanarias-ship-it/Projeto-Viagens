@@ -825,6 +825,11 @@ const Admin = () => {
                               {!journey.is_active && (
                                 <span className="ml-2 bg-red-100 text-red-600 px-2 py-0.5 rounded">Inativa</span>
                               )}
+                              {journey.show_goal_amount ? (
+                                <span className="ml-2 bg-green-100 text-green-600 px-2 py-0.5 rounded text-xs">€ Público</span>
+                              ) : (
+                                <span className="ml-2 bg-stone-100 text-stone-500 px-2 py-0.5 rounded text-xs">% Apenas</span>
+                              )}
                             </p>
                           </div>
                         </div>
