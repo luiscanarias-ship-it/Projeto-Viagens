@@ -47,6 +47,16 @@ const Dashboard = () => {
         
         setDashboardData(statsRes.data);
         setProfile(profileRes.data);
+        
+        // Fetch ambassador journeys if user is ambassador
+        if (profileRes.data?.level === 'embaixador') {
+          try {
+            const journeysRes = await axios.get(`${API}/ambassador/my-journeys`, { headers, withCredentials: true });
+            setMyJourneys(journeysRes.data.journeys || []);
+          } catch (e) {
+            console.log('No ambassador journeys');
+          }
+        }
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
       } finally {
