@@ -186,7 +186,6 @@ Valores fixos: €10, €20, €50, €100, €200, €500, €1000
 - ✅ Sonhos Realizados: organizados por país, fotos/histórias, conteúdo curado
 - ✅ Lifecycle completo: candidatura → aprovada → ativa → financiada → realizada → encerrada
 - ✅ Transição automática para "financiada" quando objetivo atingido
-- ✅ Sistema de emails mockado com templates (contribution_confirmed, ambassador_unlocked, journey_funded)
 - ✅ Migração de status 'active' → 'ativa' para consistência
 - ✅ Endpoint para definir viagem principal
 - ✅ **Onboarding guiado após registo (4 ecrãs)**:
@@ -194,6 +193,12 @@ Valores fixos: €10, €20, €50, €100, €200, €500, €1000
   - Ecrã 2: Progressão (contribuir → convidar → embaixador → viagem própria)
   - Ecrã 3: Impacto da comunidade (100%, 0% comissões, ∞ sonhos)
   - Ecrã 4: Escolha de ação inicial (apoiar viagem, explorar, planear)
+- ✅ **Emails comportamentais com Resend** (domínio 4luis.com verificado):
+  - Email 1: Confirmação de contribuição ao contribuidor (HTML com branding)
+  - Email 2a: Notificação ao sponsor quando convidado contribui (progresso Embaixador)
+  - Email 2b: Notificação interna ao admin sobre contribuição via referral
+  - Email 3: Parabéns ao novo Embaixador com benefícios desbloqueados
+  - Email 4: Viagem financiada (ao embaixador + admin)
 
 ### 2026-02-25 (Sessão 2)
 - ✅ Feed de contribuições públicas com nome/alias, valor, mensagem
