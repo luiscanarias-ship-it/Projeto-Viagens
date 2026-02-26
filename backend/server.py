@@ -154,6 +154,13 @@ class Journey(BaseModel):
     # Story & photos for realized journeys
     story: Optional[str] = None  # Story text after journey is realized
     photos: Optional[List[str]] = None  # List of photo URLs
+    # Visibility & Featuring fields
+    is_featured: bool = False  # Manually featured by admin
+    featured_at: Optional[str] = None  # When it was featured
+    featured_order: int = 0  # Order in featured section (lower = higher priority)
+    visibility_score: float = 0.0  # Calculated score for sorting
+    visibility_boost: float = 0.0  # Manual boost by admin (-100 to +100)
+    hide_from_listings: bool = False  # Admin can hide journey from listings
     # Admin fields
     owner_user_id: Optional[str] = None  # Admin who created/approved the journey
     admin_notes: Optional[str] = None
