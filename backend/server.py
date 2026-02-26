@@ -2511,6 +2511,38 @@ async def get_email_queue(request: Request, status: Optional[str] = None, limit:
         }
     }
 
+@api_router.post("/admin/test-email")
+async def test_email_send(request: Request):
+    """Test email sending - Admin only"""
+    await require_admin(request)
+    data = await request.json()
+    
+    test_email = data.get("email", ADMIN_EMAIL)
+    
+    # Create a simple test email
+    content = f"""
+    <h1 style="margin: 0 0 16px 0; color: #2D2A26; font-size: 24px;">Teste de Email 4Luis</h1>
+    <p style="margin: 0 0 24px 0; color: #6B6661; font-size: 16px; line-height: 1.6;">
+        Este é um email de teste para verificar a integração do Resend.
+    </p>
+    <div style="background-color: #E6F4F1; border-radius: 12px; padding: 24px; text-align: center;">
+        <p style="margin: 0; color: #2D2A26;">Timestamp: {datetime.now(timezone.utc).isoformat()}</p>
+    </div>
+    """
+    
+    html = get_email_base_template(content, "Teste Email - 4Luis")
+    
+    result = await send_email_resend(
+        to_email=test_email,
+        subject="🧪 Teste de Email - 4Luis",
+        html_content=html
+    )
+    
+    return {
+        "message": f"Email de teste enviado para {test_email}",
+        "result": result
+    }
+
 @api_router.get("/admin/sponsors-report")
 async def get_sponsors_report(request: Request):
     """Get report of sponsors who have 3+ successful referrals - Admin only"""
