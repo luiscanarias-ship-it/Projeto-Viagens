@@ -3771,6 +3771,12 @@ async def update_ambassador_journey_status(journey_id: str, request: Request):
             update_data["status"] = "ativa"
             update_data["is_active"] = True
             update_data["activated_at"] = datetime.now(timezone.utc).isoformat()
+            # Explicitly set visibility fields to default values (no automatic featuring or boost)
+            update_data["is_featured"] = False
+            update_data["visibility_boost"] = 0.0
+            update_data["hide_from_listings"] = False
+            # Initial visibility score for new journeys (newness bonus only)
+            update_data["visibility_score"] = 10.0
             new_status = "ativa"  # Update for email and notification
             
     elif new_status == "ajustes_pedidos":
