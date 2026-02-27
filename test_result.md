@@ -101,3 +101,115 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: "Testa o fluxo de pagamento Stripe na aplicação 4Luis. O utilizador reporta 'Network error' quando clica em 'Cartão'."
+
+backend:
+  - task: "Stripe Config Endpoint"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "GET /api/stripe/config returns publishable_key correctly. Response: {'publishable_key': 'pk_test_51T5VdSDh1LF...'}"
+
+  - task: "Stripe Contribution Creation"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "POST /api/contributions/create with payment_method='stripe' successfully creates PaymentIntent and returns client_secret and payment_intent_id"
+
+  - task: "Payment Info Endpoint"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "GET /api/contributions/payment-info returns all payment methods including mbway, paypal, revolut, wise, crypto"
+
+  - task: "Journey Endpoints for China Journey"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "All journey endpoints working: GET /api/journeys/journey_china001, progress, contributions, travel-resources"
+
+frontend:
+  - task: "Stripe Payment Form Integration"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/StripePaymentForm.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "FIXED: JavaScript error in JourneyDetail.js - undefined setShowStripeForm function calls removed"
+      - working: true
+        agent: "testing"
+        comment: "Stripe Payment Element integration working correctly after fix. Successfully loads Stripe config and creates PaymentIntent"
+
+  - task: "Payment Modal Flow"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/JourneyDetail.js"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "user"
+        comment: "User reported 'Network error' when clicking 'Cartão' payment method"
+      - working: true
+        agent: "testing"
+        comment: "FIXED: Removed undefined setShowStripeForm calls in handleStripeSuccess and handleStripeCancel functions. Payment modal now works correctly"
+
+  - task: "Homepage China Journey Display"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/Home.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "Homepage correctly loads and displays China journey via /homepage/main-journey endpoint"
+
+metadata:
+  created_by: "testing_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Stripe Payment Form Integration"
+    - "Payment Modal Flow"
+  stuck_tasks: []
+  test_all: true
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "testing"
+    message: "Comprehensive Stripe payment flow testing completed. Found and fixed critical JavaScript error in JourneyDetail.js that was causing 'Network error'. All backend Stripe endpoints working correctly. Frontend payment flow now functional."
