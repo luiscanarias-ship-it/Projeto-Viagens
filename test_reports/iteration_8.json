@@ -1,0 +1,111 @@
+{
+  "summary": "Completed comprehensive testing of show_goal_amount visibility control feature for 4Luis platform. All 9 backend API tests passed (100%). Frontend UI verified - Admin checkbox and badges working correctly. Fixed missing show_goal_amount field in JourneyUpdate model.",
+
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+
+  "passed_tests": [
+    "Backend: Main journey hides goal_amount when show_goal_amount=false (only % visible)",
+    "Backend: PUT /api/admin/journeys/{id}/show-goal requires admin authentication",
+    "Backend: PUT /api/admin/journeys/{id}/show-goal toggles flag correctly",
+    "Backend: PUT /api/admin/journeys/{id}/show-goal validates required parameter",
+    "Backend: PUT /api/admin/journeys/{id}/show-goal returns 404 for invalid journey",
+    "Backend: GET /api/homepage/ambassador-journeys respects show_goal_amount per journey",
+    "Backend: Admin GET /api/admin/journeys includes show_goal_amount field",
+    "Backend: General update PUT /api/admin/journeys/{id} can change show_goal_amount",
+    "Backend: New journeys default to show_goal_amount=false",
+    "Frontend: Homepage main-journey shows only percentage when show_goal_amount=false",
+    "Frontend: Homepage main-journey shows €X / €Y when show_goal_amount=true",
+    "Frontend: Admin journeys list shows badge '% Apenas' for show_goal_amount=false",
+    "Frontend: Admin journeys list shows badge '€ Público' for show_goal_amount=true",
+    "Frontend: Admin edit mode shows checkbox 'Mostrar objetivo €'",
+    "Frontend: Admin checkbox toggle persists and updates homepage display"
+  ],
+
+  "test_report_links": [
+    "/app/backend/tests/test_show_goal_amount.py",
+    "/app/test_reports/pytest/show_goal_amount_results.xml"
+  ],
+
+  "action_items": [],
+
+  "critical_code_review_comments": [
+    "FIXED: Added show_goal_amount to JourneyUpdate model (was missing, preventing Admin UI checkbox from working)",
+    "All show_goal_amount features are now fully functional",
+    "Some older journeys (Japão, Vietname, Paris, Londres, Nova Iorque) don't have show_goal_amount field set in DB - they default to false correctly",
+    "Dedicated endpoint PUT /api/admin/journeys/{id}/show-goal works correctly",
+    "General update endpoint PUT /api/admin/journeys/{id} now supports show_goal_amount"
+  ],
+
+  "updated_files": [
+    "/app/backend/server.py (added show_goal_amount to JourneyUpdate model at line 199)",
+    "/app/backend/tests/test_show_goal_amount.py (new test file)"
+  ],
+
+  "success_rate": {
+    "backend": "100% (9/9 tests passed)",
+    "frontend": "100% (all UI elements and flows working)"
+  },
+
+  "test_credentials": {
+    "admin": "admin@4luis.com / admin_password"
+  },
+
+  "seed_data_used": "Main journey 'China' (journey_china001) with show_goal_amount=false",
+
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+
+  "context_for_next_testing_agent": "show_goal_amount visibility control fully tested and working. Fix applied: added show_goal_amount to JourneyUpdate model. Main journey 'China' has show_goal_amount=false (default). Test journey 'Aventura em Bali' has show_goal_amount=true. Admin credentials: admin@4luis.com / admin_password",
+
+  "mocked_apis": {
+    "has_mocked_apis": false,
+    "mocked_apis_list": []
+  },
+
+  "features_verified": {
+    "feature_1_default_false": {
+      "description": "Campo show_goal_amount na viagem - default false",
+      "status": "WORKING",
+      "details": "New journeys created via admin have show_goal_amount=false by default"
+    },
+    "feature_2_homepage_percentage_only": {
+      "description": "Homepage main-journey mostra apenas percentagem quando show_goal_amount=false",
+      "status": "WORKING",
+      "details": "Progress bar shows 'Progresso 36%' without €X / €Y"
+    },
+    "feature_3_homepage_euro_format": {
+      "description": "Homepage main-journey mostra €X / €Y quando show_goal_amount=true",
+      "status": "WORKING",
+      "details": "Progress bar shows '€1,800 / €5,000 36%' when enabled"
+    },
+    "feature_4_ambassador_journeys": {
+      "description": "Viagens de embaixadores respeitam show_goal_amount",
+      "status": "WORKING",
+      "details": "Each ambassador journey's show_goal_amount controls whether goal_amount is included in response"
+    },
+    "feature_5_admin_checkbox": {
+      "description": "Admin pode editar show_goal_amount via checkbox 'Mostrar objetivo €'",
+      "status": "WORKING",
+      "details": "Checkbox visible in edit mode, toggles correctly, persists on save"
+    },
+    "feature_6_dedicated_endpoint": {
+      "description": "Endpoint PUT /api/admin/journeys/{journey_id}/show-goal funciona",
+      "status": "WORKING",
+      "details": "Returns success message, updates database, validates parameters"
+    },
+    "feature_7_admin_badges": {
+      "description": "Lista de viagens no Admin mostra badge '% Apenas' ou '€ Público'",
+      "status": "WORKING",
+      "details": "Green badge '€ Público' when true, gray badge '% Apenas' when false"
+    }
+  }
+}
