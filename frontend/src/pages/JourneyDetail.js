@@ -873,14 +873,18 @@ const JourneyDetail = () => {
                             if (method.id !== 'crypto') {
                               setSelectedCrypto(null);
                             }
-                            // Auto scroll when Stripe is selected
+                            // Auto scroll when Stripe is selected - scroll to bottom after form loads
                             if (method.id === 'stripe') {
+                              // Initial scroll
                               setTimeout(() => {
                                 const modal = document.querySelector('[data-testid="payment-modal"]');
-                                if (modal) {
-                                  modal.scrollTo({ top: modal.scrollHeight, behavior: 'smooth' });
-                                }
-                              }, 300);
+                                if (modal) modal.scrollTo({ top: modal.scrollHeight, behavior: 'smooth' });
+                              }, 500);
+                              // Second scroll after Stripe loads
+                              setTimeout(() => {
+                                const modal = document.querySelector('[data-testid="payment-modal"]');
+                                if (modal) modal.scrollTo({ top: modal.scrollHeight, behavior: 'smooth' });
+                              }, 1500);
                             }
                           }}
                           className={`w-full p-4 rounded-xl border-2 transition-all flex items-center gap-4 ${
