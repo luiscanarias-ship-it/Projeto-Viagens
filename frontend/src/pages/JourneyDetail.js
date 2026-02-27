@@ -93,6 +93,7 @@ const JourneyDetail = () => {
   const [showAiPlanner, setShowAiPlanner] = useState(false);
   
   const sponsorCode = searchParams.get('sponsor');
+  const openPayment = searchParams.get('pay') === 'true';
 
   useEffect(() => {
     const fetchData = async () => {
@@ -109,6 +110,11 @@ const JourneyDetail = () => {
         setTravelResources(resourcesRes.data);
         setProgress(progressRes.data);
         setContributions(contribRes.data.contributions || []);
+        
+        // Open payment modal if ?pay=true in URL
+        if (openPayment) {
+          setShowPayment(true);
+        }
       } catch (error) {
         console.error('Error fetching journey:', error);
         navigate('/');
@@ -118,7 +124,7 @@ const JourneyDetail = () => {
     };
 
     fetchData();
-  }, [id, navigate]);
+  }, [id, navigate, openPayment]);
 
   const handleSupport = () => {
     setShowPayment(true);
