@@ -157,16 +157,17 @@ const StripePaymentForm = ({
         if (response.data.client_secret) {
           setClientSecret(response.data.client_secret);
           setContributionId(response.data.contribution_id);
-          // Scroll modal to bottom to show pay button - multiple attempts
+          // Scroll modal to bottom to show pay button - multiple attempts with longer delay
           const scrollToBottom = () => {
             const modal = document.querySelector('[data-testid="payment-modal"]');
             if (modal) {
               modal.scrollTo({ top: modal.scrollHeight, behavior: 'smooth' });
             }
           };
-          setTimeout(scrollToBottom, 800);
-          setTimeout(scrollToBottom, 1500);
-          setTimeout(scrollToBottom, 2500);
+          setTimeout(scrollToBottom, 500);
+          setTimeout(scrollToBottom, 1200);
+          setTimeout(scrollToBottom, 2000);
+          setTimeout(scrollToBottom, 3000);
         } else {
           throw new Error('Erro ao criar sessão de pagamento');
         }
