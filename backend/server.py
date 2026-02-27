@@ -1166,68 +1166,58 @@ async def create_contribution(request: Request):
     
     contribution_id = f"contrib_{uuid.uuid4().hex[:12]}"
     
-    # For Stripe payments, create checkout session
+    # For Stripe payments, create PaymentIntent (embedded Payment Element)
     if payment_method == "stripe":
-        from emergentintegrations.payments.stripe.checkout import (
-            StripeCheckout, CheckoutSessionRequest, CheckoutSessionResponse
-        )
-        
         api_key = os.environ.get("STRIPE_API_KEY")
         if not api_key or api_key == 'sk_test_emergent':
             raise HTTPException(status_code=500, detail="Stripe não configurado")
         
-        origin_url = data.get("origin_url", "https://journey-curator-2.preview.emergentagent.com")
-        host_url = str(request.base_url).rstrip("/")
-        webhook_url = f"{host_url}/api/webhook/stripe"
+        stripe.api_key = api_key
         
-        stripe_checkout = StripeCheckout(api_key=api_key, webhook_url=webhook_url)
-        
-        success_url = f"{origin_url}/payment-success?session_id={{CHECKOUT_SESSION_ID}}"
-        cancel_url = f"{origin_url}/journey/{journey_id}"
-        
-        checkout_request = CheckoutSessionRequest(
-            amount=float(amount),
-            currency="eur",
-            success_url=success_url,
-            cancel_url=cancel_url,
-            metadata={
-                "journey_id": journey_id,
-                "user_id": user_id or "anonymous",
+        try:
+            # Create PaymentIntent
+            payment_intent = stripe.PaymentIntent.create(
+                amount=int(amount * 100),  # Stripe uses cents
+                currency="eur",
+                automatic_payment_methods={"enabled": True},
+                metadata={
+                    "journey_id": journey_id,
+                    "user_id": user_id or "anonymous",
+                    "contribution_id": contribution_id,
+                    "sponsor_code": sponsor_code or "",
+                    "source": "4luis_platform"
+                }
+            )
+            
+            # Create contribution record
+            contribution_doc = {
                 "contribution_id": contribution_id,
-                "sponsor_code": sponsor_code or "",
-                "source": "4luis_platform"
+                "journey_id": journey_id,
+                "user_id": user_id,
+                "amount": amount,
+                "currency": "EUR",
+                "payment_method": "stripe",
+                "status": "pending",
+                "is_main_trip": True,
+                "sponsor_link_id": sponsor_code,
+                "payment_intent_id": payment_intent.id,
+                "contributor_name": contributor_name or (user.name if user else None),
+                "contributor_email": contributor_email or (user.email if user else None),
+                "public_message": public_message,
+                "show_name": show_name,
+                "created_at": datetime.now(timezone.utc).isoformat()
             }
-        )
-        
-        session: CheckoutSessionResponse = await stripe_checkout.create_checkout_session(checkout_request)
-        session_id = session.session_id
-        
-        # Create contribution record
-        contribution_doc = {
-            "contribution_id": contribution_id,
-            "journey_id": journey_id,
-            "user_id": user_id,
-            "amount": amount,
-            "currency": "EUR",
-            "payment_method": "stripe",
-            "status": "pending",
-            "is_main_trip": True,
-            "sponsor_link_id": sponsor_code,
-            "session_id": session_id,
-            "contributor_name": contributor_name or (user.name if user else None),
-            "contributor_email": contributor_email or (user.email if user else None),
-            "public_message": public_message,
-            "show_name": show_name,
-            "created_at": datetime.now(timezone.utc).isoformat()
-        }
-        await db.contributions.insert_one(contribution_doc)
-        
-        return {
-            "contribution_id": contribution_id,
-            "payment_method": "stripe",
-            "checkout_url": session.url,
-            "session_id": session_id
-        }
+            await db.contributions.insert_one(contribution_doc)
+            
+            return {
+                "contribution_id": contribution_id,
+                "payment_method": "stripe",
+                "client_secret": payment_intent.client_secret,
+                "payment_intent_id": payment_intent.id
+            }
+        except stripe.error.StripeError as e:
+            logger.error(f"Stripe PaymentIntent error: {e}")
+            raise HTTPException(status_code=500, detail=f"Erro Stripe: {str(e)}")
     
     # For direct payments (MBWay, PayPal, Revolut, Wise, Crypto)
     else:
