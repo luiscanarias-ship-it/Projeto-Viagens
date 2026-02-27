@@ -16,7 +16,7 @@ const defaultTexts = {
   
   // Hero
   "hero.tagline": "Aqui, cada gesto ilumina um caminho.",
-  "hero.subtitle": "Uma plataforma para quem acredita que os sonhos se podem concretizar.",
+  "hero.subtitle": "A plataforma de CrowdDreaming para quem acredita que os sonhos se podem concretizar.",
   "hero.cta": "Descobrir Viagens",
   
   // Journeys
