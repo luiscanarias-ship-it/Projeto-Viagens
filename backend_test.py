@@ -473,6 +473,7 @@ class FourLuisAPITester:
         self.test_auth_endpoints()
         self.test_admin_endpoints()
         self.test_journey_endpoints()
+        self.test_stripe_payment_elements()  # New Stripe Payment Element tests
         self.test_payment_endpoints()
         self.test_translation_endpoint()
         self.test_new_features()
