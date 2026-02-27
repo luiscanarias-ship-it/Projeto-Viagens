@@ -927,7 +927,6 @@ const JourneyDetail = () => {
                       <span className="ml-auto text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">Auto</span>
                     </div>
                   )}
-                  </div>
                 </motion.div>
               )}
 
