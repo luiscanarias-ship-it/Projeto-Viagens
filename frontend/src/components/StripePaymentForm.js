@@ -157,13 +157,13 @@ const StripePaymentForm = ({
         if (response.data.client_secret) {
           setClientSecret(response.data.client_secret);
           setContributionId(response.data.contribution_id);
-          // Scroll to show pay button after Stripe loads
+          // Scroll modal to show pay button after Stripe form renders
           setTimeout(() => {
-            const payBtn = document.querySelector('[data-testid="stripe-pay-btn"]');
-            if (payBtn) {
-              payBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            const modal = document.querySelector('[data-testid="payment-modal"]');
+            if (modal) {
+              modal.scrollTo({ top: modal.scrollHeight, behavior: 'smooth' });
             }
-          }, 800);
+          }, 1000);
         } else {
           throw new Error('Erro ao criar sessão de pagamento');
         }
