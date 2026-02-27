@@ -235,6 +235,80 @@ class FourLuisAPITester:
         else:
             print("❌ No journeys available for testing")
 
+    def test_stripe_payment_elements(self):
+        """Test Stripe Payment Element specific endpoints"""
+        print("\n🔍 Testing Stripe Payment Element Features...")
+        
+        # Test Stripe config endpoint
+        stripe_config = self.run_test(
+            "GET /api/stripe/config returns publishable_key",
+            "GET",
+            "stripe/config",
+            200
+        )
+        
+        if stripe_config:
+            print(f"   Stripe config: {stripe_config}")
+            if 'publishable_key' in stripe_config:
+                print(f"   ✅ Publishable key found: {stripe_config['publishable_key'][:20]}...")
+            else:
+                print(f"   ❌ publishable_key missing from response")
+        
+        # Get journeys for payment testing - use journey_china001 as mentioned
+        journey_id = "journey_china001"
+        
+        # Test contributions/create with Stripe payment method
+        stripe_contrib_data = {
+            "amount": 50,
+            "payment_method": "stripe",
+            "journey_id": journey_id,
+            "contributor_name": "Test Stripe User",
+            "contributor_email": "stripe_test@test.com",
+            "public_message": "Testing Stripe Payment Element",
+            "show_name": True
+        }
+        
+        stripe_result = self.run_test(
+            "POST /api/contributions/create with payment_method='stripe'",
+            "POST",
+            "contributions/create",
+            200,
+            stripe_contrib_data
+        )
+        
+        if stripe_result:
+            print(f"   Stripe contribution result: {stripe_result}")
+            if 'client_secret' in stripe_result and 'payment_intent_id' in stripe_result:
+                print(f"   ✅ client_secret and payment_intent_id returned")
+            else:
+                print(f"   ❌ client_secret or payment_intent_id missing")
+        
+        # Test contributions/create with MBWay payment method
+        mbway_contrib_data = {
+            "amount": 20,
+            "payment_method": "mbway",
+            "journey_id": journey_id,
+            "contributor_name": "Test MBWay User",
+            "contributor_email": "mbway_test@test.com",
+            "public_message": "Testing MBWay Payment",
+            "show_name": True
+        }
+        
+        mbway_result = self.run_test(
+            "POST /api/contributions/create with payment_method='mbway'",
+            "POST",
+            "contributions/create",
+            200,
+            mbway_contrib_data
+        )
+        
+        if mbway_result:
+            print(f"   MBWay contribution result: {mbway_result}")
+            if 'status' in mbway_result and mbway_result['status'] == 'pending':
+                print(f"   ✅ MBWay returns status='pending'")
+            else:
+                print(f"   ❌ MBWay should return status='pending'")
+
     def test_payment_endpoints(self):
         """Test payment-related endpoints"""
         print("\n🔍 Testing Payment Endpoints...")
