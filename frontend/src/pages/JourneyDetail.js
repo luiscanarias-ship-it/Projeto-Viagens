@@ -873,6 +873,12 @@ const JourneyDetail = () => {
                             if (method.id !== 'crypto') {
                               setSelectedCrypto(null);
                             }
+                            // Auto scroll when Stripe is selected
+                            if (method.id === 'stripe') {
+                              setTimeout(() => {
+                                stripeFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                              }, 500);
+                            }
                           }}
                           className={`w-full p-4 rounded-xl border-2 transition-all flex items-center gap-4 ${
                             selectedMethod === method.id
