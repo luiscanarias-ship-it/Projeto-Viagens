@@ -177,7 +177,23 @@ const StripePaymentForm = ({
         }
       } catch (err) {
         console.error('Payment initialization error:', err);
-        setError(err.response?.data?.detail || err.message || 'Erro ao inicializar pagamento');
+        console.error('Error details:', {
+          message: err.message,
+          response: err.response,
+          request: err.request,
+          config: err.config
+        });
+        
+        // Better error message for network errors
+        let errorMsg = 'Erro ao inicializar pagamento';
+        if (err.message === 'Network Error') {
+          errorMsg = `Erro de rede. URL: ${API}/contributions/create`;
+        } else if (err.response?.data?.detail) {
+          errorMsg = err.response.data.detail;
+        } else if (err.message) {
+          errorMsg = err.message;
+        }
+        setError(errorMsg);
       } finally {
         setLoading(false);
       }
