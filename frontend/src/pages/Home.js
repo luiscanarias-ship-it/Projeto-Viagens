@@ -129,9 +129,9 @@ const Home = () => {
 
         <div className="relative max-w-4xl mx-auto px-6 text-center pt-20">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-            <h1 className="text-5xl md:text-7xl font-bold text-[#2D2A26] tracking-tight mb-6">
+            <h1 className="tracking-tight mb-6">
               <span className="font-handwritten text-6xl md:text-8xl text-[#FFBE98] block mb-4">4Luis</span>
-              {t('hero.tagline')}
+              <span className="text-3xl md:text-5xl font-bold text-[#FFBE98] whitespace-nowrap">{t('hero.tagline')}</span>
             </h1>
           </motion.div>
 
