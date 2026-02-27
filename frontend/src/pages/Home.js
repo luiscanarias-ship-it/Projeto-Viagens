@@ -215,7 +215,7 @@ const Home = () => {
                     </div>
                   )}
                   
-                  <Link to={`/journey/${mainJourney.journey.journey_id}`}
+                  <Link to={`/journey/${mainJourney.journey.journey_id}?pay=true`}
                     className="inline-flex items-center gap-2 px-8 py-4 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-bold hover:bg-[#FFAB7D] transition-colors"
                     data-testid="contribute-main-btn">
                     <Heart className="w-5 h-5" /> Contribuir para este Sonho
