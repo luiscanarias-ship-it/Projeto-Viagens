@@ -1451,23 +1451,144 @@ async def get_checkout_status(session_id: str, request: Request):
 
 @api_router.post("/webhook/stripe")
 async def stripe_webhook(request: Request):
-    from emergentintegrations.payments.stripe.checkout import StripeCheckout
-    
+    """Handle Stripe webhook events for PaymentIntent"""
     api_key = os.environ.get("STRIPE_API_KEY")
-    host_url = str(request.base_url).rstrip("/")
-    webhook_url = f"{host_url}/api/webhook/stripe"
-    stripe_checkout = StripeCheckout(api_key=api_key, webhook_url=webhook_url)
+    webhook_secret = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
+    stripe.api_key = api_key
     
     body = await request.body()
     signature = request.headers.get("Stripe-Signature")
     
     try:
-        webhook_response = await stripe_checkout.handle_webhook(body, signature)
-        logger.info(f"Webhook received: {webhook_response.event_type}")
-        return {"status": "received"}
+        # Verify webhook signature if secret is configured
+        if webhook_secret:
+            event = stripe.Webhook.construct_event(body, signature, webhook_secret)
+        else:
+            # Parse event without signature verification (development)
+            import json
+            event = stripe.Event.construct_from(json.loads(body), stripe.api_key)
+        
+        logger.info(f"Stripe webhook received: {event.type}")
+        
+        # Handle payment_intent.succeeded
+        if event.type == "payment_intent.succeeded":
+            payment_intent = event.data.object
+            payment_intent_id = payment_intent.id
+            metadata = payment_intent.get("metadata", {})
+            
+            logger.info(f"PaymentIntent succeeded: {payment_intent_id}")
+            
+            # Find and update contribution
+            contribution = await db.contributions.find_one(
+                {"payment_intent_id": payment_intent_id},
+                {"_id": 0}
+            )
+            
+            if contribution:
+                contribution_id = contribution["contribution_id"]
+                journey_id = contribution["journey_id"]
+                amount = contribution["amount"]
+                user_id = contribution.get("user_id")
+                sponsor_link_id = contribution.get("sponsor_link_id")
+                
+                # Update contribution status
+                await db.contributions.update_one(
+                    {"contribution_id": contribution_id},
+                    {"$set": {
+                        "status": "confirmed",
+                        "validated_at": datetime.now(timezone.utc).isoformat(),
+                        "validated_by": "stripe_webhook"
+                    }}
+                )
+                
+                # Update journey current_amount
+                await db.journeys.update_one(
+                    {"journey_id": journey_id},
+                    {"$inc": {"current_amount": amount}}
+                )
+                
+                # Check if journey is now funded
+                await check_and_update_journey_funding_status(journey_id)
+                
+                # Process user progression if logged in
+                if user_id:
+                    # Check if main trip contribution
+                    journey = await db.journeys.find_one({"journey_id": journey_id}, {"_id": 0})
+                    if journey and journey.get("is_main_trip"):
+                        await db.users.update_one(
+                            {"user_id": user_id},
+                            {"$set": {"contributed_to_main_trip": True}}
+                        )
+                    
+                    # Process sponsor referral
+                    if sponsor_link_id:
+                        sponsor_link = await db.sponsor_links.find_one(
+                            {"link_id": sponsor_link_id},
+                            {"_id": 0}
+                        )
+                        if sponsor_link:
+                            sponsor_user_id = sponsor_link["user_id"]
+                            # Increment successful referrals
+                            await db.sponsor_links.update_one(
+                                {"link_id": sponsor_link_id},
+                                {"$inc": {"successful_referrals": 1}}
+                            )
+                            # Update sponsor's valid_referrals_count
+                            await db.users.update_one(
+                                {"user_id": sponsor_user_id},
+                                {"$inc": {"valid_referrals_count": 1}}
+                            )
+                            
+                            # Check if sponsor becomes ambassador
+                            sponsor_user = await db.users.find_one(
+                                {"user_id": sponsor_user_id},
+                                {"_id": 0}
+                            )
+                            if sponsor_user:
+                                valid_refs = sponsor_user.get("valid_referrals_count", 0) + 1
+                                contributed = sponsor_user.get("contributed_to_main_trip", False)
+                                if contributed and valid_refs >= 3 and sponsor_user.get("level") != "embaixador":
+                                    await db.users.update_one(
+                                        {"user_id": sponsor_user_id},
+                                        {"$set": {
+                                            "level": "embaixador",
+                                            "embaixador_unlocked_at": datetime.now(timezone.utc).isoformat()
+                                        }}
+                                    )
+                                    # Send email
+                                    asyncio.create_task(send_ambassador_unlocked_email(sponsor_user_id))
+                
+                # Send confirmation email
+                updated_contribution = await db.contributions.find_one(
+                    {"contribution_id": contribution_id},
+                    {"_id": 0}
+                )
+                if updated_contribution and journey:
+                    asyncio.create_task(send_contribution_email(updated_contribution, journey))
+                
+                logger.info(f"Contribution {contribution_id} confirmed via Stripe webhook")
+            else:
+                logger.warning(f"No contribution found for PaymentIntent: {payment_intent_id}")
+        
+        elif event.type == "payment_intent.payment_failed":
+            payment_intent = event.data.object
+            payment_intent_id = payment_intent.id
+            logger.warning(f"PaymentIntent failed: {payment_intent_id}")
+            
+            # Update contribution status to rejected
+            await db.contributions.update_one(
+                {"payment_intent_id": payment_intent_id},
+                {"$set": {"status": "rejected"}}
+            )
+        
+        return {"status": "success"}
+        
+    except stripe.error.SignatureVerificationError as e:
+        logger.error(f"Webhook signature verification failed: {e}")
+        return JSONResponse(status_code=400, content={"error": "Invalid signature"})
     except Exception as e:
         logger.error(f"Webhook error: {e}")
-        return {"status": "error"}
+        return {"status": "error", "message": str(e)}
 
 @api_router.post("/contributions/manual")
 async def record_manual_contribution(request: Request):
