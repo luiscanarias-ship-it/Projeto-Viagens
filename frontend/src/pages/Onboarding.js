@@ -151,7 +151,7 @@ const Onboarding = () => {
               </p>
               
               <p className="font-handwritten text-2xl text-[#FFBE98] mb-8">
-                É crowddreaming.
+                É CrowdDreaming.
               </p>
               
               <div className="bg-[#FAFAF9] rounded-2xl p-6 max-w-md mx-auto">
