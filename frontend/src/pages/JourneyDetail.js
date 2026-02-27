@@ -1134,6 +1134,12 @@ const JourneyDetail = () => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="mt-4"
+                  onAnimationComplete={() => {
+                    // Scroll to show full Stripe form after animation
+                    setTimeout(() => {
+                      stripeFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100);
+                  }}
                 >
                   <StripePaymentForm
                     amount={selectedAmount.value}
