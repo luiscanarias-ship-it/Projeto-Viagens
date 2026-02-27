@@ -187,6 +187,31 @@ const JourneyDetail = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  // Stripe payment callbacks
+  const handleStripeSuccess = (result) => {
+    setShowPayment(false);
+    setShowStripeForm(false);
+    setSelectedAmount(null);
+    setSelectedMethod(null);
+    setPublicMessage('');
+    // Refresh contributions
+    axios.get(`${API}/journeys/${id}/contributions`).then(res => {
+      setContributions(res.data.contributions || []);
+    });
+    axios.get(`${API}/journeys/${id}/progress`).then(res => {
+      setProgress(res.data);
+    });
+    alert('Pagamento realizado com sucesso! Obrigado pelo seu apoio. 💚');
+  };
+
+  const handleStripeError = (error) => {
+    console.error('Stripe error:', error);
+  };
+
+  const handleStripeCancel = () => {
+    setShowStripeForm(false);
+  };
+
   const askAI = async () => {
     if (!aiQuestion.trim()) return;
     
