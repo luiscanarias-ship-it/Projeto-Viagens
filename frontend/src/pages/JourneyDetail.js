@@ -1106,50 +1106,53 @@ const JourneyDetail = () => {
                 </motion.div>
               )}
 
-              {/* Continue Button */}
-              {selectedAmount && selectedMethod && (
+              {/* Stripe Payment Element - Inline */}
+              {selectedAmount && selectedMethod === 'stripe' && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-4"
+                >
+                  <StripePaymentForm
+                    amount={selectedAmount.value}
+                    journeyId={id}
+                    sponsorCode={sponsorCode}
+                    contributorName={user?.name}
+                    contributorEmail={user?.email}
+                    publicMessage={publicMessage}
+                    showName={showName}
+                    onSuccess={handleStripeSuccess}
+                    onError={handleStripeError}
+                    onCancel={handleStripeCancel}
+                    getAuthHeaders={getAuthHeaders}
+                  />
+                </motion.div>
+              )}
+
+              {/* Continue Button - Only for non-Stripe methods */}
+              {selectedAmount && selectedMethod && selectedMethod !== 'stripe' && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                 >
-                  {selectedMethod === 'stripe' ? (
-                    <button
-                      onClick={handlePayment}
-                      disabled={processing}
-                      className="w-full btn-primary flex items-center justify-center gap-2"
-                      data-testid="continue-payment-btn"
-                    >
-                      {processing ? (
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      ) : (
-                        <>
-                          <CreditCard className="w-5 h-5" />
-                          {t('payment.continue')} - €{selectedAmount.value}
-                        </>
-                      )}
-                    </button>
-                  ) : (
-                    <button
-                      onClick={handlePayment}
-                      disabled={processing}
-                      className="w-full bg-[#2D2A26] text-white py-3 px-6 rounded-xl font-medium hover:bg-[#4A4640] transition-all flex items-center justify-center gap-2"
-                      data-testid="register-contribution-btn"
-                    >
-                      {processing ? (
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      ) : (
-                        <>
-                          <Check className="w-5 h-5" />
-                          Registar contribuição de €{selectedAmount.value}
-                        </>
-                      )}
-                    </button>
-                  )}
-                  {selectedMethod !== 'stripe' && (
-                    <p className="text-center text-xs text-[#6B6661] mt-3">
-                      A contribuição ficará pendente até confirmação do pagamento pelo administrador.
-                    </p>
-                  )}
+                  <button
+                    onClick={handlePayment}
+                    disabled={processing}
+                    className="w-full bg-[#2D2A26] text-white py-3 px-6 rounded-xl font-medium hover:bg-[#4A4640] transition-all flex items-center justify-center gap-2"
+                    data-testid="register-contribution-btn"
+                  >
+                    {processing ? (
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <>
+                        <Check className="w-5 h-5" />
+                        Registar contribuição de €{selectedAmount.value}
+                      </>
+                    )}
+                  </button>
+                  <p className="text-center text-xs text-[#6B6661] mt-3">
+                    A contribuição ficará pendente até confirmação do pagamento pelo administrador.
+                  </p>
                 </motion.div>
               )}
             </div>
