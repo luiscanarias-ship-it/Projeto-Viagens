@@ -130,7 +130,7 @@ const Onboarding = () => {
         {/* Steps Container */}
         <div className="bg-white rounded-3xl shadow-xl p-8 md:p-12 min-h-[500px] flex flex-col">
           
-          {/* Step 1: Introdução ao Crowddreaming */}
+          {/* Step 1: Introdução ao CrowdDreaming */}
           <OnboardingStep isActive={currentStep === 0}>
             <div className="text-center flex-1 flex flex-col justify-center">
               <motion.div
