@@ -1076,8 +1076,8 @@ const JourneyDetail = () => {
                 </motion.div>
               )}
 
-              {/* Step 3: Public Message (Optional) */}
-              {selectedAmount && selectedMethod && (
+              {/* Step 3: Public Message (Optional) - Hide when Stripe selected to save space */}
+              {selectedAmount && selectedMethod && selectedMethod !== 'stripe' && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
