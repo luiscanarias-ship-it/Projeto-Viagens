@@ -1308,6 +1308,12 @@ async def get_payment_info():
         "note": "A plataforma não retém comissões. O valor integral vai diretamente para o sonhador."
     }
 
+@api_router.get("/stripe/config")
+async def get_stripe_config():
+    """Get Stripe publishable key for frontend"""
+    publishable_key = os.environ.get("STRIPE_PUBLISHABLE_KEY", "")
+    return {"publishable_key": publishable_key}
+
 @api_router.get("/journeys/{journey_id}/contributions")
 async def get_journey_public_contributions(journey_id: str):
     """Get public feed of confirmed contributions for a journey"""
