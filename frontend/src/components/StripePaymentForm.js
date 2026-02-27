@@ -1,32 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import { CreditCard, Check, AlertCircle, Loader2 } from 'lucide-react';
+import { CreditCard, AlertCircle, Loader2 } from 'lucide-react';
 import axios from 'axios';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-// Stripe Promise - will be initialized with publishable key
-let stripePromise = null;
-
-const getStripePromise = async () => {
-  if (!stripePromise) {
-    try {
-      const response = await axios.get(`${API}/stripe/config`);
-      const { publishable_key } = response.data;
-      if (publishable_key) {
-        stripePromise = loadStripe(publishable_key);
-      }
-    } catch (error) {
-      console.error('Error loading Stripe config:', error);
-    }
-  }
-  return stripePromise;
-};
-
 // Inner form component that uses Stripe hooks
-const CheckoutForm = ({ amount, onSuccess, onError, contributionId }) => {
+const CheckoutForm = ({ amount, onSuccess, onError }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [processing, setProcessing] = useState(false);
@@ -57,7 +39,6 @@ const CheckoutForm = ({ amount, onSuccess, onError, contributionId }) => {
       } else if (paymentIntent && paymentIntent.status === 'succeeded') {
         onSuccess?.(paymentIntent);
       } else if (paymentIntent && paymentIntent.status === 'requires_action') {
-        // 3D Secure or other actions required - Stripe will handle this
         setErrorMessage('Autenticação adicional necessária. Por favor complete a verificação.');
       }
     } catch (err) {
@@ -130,21 +111,29 @@ const StripePaymentForm = ({
   const [contributionId, setContributionId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [stripeLoaded, setStripeLoaded] = useState(null);
+  const [stripePromise, setStripePromise] = useState(null);
+  const initialized = useRef(false);
 
   useEffect(() => {
+    // Prevent double initialization
+    if (initialized.current) return;
+    initialized.current = true;
+
     const initializePayment = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        // Load Stripe
-        const stripe = await getStripePromise();
-        setStripeLoaded(stripe);
-
-        if (!stripe) {
+        // Get Stripe publishable key and load Stripe
+        const configResponse = await axios.get(`${API}/stripe/config`);
+        const { publishable_key } = configResponse.data;
+        
+        if (!publishable_key) {
           throw new Error('Stripe não está configurado');
         }
+        
+        const stripe = loadStripe(publishable_key);
+        setStripePromise(stripe);
 
         // Create PaymentIntent via backend
         const response = await axios.post(
@@ -182,7 +171,7 @@ const StripePaymentForm = ({
     if (amount && journeyId) {
       initializePayment();
     }
-  }, [amount, journeyId, sponsorCode, contributorName, contributorEmail, publicMessage, showName, getAuthHeaders]);
+  }, []); // Empty dependency array - only run once
 
   const handleSuccess = (paymentIntent) => {
     onSuccess?.({
@@ -218,9 +207,10 @@ const StripePaymentForm = ({
     );
   }
 
-  if (!clientSecret || !stripeLoaded) {
+  if (!clientSecret || !stripePromise) {
     return (
       <div className="flex items-center justify-center py-8">
+        <Loader2 className="w-6 h-6 animate-spin text-[#FFBE98] mr-2" />
         <p className="text-sm text-[#6B6661]">A carregar formulário de pagamento...</p>
       </div>
     );
@@ -256,7 +246,7 @@ const StripePaymentForm = ({
 
   return (
     <Elements 
-      stripe={stripeLoaded} 
+      stripe={stripePromise} 
       options={{ 
         clientSecret,
         appearance,
@@ -267,7 +257,6 @@ const StripePaymentForm = ({
         amount={amount} 
         onSuccess={handleSuccess}
         onError={onError}
-        contributionId={contributionId}
       />
     </Elements>
   );
