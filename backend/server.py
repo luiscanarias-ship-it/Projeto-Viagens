@@ -5077,16 +5077,18 @@ async def set_main_journey(journey_id: str, request: Request):
 async def root():
     return {"message": "4Luis API - Onde os sonhos ganham asas"}
 
-# Include router
-app.include_router(api_router)
-
+# CORS middleware MUST be added BEFORE routes
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
     allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
+
+# Include router
+app.include_router(api_router)
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
