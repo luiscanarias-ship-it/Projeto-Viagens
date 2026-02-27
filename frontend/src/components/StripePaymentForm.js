@@ -4,8 +4,12 @@ import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-
 import { CreditCard, AlertCircle, Loader2 } from 'lucide-react';
 import axios from 'axios';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || '';
 const API = `${BACKEND_URL}/api`;
+
+// Debug: log API URL on load
+console.log('[StripePaymentForm] BACKEND_URL:', BACKEND_URL);
+console.log('[StripePaymentForm] API:', API);
 
 // Inner form component that uses Stripe hooks
 const CheckoutForm = ({ amount, onSuccess, onError }) => {
