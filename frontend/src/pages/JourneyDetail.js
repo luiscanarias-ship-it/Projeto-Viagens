@@ -190,7 +190,6 @@ const JourneyDetail = () => {
   // Stripe payment callbacks
   const handleStripeSuccess = (result) => {
     setShowPayment(false);
-    setShowStripeForm(false);
     setSelectedAmount(null);
     setSelectedMethod(null);
     setPublicMessage('');
@@ -209,7 +208,9 @@ const JourneyDetail = () => {
   };
 
   const handleStripeCancel = () => {
-    setShowStripeForm(false);
+    setShowPayment(false);
+    setSelectedAmount(null);
+    setSelectedMethod(null);
   };
 
   const askAI = async () => {
