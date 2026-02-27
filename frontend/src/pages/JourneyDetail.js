@@ -10,6 +10,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import axios from 'axios';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
+import StripePaymentForm from '../components/StripePaymentForm';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
