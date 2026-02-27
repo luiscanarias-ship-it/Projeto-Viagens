@@ -1115,6 +1115,7 @@ const JourneyDetail = () => {
               {/* Stripe Payment Element - Inline */}
               {selectedAmount && selectedMethod === 'stripe' && (
                 <motion.div
+                  ref={stripeFormRef}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="mt-4"
