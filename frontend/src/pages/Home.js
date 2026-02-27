@@ -601,7 +601,7 @@ const Home = () => {
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
             <p className="font-handwritten text-3xl md:text-4xl text-[#6B6661] leading-relaxed">
               "Não é apenas crowdfunding,<br />
-              <span className="text-[#FFBE98]">é crowddreaming.</span><br />
+              <span className="text-[#FFBE98]">é CrowdDreaming.</span><br />
               Não é um donativo,<br />
               <span className="text-[#FFBE98]">é um gesto fraternal.</span>"
             </p>
