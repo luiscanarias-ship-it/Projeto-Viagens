@@ -859,65 +859,74 @@ const JourneyDetail = () => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                 >
-                  <h3 className="font-semibold mb-4">{t('payment.method')}</h3>
-                  <div className="space-y-2">
-                    {paymentMethods.map((method) => {
-                      const Icon = method.icon;
-                      const isRecommended = method.recommended;
-                      const isAutomatic = method.type === 'automatic';
-                      return (
-                        <button
-                          key={method.id}
-                          onClick={() => {
-                            setSelectedMethod(method.id);
-                            if (method.id !== 'crypto') {
-                              setSelectedCrypto(null);
-                            }
-                            // Auto scroll when Stripe is selected - scroll to bottom after form loads
-                            if (method.id === 'stripe') {
-                              // Initial scroll
-                              setTimeout(() => {
-                                const modal = document.querySelector('[data-testid="payment-modal"]');
-                                if (modal) modal.scrollTo({ top: modal.scrollHeight, behavior: 'smooth' });
-                              }, 500);
-                              // Second scroll after Stripe loads
-                              setTimeout(() => {
-                                const modal = document.querySelector('[data-testid="payment-modal"]');
-                                if (modal) modal.scrollTo({ top: modal.scrollHeight, behavior: 'smooth' });
-                              }, 1500);
-                            }
-                          }}
-                          className={`w-full p-4 rounded-xl border-2 transition-all flex items-center gap-4 ${
-                            selectedMethod === method.id
-                              ? 'border-[#FFBE98] bg-[#FFBE98]/10'
-                              : isRecommended
-                              ? 'border-[#F7931A]/50 bg-gradient-to-r from-[#F7931A]/5 to-[#627EEA]/5 hover:border-[#F7931A]'
-                              : isAutomatic
-                              ? 'border-green-200 bg-green-50/50 hover:border-green-300'
-                              : 'border-stone-200 hover:border-stone-300'
-                          }`}
-                          data-testid={`method-${method.id}`}
-                        >
-                          <Icon className={`w-6 h-6 ${isRecommended ? 'text-[#F7931A]' : isAutomatic ? 'text-green-600' : 'text-[#6B6661]'}`} />
-                          <div className="text-left flex-1">
-                            <span className="font-medium block">{method.name}</span>
-                            <span className={`text-xs ${isRecommended ? 'text-[#F7931A]' : isAutomatic ? 'text-green-600' : 'text-[#6B6661]'}`}>
-                              {method.description}
-                            </span>
-                          </div>
-                          {isRecommended && (
-                            <span className="text-xs bg-gradient-to-r from-[#F7931A] to-[#627EEA] text-white px-2 py-1 rounded-full font-medium">
-                              Recomendado
-                            </span>
-                          )}
-                          {isAutomatic && (
-                            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
-                              Auto
-                            </span>
-                          )}
-                        </button>
-                      );
-                    })}
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-semibold">{t('payment.method')}</h3>
+                    {selectedMethod === 'stripe' && (
+                      <button 
+                        onClick={() => setSelectedMethod(null)}
+                        className="text-sm text-[#FFBE98] hover:underline"
+                      >
+                        Alterar método
+                      </button>
+                    )}
+                  </div>
+                  
+                  {/* Show all methods or just selected Stripe */}
+                  {selectedMethod !== 'stripe' ? (
+                    <div className="space-y-2">
+                      {paymentMethods.map((method) => {
+                        const Icon = method.icon;
+                        const isRecommended = method.recommended;
+                        const isAutomatic = method.type === 'automatic';
+                        return (
+                          <button
+                            key={method.id}
+                            onClick={() => {
+                              setSelectedMethod(method.id);
+                              if (method.id !== 'crypto') {
+                                setSelectedCrypto(null);
+                              }
+                            }}
+                            className={`w-full p-4 rounded-xl border-2 transition-all flex items-center gap-4 ${
+                              selectedMethod === method.id
+                                ? 'border-[#FFBE98] bg-[#FFBE98]/10'
+                                : isRecommended
+                                ? 'border-[#F7931A]/50 bg-gradient-to-r from-[#F7931A]/5 to-[#627EEA]/5 hover:border-[#F7931A]'
+                                : isAutomatic
+                                ? 'border-green-200 bg-green-50/50 hover:border-green-300'
+                                : 'border-stone-200 hover:border-stone-300'
+                            }`}
+                            data-testid={`method-${method.id}`}
+                          >
+                            <Icon className={`w-6 h-6 ${isRecommended ? 'text-[#F7931A]' : isAutomatic ? 'text-green-600' : 'text-[#6B6661]'}`} />
+                            <div className="text-left flex-1">
+                              <span className="font-medium block">{method.name}</span>
+                              <span className={`text-xs ${isRecommended ? 'text-[#F7931A]' : isAutomatic ? 'text-green-600' : 'text-[#6B6661]'}`}>
+                                {method.description}
+                              </span>
+                            </div>
+                            {isRecommended && (
+                              <span className="text-xs bg-gradient-to-r from-[#F7931A] to-[#627EEA] text-white px-2 py-1 rounded-full font-medium">
+                                Recomendado
+                              </span>
+                            )}
+                            {isAutomatic && (
+                              <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                                Auto
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="p-3 rounded-xl border-2 border-[#FFBE98] bg-[#FFBE98]/10 flex items-center gap-3">
+                      <CreditCard className="w-5 h-5 text-green-600" />
+                      <span className="font-medium">Cartão</span>
+                      <span className="text-xs text-green-600">Visa, Mastercard (automático)</span>
+                      <span className="ml-auto text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">Auto</span>
+                    </div>
+                  )}
                   </div>
                 </motion.div>
               )}
