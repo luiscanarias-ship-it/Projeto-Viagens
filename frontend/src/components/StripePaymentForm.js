@@ -153,8 +153,10 @@ const StripePaymentForm = ({
             show_name: showName
           },
           {
-            headers: getAuthHeaders?.() || {},
-            withCredentials: true
+            headers: {
+              'Content-Type': 'application/json',
+              ...(getAuthHeaders?.() || {})
+            }
           }
         );
 
