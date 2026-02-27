@@ -131,7 +131,7 @@ const Home = () => {
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
             <h1 className="tracking-tight mb-6">
               <span className="font-handwritten text-6xl md:text-8xl text-[#FFBE98] block mb-4">4Luis</span>
-              <span className="text-3xl md:text-5xl font-bold text-[#FFBE98] whitespace-nowrap">{t('hero.tagline')}</span>
+              <span className="font-handwritten text-4xl md:text-6xl text-[#FFBE98] whitespace-nowrap" style={{ fontWeight: 700 }}>{t('hero.tagline')}</span>
             </h1>
           </motion.div>
 
