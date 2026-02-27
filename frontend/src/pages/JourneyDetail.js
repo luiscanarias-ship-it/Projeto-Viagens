@@ -876,8 +876,11 @@ const JourneyDetail = () => {
                             // Auto scroll when Stripe is selected
                             if (method.id === 'stripe') {
                               setTimeout(() => {
-                                stripeFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                              }, 500);
+                                const modal = document.querySelector('[data-testid="payment-modal"]');
+                                if (modal) {
+                                  modal.scrollTo({ top: modal.scrollHeight, behavior: 'smooth' });
+                                }
+                              }, 300);
                             }
                           }}
                           className={`w-full p-4 rounded-xl border-2 transition-all flex items-center gap-4 ${
