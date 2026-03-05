@@ -354,6 +354,20 @@ const Home = () => {
               <p className="text-sm text-[#6B6661] mt-2">Cria a tua própria viagem e recebe apoio</p>
             </motion.div>
           </div>
+
+          {/* CTA Button - direct to main journey checkout */}
+          {mainJourney?.journey && (
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.4 }}
+              className="text-center mt-10">
+              <Link to={`/journey/${mainJourney.journey.journey_id}?pay=true`}
+                className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#2D2A26] text-white rounded-xl font-semibold hover:bg-[#4A4640] transition-colors text-base"
+                data-testid="howit-works-cta"
+              >
+                <Heart className="w-5 h-5" />
+                Apoiar este sonho
+              </Link>
+            </motion.div>
+          )}
         </div>
       </section>
 
