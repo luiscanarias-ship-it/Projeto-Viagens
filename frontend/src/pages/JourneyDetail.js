@@ -898,9 +898,9 @@ const JourneyDetail = () => {
                     <h3 className="font-semibold">{t('payment.method')}</h3>
                   </div>
                   
-                  {/* Payment methods list */}
+                  {/* Payment methods list - Compact horizontal layout */}
                   {!showPaymentInstructions && (
-                    <div className="space-y-2">
+                    <div className="grid grid-cols-3 gap-2">
                       {paymentMethods.map((method) => {
                         const Icon = method.icon;
                         const isRecommended = method.recommended;
@@ -913,25 +913,20 @@ const JourneyDetail = () => {
                                 setSelectedCrypto(null);
                               }
                             }}
-                            className={`w-full p-4 rounded-xl border-2 transition-all flex items-center gap-4 ${
+                            className={`p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-1 ${
                               selectedMethod === method.id
                                 ? 'border-[#FFBE98] bg-[#FFBE98]/10'
                                 : isRecommended
-                                ? 'border-[#F7931A]/50 bg-gradient-to-r from-[#F7931A]/5 to-[#627EEA]/5 hover:border-[#F7931A]'
+                                ? 'border-[#F7931A]/50 bg-[#F7931A]/5 hover:border-[#F7931A]'
                                 : 'border-stone-200 hover:border-stone-300'
                             }`}
                             data-testid={`method-${method.id}`}
                           >
-                            <Icon className={`w-6 h-6 ${isRecommended ? 'text-[#F7931A]' : 'text-[#6B6661]'}`} />
-                            <div className="text-left flex-1">
-                              <span className="font-medium block">{method.name}</span>
-                              <span className={`text-xs ${isRecommended ? 'text-[#F7931A]' : 'text-[#6B6661]'}`}>
-                                {method.description}
-                              </span>
-                            </div>
+                            <Icon className={`w-5 h-5 ${isRecommended ? 'text-[#F7931A]' : selectedMethod === method.id ? 'text-[#FFBE98]' : 'text-[#6B6661]'}`} />
+                            <span className="font-medium text-xs">{method.name}</span>
                             {isRecommended && (
-                              <span className="text-xs bg-gradient-to-r from-[#F7931A] to-[#627EEA] text-white px-2 py-1 rounded-full font-medium">
-                                Recomendado
+                              <span className="text-[10px] bg-[#F7931A] text-white px-1.5 py-0.5 rounded-full">
+                                Top
                               </span>
                             )}
                           </button>
@@ -942,235 +937,145 @@ const JourneyDetail = () => {
                 </motion.div>
               )}
 
-              {/* Crypto Type Selection */}
-              {selectedAmount && selectedMethod === 'crypto' && (
+              {/* Crypto Type Selection - Compact */}
+              {selectedAmount && selectedMethod === 'crypto' && !showPaymentInstructions && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                 >
-                  <h3 className="font-semibold mb-4">Escolha a criptomoeda</h3>
-                  <div className="grid grid-cols-2 gap-2">
+                  <p className="text-sm text-[#6B6661] mb-2">Escolha a moeda:</p>
+                  <div className="grid grid-cols-4 gap-2">
                     {cryptoTypes.map((crypto) => (
                       <button
                         key={crypto.id}
                         onClick={() => setSelectedCrypto(crypto.id)}
-                        className={`p-4 rounded-xl border-2 transition-all ${
+                        className={`p-2 rounded-xl border-2 transition-all ${
                           selectedCrypto === crypto.id
                             ? 'border-[#FFBE98] bg-[#FFBE98]/10'
                             : 'border-stone-200 hover:border-stone-300'
                         }`}
                         data-testid={`crypto-${crypto.id}`}
                       >
-                        <div 
-                          className="w-10 h-10 rounded-full mx-auto mb-2 flex items-center justify-center"
-                          style={{ backgroundColor: `${crypto.color}20` }}
-                        >
-                          <Bitcoin className="w-5 h-5" style={{ color: crypto.color }} />
-                        </div>
-                        <p className="font-medium text-[#2D2A26]">{crypto.symbol}</p>
-                        <p className="text-xs text-[#6B6661]">{crypto.name}</p>
+                        <p className="font-bold text-sm" style={{ color: crypto.color }}>{crypto.symbol}</p>
                       </button>
                     ))}
                   </div>
                 </motion.div>
               )}
 
-              {/* Payment Details */}
-              {selectedAmount && selectedMethod && selectedMethod !== 'stripe' && paymentInfo && (selectedMethod !== 'crypto' || selectedCrypto) && (
+              {/* Payment Details - Compact inline */}
+              {selectedAmount && selectedMethod && selectedMethod !== 'stripe' && paymentInfo && !showPaymentInstructions && (selectedMethod !== 'crypto' || selectedCrypto) && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-stone-50 rounded-2xl p-4"
+                  className="bg-stone-50 rounded-xl p-3"
                 >
                   {selectedMethod === 'mbway' && (
-                    <div className="text-center">
-                      <p className="text-sm text-[#6B6661] mb-2">Envie €{selectedAmount.value} para:</p>
-                      <p className="text-2xl font-bold text-[#2D2A26]">{paymentInfo.mbway.phone}</p>
-                      <p className="text-sm text-[#6B6661] mt-1">Nome: {paymentInfo.mbway.name}</p>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs text-[#6B6661]">Enviar €{selectedAmount.value} para:</p>
+                        <p className="font-bold text-[#2D2A26]">{paymentInfo.mbway.phone}</p>
+                      </div>
                       <button
                         onClick={() => copyToClipboard(paymentInfo.mbway.phone)}
-                        className="mt-4 flex items-center gap-2 mx-auto text-[#FFBE98]"
+                        className="px-3 py-1.5 bg-[#FFBE98]/20 text-[#FFBE98] rounded-lg text-sm flex items-center gap-1"
                       >
                         {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                        {copied ? 'Copiado!' : 'Copiar número'}
+                        {copied ? 'Copiado' : 'Copiar'}
                       </button>
                     </div>
                   )}
 
                   {selectedMethod === 'paypal' && (
-                    <div className="text-center">
-                      <p className="text-sm text-[#6B6661] mb-4">Envie €{selectedAmount.value} via PayPal:</p>
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm text-[#6B6661]">PayPal: <strong>{paymentInfo.paypal.link}</strong></p>
                       <a
                         href={`https://${paymentInfo.paypal.link}/${selectedAmount.value}EUR`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="btn-primary inline-flex items-center gap-2"
+                        className="px-3 py-1.5 bg-[#0070BA] text-white rounded-lg text-sm flex items-center gap-1"
                       >
                         <ExternalLink className="w-4 h-4" />
-                        Abrir PayPal (€{selectedAmount.value})
+                        Abrir
                       </a>
                     </div>
                   )}
 
                   {selectedMethod === 'revolut' && (
-                    <div className="text-center">
-                      <p className="text-sm text-[#6B6661] mb-2">Envie €{selectedAmount.value} para:</p>
-                      <p className="text-2xl font-bold text-[#2D2A26]">{paymentInfo.revolut.tag}</p>
-                      <p className="text-sm text-[#6B6661] mt-2">{paymentInfo.revolut.note}</p>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs text-[#6B6661]">Enviar €{selectedAmount.value} para:</p>
+                        <p className="font-bold text-[#2D2A26]">{paymentInfo.revolut.tag}</p>
+                      </div>
                       <button
                         onClick={() => copyToClipboard(paymentInfo.revolut.tag)}
-                        className="mt-4 flex items-center gap-2 mx-auto text-[#FFBE98]"
+                        className="px-3 py-1.5 bg-[#FFBE98]/20 text-[#FFBE98] rounded-lg text-sm flex items-center gap-1"
                       >
                         {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                        {copied ? 'Copiado!' : 'Copiar tag'}
+                        {copied ? 'Copiado' : 'Copiar'}
                       </button>
                     </div>
                   )}
 
                   {selectedMethod === 'wise' && (
-                    <div className="text-center">
-                      <p className="text-sm text-[#6B6661] mb-2">Envie €{selectedAmount.value} para:</p>
-                      <p className="text-xl font-bold text-[#2D2A26]">{paymentInfo.wise.email}</p>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs text-[#6B6661]">Enviar €{selectedAmount.value} para:</p>
+                        <p className="font-bold text-[#2D2A26] text-sm">{paymentInfo.wise.email}</p>
+                      </div>
                       <button
                         onClick={() => copyToClipboard(paymentInfo.wise.email)}
-                        className="mt-4 flex items-center gap-2 mx-auto text-[#FFBE98]"
+                        className="px-3 py-1.5 bg-[#FFBE98]/20 text-[#FFBE98] rounded-lg text-sm flex items-center gap-1"
                       >
                         {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                        {copied ? 'Copiado!' : 'Copiar email'}
+                        {copied ? 'Copiado' : 'Copiar'}
                       </button>
                     </div>
                   )}
 
                   {selectedMethod === 'crypto' && selectedCrypto && paymentInfo?.crypto?.[selectedCrypto] && (
-                    <div className="text-center">
-                      <p className="text-sm text-[#6B6661] mb-2">Envie equivalente a €{selectedAmount.value} em:</p>
-                      <div className="bg-white p-4 rounded-xl inline-block mb-4">
-                        <QRCodeSVG value={paymentInfo.crypto[selectedCrypto].address} size={150} />
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-bold" style={{ color: paymentInfo.crypto[selectedCrypto].color }}>
+                          {paymentInfo.crypto[selectedCrypto].symbol}
+                        </p>
+                        <span className="text-xs text-[#6B6661]">Rede: {paymentInfo.crypto[selectedCrypto].network}</span>
                       </div>
-                      <p className="text-sm font-semibold mb-2" style={{ color: paymentInfo.crypto[selectedCrypto].color }}>
-                        {paymentInfo.crypto[selectedCrypto].symbol} ({paymentInfo.crypto[selectedCrypto].network})
-                      </p>
-                      <p className="text-xs font-mono bg-stone-100 p-2 rounded break-all">
-                        {paymentInfo.crypto[selectedCrypto].address}
-                      </p>
-                      <button
-                        onClick={() => copyToClipboard(paymentInfo.crypto[selectedCrypto].address)}
-                        className="mt-4 flex items-center gap-2 mx-auto text-[#FFBE98]"
-                      >
-                        {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                        {copied ? 'Copiado!' : 'Copiar endereço'}
-                      </button>
-                      {paymentInfo.crypto[selectedCrypto].warning && (
-                        <p className="mt-4 text-xs text-red-500 bg-red-50 p-3 rounded-xl">
-                          ⚠️ {paymentInfo.crypto[selectedCrypto].warning}
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs font-mono bg-white p-2 rounded flex-1 truncate">
+                          {paymentInfo.crypto[selectedCrypto].address}
                         </p>
-                      )}
-                      
-                      {/* Transaction hash input */}
-                      <div className="mt-4 text-left">
-                        <label className="block text-xs font-medium text-[#6B6661] mb-2">
-                          Transaction Hash (opcional):
-                        </label>
-                        <input
-                          type="text"
-                          value={txHash}
-                          onChange={(e) => setTxHash(e.target.value)}
-                          placeholder="0x... ou hash da transação"
-                          className="w-full px-3 py-2 bg-white border border-stone-200 rounded-lg text-xs font-mono focus:outline-none focus:border-[#FFBE98]"
-                          data-testid="tx-hash-input"
-                        />
-                        <p className="text-xs text-[#6B6661] mt-1">
-                          Facilita a verificação da transação
-                        </p>
+                        <button
+                          onClick={() => copyToClipboard(paymentInfo.crypto[selectedCrypto].address)}
+                          className="px-3 py-1.5 bg-[#FFBE98]/20 text-[#FFBE98] rounded-lg text-sm flex items-center gap-1 flex-shrink-0"
+                        >
+                          {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                        </button>
                       </div>
                     </div>
-                  )}
-                </motion.div>
-              )}
-
-              {/* Step 3: Public Message (Optional) - Hide when Stripe selected to save space */}
-              {selectedAmount && selectedMethod && selectedMethod !== 'stripe' && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="space-y-4"
-                >
-                  <div>
-                    <label className="block text-sm font-medium text-[#2D2A26] mb-2">
-                      Deixar mensagem pública (opcional)
-                    </label>
-                    <textarea
-                      value={publicMessage}
-                      onChange={(e) => setPublicMessage(e.target.value)}
-                      placeholder="Escreve uma mensagem de apoio..."
-                      maxLength={200}
-                      rows={2}
-                      className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl resize-none focus:outline-none focus:border-[#FFBE98] transition-colors"
-                      data-testid="public-message-input"
-                    />
-                    <p className="text-xs text-[#6B6661] mt-1 text-right">
-                      {publicMessage.length}/200
-                    </p>
-                  </div>
-                  
-                  {/* Show name toggle */}
-                  <div className="flex items-center justify-between p-3 bg-stone-50 rounded-xl">
-                    <div className="flex items-center gap-2">
-                      <User className="w-4 h-4 text-[#6B6661]" />
-                      <span className="text-sm text-[#2D2A26]">Mostrar o meu nome</span>
-                    </div>
-                    <button
-                      onClick={() => setShowName(!showName)}
-                      className={`w-12 h-6 rounded-full transition-colors ${
-                        showName ? 'bg-[#FFBE98]' : 'bg-stone-300'
-                      }`}
-                      data-testid="show-name-toggle"
-                    >
-                      <div className={`w-5 h-5 bg-white rounded-full shadow transition-transform ${
-                        showName ? 'translate-x-6' : 'translate-x-0.5'
-                      }`} />
-                    </button>
-                  </div>
-                  {!showName && (
-                    <p className="text-xs text-[#6B6661] bg-[#E6F4F1]/50 p-2 rounded">
-                      Aparecerás como "Sonhador Anónimo" na lista de apoiantes.
-                    </p>
                   )}
                 </motion.div>
               )}
 
               {/* Stripe temporarily disabled - Payment instructions will be shown instead */}
 
-              {/* Continue Button - Only for non-Stripe methods */}
-              {selectedAmount && selectedMethod && selectedMethod !== 'stripe' && !showPaymentInstructions && (
+              {/* Continue Button - Simplified */}
+              {selectedAmount && selectedMethod && selectedMethod !== 'stripe' && !showPaymentInstructions && (selectedMethod !== 'crypto' || selectedCrypto) && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="space-y-4"
+                  className="space-y-3"
                 >
-                  {/* Important message before register button */}
-                  <div className="bg-[#FFBE98]/10 border border-[#FFBE98]/30 rounded-xl p-4">
-                    <div className="flex items-start gap-3">
-                      <div className="w-8 h-8 bg-[#FFBE98]/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <span className="text-lg">👇</span>
-                      </div>
-                      <div>
-                        <p className="font-semibold text-[#2D2A26] text-sm">
-                          Passo importante!
-                        </p>
-                        <p className="text-sm text-[#6B6661] mt-1">
-                          Depois de copiar os dados acima, clica no botão abaixo para <strong>registar a tua contribuição</strong>. 
-                          Vais receber um <strong>código de referência</strong> para incluir no pagamento.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                  {/* Compact instruction */}
+                  <p className="text-xs text-center text-[#6B6661] bg-[#FFBE98]/10 p-2 rounded-lg">
+                    👇 Clica para registar e receber o <strong>código de referência</strong>
+                  </p>
 
                   <button
                     ref={registerButtonRef}
                     onClick={handlePayment}
                     disabled={processing}
-                    className="w-full bg-[#2D2A26] text-white py-4 px-6 rounded-xl font-medium hover:bg-[#4A4640] transition-all flex items-center justify-center gap-2 text-lg shadow-lg"
+                    className="w-full bg-[#2D2A26] text-white py-3 px-6 rounded-xl font-medium hover:bg-[#4A4640] transition-all flex items-center justify-center gap-2"
                     data-testid="register-contribution-btn"
                   >
                     {processing ? (
@@ -1178,13 +1083,10 @@ const JourneyDetail = () => {
                     ) : (
                       <>
                         <Check className="w-5 h-5" />
-                        Registar contribuição de €{selectedAmount.value}
+                        Registar €{selectedAmount.value}
                       </>
                     )}
                   </button>
-                  <p className="text-center text-xs text-[#6B6661]">
-                    ⏳ A contribuição ficará pendente até confirmarmos o pagamento.
-                  </p>
                 </motion.div>
               )}
 
