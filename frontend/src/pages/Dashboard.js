@@ -439,40 +439,67 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              {/* Status Message */}
+              {/* Status Message - Dynamic motivational */}
               {hasContribution && validReferrals >= 3 ? (
                 <div className="p-4 bg-green-50 rounded-xl border border-green-200 text-center">
                   <p className="text-green-700 font-medium">
-                    🎉 Parabéns! Cumpres todos os requisitos. O teu nível será atualizado em breve!
+                    Parabéns! Cumpres todos os requisitos. O teu nível será atualizado em breve!
                   </p>
                 </div>
               ) : (
                 <div className="p-4 bg-[#FFF8F0] rounded-xl border border-[#FFBE98]/30">
-                  <p className="text-sm text-[#2D2A26]">
-                    {!hasContribution && referralsNeeded > 0 
-                      ? `Falta contribuir para a viagem principal e convidar ${referralsNeeded} amigo${referralsNeeded > 1 ? 's' : ''} que contribuam.`
-                      : !hasContribution 
-                        ? 'Falta apenas contribuir para a viagem principal!'
-                        : `Faltam ${referralsNeeded} referral${referralsNeeded > 1 ? 's' : ''} válido${referralsNeeded > 1 ? 's' : ''} para desbloquear Embaixador.`}
+                  <p className="text-sm text-[#2D2A26] font-medium">
+                    {!hasContribution && validReferrals === 0
+                      ? 'Estás a 3 passos de desbloquear o nível Embaixador. Contribui para a viagem principal e convida 3 amigos para tornar este sonho realidade.'
+                      : !hasContribution
+                        ? `Contribui para a viagem principal e convida mais ${referralsNeeded} amigo${referralsNeeded > 1 ? 's' : ''} para desbloquear Embaixador.`
+                        : `Faltam apenas ${referralsNeeded} amigo${referralsNeeded > 1 ? 's' : ''} para desbloqueares o nível Embaixador.`}
                   </p>
                 </div>
               )}
               
-              {/* Invite button with /invite/{alias} */}
+              {/* Invite link section */}
               {!isEmbaixador && dashboardData?.user_alias && (
-                <button
-                  onClick={() => {
-                    const inviteUrl = `${window.location.origin}/invite/${encodeURIComponent(dashboardData.user_alias)}`;
-                    navigator.clipboard.writeText(inviteUrl);
-                    setCopiedLink(true);
-                    setTimeout(() => setCopiedLink(false), 2000);
-                  }}
-                  className="mt-4 w-full py-3 bg-[#2D2A26] text-white rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-[#4A4640] transition-colors"
-                  data-testid="invite-friends-btn"
-                >
-                  <Users className="w-5 h-5" />
-                  {copiedLink ? 'Link copiado!' : 'Convidar mais amigos'}
-                </button>
+                <div className="p-4 bg-stone-50 rounded-xl border border-stone-200">
+                  <p className="text-xs text-[#6B6661] mb-1.5">O teu link de convite</p>
+                  <p className="text-sm font-mono font-semibold text-[#2D2A26] mb-3 break-all">
+                    {window.location.origin}/invite/{dashboardData.user_alias}
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(`${window.location.origin}/invite/${encodeURIComponent(dashboardData.user_alias)}`);
+                        setCopiedLink(true);
+                        setTimeout(() => setCopiedLink(false), 2000);
+                      }}
+                      className="flex-1 py-2.5 bg-[#2D2A26] text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-[#4A4640] transition-colors"
+                      data-testid="copy-invite-link-btn"
+                    >
+                      {copiedLink ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                      {copiedLink ? 'Copiado!' : 'Copiar link'}
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (navigator.share) {
+                          navigator.share({
+                            title: 'Convite 4Luis',
+                            text: 'Junta-te a mim e ajuda a financiar um sonho!',
+                            url: `${window.location.origin}/invite/${encodeURIComponent(dashboardData.user_alias)}`
+                          });
+                        } else {
+                          navigator.clipboard.writeText(`${window.location.origin}/invite/${encodeURIComponent(dashboardData.user_alias)}`);
+                          setCopiedLink(true);
+                          setTimeout(() => setCopiedLink(false), 2000);
+                        }
+                      }}
+                      className="flex-1 py-2.5 bg-[#FFBE98] text-[#2D2A26] rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-[#FFBE98]/80 transition-colors"
+                      data-testid="share-invite-btn"
+                    >
+                      <Share2 className="w-3.5 h-3.5" />
+                      Partilhar
+                    </button>
+                  </div>
+                </div>
               )}
             </>
           )}
