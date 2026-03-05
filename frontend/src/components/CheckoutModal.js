@@ -172,17 +172,21 @@ const CheckoutModal = ({
   // Generate QR code value for crypto
   const getCryptoQRValue = (cryptoId, euroAmount) => {
     const crypto = cryptoConfig[cryptoId];
-    if (!crypto) return crypto?.address || '';
+    if (!crypto) return '';
     
     const cryptoAmount = getCryptoAmount(euroAmount, cryptoId);
     if (!cryptoAmount) return crypto.address;
     
-    // Different protocols have different URI formats
+    // Standard URI formats per protocol with amount
     switch (cryptoId) {
       case 'btc':
         return `bitcoin:${crypto.address}?amount=${cryptoAmount}`;
       case 'eth':
-        return `ethereum:${crypto.address}?value=${cryptoAmount}`;
+        return `ethereum:${crypto.address}@1?value=${cryptoAmount}`;
+      case 'usdt':
+        return `tron:${crypto.address}?amount=${cryptoAmount}&token=USDT`;
+      case 'usdc':
+        return `xdc:${crypto.address}?amount=${cryptoAmount}&token=USDC`;
       default:
         return crypto.address;
     }
