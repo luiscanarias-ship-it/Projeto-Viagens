@@ -164,9 +164,10 @@ const Home = () => {
             <>
               {/* Journey Header */}
               <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
-                <span className="inline-block px-4 py-2 bg-[#FFBE98]/20 rounded-full text-[#FFBE98] font-medium text-sm mb-4">
+                <Link to={`/journey/${mainJourney.journey.journey_id}`}
+                  className="inline-block px-4 py-2 bg-[#FFBE98]/20 rounded-full text-[#FFBE98] font-medium text-sm mb-4 hover:bg-[#FFBE98]/30 transition-colors cursor-pointer">
                   Viagem Principal
-                </span>
+                </Link>
                 <h2 className="text-4xl md:text-5xl font-bold text-[#2D2A26] mb-4">
                   {mainJourney.journey.name}
                 </h2>
@@ -176,8 +177,9 @@ const Home = () => {
               </motion.div>
 
               {/* Live Experience Card */}
+              <Link to={`/journey/${mainJourney.journey.journey_id}`} className="block">
               <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-                className="relative rounded-3xl overflow-hidden shadow-xl mb-12">
+                className="relative rounded-3xl overflow-hidden shadow-xl mb-12 cursor-pointer hover:shadow-2xl transition-shadow">
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent z-10" />
                 <img src={mainJourney.journey.image_url} alt={mainJourney.journey.name}
                   className="w-full h-[400px] md:h-[500px] object-cover" />
@@ -225,6 +227,7 @@ const Home = () => {
                   </Link>
                 </div>
               </motion.div>
+              </Link>
 
               {/* Contributions Feed */}
               {mainJourney.contributions?.length > 0 && (
