@@ -1146,12 +1146,31 @@ const JourneyDetail = () => {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
+                  className="space-y-4"
                 >
+                  {/* Important message before register button */}
+                  <div className="bg-[#FFBE98]/10 border border-[#FFBE98]/30 rounded-xl p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-[#FFBE98]/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <span className="text-lg">👇</span>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-[#2D2A26] text-sm">
+                          Passo importante!
+                        </p>
+                        <p className="text-sm text-[#6B6661] mt-1">
+                          Depois de copiar os dados acima, clica no botão abaixo para <strong>registar a tua contribuição</strong>. 
+                          Vais receber um <strong>código de referência</strong> para incluir no pagamento.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
                   <button
                     ref={registerButtonRef}
                     onClick={handlePayment}
                     disabled={processing}
-                    className="w-full bg-[#2D2A26] text-white py-3 px-6 rounded-xl font-medium hover:bg-[#4A4640] transition-all flex items-center justify-center gap-2"
+                    className="w-full bg-[#2D2A26] text-white py-4 px-6 rounded-xl font-medium hover:bg-[#4A4640] transition-all flex items-center justify-center gap-2 text-lg shadow-lg"
                     data-testid="register-contribution-btn"
                   >
                     {processing ? (
@@ -1163,8 +1182,8 @@ const JourneyDetail = () => {
                       </>
                     )}
                   </button>
-                  <p className="text-center text-xs text-[#6B6661] mt-3">
-                    A contribuição ficará pendente até confirmação do pagamento pelo administrador.
+                  <p className="text-center text-xs text-[#6B6661]">
+                    ⏳ A contribuição ficará pendente até confirmarmos o pagamento.
                   </p>
                 </motion.div>
               )}
