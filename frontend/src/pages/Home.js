@@ -30,6 +30,7 @@ const Home = () => {
   const [curatedDreams, setCuratedDreams] = useState(null);
   const [loading, setLoading] = useState(true);
   const [dreamersStats, setDreamersStats] = useState(null);
+  const [platformStats, setPlatformStats] = useState(null);
   
   // Travel planner state
   const [customDestination, setCustomDestination] = useState('');
@@ -42,12 +43,13 @@ const Home = () => {
       try {
         await axios.post(`${API}/seed-journeys`).catch(() => {});
         
-        const [mainRes, ambassadorRes, realizedRes, curatedRes, dreamersRes] = await Promise.all([
+        const [mainRes, ambassadorRes, realizedRes, curatedRes, dreamersRes, platformRes] = await Promise.all([
           axios.get(`${API}/homepage/main-journey`),
           axios.get(`${API}/homepage/ambassador-journeys`),
           axios.get(`${API}/homepage/realized-journeys`),
           axios.get(`${API}/homepage/curated-dreams`),
-          axios.get(`${API}/dreamers-stats`)
+          axios.get(`${API}/dreamers-stats`),
+          axios.get(`${API}/platform/stats`).catch(() => ({ data: null }))
         ]);
         
         setMainJourney(mainRes.data);
@@ -55,6 +57,7 @@ const Home = () => {
         setRealizedJourneys(realizedRes.data);
         setCuratedDreams(curatedRes.data);
         setDreamersStats(dreamersRes.data);
+        setPlatformStats(platformRes.data);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -293,6 +296,60 @@ const Home = () => {
                 </div>
               </>
             )}
+          </div>
+        </div>
+      </section>
+
+      {/* ==================== COMO FUNCIONA + PROVA SOCIAL ==================== */}
+      <section className="py-16 bg-[#FAFAF9]" data-testid="how-it-works-section">
+        <div className="max-w-5xl mx-auto px-6">
+          {/* Social Proof */}
+          {platformStats && platformStats.total_dreamers > 0 && (
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+              className="flex items-center justify-center gap-2 mb-10">
+              <Users className="w-5 h-5 text-[#FFBE98]" />
+              <p className="text-lg text-[#6B6661]">
+                <strong className="text-[#2D2A26] text-xl">{platformStats.total_dreamers}</strong> sonhadores já ajudaram esta plataforma
+              </p>
+            </motion.div>
+          )}
+
+          {/* How it Works */}
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+            className="text-center mb-10">
+            <h2 className="text-3xl font-bold text-[#2D2A26]">Como funciona o Crowddreaming</h2>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.1 }}
+              className="bg-white rounded-2xl p-6 shadow-sm border border-stone-100 text-center">
+              <div className="w-14 h-14 bg-[#FFBE98]/15 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Heart className="w-7 h-7 text-[#FFBE98]" />
+              </div>
+              <div className="w-8 h-8 bg-[#2D2A26] rounded-full flex items-center justify-center mx-auto mb-3 text-white text-sm font-bold">1</div>
+              <p className="text-base font-semibold text-[#2D2A26]">Contribui para um sonho</p>
+              <p className="text-sm text-[#6B6661] mt-2">Ajuda a concretizar uma viagem com qualquer valor</p>
+            </motion.div>
+
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.2 }}
+              className="bg-white rounded-2xl p-6 shadow-sm border border-stone-100 text-center">
+              <div className="w-14 h-14 bg-[#E6F4F1] rounded-full flex items-center justify-center mx-auto mb-4">
+                <Users className="w-7 h-7 text-[#2D2A26]" />
+              </div>
+              <div className="w-8 h-8 bg-[#2D2A26] rounded-full flex items-center justify-center mx-auto mb-3 text-white text-sm font-bold">2</div>
+              <p className="text-base font-semibold text-[#2D2A26]">Convida 3 amigos a contribuir</p>
+              <p className="text-sm text-[#6B6661] mt-2">Partilha o sonho e torna-te embaixador</p>
+            </motion.div>
+
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.3 }}
+              className="bg-white rounded-2xl p-6 shadow-sm border border-stone-100 text-center">
+              <div className="w-14 h-14 bg-[#F2C94C]/15 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Star className="w-7 h-7 text-[#F2C94C]" />
+              </div>
+              <div className="w-8 h-8 bg-[#2D2A26] rounded-full flex items-center justify-center mx-auto mb-3 text-white text-sm font-bold">3</div>
+              <p className="text-base font-semibold text-[#2D2A26]">Desbloqueia o teu próprio sonho</p>
+              <p className="text-sm text-[#6B6661] mt-2">Cria a tua própria viagem e recebe apoio</p>
+            </motion.div>
           </div>
         </div>
       </section>
