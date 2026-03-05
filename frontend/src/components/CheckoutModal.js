@@ -587,39 +587,88 @@ const CheckoutModal = ({
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
-                  className="space-y-2"
+                  className="space-y-2.5"
                 >
-                  {/* QR Code + Payment Details */}
-                  <div className="bg-white border border-stone-200 rounded-xl p-3">
-                    <div className="flex items-start gap-3">
-                      {/* QR Code */}
-                      <div className="flex-shrink-0">
-                        {/* Crypto: QR from blockchain URI */}
-                        {selectedMethod === 'crypto' && (
-                          <div className="bg-white p-2 rounded-lg shadow-sm border border-stone-100">
-                            {qrImageUrl ? (
-                              <img src={qrImageUrl} alt="QR Code" width={120} height={120} />
-                            ) : (
-                              <div className="w-[120px] h-[120px] flex items-center justify-center">
-                                <div className="w-6 h-6 border-2 border-[#FFBE98] border-t-transparent rounded-full animate-spin" />
-                              </div>
-                            )}
-                            {cryptoData && (
-                              <div className="mt-1.5 text-center space-y-0.5">
-                                <p className="text-[9px] font-bold text-red-600 leading-tight">
-                                  Rede: {cryptoData.network}
-                                </p>
-                                {cryptoAmountCalc && (
-                                  <p className="text-[9px] font-bold text-[#2D2A26] leading-tight">
-                                    {cryptoAmountCalc} {cryptoData.symbol}
-                                  </p>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        )}
-                        {/* Non-crypto: simple QR */}
-                        {selectedMethod !== 'crypto' && (
+                  {/* ===== CRYPTO STEP 3 ===== */}
+                  {selectedMethod === 'crypto' && cryptoData && (
+                    <>
+                      {/* Incentive banner */}
+                      <div className="bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-1.5 text-center">
+                        <p className="text-xs font-semibold text-emerald-700">Pagamento instantâneo e sem taxas bancárias</p>
+                      </div>
+
+                      {/* QR Code centered */}
+                      <div className="flex justify-center">
+                        <div className="bg-white p-2 rounded-xl shadow-sm border border-stone-100">
+                          {qrImageUrl ? (
+                            <img src={qrImageUrl} alt="QR Code" width={140} height={140} />
+                          ) : (
+                            <div className="w-[140px] h-[140px] flex items-center justify-center">
+                              <div className="w-6 h-6 border-2 border-[#FFBE98] border-t-transparent rounded-full animate-spin" />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Amount box */}
+                      <div className="bg-stone-50 rounded-xl p-3 text-center">
+                        <p className="text-[10px] text-[#6B6661] uppercase tracking-wide">Valor a enviar</p>
+                        <p className="text-xl font-bold text-[#2D2A26] mt-0.5">
+                          {cryptoAmountCalc} {cryptoData.symbol}
+                        </p>
+                        <p className="text-sm text-[#6B6661]">
+                          ≈ {selectedAmount} €
+                        </p>
+                      </div>
+
+                      {/* 3 visual steps */}
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2.5">
+                          <span className="w-5 h-5 rounded-full bg-[#2D2A26] text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0">1</span>
+                          <p className="text-xs text-[#2D2A26]">Copia o endereço ou abre a tua carteira</p>
+                        </div>
+                        <div className="flex items-center gap-2.5">
+                          <span className="w-5 h-5 rounded-full bg-[#2D2A26] text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0">2</span>
+                          <p className="text-xs text-[#2D2A26]">Envia exatamente <strong>{cryptoAmountCalc} {cryptoData.symbol}</strong></p>
+                        </div>
+                        <div className="flex items-center gap-2.5">
+                          <span className="w-5 h-5 rounded-full bg-[#2D2A26] text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0">3</span>
+                          <p className="text-xs text-[#2D2A26]">Depois clica em <strong>Já efetuei o pagamento</strong></p>
+                        </div>
+                      </div>
+
+                      {/* Action buttons: Copy + Open Wallet */}
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => copyToClipboard(cryptoData.address, 'address')}
+                          className="flex-1 py-2.5 bg-[#2D2A26] text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-[#4A4640] transition-colors"
+                        >
+                          {copiedField === 'address' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                          {copiedField === 'address' ? 'Copiado!' : 'Copiar endereço'}
+                        </button>
+                        <a
+                          href={cryptoURI}
+                          className="flex-1 py-2.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-emerald-700 transition-colors"
+                        >
+                          <Wallet className="w-3.5 h-3.5" />
+                          Abrir carteira
+                        </a>
+                      </div>
+
+                      {/* Network warning */}
+                      <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                        <p className="text-[11px] text-amber-800">
+                          Enviar apenas pela rede <strong>{cryptoData.network}</strong>. Outras redes podem resultar na perda dos fundos.
+                        </p>
+                      </div>
+                    </>
+                  )}
+
+                  {/* ===== NON-CRYPTO STEP 3 ===== */}
+                  {selectedMethod !== 'crypto' && (
+                    <div className="bg-white border border-stone-200 rounded-xl p-3">
+                      <div className="flex items-start gap-3">
+                        <div className="flex-shrink-0">
                           <div className="bg-white p-2 rounded-lg shadow-sm border border-stone-100">
                             {nonCryptoQrUrl ? (
                               <img src={nonCryptoQrUrl} alt="QR Code" width={120} height={120} />
@@ -629,79 +678,44 @@ const CheckoutModal = ({
                               </div>
                             )}
                           </div>
-                        )}
-                      </div>
-
-                      {/* Payment details next to QR */}
-                      <div className="flex-1 min-w-0">
-                        {/* Crypto specific details */}
-                        {selectedMethod === 'crypto' && cryptoData && (
-                          <div className="space-y-1.5">
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm font-bold" style={{ color: cryptoData.color }}>
-                                {cryptoData.symbol}
-                              </span>
-                              <span className="text-[10px] bg-stone-100 px-1.5 py-0.5 rounded-full">
-                                {cryptoData.network}
-                              </span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          {/* MBWay */}
+                          {selectedMethod === 'mbway' && methodData && (
+                            <div className="space-y-1.5">
+                              <p className="text-xs text-[#6B6661]">Enviar <strong>€{selectedAmount}</strong> para:</p>
+                              <p className="text-lg font-bold text-[#2D2A26]">{methodData.phone}</p>
+                              <button
+                                onClick={() => copyToClipboard(methodData.phoneClean, 'phone')}
+                                className="w-full py-1.5 bg-stone-100 rounded-md text-xs flex items-center justify-center gap-1.5 hover:bg-stone-200"
+                              >
+                                {copiedField === 'phone' ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3" />}
+                                {copiedField === 'phone' ? 'Copiado!' : 'Copiar número'}
+                              </button>
                             </div>
-                            {cryptoAmountCalc && (
-                              <div className="bg-[#FFBE98]/10 rounded-md px-2 py-1.5">
-                                <p className="text-[10px] text-[#6B6661]">Valor aprox:</p>
-                                <p className="font-bold text-sm text-[#2D2A26]">
-                                  {cryptoAmountCalc} {cryptoData.symbol}
-                                </p>
-                              </div>
-                            )}
-                            <p className="text-[10px] font-mono break-all text-[#6B6661] leading-tight">
-                              {cryptoData.address}
-                            </p>
-                            <button
-                              onClick={() => copyToClipboard(cryptoData.address, 'address')}
-                              className="w-full py-1.5 bg-stone-100 rounded-md text-xs flex items-center justify-center gap-1.5 hover:bg-stone-200"
-                            >
-                              {copiedField === 'address' ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3" />}
-                              {copiedField === 'address' ? 'Copiado!' : 'Copiar endereço'}
-                            </button>
-                          </div>
-                        )}
-
-                        {/* MBWay details */}
-                        {selectedMethod === 'mbway' && methodData && (
-                          <div className="space-y-1.5">
-                            <p className="text-xs text-[#6B6661]">Enviar <strong>€{selectedAmount}</strong> para:</p>
-                            <p className="text-lg font-bold text-[#2D2A26]">{methodData.phone}</p>
-                            <button
-                              onClick={() => copyToClipboard(methodData.phoneClean, 'phone')}
-                              className="w-full py-1.5 bg-stone-100 rounded-md text-xs flex items-center justify-center gap-1.5 hover:bg-stone-200"
-                            >
-                              {copiedField === 'phone' ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3" />}
-                              {copiedField === 'phone' ? 'Copiado!' : 'Copiar número'}
-                            </button>
-                          </div>
-                        )}
-
-                        {/* PayPal, Revolut, Wise details */}
-                        {(selectedMethod === 'paypal' || selectedMethod === 'revolut' || selectedMethod === 'wise') && methodData && (
-                          <div className="space-y-1.5">
-                            <p className="text-xs text-[#6B6661]">Enviar <strong>€{selectedAmount}</strong> para:</p>
-                            <p className="font-bold text-[#2D2A26]">{methodData.username}</p>
-                            <a
-                              href={selectedMethod === 'paypal' ? `${methodData.link}/${selectedAmount}EUR` : methodData.link}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="w-full py-1.5 bg-[#2D2A26] text-white rounded-md text-xs flex items-center justify-center gap-1.5 hover:bg-[#4A4640]"
-                            >
-                              <ExternalLink className="w-3 h-3" />
-                              Abrir {methodData.name}
-                            </a>
-                          </div>
-                        )}
+                          )}
+                          {/* PayPal, Revolut, Wise */}
+                          {(selectedMethod === 'paypal' || selectedMethod === 'revolut' || selectedMethod === 'wise') && methodData && (
+                            <div className="space-y-1.5">
+                              <p className="text-xs text-[#6B6661]">Enviar <strong>€{selectedAmount}</strong> para:</p>
+                              <p className="font-bold text-[#2D2A26]">{methodData.username}</p>
+                              <a
+                                href={selectedMethod === 'paypal' ? `${methodData.link}/${selectedAmount}EUR` : methodData.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="w-full py-1.5 bg-[#2D2A26] text-white rounded-md text-xs flex items-center justify-center gap-1.5 hover:bg-[#4A4640]"
+                              >
+                                <ExternalLink className="w-3 h-3" />
+                                Abrir {methodData.name}
+                              </a>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
 
-                  {/* Reference code - compact */}
+                  {/* Reference code */}
                   <div className="bg-[#FFBE98]/10 border border-[#FFBE98]/30 rounded-xl px-3 py-2">
                     <div className="flex items-center justify-between">
                       <div>
@@ -719,12 +733,7 @@ const CheckoutModal = ({
                     <p className="text-[10px] text-red-500 font-medium mt-0.5">Inclui esta referência na descrição do pagamento</p>
                   </div>
 
-                  {/* Trust line + Confirm button combined */}
-                  <div className="flex items-center gap-1.5 text-[10px] text-green-600 bg-green-50 px-2 py-1.5 rounded-lg">
-                    <Check className="w-3 h-3 flex-shrink-0" />
-                    Contribuição confirmada assim que o pagamento for recebido
-                  </div>
-
+                  {/* Confirm button */}
                   <button
                     onClick={() => setShowConfirmation(true)}
                     className="w-full bg-[#2D2A26] text-white py-2.5 px-6 rounded-xl font-medium hover:bg-[#4A4640] transition-all text-sm"
