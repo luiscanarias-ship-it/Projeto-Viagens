@@ -84,7 +84,7 @@ const paymentMethodsConfig = {
     id: 'paypal',
     name: 'PayPal',
     icon: ExternalLink,
-    username: 'luis canarias',
+    username: 'paypal.me/luis canarias',
     link: 'https://paypal.me/luis canarias'
   }
 };
