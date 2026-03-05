@@ -406,117 +406,95 @@ const CheckoutModal = ({
                 </motion.div>
               )}
 
-              {/* STEP 3: Payment Instructions */}
+              {/* STEP 3: Payment Instructions - Compact */}
               {step === 3 && !showConfirmation && contribution && (
                 <motion.div
                   key="step3"
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
-                  className="space-y-4"
+                  className="space-y-3"
                 >
-                  {/* Summary */}
-                  <div className="bg-stone-50 rounded-xl p-3 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-[#6B6661]">Contribuição:</span>
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold">€{selectedAmount}</span>
-                        <button
-                          onClick={() => { setStep(1); setContribution(null); }}
-                          className="text-xs text-[#FFBE98] hover:underline"
-                        >
-                          Alterar
-                        </button>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-[#6B6661]">Método:</span>
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">
-                          {paymentMethods.find(m => m.id === selectedMethod)?.name}
-                          {selectedCrypto && ` (${selectedCrypto.toUpperCase()})`}
-                        </span>
-                        <button
-                          onClick={() => { setStep(2); setContribution(null); }}
-                          className="text-xs text-[#FFBE98] hover:underline"
-                        >
-                          Alterar
-                        </button>
-                      </div>
-                    </div>
+                  {/* Summary - Single line */}
+                  <div className="flex items-center justify-between text-sm bg-stone-50 rounded-lg px-3 py-2">
+                    <span className="text-[#6B6661]">
+                      <strong className="text-[#2D2A26]">€{selectedAmount}</strong> via <strong className="text-[#2D2A26]">{paymentMethods.find(m => m.id === selectedMethod)?.name}{selectedCrypto && ` (${selectedCrypto.toUpperCase()})`}</strong>
+                    </span>
+                    <button
+                      onClick={() => { setStep(1); setContribution(null); }}
+                      className="text-xs text-[#FFBE98] hover:underline"
+                    >
+                      Alterar
+                    </button>
                   </div>
 
-                  {/* Payment details */}
+                  {/* Payment details - Compact */}
                   {paymentDetails && (
-                    <div className="bg-white border-2 border-[#FFBE98]/30 rounded-xl p-4 space-y-3">
-                      <p className="text-sm text-[#6B6661]">{paymentDetails.label}</p>
-                      
-                      {paymentDetails.showQR && (
-                        <div className="flex justify-center py-2">
-                          <div className="bg-white p-3 rounded-xl shadow-sm">
-                            <QRCodeSVG value={paymentDetails.value} size={120} />
+                    <div className="bg-white border border-stone-200 rounded-xl p-3">
+                      {paymentDetails.showQR ? (
+                        <div className="flex items-center gap-3">
+                          <QRCodeSVG value={paymentDetails.value} size={80} />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs text-[#6B6661] mb-1">{paymentDetails.label}</p>
+                            <p className="text-xs font-mono break-all bg-stone-50 p-2 rounded">{paymentDetails.value}</p>
+                            {paymentDetails.network && (
+                              <p className="text-xs mt-1" style={{ color: paymentDetails.color }}>Rede: {paymentDetails.network}</p>
+                            )}
                           </div>
                         </div>
-                      )}
-
-                      {paymentDetails.network && (
-                        <p className="text-xs text-center" style={{ color: paymentDetails.color }}>
-                          Rede: {paymentDetails.network}
-                        </p>
-                      )}
-
-                      <div className="bg-stone-50 rounded-lg p-3">
-                        <p className={`font-mono text-sm ${paymentDetails.showQR ? 'text-xs break-all' : 'text-lg text-center font-bold'}`}>
-                          {paymentDetails.value}
-                        </p>
-                      </div>
-
-                      {paymentDetails.isLink ? (
-                        <a
-                          href={paymentDetails.copyValue}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="w-full flex items-center justify-center gap-2 bg-[#0070BA] text-white py-2 px-4 rounded-lg text-sm"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                          Abrir PayPal
-                        </a>
                       ) : (
-                        <button
-                          onClick={() => copyToClipboard(paymentDetails.copyValue)}
-                          className="w-full flex items-center justify-center gap-2 bg-stone-100 text-[#2D2A26] py-2 px-4 rounded-lg text-sm hover:bg-stone-200 transition-colors"
-                        >
-                          {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
-                          {copied ? 'Copiado!' : 'Copiar'}
-                        </button>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-xs text-[#6B6661]">{paymentDetails.label}</p>
+                            <p className="font-bold text-[#2D2A26]">{paymentDetails.value}</p>
+                          </div>
+                          {paymentDetails.isLink ? (
+                            <a
+                              href={paymentDetails.copyValue}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-3 py-1.5 bg-[#0070BA] text-white rounded-lg text-sm flex items-center gap-1"
+                            >
+                              <ExternalLink className="w-3 h-3" />
+                              Abrir
+                            </a>
+                          ) : (
+                            <button
+                              onClick={() => copyToClipboard(paymentDetails.copyValue)}
+                              className="px-3 py-1.5 bg-stone-100 rounded-lg text-sm flex items-center gap-1 hover:bg-stone-200"
+                            >
+                              {copied ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3" />}
+                              {copied ? 'OK' : 'Copiar'}
+                            </button>
+                          )}
+                        </div>
                       )}
                     </div>
                   )}
 
-                  {/* Reference code */}
-                  <div className="bg-[#FFBE98]/10 border border-[#FFBE98]/30 rounded-xl p-4">
-                    <p className="text-sm text-[#6B6661] text-center mb-2">Referência do pagamento:</p>
-                    <div className="flex items-center justify-center gap-3">
-                      <span className="text-2xl font-bold text-[#2D2A26] tracking-wider">
-                        {contribution.payment_reference}
-                      </span>
+                  {/* Reference code - Compact */}
+                  <div className="bg-[#FFBE98]/10 border border-[#FFBE98]/30 rounded-xl p-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs text-[#6B6661]">Referência:</p>
+                        <p className="text-xl font-bold text-[#2D2A26] tracking-wider">{contribution.payment_reference}</p>
+                      </div>
                       <button
                         onClick={() => copyToClipboard(contribution.payment_reference)}
-                        className="p-2 bg-[#FFBE98]/20 rounded-lg hover:bg-[#FFBE98]/30 transition-colors"
+                        className="px-3 py-2 bg-[#FFBE98]/20 rounded-lg hover:bg-[#FFBE98]/30 flex items-center gap-1 text-sm"
                       >
                         {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4 text-[#FFBE98]" />}
+                        <span className="text-[#FFBE98]">{copied ? 'OK' : 'Copiar'}</span>
                       </button>
                     </div>
-                    <p className="text-xs text-center text-[#6B6661] mt-2">
-                      Inclui este código na descrição do pagamento
-                    </p>
+                    <p className="text-xs text-[#6B6661] mt-1">Inclui este código na descrição do pagamento</p>
                   </div>
 
-                  {/* Trust line */}
-                  <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 p-3 rounded-lg">
-                    <Check className="w-4 h-4" />
-                    <span>A tua contribuição será confirmada assim que o pagamento for recebido</span>
-                  </div>
+                  {/* Trust line - Compact */}
+                  <p className="text-xs text-green-600 bg-green-50 p-2 rounded-lg flex items-center gap-1">
+                    <Check className="w-3 h-3" />
+                    Contribuição confirmada assim que recebermos o pagamento
+                  </p>
 
                   {/* Confirm button */}
                   <button
