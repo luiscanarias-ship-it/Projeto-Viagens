@@ -666,52 +666,95 @@ const CheckoutModal = ({
 
                   {/* ===== NON-CRYPTO STEP 3 ===== */}
                   {selectedMethod !== 'crypto' && (
-                    <div className="bg-white border border-stone-200 rounded-xl p-3">
-                      <div className="flex items-start gap-3">
-                        <div className="flex-shrink-0">
-                          <div className="bg-white p-2 rounded-lg shadow-sm border border-stone-100">
-                            {nonCryptoQrUrl ? (
-                              <img src={nonCryptoQrUrl} alt="QR Code" width={120} height={120} />
-                            ) : (
-                              <div className="w-[120px] h-[120px] flex items-center justify-center">
-                                <div className="w-6 h-6 border-2 border-[#FFBE98] border-t-transparent rounded-full animate-spin" />
-                              </div>
-                            )}
+                    <div className="space-y-2.5">
+                      {/* Amount summary */}
+                      <div className="bg-stone-50 rounded-xl p-3 text-center">
+                        <p className="text-[10px] text-[#6B6661] uppercase tracking-wide">Valor a enviar</p>
+                        <p className="text-2xl font-bold text-[#2D2A26] mt-0.5">€{selectedAmount}</p>
+                      </div>
+
+                      {/* MBWay */}
+                      {selectedMethod === 'mbway' && methodData && (
+                        <div className="space-y-2">
+                          <div className="bg-white border border-stone-200 rounded-xl p-3">
+                            <p className="text-xs text-[#6B6661] mb-1">Enviar para o número:</p>
+                            <p className="text-lg font-bold text-[#2D2A26]">{methodData.phone}</p>
+                          </div>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => copyToClipboard(methodData.phoneClean, 'phone')}
+                              className="flex-1 py-2.5 bg-[#2D2A26] text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-[#4A4640] transition-colors"
+                            >
+                              {copiedField === 'phone' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                              {copiedField === 'phone' ? 'Copiado!' : 'Copiar número'}
+                            </button>
+                            <a
+                              href="mbway://transfer"
+                              className="flex-1 py-2.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-emerald-700 transition-colors"
+                            >
+                              <Smartphone className="w-3.5 h-3.5" />
+                              Abrir MBWay
+                            </a>
                           </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          {/* MBWay */}
-                          {selectedMethod === 'mbway' && methodData && (
-                            <div className="space-y-1.5">
-                              <p className="text-xs text-[#6B6661]">Enviar <strong>€{selectedAmount}</strong> para:</p>
-                              <p className="text-lg font-bold text-[#2D2A26]">{methodData.phone}</p>
-                              <button
-                                onClick={() => copyToClipboard(methodData.phoneClean, 'phone')}
-                                className="w-full py-1.5 bg-stone-100 rounded-md text-xs flex items-center justify-center gap-1.5 hover:bg-stone-200"
-                              >
-                                {copiedField === 'phone' ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3" />}
-                                {copiedField === 'phone' ? 'Copiado!' : 'Copiar número'}
-                              </button>
-                            </div>
-                          )}
-                          {/* PayPal, Revolut, Wise */}
-                          {(selectedMethod === 'paypal' || selectedMethod === 'revolut' || selectedMethod === 'wise') && methodData && (
-                            <div className="space-y-1.5">
-                              <p className="text-xs text-[#6B6661]">Enviar <strong>€{selectedAmount}</strong> para:</p>
-                              <p className="font-bold text-[#2D2A26]">{methodData.username}</p>
-                              <a
-                                href={selectedMethod === 'paypal' ? `${methodData.link}/${selectedAmount}EUR` : methodData.link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="w-full py-1.5 bg-[#2D2A26] text-white rounded-md text-xs flex items-center justify-center gap-1.5 hover:bg-[#4A4640]"
-                              >
-                                <ExternalLink className="w-3 h-3" />
-                                Abrir {methodData.name}
-                              </a>
-                            </div>
-                          )}
+                      )}
+
+                      {/* Revolut */}
+                      {selectedMethod === 'revolut' && methodData && (
+                        <div className="space-y-2">
+                          <div className="bg-white border border-stone-200 rounded-xl p-3">
+                            <p className="text-xs text-[#6B6661] mb-1">Enviar para:</p>
+                            <p className="text-lg font-bold text-[#2D2A26]">{methodData.username}</p>
+                          </div>
+                          <a
+                            href={methodData.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full py-2.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-emerald-700 transition-colors"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5" />
+                            Abrir Revolut
+                          </a>
                         </div>
-                      </div>
+                      )}
+
+                      {/* Wise */}
+                      {selectedMethod === 'wise' && methodData && (
+                        <div className="space-y-2">
+                          <div className="bg-white border border-stone-200 rounded-xl p-3">
+                            <p className="text-xs text-[#6B6661] mb-1">Enviar para:</p>
+                            <p className="text-lg font-bold text-[#2D2A26]">{methodData.username}</p>
+                          </div>
+                          <a
+                            href={methodData.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full py-2.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-emerald-700 transition-colors"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5" />
+                            Abrir Wise
+                          </a>
+                        </div>
+                      )}
+
+                      {/* PayPal */}
+                      {selectedMethod === 'paypal' && methodData && (
+                        <div className="space-y-2">
+                          <div className="bg-white border border-stone-200 rounded-xl p-3">
+                            <p className="text-xs text-[#6B6661] mb-1">Enviar para:</p>
+                            <p className="text-lg font-bold text-[#2D2A26]">{methodData.username}</p>
+                          </div>
+                          <a
+                            href={`${methodData.link}/${selectedAmount}EUR`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full py-2.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-emerald-700 transition-colors"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5" />
+                            Abrir PayPal
+                          </a>
+                        </div>
+                      )}
                     </div>
                   )}
 
