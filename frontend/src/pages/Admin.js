@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit2, Trash2, Save, X, BarChart3, Settings, CheckCircle, XCircle, Mail, Users, Award, Gift, Crown, TrendingUp, UserPlus, ChevronRight, Star, FileText, Clock, MapPin, Target, Calendar, Eye, MessageSquare, AlertCircle, ExternalLink, History } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, X, BarChart3, Settings, CheckCircle, XCircle, Mail, Users, Award, Gift, Crown, TrendingUp, UserPlus, ChevronRight, Star, FileText, Clock, MapPin, Target, Calendar, Eye, MessageSquare, AlertCircle, ExternalLink, History, Search } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -17,6 +17,8 @@ const Admin = () => {
   const [activeTab, setActiveTab] = useState('journeys');
   const [journeys, setJourneys] = useState([]);
   const [contributions, setContributions] = useState([]);
+  const [contributionSearch, setContributionSearch] = useState('');
+  const [searchingContribution, setSearchingContribution] = useState(false);
   const [stats, setStats] = useState(null);
   const [settings, setSettings] = useState({ contact_email: '', contact_message: '' });
   const [loading, setLoading] = useState(true);
@@ -208,6 +210,35 @@ const Admin = () => {
     } catch (error) {
       console.error('Error rejecting contribution:', error);
       alert('Erro ao rejeitar contribuição');
+    }
+  };
+
+  const handleSearchContribution = async () => {
+    if (!contributionSearch.trim()) {
+      // If empty search, reload all contributions
+      try {
+        const headers = getAuthHeaders();
+        const response = await axios.get(`${API}/admin/contributions`, { headers, withCredentials: true });
+        setContributions(response.data);
+      } catch (error) {
+        console.error('Error loading contributions:', error);
+      }
+      return;
+    }
+    
+    setSearchingContribution(true);
+    try {
+      const headers = getAuthHeaders();
+      const response = await axios.get(`${API}/admin/contributions/search?ref=${encodeURIComponent(contributionSearch.trim())}`, {
+        headers,
+        withCredentials: true
+      });
+      setContributions(response.data.contributions || []);
+    } catch (error) {
+      console.error('Error searching contribution:', error);
+      alert('Erro ao pesquisar contribuição');
+    } finally {
+      setSearchingContribution(false);
     }
   };
 
@@ -1364,15 +1395,61 @@ const Admin = () => {
             >
               <h2 className="text-xl font-bold mb-6">Gestão de Contribuições</h2>
               
+              {/* Search by Payment Reference */}
+              <div className="mb-6">
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <input
+                      type="text"
+                      value={contributionSearch}
+                      onChange={(e) => setContributionSearch(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleSearchContribution()}
+                      placeholder="Pesquisar por código de referência (ex: CN-1234)"
+                      className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FFBE98]/50"
+                    />
+                    {contributionSearch && (
+                      <button
+                        onClick={() => {
+                          setContributionSearch('');
+                          handleSearchContribution();
+                        }}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B6661] hover:text-[#2D2A26]"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                  <button
+                    onClick={handleSearchContribution}
+                    disabled={searchingContribution}
+                    className="px-6 py-3 bg-[#2D2A26] text-white rounded-xl hover:bg-[#4A4640] transition-all flex items-center gap-2"
+                  >
+                    {searchingContribution ? (
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <>
+                        <Search className="w-4 h-4" />
+                        Pesquisar
+                      </>
+                    )}
+                  </button>
+                </div>
+                <p className="text-xs text-[#6B6661] mt-2">
+                  💡 Os utilizadores recebem um código de referência (CN-XXXX) para incluir na descrição do pagamento.
+                </p>
+              </div>
+              
               {contributions.length === 0 ? (
-                <p className="text-center text-[#6B6661] py-8">Nenhuma contribuição registada.</p>
+                <p className="text-center text-[#6B6661] py-8">
+                  {contributionSearch ? 'Nenhuma contribuição encontrada com esse código.' : 'Nenhuma contribuição registada.'}
+                </p>
               ) : (
                 <div className="space-y-3">
                   {contributions.map((contrib) => (
                     <div
                       key={contrib.contribution_id}
                       className={`p-4 rounded-2xl border ${
-                        contrib.status === 'pending_confirmation' 
+                        contrib.status === 'pending' || contrib.status === 'pending_confirmation'
                           ? 'border-[#F2C94C] bg-[#F2C94C]/5' 
                           : contrib.status === 'completed'
                           ? 'border-green-200 bg-green-50/50'
@@ -1381,33 +1458,39 @@ const Admin = () => {
                     >
                       <div className="flex items-center justify-between flex-wrap gap-4">
                         <div>
-                          <div className="flex items-center gap-2 mb-1">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
                             <span className="font-semibold">€{contrib.amount}</span>
+                            {/* Payment Reference Badge */}
+                            {contrib.payment_reference && (
+                              <span className="text-xs px-2 py-0.5 rounded-full bg-[#FFBE98]/20 text-[#FFBE98] font-mono font-bold">
+                                {contrib.payment_reference}
+                              </span>
+                            )}
                             <span className={`text-xs px-2 py-0.5 rounded-full ${
-                              contrib.status === 'pending_confirmation' ? 'bg-[#F2C94C]/20 text-[#F2C94C]' :
+                              contrib.status === 'pending' || contrib.status === 'pending_confirmation' ? 'bg-[#F2C94C]/20 text-[#F2C94C]' :
                               contrib.status === 'completed' ? 'bg-green-100 text-green-600' :
                               contrib.status === 'rejected' ? 'bg-red-100 text-red-600' :
                               'bg-stone-100 text-stone-600'
                             }`}>
-                              {contrib.status === 'pending_confirmation' ? 'Pendente' :
+                              {contrib.status === 'pending' || contrib.status === 'pending_confirmation' ? 'Pendente' :
                                contrib.status === 'completed' ? 'Confirmada' :
                                contrib.status === 'rejected' ? 'Rejeitada' : contrib.status}
                             </span>
-                            {contrib.is_crypto && (
+                            {contrib.crypto_type && (
                               <span className="text-xs bg-[#F2C94C] text-white px-2 py-0.5 rounded-full">
-                                Crypto
+                                {contrib.crypto_type.toUpperCase()}
                               </span>
                             )}
                           </div>
                           <p className="text-sm text-[#6B6661]">
-                            {contrib.user_name} • {contrib.user_email}
+                            {contrib.user_name || contrib.contributor_name || 'Anónimo'} • {contrib.user_email || contrib.contributor_email || ''}
                           </p>
                           <p className="text-xs text-[#6B6661]">
                             {contrib.journey_name} • {contrib.payment_method} • {new Date(contrib.created_at).toLocaleDateString('pt-PT')}
                           </p>
                         </div>
                         
-                        {contrib.status === 'pending_confirmation' && (
+                        {(contrib.status === 'pending' || contrib.status === 'pending_confirmation') && (
                           <div className="flex gap-2">
                             <button
                               onClick={() => handleConfirmContribution(contrib.contribution_id)}

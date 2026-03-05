@@ -249,12 +249,19 @@ class Contribution(BaseModel):
     validated_at: Optional[str] = None  # Datetime of validation
     sponsor_link_id: Optional[str] = None
     session_id: Optional[str] = None  # Stripe session if applicable
+    payment_reference: Optional[str] = None  # Payment reference code CN-XXXX for external payments
     contributor_name: Optional[str] = None  # For anonymous/unregistered
     contributor_email: Optional[str] = None
     public_message: Optional[str] = None  # Public message from supporter
     show_name: bool = True  # Whether to show real name or anonymous
     notes: Optional[str] = None  # Admin notes
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+def generate_payment_reference() -> str:
+    """Generate a unique payment reference code CN-XXXX"""
+    # Use random 4-digit number for simplicity
+    code = random.randint(1000, 9999)
+    return f"CN-{code}"
 
 class ContributionCreate(BaseModel):
     journey_id: str
@@ -1120,7 +1127,7 @@ async def get_contribution_config():
 
 @api_router.post("/contributions/create")
 async def create_contribution(request: Request):
-    """Create a new contribution (for both Stripe and direct payments)"""
+    """Create a new contribution with payment reference for external payments"""
     data = await request.json()
     amount = data.get("amount")
     payment_method = data.get("payment_method")
@@ -1136,21 +1143,21 @@ async def create_contribution(request: Request):
             detail=f"Montante inválido. Valores permitidos: {FIXED_CONTRIBUTION_AMOUNTS}"
         )
     
-    # Validate payment method
-    if payment_method not in PAYMENT_METHODS:
+    # Validate payment method (Stripe temporarily disabled)
+    valid_methods = ["crypto", "mbway", "paypal", "revolut", "wise"]
+    if payment_method not in valid_methods:
         raise HTTPException(
             status_code=400, 
-            detail=f"Método de pagamento inválido. Métodos permitidos: {list(PAYMENT_METHODS.keys())}"
+            detail=f"Método de pagamento inválido. Métodos permitidos: {valid_methods}"
         )
     
-    # Check if journey exists and is the main trip
+    # Check if journey exists and is active
     journey = await db.journeys.find_one({"journey_id": journey_id, "is_active": True}, {"_id": 0})
     if not journey:
         raise HTTPException(status_code=404, detail="Viagem não encontrada ou inativa")
     
     # Validate crypto_type if payment_method is crypto
     crypto_type = data.get("crypto_type")
-    tx_hash = data.get("tx_hash")
     
     if payment_method == "crypto":
         if not crypto_type or crypto_type not in CRYPTO_TYPES:
@@ -1166,95 +1173,49 @@ async def create_contribution(request: Request):
     
     contribution_id = f"contrib_{uuid.uuid4().hex[:12]}"
     
-    # For Stripe payments, create PaymentIntent (embedded Payment Element)
-    if payment_method == "stripe":
-        api_key = os.environ.get("STRIPE_API_KEY")
-        if not api_key or api_key == 'sk_test_emergent':
-            raise HTTPException(status_code=500, detail="Stripe não configurado")
-        
-        stripe.api_key = api_key
-        
-        try:
-            # Create PaymentIntent
-            payment_intent = stripe.PaymentIntent.create(
-                amount=int(amount * 100),  # Stripe uses cents
-                currency="eur",
-                automatic_payment_methods={"enabled": True},
-                metadata={
-                    "journey_id": journey_id,
-                    "user_id": user_id or "anonymous",
-                    "contribution_id": contribution_id,
-                    "sponsor_code": sponsor_code or "",
-                    "source": "4luis_platform"
-                }
-            )
-            
-            # Create contribution record
-            contribution_doc = {
-                "contribution_id": contribution_id,
-                "journey_id": journey_id,
-                "user_id": user_id,
-                "amount": amount,
-                "currency": "EUR",
-                "payment_method": "stripe",
-                "status": "pending",
-                "is_main_trip": True,
-                "sponsor_link_id": sponsor_code,
-                "payment_intent_id": payment_intent.id,
-                "contributor_name": contributor_name or (user.name if user else None),
-                "contributor_email": contributor_email or (user.email if user else None),
-                "public_message": public_message,
-                "show_name": show_name,
-                "created_at": datetime.now(timezone.utc).isoformat()
-            }
-            await db.contributions.insert_one(contribution_doc)
-            
-            return {
-                "contribution_id": contribution_id,
-                "payment_method": "stripe",
-                "client_secret": payment_intent.client_secret,
-                "payment_intent_id": payment_intent.id
-            }
-        except stripe.error.StripeError as e:
-            logger.error(f"Stripe PaymentIntent error: {e}")
-            raise HTTPException(status_code=500, detail=f"Erro Stripe: {str(e)}")
+    # Generate unique payment reference
+    payment_reference = generate_payment_reference()
+    # Ensure uniqueness
+    while await db.contributions.find_one({"payment_reference": payment_reference}):
+        payment_reference = generate_payment_reference()
     
-    # For direct payments (MBWay, PayPal, Revolut, Wise, Crypto)
-    else:
-        contribution_doc = {
-            "contribution_id": contribution_id,
-            "journey_id": journey_id,
-            "user_id": user_id,
-            "amount": amount,
-            "currency": "EUR",
-            "payment_method": payment_method,
-            "crypto_type": crypto_type if payment_method == "crypto" else None,
-            "tx_hash": tx_hash if payment_method == "crypto" else None,
-            "status": "pending",  # Requires admin confirmation
-            "is_main_trip": True,
-            "sponsor_link_id": sponsor_code,
-            "contributor_name": contributor_name or (user.name if user else None),
-            "contributor_email": contributor_email or (user.email if user else None),
-            "public_message": public_message,
-            "show_name": show_name,
-            "created_at": datetime.now(timezone.utc).isoformat()
-        }
-        await db.contributions.insert_one(contribution_doc)
-        
-        # Update user's crypto badge if this is a crypto contribution
-        if payment_method == "crypto" and user_id:
-            await db.users.update_one(
-                {"user_id": user_id},
-                {"$set": {"has_crypto_contribution": True}}
-            )
-        
-        return {
-            "contribution_id": contribution_id,
-            "payment_method": payment_method,
-            "crypto_type": crypto_type,
-            "status": "pending",
-            "message": "Contribuição registada. Aguarda confirmação após o pagamento ser recebido."
-        }
+    # Create contribution with payment reference
+    contribution_doc = {
+        "contribution_id": contribution_id,
+        "journey_id": journey_id,
+        "user_id": user_id,
+        "amount": amount,
+        "currency": "EUR",
+        "payment_method": payment_method,
+        "crypto_type": crypto_type if payment_method == "crypto" else None,
+        "payment_reference": payment_reference,
+        "status": "pending",  # Requires admin confirmation
+        "is_main_trip": journey.get("is_main_trip", False),
+        "sponsor_link_id": sponsor_code,
+        "contributor_name": contributor_name or (user.name if user else None),
+        "contributor_email": contributor_email or (user.email if user else None),
+        "public_message": public_message,
+        "show_name": show_name,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.contributions.insert_one(contribution_doc)
+    
+    # Update user's crypto badge if this is a crypto contribution
+    if payment_method == "crypto" and user_id:
+        await db.users.update_one(
+            {"user_id": user_id},
+            {"$set": {"has_crypto_contribution": True}}
+        )
+    
+    return {
+        "contribution_id": contribution_id,
+        "payment_reference": payment_reference,
+        "payment_method": payment_method,
+        "crypto_type": crypto_type,
+        "amount": amount,
+        "status": "pending",
+        "message": f"Contribuição registada. Use o código {payment_reference} na descrição do pagamento."
+    }
 
 @api_router.get("/contributions/payment-info")
 async def get_payment_info():
@@ -2658,6 +2619,36 @@ async def get_dreamers_stats():
 
 # ==================== ADMIN CONTRIBUTIONS MANAGEMENT ====================
 
+@api_router.get("/admin/contributions/search")
+async def search_contributions_by_reference(request: Request, ref: str = None):
+    """Search contributions by payment reference"""
+    await require_admin(request)
+    
+    if not ref:
+        raise HTTPException(status_code=400, detail="Parâmetro 'ref' é obrigatório")
+    
+    # Search by payment_reference (case-insensitive)
+    query = {"payment_reference": {"$regex": ref.upper(), "$options": "i"}}
+    contributions = await db.contributions.find(query, {"_id": 0}).sort("created_at", -1).to_list(100)
+    
+    # Enrich with user and journey info
+    for contrib in contributions:
+        if contrib.get("user_id"):
+            user = await db.users.find_one({"user_id": contrib["user_id"]}, {"_id": 0, "name": 1, "email": 1})
+            contrib["user_name"] = user.get("name") if user else "Desconhecido"
+            contrib["user_email"] = user.get("email") if user else ""
+        else:
+            contrib["user_name"] = contrib.get("contributor_name") or "Anónimo"
+            contrib["user_email"] = contrib.get("contributor_email") or ""
+        
+        journey = await db.journeys.find_one({"journey_id": contrib["journey_id"]}, {"_id": 0, "name": 1})
+        contrib["journey_name"] = journey.get("name") if journey else "Desconhecida"
+    
+    return {
+        "count": len(contributions),
+        "contributions": contributions
+    }
+
 @api_router.get("/admin/contributions")
 async def get_all_contributions(request: Request):
     """Get all contributions for admin management"""
@@ -2671,11 +2662,15 @@ async def get_all_contributions(request: Request):
             contrib["user_name"] = user.get("name") if user else "Desconhecido"
             contrib["user_email"] = user.get("email") if user else ""
         else:
-            contrib["user_name"] = "Anónimo"
-            contrib["user_email"] = ""
+            contrib["user_name"] = contrib.get("contributor_name") or "Anónimo"
+            contrib["user_email"] = contrib.get("contributor_email") or ""
         
         journey = await db.journeys.find_one({"journey_id": contrib["journey_id"]}, {"_id": 0, "name": 1})
         contrib["journey_name"] = journey.get("name") if journey else "Desconhecida"
+        
+        # Ensure payment_reference is included
+        if not contrib.get("payment_reference"):
+            contrib["payment_reference"] = None
     
     return contributions
 

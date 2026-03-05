@@ -34,10 +34,9 @@ const cryptoTypes = [
   { id: 'usdc', name: 'USD Coin', symbol: 'USDC', color: '#2775CA' }
 ];
 
-// Payment methods - CRYPTO FIRST (recommended)
+// Payment methods - CRYPTO FIRST (recommended) - Stripe temporarily disabled
 const paymentMethods = [
   { id: 'crypto', name: 'Criptomoedas', icon: Bitcoin, description: 'BTC, ETH, USDT, USDC', type: 'direct', recommended: true },
-  { id: 'stripe', name: 'Cartão', icon: CreditCard, description: 'Visa, Mastercard (automático)', type: 'automatic', recommended: false },
   { id: 'mbway', name: 'MBWay', icon: Smartphone, description: 'Pagamento móvel Portugal', type: 'direct', recommended: false },
   { id: 'paypal', name: 'PayPal', icon: ExternalLink, description: 'paypal.me/LuisCanarias', type: 'direct', recommended: false },
   { id: 'revolut', name: 'Revolut', icon: ExternalLink, description: '@luis4dreams', type: 'direct', recommended: false },
@@ -84,6 +83,9 @@ const JourneyDetail = () => {
   const [showName, setShowName] = useState(true);
   const [selectedCrypto, setSelectedCrypto] = useState(null);
   const [txHash, setTxHash] = useState('');
+  const [paymentReference, setPaymentReference] = useState(null);
+  const [showPaymentInstructions, setShowPaymentInstructions] = useState(false);
+  const [refCopied, setRefCopied] = useState(false);
   const stripeFormRef = React.useRef(null);
   
   // Travel planning state
@@ -154,31 +156,39 @@ const JourneyDetail = () => {
         contributor_email: user?.email || null,
         public_message: publicMessage || null,
         show_name: showName,
-        crypto_type: selectedMethod === 'crypto' ? selectedCrypto : null,
-        tx_hash: selectedMethod === 'crypto' && txHash ? txHash : null
+        crypto_type: selectedMethod === 'crypto' ? selectedCrypto : null
       }, {
-        headers: getAuthHeaders(),
-        withCredentials: true
+        headers: getAuthHeaders()
       });
       
-      if (selectedMethod === 'stripe' && response.data.checkout_url) {
-        window.location.href = response.data.checkout_url;
-      } else {
-        // Direct payment - show confirmation
-        alert('Contribuição registada! Após efetuar o pagamento, a sua contribuição será confirmada pelo administrador.');
-        setShowPayment(false);
-        setSelectedAmount(null);
-        setSelectedMethod(null);
-        setSelectedCrypto(null);
-        setTxHash('');
-        setPublicMessage('');
-      }
+      // Show payment reference and instructions
+      setPaymentReference(response.data.payment_reference);
+      setShowPaymentInstructions(true);
+      
     } catch (error) {
       console.error('Payment error:', error);
       alert(error.response?.data?.detail || 'Erro ao processar pagamento. Tente novamente.');
     } finally {
       setProcessing(false);
     }
+  };
+
+  const handleCopyReference = () => {
+    if (paymentReference) {
+      navigator.clipboard.writeText(paymentReference);
+      setRefCopied(true);
+      setTimeout(() => setRefCopied(false), 2000);
+    }
+  };
+
+  const handleCloseInstructions = () => {
+    setShowPaymentInstructions(false);
+    setShowPayment(false);
+    setSelectedAmount(null);
+    setSelectedMethod(null);
+    setSelectedCrypto(null);
+    setPaymentReference(null);
+    setPublicMessage('');
   };
 
   const copyToClipboard = (text) => {
@@ -862,23 +872,14 @@ const JourneyDetail = () => {
                 >
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="font-semibold">{t('payment.method')}</h3>
-                    {selectedMethod === 'stripe' && (
-                      <button 
-                        onClick={() => setSelectedMethod(null)}
-                        className="text-sm text-[#FFBE98] hover:underline"
-                      >
-                        Alterar método
-                      </button>
-                    )}
                   </div>
                   
-                  {/* Show all methods or just selected Stripe */}
-                  {selectedMethod !== 'stripe' ? (
+                  {/* Payment methods list */}
+                  {!showPaymentInstructions && (
                     <div className="space-y-2">
                       {paymentMethods.map((method) => {
                         const Icon = method.icon;
                         const isRecommended = method.recommended;
-                        const isAutomatic = method.type === 'automatic';
                         return (
                           <button
                             key={method.id}
@@ -893,16 +894,14 @@ const JourneyDetail = () => {
                                 ? 'border-[#FFBE98] bg-[#FFBE98]/10'
                                 : isRecommended
                                 ? 'border-[#F7931A]/50 bg-gradient-to-r from-[#F7931A]/5 to-[#627EEA]/5 hover:border-[#F7931A]'
-                                : isAutomatic
-                                ? 'border-green-200 bg-green-50/50 hover:border-green-300'
                                 : 'border-stone-200 hover:border-stone-300'
                             }`}
                             data-testid={`method-${method.id}`}
                           >
-                            <Icon className={`w-6 h-6 ${isRecommended ? 'text-[#F7931A]' : isAutomatic ? 'text-green-600' : 'text-[#6B6661]'}`} />
+                            <Icon className={`w-6 h-6 ${isRecommended ? 'text-[#F7931A]' : 'text-[#6B6661]'}`} />
                             <div className="text-left flex-1">
                               <span className="font-medium block">{method.name}</span>
-                              <span className={`text-xs ${isRecommended ? 'text-[#F7931A]' : isAutomatic ? 'text-green-600' : 'text-[#6B6661]'}`}>
+                              <span className={`text-xs ${isRecommended ? 'text-[#F7931A]' : 'text-[#6B6661]'}`}>
                                 {method.description}
                               </span>
                             </div>
@@ -911,21 +910,9 @@ const JourneyDetail = () => {
                                 Recomendado
                               </span>
                             )}
-                            {isAutomatic && (
-                              <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
-                                Auto
-                              </span>
-                            )}
                           </button>
                         );
                       })}
-                    </div>
-                  ) : (
-                    <div className="p-3 rounded-xl border-2 border-[#FFBE98] bg-[#FFBE98]/10 flex items-center gap-3">
-                      <CreditCard className="w-5 h-5 text-green-600" />
-                      <span className="font-medium">Cartão</span>
-                      <span className="text-xs text-green-600">Visa, Mastercard (automático)</span>
-                      <span className="ml-auto text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">Auto</span>
                     </div>
                   )}
                 </motion.div>
@@ -1128,38 +1115,10 @@ const JourneyDetail = () => {
                 </motion.div>
               )}
 
-              {/* Stripe Payment Element - Inline */}
-              {selectedAmount && selectedMethod === 'stripe' && (
-                <motion.div
-                  ref={stripeFormRef}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mt-4"
-                  onAnimationComplete={() => {
-                    // Scroll to show full Stripe form after animation
-                    setTimeout(() => {
-                      stripeFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }, 100);
-                  }}
-                >
-                  <StripePaymentForm
-                    amount={selectedAmount.value}
-                    journeyId={id}
-                    sponsorCode={sponsorCode}
-                    contributorName={user?.name}
-                    contributorEmail={user?.email}
-                    publicMessage={publicMessage}
-                    showName={showName}
-                    onSuccess={handleStripeSuccess}
-                    onError={handleStripeError}
-                    onCancel={handleStripeCancel}
-                    getAuthHeaders={getAuthHeaders}
-                  />
-                </motion.div>
-              )}
+              {/* Stripe temporarily disabled - Payment instructions will be shown instead */}
 
               {/* Continue Button - Only for non-Stripe methods */}
-              {selectedAmount && selectedMethod && selectedMethod !== 'stripe' && (
+              {selectedAmount && selectedMethod && selectedMethod !== 'stripe' && !showPaymentInstructions && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -1182,6 +1141,197 @@ const JourneyDetail = () => {
                   <p className="text-center text-xs text-[#6B6661] mt-3">
                     A contribuição ficará pendente até confirmação do pagamento pelo administrador.
                   </p>
+                </motion.div>
+              )}
+
+              {/* Payment Instructions with Reference Code */}
+              {showPaymentInstructions && paymentReference && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="space-y-4"
+                >
+                  {/* Success Header */}
+                  <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
+                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Check className="w-6 h-6 text-green-600" />
+                    </div>
+                    <h3 className="font-bold text-green-800 text-lg">Contribuição Registada!</h3>
+                    <p className="text-green-700 text-sm mt-1">
+                      Valor: <span className="font-semibold">€{selectedAmount?.value}</span>
+                    </p>
+                  </div>
+
+                  {/* Payment Reference Code */}
+                  <div className="bg-[#FFBE98]/10 border-2 border-[#FFBE98] rounded-xl p-4">
+                    <p className="text-center text-sm text-[#6B6661] mb-2">
+                      Código de referência do pagamento:
+                    </p>
+                    <div className="flex items-center justify-center gap-3">
+                      <span className="text-2xl font-bold text-[#2D2A26] tracking-wider">
+                        {paymentReference}
+                      </span>
+                      <button
+                        onClick={handleCopyReference}
+                        className={`p-2 rounded-lg transition-all ${
+                          refCopied 
+                            ? 'bg-green-100 text-green-600' 
+                            : 'bg-[#FFBE98]/20 text-[#FFBE98] hover:bg-[#FFBE98]/30'
+                        }`}
+                        title="Copiar código"
+                      >
+                        {refCopied ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
+                      </button>
+                    </div>
+                    {refCopied && (
+                      <p className="text-center text-xs text-green-600 mt-2">Código copiado!</p>
+                    )}
+                  </div>
+
+                  {/* Instructions */}
+                  <div className="bg-stone-50 rounded-xl p-4">
+                    <h4 className="font-semibold text-[#2D2A26] mb-3 flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 text-[#FFBE98]" />
+                      Instruções importantes:
+                    </h4>
+                    <ol className="space-y-2 text-sm text-[#6B6661]">
+                      <li className="flex items-start gap-2">
+                        <span className="font-bold text-[#FFBE98]">1.</span>
+                        <span>Inclua o código <strong className="text-[#2D2A26]">{paymentReference}</strong> na descrição/mensagem do pagamento.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="font-bold text-[#FFBE98]">2.</span>
+                        <span>Efetue o pagamento utilizando os dados de {selectedMethod === 'crypto' ? `${selectedCrypto?.toUpperCase()}` : paymentMethods.find(m => m.id === selectedMethod)?.name} abaixo.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="font-bold text-[#FFBE98]">3.</span>
+                        <span>A contribuição será confirmada automaticamente após identificarmos o pagamento.</span>
+                      </li>
+                    </ol>
+                  </div>
+
+                  {/* Payment Details Based on Method */}
+                  {paymentInfo && (
+                    <div className="bg-white border border-stone-200 rounded-xl p-4">
+                      <h4 className="font-semibold text-[#2D2A26] mb-3">
+                        Dados para pagamento:
+                      </h4>
+                      
+                      {selectedMethod === 'crypto' && selectedCrypto && paymentInfo.crypto?.[selectedCrypto] && (
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between bg-stone-50 p-3 rounded-lg">
+                            <span className="text-sm text-[#6B6661]">Endereço {selectedCrypto.toUpperCase()}:</span>
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(paymentInfo.crypto[selectedCrypto].address);
+                                setCopied(true);
+                                setTimeout(() => setCopied(false), 2000);
+                              }}
+                              className="flex items-center gap-2 text-[#FFBE98] hover:underline text-sm"
+                            >
+                              {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                              Copiar
+                            </button>
+                          </div>
+                          <p className="text-xs font-mono break-all bg-stone-100 p-2 rounded">
+                            {paymentInfo.crypto[selectedCrypto].address}
+                          </p>
+                          {paymentInfo.crypto[selectedCrypto].network && (
+                            <p className="text-xs text-[#6B6661]">
+                              Rede: <strong>{paymentInfo.crypto[selectedCrypto].network}</strong>
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                      {selectedMethod === 'mbway' && paymentInfo.mbway && (
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between bg-stone-50 p-3 rounded-lg">
+                            <span className="text-sm text-[#6B6661]">Número MBWay:</span>
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(paymentInfo.mbway.phone);
+                                setCopied(true);
+                                setTimeout(() => setCopied(false), 2000);
+                              }}
+                              className="flex items-center gap-2 text-[#FFBE98] hover:underline text-sm"
+                            >
+                              {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                              Copiar
+                            </button>
+                          </div>
+                          <p className="text-lg font-bold text-center text-[#2D2A26]">{paymentInfo.mbway.phone}</p>
+                          <p className="text-xs text-[#6B6661] text-center">{paymentInfo.mbway.name}</p>
+                        </div>
+                      )}
+
+                      {selectedMethod === 'paypal' && paymentInfo.paypal && (
+                        <div className="space-y-2">
+                          <a
+                            href={`https://paypal.me/${paymentInfo.paypal.username}/${selectedAmount?.value}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-center gap-2 bg-[#0070BA] text-white py-3 px-4 rounded-lg hover:bg-[#005ea6] transition-all"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                            Abrir PayPal.me
+                          </a>
+                          <p className="text-xs text-[#6B6661] text-center">
+                            Lembre-se de incluir <strong>{paymentReference}</strong> na mensagem!
+                          </p>
+                        </div>
+                      )}
+
+                      {selectedMethod === 'revolut' && paymentInfo.revolut && (
+                        <div className="space-y-2">
+                          <a
+                            href={paymentInfo.revolut.link || `https://revolut.me/${paymentInfo.revolut.username}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-center gap-2 bg-black text-white py-3 px-4 rounded-lg hover:bg-gray-800 transition-all"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                            Abrir Revolut
+                          </a>
+                          <p className="text-xs text-[#6B6661] text-center">
+                            Username: <strong>{paymentInfo.revolut.username}</strong>
+                          </p>
+                          <p className="text-xs text-[#6B6661] text-center">
+                            Lembre-se de incluir <strong>{paymentReference}</strong> na mensagem!
+                          </p>
+                        </div>
+                      )}
+
+                      {selectedMethod === 'wise' && paymentInfo.wise && (
+                        <div className="space-y-2">
+                          <div className="bg-stone-50 p-3 rounded-lg space-y-1">
+                            <p className="text-sm"><strong>Email:</strong> {paymentInfo.wise.email}</p>
+                            {paymentInfo.wise.iban && <p className="text-sm"><strong>IBAN:</strong> {paymentInfo.wise.iban}</p>}
+                          </div>
+                          <a
+                            href="https://wise.com/send"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-center gap-2 bg-[#9FE870] text-black py-3 px-4 rounded-lg hover:bg-[#8fd860] transition-all"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                            Abrir Wise
+                          </a>
+                          <p className="text-xs text-[#6B6661] text-center">
+                            Lembre-se de incluir <strong>{paymentReference}</strong> na referência!
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Close Button */}
+                  <button
+                    onClick={handleCloseInstructions}
+                    className="w-full bg-[#2D2A26] text-white py-3 px-6 rounded-xl font-medium hover:bg-[#4A4640] transition-all"
+                  >
+                    Entendido, vou fazer o pagamento
+                  </button>
                 </motion.div>
               )}
             </div>
