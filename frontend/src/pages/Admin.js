@@ -776,65 +776,213 @@ const Admin = () => {
                     className="p-4 border border-stone-100 rounded-2xl"
                   >
                     {editingJourney?.journey_id === journey.journey_id ? (
-                      <div className="space-y-3">
-                        <div className="grid md:grid-cols-2 gap-3">
-                          <input
-                            type="text"
-                            value={editingJourney.name}
-                            onChange={(e) => setEditingJourney({ ...editingJourney, name: e.target.value })}
-                            className="input-warm px-3 text-sm"
-                          />
-                          <input
-                            type="text"
-                            value={editingJourney.poetic_name}
-                            onChange={(e) => setEditingJourney({ ...editingJourney, poetic_name: e.target.value })}
-                            className="input-warm px-3 text-sm"
-                          />
-                          <input
-                            type="number"
-                            value={editingJourney.goal_amount}
-                            onChange={(e) => setEditingJourney({ ...editingJourney, goal_amount: parseFloat(e.target.value) })}
-                            className="input-warm px-3 text-sm"
-                          />
-                          <div>
-                            <label className="block text-xs text-[#6B6661] mb-1">Data Objetivo</label>
-                            <input
-                              type="date"
-                              value={editingJourney.target_date || ''}
-                              onChange={(e) => setEditingJourney({ ...editingJourney, target_date: e.target.value })}
-                              className="input-warm px-3 text-sm w-full"
-                            />
-                          </div>
-                          <select
-                            value={editingJourney.is_active}
-                            onChange={(e) => setEditingJourney({ ...editingJourney, is_active: e.target.value === 'true' })}
-                            className="input-warm px-3 text-sm"
-                          >
-                            <option value="true">Ativa</option>
-                            <option value="false">Inativa</option>
-                          </select>
-                          <label className="flex items-center gap-2 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={editingJourney.show_goal_amount || false}
-                              onChange={(e) => setEditingJourney({ ...editingJourney, show_goal_amount: e.target.checked })}
-                              className="w-4 h-4 rounded border-stone-300 text-[#FFBE98] focus:ring-[#FFBE98]"
-                            />
-                            <span className="text-sm text-[#6B6661]">Mostrar objetivo €</span>
-                          </label>
-                        </div>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleUpdate(journey.journey_id)}
-                            className="p-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200"
-                          >
-                            <Save className="w-4 h-4" />
-                          </button>
+                      <div className="bg-stone-50 rounded-xl p-5 space-y-5">
+                        <div className="flex items-center justify-between border-b border-stone-200 pb-3">
+                          <h3 className="font-bold text-lg text-[#2D2A26]">✏️ Editar Viagem</h3>
                           <button
                             onClick={() => setEditingJourney(null)}
-                            className="p-2 bg-stone-100 text-stone-600 rounded-lg hover:bg-stone-200"
+                            className="p-2 hover:bg-stone-200 rounded-lg transition-colors"
                           >
-                            <X className="w-4 h-4" />
+                            <X className="w-5 h-5 text-[#6B6661]" />
+                          </button>
+                        </div>
+                        
+                        {/* Informações Básicas */}
+                        <div className="space-y-4">
+                          <h4 className="font-semibold text-[#2D2A26] flex items-center gap-2">
+                            <MapPin className="w-4 h-4 text-[#FFBE98]" />
+                            Informações Básicas
+                          </h4>
+                          <div className="grid md:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium text-[#6B6661] mb-1">Nome do Destino *</label>
+                              <input
+                                type="text"
+                                value={editingJourney.name}
+                                onChange={(e) => setEditingJourney({ ...editingJourney, name: e.target.value })}
+                                placeholder="Ex: China, Japão, Brasil..."
+                                className="w-full px-4 py-2.5 bg-white border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FFBE98]/50"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-[#6B6661] mb-1">Título Poético</label>
+                              <input
+                                type="text"
+                                value={editingJourney.poetic_name || ''}
+                                onChange={(e) => setEditingJourney({ ...editingJourney, poetic_name: e.target.value })}
+                                placeholder="Ex: Onde os Dragões Dançam"
+                                className="w-full px-4 py-2.5 bg-white border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FFBE98]/50"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Objetivos Financeiros */}
+                        <div className="space-y-4">
+                          <h4 className="font-semibold text-[#2D2A26] flex items-center gap-2">
+                            <Target className="w-4 h-4 text-[#FFBE98]" />
+                            Objetivos Financeiros
+                          </h4>
+                          <div className="grid md:grid-cols-3 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium text-[#6B6661] mb-1">Objetivo a Angariar (€) *</label>
+                              <input
+                                type="number"
+                                value={editingJourney.goal_amount}
+                                onChange={(e) => setEditingJourney({ ...editingJourney, goal_amount: parseFloat(e.target.value) || 0 })}
+                                placeholder="5000"
+                                min="100"
+                                className="w-full px-4 py-2.5 bg-white border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FFBE98]/50"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-[#6B6661] mb-1">Já Angariado (€)</label>
+                              <input
+                                type="number"
+                                value={editingJourney.current_amount || 0}
+                                onChange={(e) => setEditingJourney({ ...editingJourney, current_amount: parseFloat(e.target.value) || 0 })}
+                                className="w-full px-4 py-2.5 bg-stone-100 border border-stone-200 rounded-xl"
+                                disabled
+                              />
+                              <p className="text-xs text-[#6B6661] mt-1">Calculado automaticamente</p>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-[#6B6661] mb-1">Data Objetivo</label>
+                              <input
+                                type="date"
+                                value={editingJourney.target_date || ''}
+                                onChange={(e) => setEditingJourney({ ...editingJourney, target_date: e.target.value })}
+                                className="w-full px-4 py-2.5 bg-white border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FFBE98]/50"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Textos e Descrições */}
+                        <div className="space-y-4">
+                          <h4 className="font-semibold text-[#2D2A26] flex items-center gap-2">
+                            <FileText className="w-4 h-4 text-[#FFBE98]" />
+                            Textos e Descrições
+                          </h4>
+                          <div className="space-y-4">
+                            <div>
+                              <label className="block text-sm font-medium text-[#6B6661] mb-1">Mensagem Emocional</label>
+                              <textarea
+                                value={editingJourney.emotional_message || ''}
+                                onChange={(e) => setEditingJourney({ ...editingJourney, emotional_message: e.target.value })}
+                                placeholder="Mensagem que aparece em destaque na página da viagem..."
+                                rows={2}
+                                className="w-full px-4 py-2.5 bg-white border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FFBE98]/50 resize-none"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-[#6B6661] mb-1">Descrição do Impacto</label>
+                              <textarea
+                                value={editingJourney.impact_description || ''}
+                                onChange={(e) => setEditingJourney({ ...editingJourney, impact_description: e.target.value })}
+                                placeholder="Descreva o impacto que esta viagem terá..."
+                                rows={2}
+                                className="w-full px-4 py-2.5 bg-white border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FFBE98]/50 resize-none"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-[#6B6661] mb-1">Descrição Completa</label>
+                              <textarea
+                                value={editingJourney.description || ''}
+                                onChange={(e) => setEditingJourney({ ...editingJourney, description: e.target.value })}
+                                placeholder="Descrição detalhada da viagem..."
+                                rows={3}
+                                className="w-full px-4 py-2.5 bg-white border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FFBE98]/50 resize-none"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Imagem */}
+                        <div className="space-y-4">
+                          <h4 className="font-semibold text-[#2D2A26] flex items-center gap-2">
+                            <Eye className="w-4 h-4 text-[#FFBE98]" />
+                            Imagem
+                          </h4>
+                          <div className="flex gap-4 items-start">
+                            {editingJourney.image_url && (
+                              <img
+                                src={editingJourney.image_url}
+                                alt="Preview"
+                                className="w-24 h-24 rounded-xl object-cover border border-stone-200"
+                              />
+                            )}
+                            <div className="flex-1">
+                              <label className="block text-sm font-medium text-[#6B6661] mb-1">URL da Imagem</label>
+                              <input
+                                type="url"
+                                value={editingJourney.image_url || ''}
+                                onChange={(e) => setEditingJourney({ ...editingJourney, image_url: e.target.value })}
+                                placeholder="https://..."
+                                className="w-full px-4 py-2.5 bg-white border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FFBE98]/50"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Configurações */}
+                        <div className="space-y-4">
+                          <h4 className="font-semibold text-[#2D2A26] flex items-center gap-2">
+                            <Settings className="w-4 h-4 text-[#FFBE98]" />
+                            Configurações
+                          </h4>
+                          <div className="grid md:grid-cols-3 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium text-[#6B6661] mb-1">Estado</label>
+                              <select
+                                value={editingJourney.is_active}
+                                onChange={(e) => setEditingJourney({ ...editingJourney, is_active: e.target.value === 'true' })}
+                                className="w-full px-4 py-2.5 bg-white border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FFBE98]/50"
+                              >
+                                <option value="true">✅ Ativa (visível)</option>
+                                <option value="false">❌ Inativa (oculta)</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-[#6B6661] mb-1">Viagem Principal</label>
+                              <select
+                                value={editingJourney.is_main_trip || false}
+                                onChange={(e) => setEditingJourney({ ...editingJourney, is_main_trip: e.target.value === 'true' })}
+                                className="w-full px-4 py-2.5 bg-white border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FFBE98]/50"
+                              >
+                                <option value="true">⭐ Sim (destaque na homepage)</option>
+                                <option value="false">Não</option>
+                              </select>
+                            </div>
+                            <div className="flex items-center gap-3 pt-6">
+                              <input
+                                type="checkbox"
+                                id={`show-goal-${journey.journey_id}`}
+                                checked={editingJourney.show_goal_amount || false}
+                                onChange={(e) => setEditingJourney({ ...editingJourney, show_goal_amount: e.target.checked })}
+                                className="w-5 h-5 rounded border-stone-300 text-[#FFBE98] focus:ring-[#FFBE98]"
+                              />
+                              <label htmlFor={`show-goal-${journey.journey_id}`} className="text-sm text-[#6B6661] cursor-pointer">
+                                Mostrar valor € objetivo
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Botões de Ação */}
+                        <div className="flex items-center justify-between pt-4 border-t border-stone-200">
+                          <button
+                            onClick={() => setEditingJourney(null)}
+                            className="px-6 py-2.5 text-[#6B6661] hover:bg-stone-200 rounded-xl transition-colors"
+                          >
+                            Cancelar
+                          </button>
+                          <button
+                            onClick={() => handleUpdate(journey.journey_id)}
+                            className="px-6 py-2.5 bg-[#2D2A26] text-white rounded-xl hover:bg-[#4A4640] transition-colors flex items-center gap-2"
+                          >
+                            <Save className="w-4 h-4" />
+                            Guardar Alterações
                           </button>
                         </div>
                       </div>
