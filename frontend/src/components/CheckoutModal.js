@@ -84,8 +84,8 @@ const paymentMethodsConfig = {
     id: 'paypal',
     name: 'PayPal',
     icon: ExternalLink,
-    username: 'paypal.me/luis canarias',
-    link: 'https://paypal.me/luis canarias'
+    username: 'LuisCanarias',
+    link: 'https://paypal.me/LuisCanarias'
   }
 };
 
@@ -751,15 +751,16 @@ const CheckoutModal = ({
                           <div className="bg-white border border-stone-200 rounded-xl p-3">
                             <p className="text-xs text-[#6B6661] mb-1">Enviar para:</p>
                             <p className="text-lg font-bold text-[#2D2A26]">{methodData.username}</p>
+                            <p className="text-xs text-[#6B6661] mt-1">paypal.me/{methodData.username}/{selectedAmount}</p>
                           </div>
                           <a
-                            href={`${methodData.link}/${selectedAmount}EUR`}
+                            href={`${methodData.link}/${selectedAmount}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="w-full py-2.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-emerald-700 transition-colors"
                           >
                             <ExternalLink className="w-3.5 h-3.5" />
-                            Abrir PayPal
+                            Abrir PayPal (€{selectedAmount})
                           </a>
                         </div>
                       )}
