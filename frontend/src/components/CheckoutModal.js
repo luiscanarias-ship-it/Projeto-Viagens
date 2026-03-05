@@ -550,6 +550,19 @@ const CheckoutModal = ({
                           size={88}
                           level="M"
                         />
+                        {/* Network + amount note under QR for crypto */}
+                        {selectedMethod === 'crypto' && cryptoData && (
+                          <div className="mt-1.5 text-center space-y-0.5">
+                            <p className="text-[9px] font-bold text-red-600 leading-tight">
+                              Rede: {cryptoData.network}
+                            </p>
+                            {getCryptoAmount(selectedAmount, selectedCrypto) && (
+                              <p className="text-[9px] font-bold text-[#2D2A26] leading-tight">
+                                {getCryptoAmount(selectedAmount, selectedCrypto)} {cryptoData.symbol}
+                              </p>
+                            )}
+                          </div>
+                        )}
                       </div>
 
                       {/* Payment details next to QR */}
