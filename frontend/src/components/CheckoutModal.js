@@ -690,10 +690,10 @@ const CheckoutModal = ({
                             </button>
                             <a
                               href="mbway://transfer"
-                              className="flex-1 py-2.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-emerald-700 transition-colors"
+                              className="flex-1 py-2.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold flex flex-col items-center justify-center gap-0.5 hover:bg-emerald-700 transition-colors"
                             >
-                              <Smartphone className="w-3.5 h-3.5" />
-                              Abrir MBWay
+                              <span className="flex items-center gap-1.5"><Smartphone className="w-3.5 h-3.5" /> Abrir MBWay</span>
+                              <span className="text-[9px] font-normal opacity-80">apenas para telemóvel</span>
                             </a>
                           </div>
                         </div>
