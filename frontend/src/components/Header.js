@@ -50,7 +50,7 @@ const Header = () => {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 glass" data-testid="header">
-      <div className="max-w-7xl mx-auto px-6 md:px-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2" data-testid="logo-link">
@@ -102,7 +102,7 @@ const Header = () => {
           </nav>
 
           {/* Right side */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
             {/* Language Selector */}
             <div className="relative">
               <button
@@ -208,7 +208,7 @@ const Header = () => {
             ) : (
               <Link
                 to="/login"
-                className="btn-primary text-sm px-6 py-2.5"
+                className="btn-primary text-sm px-4 sm:px-6 py-2 sm:py-2.5 whitespace-nowrap"
                 data-testid="login-btn"
               >
                 {t('nav.login')}
