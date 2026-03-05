@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, Heart, Copy, Check, CreditCard, Smartphone, Bitcoin, ExternalLink,
   Map, Hotel, Plane, MessageCircle, Sparkles, Send, ChevronDown, ChevronUp,
-  BookOpen, Compass, Globe, User, AlertCircle, ChevronRight
+  BookOpen, Compass, Globe, User, AlertCircle, ChevronRight, Users, Gift, Star
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import axios from 'axios';
@@ -76,6 +76,8 @@ const JourneyDetail = () => {
   const [showCheckout, setShowCheckout] = useState(false);
   const [paymentInfo, setPaymentInfo] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [showStickyBtn, setShowStickyBtn] = useState(false);
+  const [platformStats, setPlatformStats] = useState(null);
   
   // Travel planning state
   const [travelResources, setTravelResources] = useState(null);
@@ -87,6 +89,20 @@ const JourneyDetail = () => {
   
   const sponsorCode = searchParams.get('sponsor');
   const openPayment = searchParams.get('pay') === 'true';
+
+  // Sticky button on scroll
+  useEffect(() => {
+    const onScroll = () => setShowStickyBtn(window.scrollY > 400);
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  // Fetch platform stats
+  useEffect(() => {
+    axios.get(`${API}/platform/stats`)
+      .then(res => setPlatformStats(res.data))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -171,6 +187,29 @@ const JourneyDetail = () => {
 
   return (
     <div className="min-h-screen pt-20" data-testid="journey-detail">
+      {/* Sticky CTA Button */}
+      <AnimatePresence>
+        {showStickyBtn && !showCheckout && (
+          <motion.div
+            initial={{ y: -80, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -80, opacity: 0 }}
+            className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-stone-200 shadow-sm"
+          >
+            <div className="max-w-6xl mx-auto px-6 py-2.5 flex items-center justify-between">
+              <p className="text-sm font-medium text-[#2D2A26] hidden sm:block">{journey?.name}</p>
+              <button
+                onClick={handleSupport}
+                className="btn-primary flex items-center gap-2 text-sm py-2.5 px-6 ml-auto"
+                data-testid="sticky-contribute-btn"
+              >
+                <Heart className="w-4 h-4" />
+                Contribuir para este sonho
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       {/* Hero Image */}
       <div className="relative h-[50vh] md:h-[60vh]">
         <img
@@ -233,6 +272,44 @@ const JourneyDetail = () => {
             )}
           </div>
         </div>
+
+          {/* Social Proof */}
+          {platformStats && platformStats.total_dreamers > 0 && (
+            <div className="flex items-center justify-center gap-2 mb-6">
+              <Users className="w-4 h-4 text-[#FFBE98]" />
+              <p className="text-sm text-[#6B6661]">
+                <strong className="text-[#2D2A26]">{platformStats.total_dreamers}</strong> sonhadores já ajudaram esta plataforma
+              </p>
+            </div>
+          )}
+
+          {/* How it Works */}
+          <div className="bg-white rounded-3xl p-8 shadow-sm border border-stone-100 mb-8">
+            <h2 className="text-xl font-bold text-[#2D2A26] text-center mb-6">Como funciona</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="text-center">
+                <div className="w-12 h-12 bg-[#FFBE98]/15 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <Heart className="w-6 h-6 text-[#FFBE98]" />
+                </div>
+                <div className="w-7 h-7 bg-[#2D2A26] rounded-full flex items-center justify-center mx-auto mb-2 text-white text-xs font-bold">1</div>
+                <p className="text-sm font-medium text-[#2D2A26]">Contribui para um sonho</p>
+              </div>
+              <div className="text-center">
+                <div className="w-12 h-12 bg-[#E6F4F1] rounded-full flex items-center justify-center mx-auto mb-3">
+                  <Users className="w-6 h-6 text-[#2D2A26]" />
+                </div>
+                <div className="w-7 h-7 bg-[#2D2A26] rounded-full flex items-center justify-center mx-auto mb-2 text-white text-xs font-bold">2</div>
+                <p className="text-sm font-medium text-[#2D2A26]">Convida 3 amigos a contribuir</p>
+              </div>
+              <div className="text-center">
+                <div className="w-12 h-12 bg-[#F2C94C]/15 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <Star className="w-6 h-6 text-[#F2C94C]" />
+                </div>
+                <div className="w-7 h-7 bg-[#2D2A26] rounded-full flex items-center justify-center mx-auto mb-2 text-white text-xs font-bold">3</div>
+                <p className="text-sm font-medium text-[#2D2A26]">Desbloqueia o teu próprio sonho</p>
+              </div>
+            </div>
+          </div>
 
         {/* Main Content Grid */}
         <div className="grid lg:grid-cols-3 gap-8">

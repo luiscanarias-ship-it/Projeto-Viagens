@@ -5082,6 +5082,18 @@ app.add_middleware(
     expose_headers=["*"],
 )
 
+# Platform stats endpoint
+@api_router.get("/platform/stats")
+async def get_platform_stats():
+    total_users = await db.users.count_documents({})
+    total_contributions = await db.contributions.count_documents({})
+    unique_contributors = len(await db.contributions.distinct("contributor_email"))
+    return {
+        "total_dreamers": max(total_users, unique_contributors),
+        "total_contributions": total_contributions
+    }
+
+
 # Include router
 app.include_router(api_router)
 
