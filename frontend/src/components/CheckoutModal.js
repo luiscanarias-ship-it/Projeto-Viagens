@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, Check, Copy, Bitcoin, Smartphone, ExternalLink,
@@ -109,6 +109,7 @@ const CheckoutModal = ({
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [cryptoPrices, setCryptoPrices] = useState({});
   const [loadingPrices, setLoadingPrices] = useState(false);
+  const cryptoSectionRef = useRef(null);
 
   // Fetch crypto prices from CoinGecko
   const fetchCryptoPrices = useCallback(async () => {
@@ -475,8 +476,12 @@ const CheckoutModal = ({
                   {/* Crypto selection */}
                   {selectedMethod === 'crypto' && (
                     <motion.div
+                      ref={cryptoSectionRef}
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: 'auto' }}
+                      onAnimationComplete={() => {
+                        cryptoSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                      }}
                       className="space-y-3 pt-2 border-t border-stone-100"
                     >
                       <p className="text-sm text-[#6B6661]">Escolhe a criptomoeda:</p>
