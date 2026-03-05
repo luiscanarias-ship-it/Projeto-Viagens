@@ -76,22 +76,23 @@ const Admin = () => {
       try {
         const headers = getAuthHeaders();
         const [journeysRes, statsRes, settingsRes, contributionsRes, sponsorsRes, rafflesRes, usersRes, applicationsRes] = await Promise.all([
-          axios.get(`${API}/admin/journeys`, { headers, withCredentials: true }),
-          axios.get(`${API}/admin/stats`, { headers, withCredentials: true }),
-          axios.get(`${API}/admin/settings`, { headers, withCredentials: true }),
-          axios.get(`${API}/admin/contributions`, { headers, withCredentials: true }),
-          axios.get(`${API}/admin/sponsors-report`, { headers, withCredentials: true }),
-          axios.get(`${API}/admin/journeys-ready-for-raffle`, { headers, withCredentials: true }),
-          axios.get(`${API}/admin/users/dashboard`, { headers, withCredentials: true }),
+          axios.get(`${API}/admin/journeys`, { headers, withCredentials: true }).catch(e => ({ data: [] })),
+          axios.get(`${API}/admin/stats`, { headers, withCredentials: true }).catch(e => ({ data: {} })),
+          axios.get(`${API}/admin/settings`, { headers, withCredentials: true }).catch(e => ({ data: {} })),
+          axios.get(`${API}/admin/contributions`, { headers, withCredentials: true }).catch(e => ({ data: [] })),
+          axios.get(`${API}/admin/sponsors-report`, { headers, withCredentials: true }).catch(e => ({ data: {} })),
+          axios.get(`${API}/admin/journeys-ready-for-raffle`, { headers, withCredentials: true }).catch(e => ({ data: { ready_journeys: [] } })),
+          axios.get(`${API}/admin/users/dashboard`, { headers, withCredentials: true }).catch(e => ({ data: null })),
           axios.get(`${API}/admin/ambassador-journeys?status=candidatura`, { headers, withCredentials: true }).catch(() => ({ data: { journeys: [] } }))
         ]);
         
-        setJourneys(journeysRes.data);
-        setStats(statsRes.data);
-        setSettings(settingsRes.data);
-        setContributions(contributionsRes.data);
-        setSponsorsReport(sponsorsRes.data);
-        setRafflesReady(rafflesRes.data.ready_journeys || []);
+        // Validate data before setting state
+        setJourneys(Array.isArray(journeysRes.data) ? journeysRes.data : []);
+        setStats(typeof statsRes.data === 'object' && !Array.isArray(statsRes.data) ? statsRes.data : {});
+        setSettings(typeof settingsRes.data === 'object' && !Array.isArray(settingsRes.data) ? settingsRes.data : {});
+        setContributions(Array.isArray(contributionsRes.data) ? contributionsRes.data : []);
+        setSponsorsReport(typeof sponsorsRes.data === 'object' ? sponsorsRes.data : {});
+        setRafflesReady(rafflesRes.data?.ready_journeys || []);
         setUsersDashboard(usersRes.data);
         // Store pending applications count
         if (applicationsRes.data?.journeys?.length > 0) {
@@ -219,9 +220,10 @@ const Admin = () => {
       try {
         const headers = getAuthHeaders();
         const response = await axios.get(`${API}/admin/contributions`, { headers, withCredentials: true });
-        setContributions(response.data);
+        setContributions(Array.isArray(response.data) ? response.data : []);
       } catch (error) {
         console.error('Error loading contributions:', error);
+        setContributions([]);
       }
       return;
     }
@@ -233,10 +235,11 @@ const Admin = () => {
         headers,
         withCredentials: true
       });
-      setContributions(response.data.contributions || []);
+      setContributions(Array.isArray(response.data?.contributions) ? response.data.contributions : []);
     } catch (error) {
       console.error('Error searching contribution:', error);
       alert('Erro ao pesquisar contribuição');
+      setContributions([]);
     } finally {
       setSearchingContribution(false);
     }
