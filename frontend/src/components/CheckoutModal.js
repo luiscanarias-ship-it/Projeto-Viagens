@@ -4,8 +4,27 @@ import {
   X, Check, Copy, Bitcoin, Smartphone, ExternalLink,
   Wallet, CreditCard, ArrowRight, QrCode
 } from 'lucide-react';
-import { QRCodeSVG } from 'qrcode.react';
+import QRCode from 'qrcode';
 import axios from 'axios';
+
+// Canvas-based QR code component using qrcode library directly
+const QRCanvas = ({ value, size = 120 }) => {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    if (canvasRef.current && value) {
+      QRCode.toCanvas(canvasRef.current, value, {
+        width: size,
+        margin: 1,
+        errorCorrectionLevel: 'M'
+      }, (error) => {
+        if (error) console.error('QR generation error:', error);
+      });
+    }
+  }, [value, size]);
+
+  return <canvas ref={canvasRef} />;
+};
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -522,16 +541,15 @@ const CheckoutModal = ({
                   {/* QR Code + Payment Details - side by side on larger, stacked compact on small */}
                   <div className="bg-white border border-stone-200 rounded-xl p-3">
                     <div className="flex items-start gap-3">
-                      {/* QR Code - compact */}
+                      {/* QR Code - canvas based for reliable URI encoding */}
                       <div className="bg-white p-2 rounded-lg shadow-sm border border-stone-100 flex-shrink-0">
-                        <QRCodeSVG 
+                        <QRCanvas 
                           value={
                             selectedMethod === 'crypto' 
                               ? getCryptoQRValue(selectedCrypto, selectedAmount)
                               : getPaymentQRValue(selectedMethod)
                           }
-                          size={88}
-                          level="M"
+                          size={100}
                         />
                         {/* Network + amount note under QR for crypto */}
                         {selectedMethod === 'crypto' && cryptoData && (
