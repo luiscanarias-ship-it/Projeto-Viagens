@@ -105,6 +105,11 @@ export const AuthProvider = ({ children }) => {
       { session_id: sessionId },
       { withCredentials: true }
     );
+    // Store JWT token for Authorization header
+    if (response.data.token) {
+      localStorage.setItem('token', response.data.token);
+      setToken(response.data.token);
+    }
     setUser(response.data.user);
     return response.data.user;
   };

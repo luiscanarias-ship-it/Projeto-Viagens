@@ -982,6 +982,15 @@ async def process_google_session(request: Request, response: Response):
             "name": google_data.get("name"),
             "picture": google_data.get("picture"),
             "is_admin": is_admin,
+            "avatar": None,
+            "use_real_name": True,
+            "anonymous_alias": generate_anonymous_alias(),
+            "sponsor_id": None,
+            "level": "sonhador",
+            "contributed_to_main_trip": False,
+            "valid_referrals_count": 0,
+            "registered_at": datetime.now(timezone.utc).isoformat(),
+            "embaixador_unlocked_at": None,
             "created_at": datetime.now(timezone.utc).isoformat()
         }
         await db.users.insert_one(user_doc)
@@ -1004,7 +1013,11 @@ async def process_google_session(request: Request, response: Response):
         max_age=7*24*60*60
     )
     
+    # Also generate JWT token for Authorization header fallback
+    jwt_token = create_jwt_token(user_id, is_admin)
+    
     return {
+        "token": jwt_token,
         "user": {
             "user_id": user_id,
             "email": email,
