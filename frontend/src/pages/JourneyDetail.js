@@ -87,6 +87,8 @@ const JourneyDetail = () => {
   const [showPaymentInstructions, setShowPaymentInstructions] = useState(false);
   const [refCopied, setRefCopied] = useState(false);
   const stripeFormRef = React.useRef(null);
+  const paymentModalRef = React.useRef(null);
+  const registerButtonRef = React.useRef(null);
   
   // Travel planning state
   const [travelResources, setTravelResources] = useState(null);
@@ -129,6 +131,27 @@ const JourneyDetail = () => {
 
     fetchData();
   }, [id, navigate, openPayment]);
+
+  // Auto-scroll to register button when payment method is selected
+  useEffect(() => {
+    if (selectedMethod && selectedAmount && paymentModalRef.current) {
+      // Small delay to allow the UI to render
+      setTimeout(() => {
+        if (registerButtonRef.current) {
+          registerButtonRef.current.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          });
+        } else {
+          // Fallback: scroll modal to bottom
+          paymentModalRef.current.scrollTo({
+            top: paymentModalRef.current.scrollHeight,
+            behavior: 'smooth'
+          });
+        }
+      }, 300);
+    }
+  }, [selectedMethod, selectedCrypto]);
 
   const handleSupport = () => {
     setShowPayment(true);
@@ -814,6 +837,7 @@ const JourneyDetail = () => {
       {showPayment && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <motion.div
+            ref={paymentModalRef}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             className="bg-white rounded-3xl w-full max-w-lg max-h-[95vh] overflow-y-auto scroll-smooth"
@@ -1124,6 +1148,7 @@ const JourneyDetail = () => {
                   animate={{ opacity: 1 }}
                 >
                   <button
+                    ref={registerButtonRef}
                     onClick={handlePayment}
                     disabled={processing}
                     className="w-full bg-[#2D2A26] text-white py-3 px-6 rounded-xl font-medium hover:bg-[#4A4640] transition-all flex items-center justify-center gap-2"
