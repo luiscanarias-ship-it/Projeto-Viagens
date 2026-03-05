@@ -1,0 +1,140 @@
+<analysis>Análise da Sessão e Resumo de Transferência
+
+### original_problem_statement
+O utilizador solicitou a continuação do trabalho no projeto Projeto-Viagens, acessível em .
+
+Ao longo da sessão, foram feitas várias solicitações, culminando na implementação de um sistema de referência de pagamento e, em seguida, na especificação de um novo fluxo de checkout modal de 3 passos com as seguintes funcionalidades:
+- **PRODUCT REQUIREMENTS (Latest):**
+    - Substituir o fluxo de pagamento atual por um checkout modal de 3 passos (Valor → Pagamento → Instruções).
+    - **Passo 1 (Valor):** Seleção de montante, com 10€ pré-selecionado.
+    - **Passo 2 (Método de Pagamento):** Seleção entre Criptomoeda (com badge Top), MBWay, Revolut, Wise, e PayPal.
+    - **Passo 3 (Instruções):**
+        - Mostrar dados de pagamento, referência (), e um botão para copiar a referência.
+        - Gerar e exibir **QR codes** para todos os métodos de pagamento.
+        - Para criptomoedas (BTC, ETH, USDT, USDC), calcular o valor automaticamente usando uma API de preços (ex: CoinGecko) e incluir no QR code ().
+    - **Lógica de Criação:** A contribuição () deve ser criada apenas no Passo 3 para garantir que a referência é gerada.
+    - **UX:** O modal deve ser responsivo, com ícones para cada método e animações suaves entre os passos.
+
+### **User's preferred language**:
+Português. O próximo agente DEVE comunicar exclusivamente em português.
+
+### **what currently exists?**
+Uma aplicação full-stack de crowdfunding para viagens chamada 4Luis.
+- **Backend:** FastAPI com MongoDB.
+- **Frontend:** React com TailwindCSS.
+- **Funcionalidades:**
+    - Autenticação de utilizadores (JWT, Google OAuth).
+    - Sistema de progressão (Visitante, Sonhador, Embaixador).
+    - Painel de Administração para gestão de viagens, utilizadores e contribuições.
+    - Um sistema de referência de pagamento () para métodos manuais (MBWay, PayPal, etc.).
+    - A implementação de um novo checkout modal de 3 passos está em andamento, substituindo a lógica anterior. O Stripe está configurado mas desativado na UI a pedido do utilizador.
+
+### **Last working item**:
+- **Last item agent was working:** Implementação do novo checkout modal de 3 passos, com foco na geração de QR codes e conversão de valores para criptomoedas, conforme a especificação detalhada do utilizador.
+- **Status:** IN PROGRESS
+- **Agent Testing Done:** N
+- **Which testing method agent to use?** Frontend testing agent. O fluxo do modal é complexo (3 passos, estados, chamadas de API, geração de QR codes) e requer um teste completo da UI. O backend pode precisar de testes se forem adicionados novos endpoints (ex: para obter preços de cripto).
+- **User Testing Done:** N
+
+### **All Pending/In progress Issue list**:
+- **Issue 1: Instabilidade do Painel de Administração (P1)**
+  - **Descrição:** O utilizador reportou múltiplos erros no painel de administração ao longo da sessão, incluindo um erro de renderização do React (Objects are not valid as a React child) e problemas de UI/UX. Embora o erro específico de renderização tenha sido abordado, a estabilidade geral do painel é questionável.
+  - **Next debug checklist:** Realizar um smoke test completo em todas as abas do painel de administração () após o login para garantir que não há erros de runtime e que a UI se comporta como esperado. Verificar as chamadas de API no network tab do browser.
+  - **Why fix this issue?** O painel de administração é crítico para a gestão da plataforma. Garantir a sua estabilidade é fundamental para o utilizador.
+  - **Status:** TESTING PENDING
+  - **Is recurring issue?** Y
+  - **Should Test frontend/backend/both after fix?** Frontend.
+
+### **In progress Task List**:
+- **Task 1: Concluir o Novo Checkout Modal de 3 Passos (P0)**
+    - **Where to resume:** O agente iniciou a reescrita do componente em . É necessário concluir a implementação, garantindo que todas as especificações do utilizador são cumpridas:
+        1.  Adicionar uma biblioteca de geração de QR codes (ex: ).
+        2.  Implementar a lógica para gerar QR codes para todos os métodos de pagamento (PayPal, Revolut, MBWay).
+        3.  Para Criptomoedas:
+            - Integrar uma API de preços (ex: CoinGecko) para converter EUR para os valores de BTC, ETH, etc.
+            - Criar um novo endpoint no backend se necessário para fazer esta chamada de forma segura.
+            - Gerar QR codes no formato .
+        4.  Garantir que a  é criada no backend apenas ao chegar ao Passo 3.
+        5.  Assegurar que o design é responsivo e compacto, como solicitado.
+    - **What will be achieved with this?** Um fluxo de checkout moderno, intuitivo e com baixa fricção, que suporta pagamentos manuais e de criptomoeda com QR codes, aumentando a probabilidade de conversão.
+    - **Status:** IN PROGRESS
+    - **Should Test frontend/backend/both after fix?** Both.
+
+### **Upcoming and Future Tasks**:
+- **Task 1: Melhorar o Formulário de Edição de Viagens no Admin (P1)**
+    - O utilizador queixou-se que o formulário para editar viagens no painel de admin era pouco friendly. O agente começou a criar um modal mais robusto, mas foi interrompido. É necessário revisitar esta funcionalidade, confirmar os requisitos com o utilizador e implementar um formulário de edição claro e completo. O ficheiro relevante é .
+
+### **Completed work in this session**
+- **Sistema de Referência de Pagamento:** Implementado um sistema onde cada contribuição gera um código  para reconciliação manual de pagamentos (MBWay, PayPal, etc.).
+- **Pesquisa no Admin:** Adicionada funcionalidade de pesquisa por  no painel de administração.
+- **Checkout Modal (Iterações Anteriores):** Criado um checkout de 1 passo e, posteriormente, um checkout de 3 passos, que foram evoluções até ao requisito final (com QR codes).
+- **Correção de Bugs Críticos:**
+    - Resolvidos múltiplos problemas com o **Preview** que não funcionava.
+    - Corrigido o URL do backend no frontend ().
+    - Reativada a **viagem principal** (China) que não estava a aparecer na homepage.
+    - Resolvido um **erro de renderização do React** (Objects are not valid as a React child) no painel de administração.
+- **Melhorias de UI/UX:**
+    - Otimizado o modal de pagamento para ser mais compacto e responsivo.
+    - Adicionado auto-scroll e mensagens de instrução mais claras.
+    - Corrigido um bug de responsividade no header onde o botão de login/utilizador desaparecia.
+- **Gestão do Projeto:**
+    - Projeto restaurado a partir de um branch git ().
+    - Criado um backup do projeto ().
+
+### **Code Architecture**
+
+
+### **Key Technical Concepts**
+- **Frontend:** React, TailwindCSS, Axios, State Management com , , .
+- **Backend:** FastAPI, Pydantic (para validação de dados), Beanie (ODM para MongoDB), JWT (para autenticação).
+- **Database:** MongoDB.
+- **Auth:** Autenticação baseada em tokens JWT armazenados em cookies HTTPOnly.
+
+### **key DB schema**
+- : 
+- : 
+- : 
+
+### **All files of reference**
+- : **Em progresso.** Onde o novo fluxo de checkout de 3 passos está a ser implementado.
+- : **Modificado.** Integra o  e controla a sua abertura.
+- : **Modificado.** Contém a lógica do painel de administração, incluindo a pesquisa de contribuições e o formulário de edição de viagens.
+- : **Modificado.** Contém os endpoints da API para contribuições, autenticação e gestão.
+- : **Modificado.** Define os modelos de dados (schemas) para o MongoDB.
+- : **Criado.** Backup do estado do projeto.
+
+### **Critical Info for New Agent**
+- **Frustração do Utilizador:** O utilizador expressou frustração extrema com a perda de trabalho e bugs recorrentes. É crucial ser empático, comunicar de forma clara e proativa, e validar frequentemente o progresso.
+- **Foco no Checkout:** A tarefa prioritária é a implementação do novo checkout modal com QR codes. As implementações anteriores devem ser consideradas obsoletas.
+- **Credenciais de Admin:**  / . O agente teve de criar este utilizador e corrigir o seu estado de  na base de dados.
+- **Pagamentos Stripe:** O código do Stripe existe mas está **desativado** na UI a pedido do utilizador. O foco atual é em métodos de pagamento manuais e cripto.
+
+### **Last 10 User Messages and any pending HUMAN messages**
+1.  **[PENDING] User (Msg 634):** Forneceu uma especificação detalhada para um novo checkout modal de 3 passos, incluindo QR codes, conversão de cripto, e lógica específica por método de pagamento. **Esta é a tarefa ativa.**
+2.  **User (Msg 629):** Confirmou que a explicação sobre o logout/login estava ótima. (Resolvido)
+3.  **User (Msg 625):** Perguntou por que o botão de login não aparecia. (Resolvido, era uma incompreensão)
+4.  **User (Msg 620):** Enviou uma captura de ecrã que ajudou a diagnosticar a confusão sobre o estado de login. (Resolvido)
+5.  **User (Msg 593):** Reportou um bug de responsividade no header. (Resolvido)
+6.  **User (Msg 580):** Pediu melhorias na usabilidade do formulário de edição de viagens no admin. (Pendente, tarefa futura)
+7.  **User (Msg 527):** Reportou um erro de runtime no painel de administração. (Resolvido)
+8.  **User (Msg 488):** Solicitou a funcionalidade de pesquisa por referência no admin. (Resolvido)
+9.  **User (Msg 483):** Aprovou a mensagem de aviso adicionada ao modal. (Resolvido)
+10. **User (Msg 477):** Pediu para adicionar uma mensagem de aviso sobre a importância da referência de pagamento. (Resolvido)
+
+### **Project Health Check:**
+- **Broken:** A funcionalidade de checkout está partida porque está a meio de uma re-implementação major. O painel de admin pode ter instabilidades latentes.
+- **Mocked:** Nenhum.
+
+### **3rd Party Integrations**
+- Google OAuth (para login)
+- Resend (para emails transacionais)
+- Stripe (código existe, mas desativado na UI)
+- CoinGecko (ou similar): **A ser adicionada** para obter preços de criptomoedas.
+
+### **Testing status**
+- **Testing agent used after significant changes:** YES (foi usado para tentar resolver o Network Error do Stripe).
+- **Troubleshoot agent used after agent stuck in loop:** YES (foi usado para diagnosticar problemas com variáveis de ambiente).
+- **Test files created:** Nenhum.
+
+### **Credentials to test flow:**
+- **Admin:**  / </analysis>

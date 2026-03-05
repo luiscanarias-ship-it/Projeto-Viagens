@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  X, Check, Copy, Bitcoin, Smartphone, ExternalLink, ChevronLeft,
-  Wallet, CreditCard, ArrowRight
+  X, Check, Copy, Bitcoin, Smartphone, ExternalLink,
+  Wallet, CreditCard, ArrowRight, QrCode
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import axios from 'axios';
@@ -13,29 +13,87 @@ const API = `${BACKEND_URL}/api`;
 // Fixed contribution amounts
 const amounts = [10, 20, 50, 100, 200, 500, 1000];
 
-// Crypto types
-const cryptoTypes = [
-  { id: 'btc', name: 'Bitcoin', symbol: 'BTC', color: '#F7931A' },
-  { id: 'eth', name: 'Ethereum', symbol: 'ETH', color: '#627EEA' },
-  { id: 'usdt', name: 'Tether', symbol: 'USDT', color: '#26A17B' },
-  { id: 'usdc', name: 'USD Coin', symbol: 'USDC', color: '#2775CA' }
-];
+// Crypto configurations with addresses
+const cryptoConfig = {
+  btc: {
+    id: 'btc',
+    name: 'Bitcoin',
+    symbol: 'BTC',
+    color: '#F7931A',
+    address: 'bc1qw34att4qwerdapfpzy3e98xz894uy7kz3sd7vm',
+    network: 'Bitcoin',
+    protocol: 'bitcoin',
+    coingeckoId: 'bitcoin'
+  },
+  eth: {
+    id: 'eth',
+    name: 'Ethereum',
+    symbol: 'ETH',
+    color: '#627EEA',
+    address: '0x48dF0E85dA06688445f3eEabaBE9DF57bA10A991',
+    network: 'ERC20',
+    protocol: 'ethereum',
+    coingeckoId: 'ethereum'
+  },
+  usdt: {
+    id: 'usdt',
+    name: 'Tether',
+    symbol: 'USDT',
+    color: '#26A17B',
+    address: 'TGcWs89gTkkxARVT8UJsCFUMc9sQkvUmtL',
+    network: 'TRC20',
+    protocol: 'tron',
+    coingeckoId: 'tether'
+  },
+  usdc: {
+    id: 'usdc',
+    name: 'USD Coin',
+    symbol: 'USDC',
+    color: '#2775CA',
+    address: 'xdc48dF0E85dA06688445f3eEabaBE9DF57bA10A991',
+    network: 'XDC Network',
+    protocol: 'xdc',
+    coingeckoId: 'usd-coin'
+  }
+};
 
-// Payment methods
-const paymentMethods = [
-  { id: 'crypto', name: 'Criptomoeda', icon: Bitcoin, description: 'BTC, ETH, USDT, USDC', recommended: true },
-  { id: 'mbway', name: 'MBWay', icon: Smartphone, description: '+351 968 068 535' },
-  { id: 'revolut', name: 'Revolut', icon: Wallet, description: '@luis4dreams' },
-  { id: 'wise', name: 'Wise', icon: CreditCard, description: 'Transferência' },
-  { id: 'paypal', name: 'PayPal', icon: ExternalLink, description: 'paypal.me' }
-];
+// Payment methods configuration
+const paymentMethodsConfig = {
+  mbway: {
+    id: 'mbway',
+    name: 'MBWay',
+    icon: Smartphone,
+    phone: '+351 968 068 535',
+    phoneClean: '351968068535'
+  },
+  revolut: {
+    id: 'revolut',
+    name: 'Revolut',
+    icon: Wallet,
+    username: '@luism2npb',
+    link: 'https://revolut.me/luism2npb'
+  },
+  wise: {
+    id: 'wise',
+    name: 'Wise',
+    icon: CreditCard,
+    username: '@luisc8030',
+    link: 'https://wise.com/pay/me/luisc8030'
+  },
+  paypal: {
+    id: 'paypal',
+    name: 'PayPal',
+    icon: ExternalLink,
+    username: 'LuisCanarias',
+    link: 'https://paypal.me/LuisCanarias'
+  }
+};
 
 const CheckoutModal = ({ 
   isOpen, 
   onClose, 
   journeyName = 'China',
   journeyId,
-  paymentInfo,
   getAuthHeaders,
   user 
 }) => {
@@ -47,7 +105,33 @@ const CheckoutModal = ({
   const [contribution, setContribution] = useState(null);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [copiedField, setCopiedField] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [cryptoPrices, setCryptoPrices] = useState({});
+  const [loadingPrices, setLoadingPrices] = useState(false);
+
+  // Fetch crypto prices from CoinGecko
+  const fetchCryptoPrices = useCallback(async () => {
+    setLoadingPrices(true);
+    try {
+      const ids = Object.values(cryptoConfig).map(c => c.coingeckoId).join(',');
+      const response = await axios.get(
+        `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=eur`
+      );
+      setCryptoPrices(response.data);
+    } catch (error) {
+      console.error('Error fetching crypto prices:', error);
+      // Fallback prices if API fails
+      setCryptoPrices({
+        bitcoin: { eur: 85000 },
+        ethereum: { eur: 3200 },
+        tether: { eur: 0.92 },
+        'usd-coin': { eur: 0.92 }
+      });
+    } finally {
+      setLoadingPrices(false);
+    }
+  }, []);
 
   // Reset state when modal closes
   useEffect(() => {
@@ -59,18 +143,78 @@ const CheckoutModal = ({
       setContribution(null);
       setShowConfirmation(false);
       setCopied(false);
+      setCopiedField(null);
+    } else {
+      // Fetch crypto prices when modal opens
+      fetchCryptoPrices();
     }
-  }, [isOpen]);
+  }, [isOpen, fetchCryptoPrices]);
 
-  // Create contribution when reaching step 3
-  const createContribution = async () => {
+  // Calculate crypto amount from EUR
+  const getCryptoAmount = (euroAmount, cryptoId) => {
+    const crypto = cryptoConfig[cryptoId];
+    if (!crypto || !cryptoPrices[crypto.coingeckoId]) return null;
+    
+    const priceInEur = cryptoPrices[crypto.coingeckoId].eur;
+    const amount = euroAmount / priceInEur;
+    
+    // Format based on crypto type
+    if (cryptoId === 'btc') {
+      return amount.toFixed(8);
+    } else if (cryptoId === 'eth') {
+      return amount.toFixed(6);
+    } else {
+      return amount.toFixed(2);
+    }
+  };
+
+  // Generate QR code value for crypto
+  const getCryptoQRValue = (cryptoId, euroAmount) => {
+    const crypto = cryptoConfig[cryptoId];
+    if (!crypto) return crypto?.address || '';
+    
+    const cryptoAmount = getCryptoAmount(euroAmount, cryptoId);
+    if (!cryptoAmount) return crypto.address;
+    
+    // Different protocols have different URI formats
+    switch (cryptoId) {
+      case 'btc':
+        return `bitcoin:${crypto.address}?amount=${cryptoAmount}`;
+      case 'eth':
+        return `ethereum:${crypto.address}?value=${cryptoAmount}`;
+      default:
+        return crypto.address;
+    }
+  };
+
+  // Generate QR code value for payment methods
+  const getPaymentQRValue = (methodId) => {
+    const method = paymentMethodsConfig[methodId];
+    if (!method) return '';
+    
+    switch (methodId) {
+      case 'paypal':
+        return `${method.link}/${selectedAmount}EUR`;
+      case 'revolut':
+        return method.link;
+      case 'wise':
+        return method.link;
+      case 'mbway':
+        return `tel:${method.phoneClean}`;
+      default:
+        return '';
+    }
+  };
+
+  // Create contribution
+  const createContribution = async (method, cryptoType = null) => {
     setLoading(true);
     try {
       const response = await axios.post(`${API}/contributions/create`, {
         amount: selectedAmount,
-        payment_method: selectedMethod,
+        payment_method: method,
         journey_id: journeyId,
-        crypto_type: selectedMethod === 'crypto' ? selectedCrypto : null,
+        crypto_type: cryptoType,
         contributor_name: user?.name || null,
         contributor_email: user?.email || null
       }, {
@@ -78,10 +222,11 @@ const CheckoutModal = ({
       });
       
       setContribution(response.data);
-      setStep(3);
+      return response.data;
     } catch (error) {
       console.error('Error creating contribution:', error);
       alert(error.response?.data?.detail || 'Erro ao registar contribuição');
+      return null;
     } finally {
       setLoading(false);
     }
@@ -97,25 +242,9 @@ const CheckoutModal = ({
     }
     
     // Create contribution and go to step 3
-    setLoading(true);
-    try {
-      const response = await axios.post(`${API}/contributions/create`, {
-        amount: selectedAmount,
-        payment_method: methodId,
-        journey_id: journeyId,
-        contributor_name: user?.name || null,
-        contributor_email: user?.email || null
-      }, {
-        headers: getAuthHeaders ? getAuthHeaders() : {}
-      });
-      
-      setContribution(response.data);
+    const contrib = await createContribution(methodId);
+    if (contrib) {
       setStep(3);
-    } catch (error) {
-      console.error('Error creating contribution:', error);
-      alert(error.response?.data?.detail || 'Erro ao registar contribuição');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -123,35 +252,22 @@ const CheckoutModal = ({
   const handleCryptoSelect = async (cryptoId) => {
     setSelectedCrypto(cryptoId);
     
-    // Create contribution with crypto
-    setLoading(true);
-    try {
-      const response = await axios.post(`${API}/contributions/create`, {
-        amount: selectedAmount,
-        payment_method: 'crypto',
-        journey_id: journeyId,
-        crypto_type: cryptoId,
-        contributor_name: user?.name || null,
-        contributor_email: user?.email || null
-      }, {
-        headers: getAuthHeaders ? getAuthHeaders() : {}
-      });
-      
-      setContribution(response.data);
+    // Create contribution immediately for crypto (to avoid losing payments)
+    const contrib = await createContribution('crypto', cryptoId);
+    if (contrib) {
       setStep(3);
-    } catch (error) {
-      console.error('Error creating contribution:', error);
-      alert(error.response?.data?.detail || 'Erro ao registar contribuição');
-    } finally {
-      setLoading(false);
     }
   };
 
   // Copy to clipboard
-  const copyToClipboard = (text) => {
+  const copyToClipboard = (text, field = null) => {
     navigator.clipboard.writeText(text);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setCopiedField(field);
+    setTimeout(() => {
+      setCopied(false);
+      setCopiedField(null);
+    }, 2000);
   };
 
   // Handle close
@@ -159,56 +275,24 @@ const CheckoutModal = ({
     onClose();
   };
 
-  // Get payment details based on method
-  const getPaymentDetails = () => {
-    if (!paymentInfo) return null;
-    
-    switch (selectedMethod) {
-      case 'mbway':
-        return {
-          label: 'Enviar pagamento para:',
-          value: paymentInfo.mbway?.phone || '+351 968 068 535',
-          copyValue: paymentInfo.mbway?.phone || '+351968068535'
-        };
-      case 'revolut':
-        return {
-          label: 'Enviar pagamento para:',
-          value: paymentInfo.revolut?.tag || '@luis4dreams',
-          copyValue: paymentInfo.revolut?.tag || '@luis4dreams'
-        };
-      case 'wise':
-        return {
-          label: 'Enviar pagamento para:',
-          value: paymentInfo.wise?.email || 'luis@4luis.com',
-          copyValue: paymentInfo.wise?.email || 'luis@4luis.com'
-        };
-      case 'paypal':
-        return {
-          label: 'Enviar pagamento via:',
-          value: paymentInfo.paypal?.link || 'paypal.me/LuisCanarias',
-          copyValue: `https://${paymentInfo.paypal?.link || 'paypal.me/LuisCanarias'}/${selectedAmount}EUR`,
-          isLink: true
-        };
-      case 'crypto':
-        if (selectedCrypto && paymentInfo.crypto?.[selectedCrypto]) {
-          return {
-            label: `Enviar ${paymentInfo.crypto[selectedCrypto].symbol} para:`,
-            value: paymentInfo.crypto[selectedCrypto].address,
-            copyValue: paymentInfo.crypto[selectedCrypto].address,
-            network: paymentInfo.crypto[selectedCrypto].network,
-            showQR: true,
-            color: paymentInfo.crypto[selectedCrypto].color
-          };
-        }
-        return null;
-      default:
-        return null;
-    }
+  // Go back to step 1
+  const goToStep1 = () => {
+    setStep(1);
+    setSelectedMethod(null);
+    setSelectedCrypto(null);
+    setContribution(null);
+  };
+
+  // Go back to step 2
+  const goToStep2 = () => {
+    setStep(2);
+    setContribution(null);
   };
 
   if (!isOpen) return null;
 
-  const paymentDetails = getPaymentDetails();
+  const cryptoData = selectedCrypto ? cryptoConfig[selectedCrypto] : null;
+  const methodData = selectedMethod && selectedMethod !== 'crypto' ? paymentMethodsConfig[selectedMethod] : null;
 
   return (
     <AnimatePresence>
@@ -224,7 +308,7 @@ const CheckoutModal = ({
           <div className="bg-gradient-to-r from-[#FFBE98]/20 to-[#E6F4F1]/30 p-4 border-b border-stone-100">
             <div className="flex items-center justify-between mb-3">
               <div>
-                <h2 className="font-bold text-[#2D2A26]">Contribuir para a Viagem</h2>
+                <h2 className="font-bold text-[#2D2A26]">Contribuir para a Viagem Principal</h2>
                 <p className="text-sm text-[#6B6661]">Destino: {journeyName}</p>
               </div>
               <button
@@ -266,7 +350,7 @@ const CheckoutModal = ({
           </div>
 
           {/* Content */}
-          <div className="p-4 overflow-y-auto max-h-[60vh]">
+          <div className="p-4 overflow-y-auto max-h-[65vh]">
             <AnimatePresence mode="wait">
               
               {/* STEP 1: Choose Amount */}
@@ -322,7 +406,7 @@ const CheckoutModal = ({
                       <p className="font-bold text-lg text-[#2D2A26]">€{selectedAmount}</p>
                     </div>
                     <button
-                      onClick={() => setStep(1)}
+                      onClick={goToStep1}
                       className="text-sm text-[#FFBE98] hover:underline"
                     >
                       Alterar valor
@@ -333,7 +417,32 @@ const CheckoutModal = ({
 
                   {/* Payment methods */}
                   <div className="space-y-2">
-                    {paymentMethods.map((method) => {
+                    {/* Crypto option */}
+                    <button
+                      onClick={() => handleMethodSelect('crypto')}
+                      disabled={loading}
+                      className={`w-full p-3 rounded-xl border-2 transition-all flex items-center gap-3 ${
+                        selectedMethod === 'crypto'
+                          ? 'border-[#FFBE98] bg-[#FFBE98]/10'
+                          : 'border-[#F7931A]/40 bg-gradient-to-r from-[#F7931A]/5 to-[#627EEA]/5 hover:border-[#F7931A]'
+                      }`}
+                    >
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[#F7931A]/20">
+                        <Bitcoin className="w-5 h-5 text-[#F7931A]" />
+                      </div>
+                      <div className="flex-1 text-left">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">Criptomoeda</span>
+                          <span className="text-[10px] bg-[#F7931A] text-white px-2 py-0.5 rounded-full font-bold">
+                            TOP
+                          </span>
+                        </div>
+                        <span className="text-xs text-[#6B6661]">BTC, ETH, USDT, USDC</span>
+                      </div>
+                    </button>
+
+                    {/* Other payment methods */}
+                    {Object.values(paymentMethodsConfig).map((method) => {
                       const Icon = method.icon;
                       return (
                         <button
@@ -343,26 +452,17 @@ const CheckoutModal = ({
                           className={`w-full p-3 rounded-xl border-2 transition-all flex items-center gap-3 ${
                             selectedMethod === method.id
                               ? 'border-[#FFBE98] bg-[#FFBE98]/10'
-                              : method.recommended
-                              ? 'border-[#F7931A]/40 bg-gradient-to-r from-[#F7931A]/5 to-[#627EEA]/5 hover:border-[#F7931A]'
                               : 'border-stone-200 hover:border-stone-300'
                           }`}
                         >
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                            method.recommended ? 'bg-[#F7931A]/20' : 'bg-stone-100'
-                          }`}>
-                            <Icon className={`w-5 h-5 ${method.recommended ? 'text-[#F7931A]' : 'text-[#6B6661]'}`} />
+                          <div className="w-10 h-10 rounded-full flex items-center justify-center bg-stone-100">
+                            <Icon className="w-5 h-5 text-[#6B6661]" />
                           </div>
                           <div className="flex-1 text-left">
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium">{method.name}</span>
-                              {method.recommended && (
-                                <span className="text-[10px] bg-[#F7931A] text-white px-2 py-0.5 rounded-full font-bold">
-                                  TOP
-                                </span>
-                              )}
-                            </div>
-                            <span className="text-xs text-[#6B6661]">{method.description}</span>
+                            <span className="font-medium">{method.name}</span>
+                            <span className="text-xs text-[#6B6661] block">
+                              {method.phone || method.username || method.link?.replace('https://', '')}
+                            </span>
                           </div>
                           {loading && selectedMethod === method.id && (
                             <div className="w-5 h-5 border-2 border-[#FFBE98] border-t-transparent rounded-full animate-spin" />
@@ -377,36 +477,43 @@ const CheckoutModal = ({
                     <motion.div
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: 'auto' }}
-                      className="space-y-2"
+                      className="space-y-3 pt-2 border-t border-stone-100"
                     >
-                      <p className="text-sm text-[#6B6661]">Escolhe a moeda:</p>
-                      <div className="grid grid-cols-4 gap-2">
-                        {cryptoTypes.map((crypto) => (
-                          <button
-                            key={crypto.id}
-                            onClick={() => handleCryptoSelect(crypto.id)}
-                            disabled={loading}
-                            className={`p-3 rounded-xl border-2 transition-all flex flex-col items-center ${
-                              selectedCrypto === crypto.id
-                                ? 'border-[#FFBE98] bg-[#FFBE98]/10'
-                                : 'border-stone-200 hover:border-stone-300'
-                            }`}
-                          >
-                            <span className="font-bold text-sm" style={{ color: crypto.color }}>
-                              {crypto.symbol}
-                            </span>
-                            {loading && selectedCrypto === crypto.id && (
-                              <div className="w-4 h-4 border-2 border-[#FFBE98] border-t-transparent rounded-full animate-spin mt-1" />
-                            )}
-                          </button>
-                        ))}
+                      <p className="text-sm text-[#6B6661]">Escolhe a criptomoeda:</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {Object.values(cryptoConfig).map((crypto) => {
+                          const cryptoAmount = getCryptoAmount(selectedAmount, crypto.id);
+                          return (
+                            <button
+                              key={crypto.id}
+                              onClick={() => handleCryptoSelect(crypto.id)}
+                              disabled={loading}
+                              className={`p-3 rounded-xl border-2 transition-all ${
+                                selectedCrypto === crypto.id
+                                  ? 'border-[#FFBE98] bg-[#FFBE98]/10'
+                                  : 'border-stone-200 hover:border-stone-300'
+                              }`}
+                            >
+                              <p className="font-bold text-sm" style={{ color: crypto.color }}>
+                                {crypto.symbol}
+                              </p>
+                              <p className="text-[10px] text-[#6B6661]">{crypto.network}</p>
+                              {cryptoAmount && !loadingPrices && (
+                                <p className="text-xs text-[#6B6661] mt-1">≈ {cryptoAmount}</p>
+                              )}
+                              {loading && selectedCrypto === crypto.id && (
+                                <div className="w-4 h-4 border-2 border-[#FFBE98] border-t-transparent rounded-full animate-spin mx-auto mt-1" />
+                              )}
+                            </button>
+                          );
+                        })}
                       </div>
                     </motion.div>
                   )}
                 </motion.div>
               )}
 
-              {/* STEP 3: Payment Instructions - Compact */}
+              {/* STEP 3: Payment Instructions */}
               {step === 3 && !showConfirmation && contribution && (
                 <motion.div
                   key="step3"
@@ -415,64 +522,113 @@ const CheckoutModal = ({
                   exit={{ opacity: 0, x: -20 }}
                   className="space-y-3"
                 >
-                  {/* Summary - Single line */}
+                  {/* Summary */}
                   <div className="flex items-center justify-between text-sm bg-stone-50 rounded-lg px-3 py-2">
                     <span className="text-[#6B6661]">
-                      <strong className="text-[#2D2A26]">€{selectedAmount}</strong> via <strong className="text-[#2D2A26]">{paymentMethods.find(m => m.id === selectedMethod)?.name}{selectedCrypto && ` (${selectedCrypto.toUpperCase()})`}</strong>
+                      <strong className="text-[#2D2A26]">€{selectedAmount}</strong> via{' '}
+                      <strong className="text-[#2D2A26]">
+                        {selectedMethod === 'crypto' 
+                          ? `${cryptoData?.name} (${cryptoData?.symbol})`
+                          : methodData?.name
+                        }
+                      </strong>
                     </span>
-                    <button
-                      onClick={() => { setStep(1); setContribution(null); }}
-                      className="text-xs text-[#FFBE98] hover:underline"
-                    >
-                      Alterar
-                    </button>
+                    <div className="flex gap-2">
+                      <button onClick={goToStep1} className="text-xs text-[#FFBE98] hover:underline">Valor</button>
+                      <button onClick={goToStep2} className="text-xs text-[#FFBE98] hover:underline">Método</button>
+                    </div>
                   </div>
 
-                  {/* Payment details - Compact */}
-                  {paymentDetails && (
-                    <div className="bg-white border border-stone-200 rounded-xl p-3">
-                      {paymentDetails.showQR ? (
-                        <div className="flex items-center gap-3">
-                          <QRCodeSVG value={paymentDetails.value} size={80} />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs text-[#6B6661] mb-1">{paymentDetails.label}</p>
-                            <p className="text-xs font-mono break-all bg-stone-50 p-2 rounded">{paymentDetails.value}</p>
-                            {paymentDetails.network && (
-                              <p className="text-xs mt-1" style={{ color: paymentDetails.color }}>Rede: {paymentDetails.network}</p>
-                            )}
+                  {/* QR Code and Payment Details */}
+                  <div className="bg-white border border-stone-200 rounded-xl p-4">
+                    <div className="flex flex-col items-center gap-3">
+                      {/* QR Code */}
+                      <div className="bg-white p-3 rounded-xl shadow-sm border border-stone-100">
+                        <QRCodeSVG 
+                          value={
+                            selectedMethod === 'crypto' 
+                              ? getCryptoQRValue(selectedCrypto, selectedAmount)
+                              : getPaymentQRValue(selectedMethod)
+                          }
+                          size={120}
+                          level="M"
+                        />
+                      </div>
+
+                      {/* Crypto specific details */}
+                      {selectedMethod === 'crypto' && cryptoData && (
+                        <div className="w-full space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-bold" style={{ color: cryptoData.color }}>
+                              {cryptoData.symbol}
+                            </span>
+                            <span className="text-xs bg-stone-100 px-2 py-1 rounded-full">
+                              Rede: {cryptoData.network}
+                            </span>
                           </div>
-                        </div>
-                      ) : (
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-xs text-[#6B6661]">{paymentDetails.label}</p>
-                            <p className="font-bold text-[#2D2A26]">{paymentDetails.value}</p>
-                          </div>
-                          {paymentDetails.isLink ? (
-                            <a
-                              href={paymentDetails.copyValue}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="px-3 py-1.5 bg-[#0070BA] text-white rounded-lg text-sm flex items-center gap-1"
-                            >
-                              <ExternalLink className="w-3 h-3" />
-                              Abrir
-                            </a>
-                          ) : (
-                            <button
-                              onClick={() => copyToClipboard(paymentDetails.copyValue)}
-                              className="px-3 py-1.5 bg-stone-100 rounded-lg text-sm flex items-center gap-1 hover:bg-stone-200"
-                            >
-                              {copied ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3" />}
-                              {copied ? 'OK' : 'Copiar'}
-                            </button>
+                          
+                          {/* Crypto amount */}
+                          {getCryptoAmount(selectedAmount, selectedCrypto) && (
+                            <div className="bg-[#FFBE98]/10 rounded-lg p-2 text-center">
+                              <p className="text-xs text-[#6B6661]">Valor aproximado:</p>
+                              <p className="font-bold text-[#2D2A26]">
+                                {getCryptoAmount(selectedAmount, selectedCrypto)} {cryptoData.symbol}
+                              </p>
+                            </div>
                           )}
+
+                          {/* Address */}
+                          <div className="bg-stone-50 rounded-lg p-2">
+                            <p className="text-xs text-[#6B6661] mb-1">Endereço:</p>
+                            <p className="text-xs font-mono break-all text-[#2D2A26]">
+                              {cryptoData.address}
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => copyToClipboard(cryptoData.address, 'address')}
+                            className="w-full py-2 bg-stone-100 rounded-lg text-sm flex items-center justify-center gap-2 hover:bg-stone-200"
+                          >
+                            {copiedField === 'address' ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                            {copiedField === 'address' ? 'Copiado!' : 'Copiar endereço'}
+                          </button>
+                        </div>
+                      )}
+
+                      {/* MBWay details */}
+                      {selectedMethod === 'mbway' && methodData && (
+                        <div className="w-full space-y-2 text-center">
+                          <p className="text-xs text-[#6B6661]">Enviar €{selectedAmount} para:</p>
+                          <p className="text-xl font-bold text-[#2D2A26]">{methodData.phone}</p>
+                          <button
+                            onClick={() => copyToClipboard(methodData.phoneClean, 'phone')}
+                            className="w-full py-2 bg-stone-100 rounded-lg text-sm flex items-center justify-center gap-2 hover:bg-stone-200"
+                          >
+                            {copiedField === 'phone' ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                            {copiedField === 'phone' ? 'Copiado!' : 'Copiar número'}
+                          </button>
+                        </div>
+                      )}
+
+                      {/* PayPal, Revolut, Wise details */}
+                      {(selectedMethod === 'paypal' || selectedMethod === 'revolut' || selectedMethod === 'wise') && methodData && (
+                        <div className="w-full space-y-2 text-center">
+                          <p className="text-xs text-[#6B6661]">Enviar €{selectedAmount} para:</p>
+                          <p className="font-bold text-[#2D2A26]">{methodData.username}</p>
+                          <a
+                            href={selectedMethod === 'paypal' ? `${methodData.link}/${selectedAmount}EUR` : methodData.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full py-2 bg-[#2D2A26] text-white rounded-lg text-sm flex items-center justify-center gap-2 hover:bg-[#4A4640]"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                            Abrir {methodData.name}
+                          </a>
                         </div>
                       )}
                     </div>
-                  )}
+                  </div>
 
-                  {/* Reference code - Compact */}
+                  {/* Reference code */}
                   <div className="bg-[#FFBE98]/10 border border-[#FFBE98]/30 rounded-xl p-3">
                     <div className="flex items-center justify-between">
                       <div>
@@ -480,21 +636,21 @@ const CheckoutModal = ({
                         <p className="text-xl font-bold text-[#2D2A26] tracking-wider">{contribution.payment_reference}</p>
                       </div>
                       <button
-                        onClick={() => copyToClipboard(contribution.payment_reference)}
+                        onClick={() => copyToClipboard(contribution.payment_reference, 'ref')}
                         className="px-3 py-2 bg-[#FFBE98]/20 rounded-lg hover:bg-[#FFBE98]/30 flex items-center gap-1 text-sm"
                       >
-                        {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4 text-[#FFBE98]" />}
-                        <span className="text-[#FFBE98]">{copied ? 'OK' : 'Copiar'}</span>
+                        {copiedField === 'ref' ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4 text-[#FFBE98]" />}
+                        <span className="text-[#FFBE98]">{copiedField === 'ref' ? 'OK' : 'Copiar'}</span>
                       </button>
                     </div>
                     <p className="text-xs text-[#6B6661] mt-1">Inclui este código na descrição do pagamento</p>
                     <p className="text-xs text-red-500 font-medium">⚠️ Sem esta referência não conseguiremos identificar o pagamento</p>
                   </div>
 
-                  {/* Trust line - Compact */}
+                  {/* Trust line */}
                   <p className="text-xs text-green-600 bg-green-50 p-2 rounded-lg flex items-center gap-1">
                     <Check className="w-3 h-3" />
-                    Contribuição confirmada assim que recebermos o pagamento
+                    A tua contribuição será confirmada assim que o pagamento for recebido
                   </p>
 
                   {/* Confirm button */}
