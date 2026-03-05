@@ -488,6 +488,7 @@ const CheckoutModal = ({
                       </button>
                     </div>
                     <p className="text-xs text-[#6B6661] mt-1">Inclui este código na descrição do pagamento</p>
+                    <p className="text-xs text-red-500 font-medium">⚠️ Sem esta referência não conseguiremos identificar o pagamento</p>
                   </div>
 
                   {/* Trust line - Compact */}
