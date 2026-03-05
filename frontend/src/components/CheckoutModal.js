@@ -305,11 +305,11 @@ const CheckoutModal = ({
           className="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-hidden shadow-2xl"
         >
           {/* Header */}
-          <div className="bg-gradient-to-r from-[#FFBE98]/20 to-[#E6F4F1]/30 p-4 border-b border-stone-100">
-            <div className="flex items-center justify-between mb-3">
+          <div className="bg-gradient-to-r from-[#FFBE98]/20 to-[#E6F4F1]/30 px-4 py-3 border-b border-stone-100">
+            <div className="flex items-center justify-between mb-2">
               <div>
-                <h2 className="font-bold text-[#2D2A26]">Contribuir para a Viagem Principal</h2>
-                <p className="text-sm text-[#6B6661]">Destino: {journeyName}</p>
+                <h2 className="font-bold text-[#2D2A26] text-sm">Contribuir para a Viagem Principal</h2>
+                <p className="text-xs text-[#6B6661]">Destino: {journeyName}</p>
               </div>
               <button
                 onClick={handleClose}
@@ -350,7 +350,7 @@ const CheckoutModal = ({
           </div>
 
           {/* Content */}
-          <div className="p-4 overflow-y-auto max-h-[65vh]">
+          <div className="px-4 py-3 overflow-y-auto max-h-[70vh]">
             <AnimatePresence mode="wait">
               
               {/* STEP 1: Choose Amount */}
@@ -520,143 +520,120 @@ const CheckoutModal = ({
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
-                  className="space-y-3"
+                  className="space-y-2"
                 >
-                  {/* Summary */}
-                  <div className="flex items-center justify-between text-sm bg-stone-50 rounded-lg px-3 py-2">
-                    <span className="text-[#6B6661]">
-                      <strong className="text-[#2D2A26]">€{selectedAmount}</strong> via{' '}
-                      <strong className="text-[#2D2A26]">
-                        {selectedMethod === 'crypto' 
-                          ? `${cryptoData?.name} (${cryptoData?.symbol})`
-                          : methodData?.name
-                        }
-                      </strong>
-                    </span>
-                    <div className="flex gap-2">
-                      <button onClick={goToStep1} className="text-xs text-[#FFBE98] hover:underline">Valor</button>
-                      <button onClick={goToStep2} className="text-xs text-[#FFBE98] hover:underline">Método</button>
-                    </div>
-                  </div>
-
-                  {/* QR Code and Payment Details */}
-                  <div className="bg-white border border-stone-200 rounded-xl p-4">
-                    <div className="flex flex-col items-center gap-3">
-                      {/* QR Code */}
-                      <div className="bg-white p-3 rounded-xl shadow-sm border border-stone-100">
+                  {/* QR Code + Payment Details - side by side on larger, stacked compact on small */}
+                  <div className="bg-white border border-stone-200 rounded-xl p-3">
+                    <div className="flex items-start gap-3">
+                      {/* QR Code - compact */}
+                      <div className="bg-white p-2 rounded-lg shadow-sm border border-stone-100 flex-shrink-0">
                         <QRCodeSVG 
                           value={
                             selectedMethod === 'crypto' 
                               ? getCryptoQRValue(selectedCrypto, selectedAmount)
                               : getPaymentQRValue(selectedMethod)
                           }
-                          size={120}
+                          size={88}
                           level="M"
                         />
                       </div>
 
-                      {/* Crypto specific details */}
-                      {selectedMethod === 'crypto' && cryptoData && (
-                        <div className="w-full space-y-2">
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm font-bold" style={{ color: cryptoData.color }}>
-                              {cryptoData.symbol}
-                            </span>
-                            <span className="text-xs bg-stone-100 px-2 py-1 rounded-full">
-                              Rede: {cryptoData.network}
-                            </span>
-                          </div>
-                          
-                          {/* Crypto amount */}
-                          {getCryptoAmount(selectedAmount, selectedCrypto) && (
-                            <div className="bg-[#FFBE98]/10 rounded-lg p-2 text-center">
-                              <p className="text-xs text-[#6B6661]">Valor aproximado:</p>
-                              <p className="font-bold text-[#2D2A26]">
-                                {getCryptoAmount(selectedAmount, selectedCrypto)} {cryptoData.symbol}
-                              </p>
+                      {/* Payment details next to QR */}
+                      <div className="flex-1 min-w-0">
+                        {/* Crypto specific details */}
+                        {selectedMethod === 'crypto' && cryptoData && (
+                          <div className="space-y-1.5">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-bold" style={{ color: cryptoData.color }}>
+                                {cryptoData.symbol}
+                              </span>
+                              <span className="text-[10px] bg-stone-100 px-1.5 py-0.5 rounded-full">
+                                {cryptoData.network}
+                              </span>
                             </div>
-                          )}
-
-                          {/* Address */}
-                          <div className="bg-stone-50 rounded-lg p-2">
-                            <p className="text-xs text-[#6B6661] mb-1">Endereço:</p>
-                            <p className="text-xs font-mono break-all text-[#2D2A26]">
+                            {getCryptoAmount(selectedAmount, selectedCrypto) && (
+                              <div className="bg-[#FFBE98]/10 rounded-md px-2 py-1.5">
+                                <p className="text-[10px] text-[#6B6661]">Valor aprox:</p>
+                                <p className="font-bold text-sm text-[#2D2A26]">
+                                  {getCryptoAmount(selectedAmount, selectedCrypto)} {cryptoData.symbol}
+                                </p>
+                              </div>
+                            )}
+                            <p className="text-[10px] font-mono break-all text-[#6B6661] leading-tight">
                               {cryptoData.address}
                             </p>
+                            <button
+                              onClick={() => copyToClipboard(cryptoData.address, 'address')}
+                              className="w-full py-1.5 bg-stone-100 rounded-md text-xs flex items-center justify-center gap-1.5 hover:bg-stone-200"
+                            >
+                              {copiedField === 'address' ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3" />}
+                              {copiedField === 'address' ? 'Copiado!' : 'Copiar endereço'}
+                            </button>
                           </div>
-                          <button
-                            onClick={() => copyToClipboard(cryptoData.address, 'address')}
-                            className="w-full py-2 bg-stone-100 rounded-lg text-sm flex items-center justify-center gap-2 hover:bg-stone-200"
-                          >
-                            {copiedField === 'address' ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
-                            {copiedField === 'address' ? 'Copiado!' : 'Copiar endereço'}
-                          </button>
-                        </div>
-                      )}
+                        )}
 
-                      {/* MBWay details */}
-                      {selectedMethod === 'mbway' && methodData && (
-                        <div className="w-full space-y-2 text-center">
-                          <p className="text-xs text-[#6B6661]">Enviar €{selectedAmount} para:</p>
-                          <p className="text-xl font-bold text-[#2D2A26]">{methodData.phone}</p>
-                          <button
-                            onClick={() => copyToClipboard(methodData.phoneClean, 'phone')}
-                            className="w-full py-2 bg-stone-100 rounded-lg text-sm flex items-center justify-center gap-2 hover:bg-stone-200"
-                          >
-                            {copiedField === 'phone' ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
-                            {copiedField === 'phone' ? 'Copiado!' : 'Copiar número'}
-                          </button>
-                        </div>
-                      )}
+                        {/* MBWay details */}
+                        {selectedMethod === 'mbway' && methodData && (
+                          <div className="space-y-1.5">
+                            <p className="text-xs text-[#6B6661]">Enviar <strong>€{selectedAmount}</strong> para:</p>
+                            <p className="text-lg font-bold text-[#2D2A26]">{methodData.phone}</p>
+                            <button
+                              onClick={() => copyToClipboard(methodData.phoneClean, 'phone')}
+                              className="w-full py-1.5 bg-stone-100 rounded-md text-xs flex items-center justify-center gap-1.5 hover:bg-stone-200"
+                            >
+                              {copiedField === 'phone' ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3" />}
+                              {copiedField === 'phone' ? 'Copiado!' : 'Copiar número'}
+                            </button>
+                          </div>
+                        )}
 
-                      {/* PayPal, Revolut, Wise details */}
-                      {(selectedMethod === 'paypal' || selectedMethod === 'revolut' || selectedMethod === 'wise') && methodData && (
-                        <div className="w-full space-y-2 text-center">
-                          <p className="text-xs text-[#6B6661]">Enviar €{selectedAmount} para:</p>
-                          <p className="font-bold text-[#2D2A26]">{methodData.username}</p>
-                          <a
-                            href={selectedMethod === 'paypal' ? `${methodData.link}/${selectedAmount}EUR` : methodData.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="w-full py-2 bg-[#2D2A26] text-white rounded-lg text-sm flex items-center justify-center gap-2 hover:bg-[#4A4640]"
-                          >
-                            <ExternalLink className="w-4 h-4" />
-                            Abrir {methodData.name}
-                          </a>
-                        </div>
-                      )}
+                        {/* PayPal, Revolut, Wise details */}
+                        {(selectedMethod === 'paypal' || selectedMethod === 'revolut' || selectedMethod === 'wise') && methodData && (
+                          <div className="space-y-1.5">
+                            <p className="text-xs text-[#6B6661]">Enviar <strong>€{selectedAmount}</strong> para:</p>
+                            <p className="font-bold text-[#2D2A26]">{methodData.username}</p>
+                            <a
+                              href={selectedMethod === 'paypal' ? `${methodData.link}/${selectedAmount}EUR` : methodData.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="w-full py-1.5 bg-[#2D2A26] text-white rounded-md text-xs flex items-center justify-center gap-1.5 hover:bg-[#4A4640]"
+                            >
+                              <ExternalLink className="w-3 h-3" />
+                              Abrir {methodData.name}
+                            </a>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
 
-                  {/* Reference code */}
-                  <div className="bg-[#FFBE98]/10 border border-[#FFBE98]/30 rounded-xl p-3">
+                  {/* Reference code - compact */}
+                  <div className="bg-[#FFBE98]/10 border border-[#FFBE98]/30 rounded-xl px-3 py-2">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-xs text-[#6B6661]">Referência:</p>
-                        <p className="text-xl font-bold text-[#2D2A26] tracking-wider">{contribution.payment_reference}</p>
+                        <p className="text-[10px] text-[#6B6661] leading-none mb-0.5">Referência:</p>
+                        <p className="text-lg font-bold text-[#2D2A26] tracking-wider leading-tight">{contribution.payment_reference}</p>
                       </div>
                       <button
                         onClick={() => copyToClipboard(contribution.payment_reference, 'ref')}
-                        className="px-3 py-2 bg-[#FFBE98]/20 rounded-lg hover:bg-[#FFBE98]/30 flex items-center gap-1 text-sm"
+                        className="px-2.5 py-1.5 bg-[#FFBE98]/20 rounded-lg hover:bg-[#FFBE98]/30 flex items-center gap-1 text-xs"
                       >
-                        {copiedField === 'ref' ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4 text-[#FFBE98]" />}
+                        {copiedField === 'ref' ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5 text-[#FFBE98]" />}
                         <span className="text-[#FFBE98]">{copiedField === 'ref' ? 'OK' : 'Copiar'}</span>
                       </button>
                     </div>
-                    <p className="text-xs text-[#6B6661] mt-1">Inclui este código na descrição do pagamento</p>
-                    <p className="text-xs text-red-500 font-medium">⚠️ Sem esta referência não conseguiremos identificar o pagamento</p>
+                    <p className="text-[10px] text-red-500 font-medium mt-0.5">Inclui esta referência na descrição do pagamento</p>
                   </div>
 
-                  {/* Trust line */}
-                  <p className="text-xs text-green-600 bg-green-50 p-2 rounded-lg flex items-center gap-1">
-                    <Check className="w-3 h-3" />
-                    A tua contribuição será confirmada assim que o pagamento for recebido
-                  </p>
+                  {/* Trust line + Confirm button combined */}
+                  <div className="flex items-center gap-1.5 text-[10px] text-green-600 bg-green-50 px-2 py-1.5 rounded-lg">
+                    <Check className="w-3 h-3 flex-shrink-0" />
+                    Contribuição confirmada assim que o pagamento for recebido
+                  </div>
 
-                  {/* Confirm button */}
                   <button
                     onClick={() => setShowConfirmation(true)}
-                    className="w-full bg-[#2D2A26] text-white py-3 px-6 rounded-xl font-medium hover:bg-[#4A4640] transition-all"
+                    className="w-full bg-[#2D2A26] text-white py-2.5 px-6 rounded-xl font-medium hover:bg-[#4A4640] transition-all text-sm"
                   >
                     Já efetuei o pagamento
                   </button>

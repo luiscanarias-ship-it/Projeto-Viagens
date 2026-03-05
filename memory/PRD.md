@@ -7,57 +7,55 @@ Plataforma de angariação de fundos para viagens solidárias com sistema de ní
 - **Frontend**: React 18 + Tailwind CSS + Framer Motion
 - **Backend**: FastAPI (Python 3.11)
 - **Database**: MongoDB
-- **Payments**: Stripe Payment Element (inline), Crypto, MBWay, PayPal, Revolut, Wise
+- **Payments**: Crypto (BTC, ETH, USDT, USDC), MBWay, PayPal, Revolut, Wise (Stripe desativado)
 - **Email**: Resend
 - **Auth**: JWT + Google OAuth
+- **QR Codes**: qrcode.react
+- **Crypto Prices**: CoinGecko API
 
 ## User Personas
 1. **Visitante**: Não registado, pode ver viagens e contribuir
 2. **Sonhador**: Utilizador registado, pode criar links de referral
-3. **Embaixador**: Sonhador que contribuiu + tem 3 referrals válidos, pode criar viagens próprias
-4. **Admin**: Gestão completa da plataforma
+3. **Embaixador**: Sonhador que contribuiu + tem 3 referrals válidos
+4. **Admin**: Gestão completa da plataforma (admin@4luis.com / Admin1)
 
 ## Core Requirements (Static)
 - Sistema de progressão: Visitante → Sonhador → Embaixador
-- 6 métodos de pagamento (Crypto destacado, Stripe automático)
-- Sistema de candidaturas de embaixadores
-- Gestão de visibilidade de viagens
-- Emails comportamentais
+- 5 métodos de pagamento ativos (Crypto destacado com badge "TOP")
+- Sistema de referência de pagamento (CN-XXXX)
+- Checkout modal de 3 passos (Valor → Pagamento → Instruções)
+- QR codes para todos os métodos de pagamento
+- Conversão automática EUR → Crypto via CoinGecko
 
 ## What's Been Implemented
 
 ### Session 27/02/2026
-- ✅ Restauração do projeto do GitHub
-- ✅ Homepage: Frase "Aqui, cada gesto ilumina um caminho" - mesma cor/fonte do "4Luis", bold
-- ✅ Homepage: Texto alterado para "A plataforma de CrowdDreaming..."
-- ✅ "CrowdDreaming" destacado em coral em toda a plataforma
-- ✅ Botão "Apoiar esta viagem" abre diretamente modal de pagamento
-- ✅ **Stripe Payment Element integrado (inline, sem redirect)**
-  - Backend: PaymentIntent via `/api/contributions/create`
-  - Frontend: `StripePaymentForm.js` com Payment Element
-  - Webhook atualizado para `payment_intent.succeeded`
-  - Suporta Card, Bancontact, Amazon Pay, EPS
+- Homepage com branding "4Luis" e "CrowdDreaming" em coral
+- Stripe Payment Element (código existe, desativado na UI)
+- Sistema de referência de pagamento (CN-XXXX)
+
+### Session 05/03/2026
+- Checkout modal de 3 passos completo com QR codes
+- Layout compacto do Step 3 (QR + dados lado a lado, sem scroll)
+- Conversão de preços cripto via CoinGecko
+- Todos os métodos de pagamento: Crypto, MBWay, Revolut, Wise, PayPal
 
 ## Prioritized Backlog
 
-### P0 (Critical)
-- Nenhum item pendente
-
 ### P1 (High Priority)
-- Testar fluxo completo de pagamento com cartão de teste
-- Adicionar tratamento de erro 3D Secure
+- Estabilidade do Painel de Administração (testes pendentes)
+- Melhorar formulário de edição de viagens no Admin
 
 ### P2 (Medium Priority)
-- Sistema de pontos (estrutura existe)
+- Sistema de pontos
 - Sorteio real
 - Notificações in-app
 
-## Next Tasks
-1. Testar pagamento end-to-end com cartão teste Stripe
-2. Configurar webhook em produção
-3. Adicionar mais métodos de pagamento locais (se necessário)
+## Key Files
+- `frontend/src/components/CheckoutModal.js` - Modal de checkout 3 passos
+- `frontend/src/pages/JourneyDetail.js` - Página de viagem
+- `frontend/src/pages/Admin.js` - Painel de administração
+- `backend/server.py` - API FastAPI principal
 
-## API Keys Required
-- STRIPE_API_KEY (Secret Key)
-- STRIPE_PUBLISHABLE_KEY 
-- RESEND_API_KEY (para emails)
+## Credentials
+- **Admin**: admin@4luis.com / Admin1
