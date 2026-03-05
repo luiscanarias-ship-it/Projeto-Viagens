@@ -350,6 +350,10 @@ const CheckoutModal = ({
   const goToStep2 = () => {
     setStep(2);
     setContribution(null);
+    setCryptoAmountCalc(null);
+    setCryptoURI(null);
+    setQrImageUrl(null);
+    setNonCryptoQrUrl(null);
   };
 
   if (!isOpen) return null;
@@ -375,10 +379,14 @@ const CheckoutModal = ({
                 <p className="text-xs text-[#6B6661]">Destino: {journeyName}</p>
               </div>
               <button
-                onClick={handleClose}
+                onClick={step === 3 ? goToStep2 : step === 2 ? goToStep1 : handleClose}
                 className="p-2 hover:bg-stone-100 rounded-full transition-colors"
               >
-                <X className="w-5 h-5 text-[#6B6661]" />
+                {step > 1 && !showConfirmation ? (
+                  <ArrowRight className="w-5 h-5 text-[#6B6661] rotate-180" />
+                ) : (
+                  <X className="w-5 h-5 text-[#6B6661]" />
+                )}
               </button>
             </div>
             
