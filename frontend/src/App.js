@@ -15,6 +15,7 @@ import Admin from "./pages/Admin";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import Onboarding from "./pages/Onboarding";
 import AmbassadorProfile from "./pages/AmbassadorProfile";
+import InvitePage from "./pages/InvitePage";
 
 // Router wrapper to handle auth callback
 const AppRouter = () => {
@@ -44,6 +45,7 @@ const AppRouter = () => {
           <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/ambassador/:userId" element={<AmbassadorProfile />} />
+          <Route path="/invite/:alias" element={<InvitePage />} />
         </Routes>
       </main>
       <Footer />

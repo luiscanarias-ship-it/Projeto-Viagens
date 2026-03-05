@@ -400,6 +400,42 @@ const Dashboard = () => {
                       }`}
                     />
                   </div>
+                  
+                  {/* Individual referral indicators */}
+                  {stats?.invites?.referral_details && stats.invites.referral_details.length > 0 && (
+                    <div className="mt-3 space-y-1.5">
+                      {stats.invites.referral_details.map((ref, idx) => (
+                        <div key={idx} className="flex items-center gap-2 text-sm">
+                          <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
+                            ref.has_contributed ? 'bg-green-500' : 'bg-stone-200'
+                          }`}>
+                            {ref.has_contributed && <CheckCircle className="w-3 h-3 text-white" />}
+                          </div>
+                          <span className={ref.has_contributed ? 'text-green-700' : 'text-[#6B6661]'}>
+                            {ref.name} {ref.has_contributed ? 'contribuiu' : '(aguarda contribuição)'}
+                          </span>
+                        </div>
+                      ))}
+                      {/* Empty slots for remaining */}
+                      {Array.from({ length: Math.max(0, 3 - stats.invites.referral_details.length) }).map((_, idx) => (
+                        <div key={`empty-${idx}`} className="flex items-center gap-2 text-sm">
+                          <div className="w-4 h-4 rounded-full bg-stone-200" />
+                          <span className="text-[#6B6661]">Falta {3 - stats.invites.referral_details.length - idx > 1 ? '1' : '1'} amigo</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {/* Empty slots when no referrals at all */}
+                  {(!stats?.invites?.referral_details || stats.invites.referral_details.length === 0) && (
+                    <div className="mt-3 space-y-1.5">
+                      {[1, 2, 3].map(i => (
+                        <div key={i} className="flex items-center gap-2 text-sm">
+                          <div className="w-4 h-4 rounded-full bg-stone-200" />
+                          <span className="text-[#6B6661]">Falta 1 amigo</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -420,6 +456,23 @@ const Dashboard = () => {
                         : `Faltam ${referralsNeeded} referral${referralsNeeded > 1 ? 's' : ''} válido${referralsNeeded > 1 ? 's' : ''} para desbloquear Embaixador.`}
                   </p>
                 </div>
+              )}
+              
+              {/* Invite button with /invite/{alias} */}
+              {!isEmbaixador && stats?.user_alias && (
+                <button
+                  onClick={() => {
+                    const inviteUrl = `${window.location.origin}/invite/${encodeURIComponent(stats.user_alias)}`;
+                    navigator.clipboard.writeText(inviteUrl);
+                    setCopiedLink(true);
+                    setTimeout(() => setCopiedLink(false), 2000);
+                  }}
+                  className="mt-4 w-full py-3 bg-[#2D2A26] text-white rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-[#4A4640] transition-colors"
+                  data-testid="invite-friends-btn"
+                >
+                  <Users className="w-5 h-5" />
+                  {copiedLink ? 'Link copiado!' : 'Convidar mais amigos'}
+                </button>
               )}
             </>
           )}

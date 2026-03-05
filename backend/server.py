@@ -1794,7 +1794,7 @@ async def get_user_dashboard_stats(request: Request):
     # Calculate impact: sum of contributions from users who registered via this user's link
     invited_users = await db.users.find(
         {"sponsor_id": user_id},
-        {"_id": 0, "user_id": 1}
+        {"_id": 0, "user_id": 1, "name": 1, "anonymous_alias": 1}
     ).to_list(1000)
     invited_user_ids = [u["user_id"] for u in invited_users]
     
@@ -1804,6 +1804,19 @@ async def get_user_dashboard_stats(request: Request):
         {"_id": 0}
     ).to_list(10000)
     impact_amount = sum(c.get("amount", 0) for c in invited_contributions)
+    
+    # Build individual referral details
+    contributor_user_ids = set(c.get("user_id") for c in invited_contributions)
+    referral_details = []
+    for inv_user in invited_users:
+        has_contributed = inv_user["user_id"] in contributor_user_ids
+        display_name = inv_user.get("name") or inv_user.get("anonymous_alias") or "Amigo"
+        referral_details.append({
+            "name": display_name,
+            "has_contributed": has_contributed
+        })
+    # Sort: contributors first
+    referral_details.sort(key=lambda x: (not x["has_contributed"], x["name"]))
     
     # Count unique users who contributed (valid referrals)
     valid_referrals_from_db = user_data.get("valid_referrals_count", 0)
@@ -1840,10 +1853,12 @@ async def get_user_dashboard_stats(request: Request):
             "total_invited": len(invited_users),
             "total_contributed_by_invites": len(invited_contributions),
             "impact_amount": impact_amount,
-            "sponsor_links": sponsor_links
+            "sponsor_links": sponsor_links,
+            "referral_details": referral_details
         },
         "main_journey": main_journey,
-        "main_sponsor_link": main_sponsor_link
+        "main_sponsor_link": main_sponsor_link,
+        "user_alias": user_data.get("anonymous_alias") or user_data.get("name") or ""
     }
 
 # ==================== USER PROFILE ====================
@@ -5092,6 +5107,46 @@ async def get_platform_stats():
         "total_dreamers": max(total_users, unique_contributors),
         "total_contributions": total_contributions
     }
+
+# Invite page endpoint - get inviter info by alias
+@api_router.get("/invite/{alias}")
+async def get_invite_page(alias: str):
+    # Find user by anonymous_alias or name
+    user = await db.users.find_one(
+        {"anonymous_alias": alias},
+        {"_id": 0, "name": 1, "anonymous_alias": 1, "user_id": 1}
+    )
+    if not user:
+        # Try by name
+        user = await db.users.find_one(
+            {"name": alias},
+            {"_id": 0, "name": 1, "anonymous_alias": 1, "user_id": 1}
+        )
+    if not user:
+        raise HTTPException(status_code=404, detail="Convite não encontrado")
+    
+    # Get main journey
+    main_journey = await db.journeys.find_one(
+        {"is_main_trip": True},
+        {"_id": 0}
+    )
+    
+    # Get sponsor link for this user + main journey
+    sponsor_link = None
+    if main_journey:
+        sponsor_link = await db.sponsor_links.find_one(
+            {"user_id": user["user_id"], "journey_id": main_journey["journey_id"]},
+            {"_id": 0, "link_id": 1}
+        )
+    
+    display_name = user.get("name") or user.get("anonymous_alias") or "Alguém"
+    
+    return {
+        "inviter_name": display_name,
+        "journey": main_journey,
+        "sponsor_link_id": sponsor_link.get("link_id") if sponsor_link else None
+    }
+
 
 
 # Include router
