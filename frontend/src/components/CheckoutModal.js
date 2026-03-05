@@ -7,25 +7,6 @@ import {
 import QRCode from 'qrcode';
 import axios from 'axios';
 
-// Canvas-based QR code component using qrcode library directly
-const QRCanvas = ({ value, size = 120 }) => {
-  const canvasRef = useRef(null);
-
-  useEffect(() => {
-    if (canvasRef.current && value) {
-      QRCode.toCanvas(canvasRef.current, value, {
-        width: size,
-        margin: 1,
-        errorCorrectionLevel: 'M'
-      }, (error) => {
-        if (error) console.error('QR generation error:', error);
-      });
-    }
-  }, [value, size]);
-
-  return <canvas ref={canvasRef} />;
-};
-
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
@@ -130,6 +111,12 @@ const CheckoutModal = ({
   const [loadingPrices, setLoadingPrices] = useState(false);
   const cryptoSectionRef = useRef(null);
 
+  // QR code states
+  const [cryptoAmountCalc, setCryptoAmountCalc] = useState(null);
+  const [cryptoURI, setCryptoURI] = useState(null);
+  const [qrImageUrl, setQrImageUrl] = useState(null);
+  const [nonCryptoQrUrl, setNonCryptoQrUrl] = useState(null);
+
   // Fetch crypto prices from CoinGecko
   const fetchCryptoPrices = useCallback(async () => {
     setLoadingPrices(true);
@@ -164,13 +151,17 @@ const CheckoutModal = ({
       setShowConfirmation(false);
       setCopied(false);
       setCopiedField(null);
+      setCryptoAmountCalc(null);
+      setCryptoURI(null);
+      setQrImageUrl(null);
+      setNonCryptoQrUrl(null);
     } else {
       // Fetch crypto prices when modal opens
       fetchCryptoPrices();
     }
   }, [isOpen, fetchCryptoPrices]);
 
-  // Calculate crypto amount from EUR
+  // Calculate crypto amount from EUR (for display in step 2 crypto selection)
   const getCryptoAmount = (euroAmount, cryptoId) => {
     const crypto = cryptoConfig[cryptoId];
     if (!crypto || !cryptoPrices[crypto.coingeckoId]) return null;
@@ -178,26 +169,86 @@ const CheckoutModal = ({
     const priceInEur = cryptoPrices[crypto.coingeckoId].eur;
     const amount = euroAmount / priceInEur;
     
-    // Format based on crypto type
-    if (cryptoId === 'btc') {
-      return amount.toFixed(8);
-    } else if (cryptoId === 'eth') {
-      return amount.toFixed(6);
-    } else {
-      return amount.toFixed(2);
-    }
+    if (cryptoId === 'btc') return amount.toFixed(8);
+    if (cryptoId === 'eth') return amount.toFixed(8);
+    return amount.toFixed(2);
   };
 
-  // Generate QR code value for crypto - blockchain URI format: protocol:address?amount=value
-  const getCryptoQRValue = (cryptoId, euroAmount) => {
-    const crypto = cryptoConfig[cryptoId];
-    if (!crypto) return '';
+  // Generate blockchain URI for crypto QR code (per user snippet)
+  function generateCryptoURI(symbol, address, eurAmount) {
+    const map = { BTC: "bitcoin", ETH: "ethereum", USDT: "tether", USDC: "usd-coin" };
+    const coingeckoId = map[symbol];
     
-    const cryptoAmount = getCryptoAmount(euroAmount, cryptoId);
-    if (!cryptoAmount) return `${crypto.protocol}:${crypto.address}`;
+    // Use already-fetched prices from cryptoPrices state
+    const priceData = cryptoPrices[coingeckoId];
+    if (!priceData) {
+      console.error('No price data for', symbol);
+      // Fallback: just use address
+      const crypto = cryptoConfig[symbol.toLowerCase()];
+      setCryptoURI(`${crypto?.protocol || ''}:${address}`);
+      return;
+    }
     
-    return `${crypto.protocol}:${crypto.address}?amount=${cryptoAmount}`;
-  };
+    const price = priceData.eur;
+    const amount = eurAmount / price;
+
+    let uri = "";
+    if (symbol === "BTC") {
+      uri = `bitcoin:${address}?amount=${amount.toFixed(8)}`;
+    }
+    if (symbol === "ETH") {
+      uri = `ethereum:${address}?amount=${amount.toFixed(8)}`;
+    }
+    if (symbol === "USDT") {
+      uri = `tron:${address}?amount=${eurAmount}`;
+    }
+    if (symbol === "USDC") {
+      uri = `xdc:${address}?amount=${eurAmount}`;
+    }
+
+    console.log('Generated crypto URI:', uri);
+    setCryptoAmountCalc(symbol === "USDT" || symbol === "USDC" ? eurAmount.toFixed(2) : amount.toFixed(8));
+    setCryptoURI(uri);
+  }
+
+  // Generate QR image when cryptoURI changes
+  useEffect(() => {
+    if (!cryptoURI) return;
+    QRCode.toDataURL(cryptoURI, {
+      width: 200,
+      margin: 2,
+      errorCorrectionLevel: 'M'
+    })
+    .then(url => {
+      console.log('QR generated for URI:', cryptoURI);
+      setQrImageUrl(url);
+    })
+    .catch(err => console.error('QR generation error:', err));
+  }, [cryptoURI]);
+
+  // Trigger crypto URI generation when entering step 3 with crypto (per user snippet)
+  useEffect(() => {
+    if (step === 3 && selectedMethod === 'crypto' && selectedCrypto && Object.keys(cryptoPrices).length > 0) {
+      const crypto = cryptoConfig[selectedCrypto];
+      if (crypto) {
+        generateCryptoURI(crypto.symbol, crypto.address, selectedAmount);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, selectedMethod, selectedCrypto, selectedAmount, cryptoPrices]);
+
+  // Generate QR for non-crypto payment methods
+  useEffect(() => {
+    if (step === 3 && selectedMethod && selectedMethod !== 'crypto') {
+      const qrValue = getPaymentQRValue(selectedMethod);
+      if (qrValue) {
+        QRCode.toDataURL(qrValue, { width: 200, margin: 2 })
+          .then(url => setNonCryptoQrUrl(url))
+          .catch(err => console.error('Non-crypto QR error:', err));
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, selectedMethod]);
 
   // Generate QR code value for payment methods
   const getPaymentQRValue = (methodId) => {
@@ -538,29 +589,44 @@ const CheckoutModal = ({
                   exit={{ opacity: 0, x: -20 }}
                   className="space-y-2"
                 >
-                  {/* QR Code + Payment Details - side by side on larger, stacked compact on small */}
+                  {/* QR Code + Payment Details */}
                   <div className="bg-white border border-stone-200 rounded-xl p-3">
                     <div className="flex items-start gap-3">
-                      {/* QR Code - canvas based for reliable URI encoding */}
-                      <div className="bg-white p-2 rounded-lg shadow-sm border border-stone-100 flex-shrink-0">
-                        <QRCanvas 
-                          value={
-                            selectedMethod === 'crypto' 
-                              ? getCryptoQRValue(selectedCrypto, selectedAmount)
-                              : getPaymentQRValue(selectedMethod)
-                          }
-                          size={100}
-                        />
-                        {/* Network + amount note under QR for crypto */}
-                        {selectedMethod === 'crypto' && cryptoData && (
-                          <div className="mt-1.5 text-center space-y-0.5">
-                            <p className="text-[9px] font-bold text-red-600 leading-tight">
-                              Rede: {cryptoData.network}
-                            </p>
-                            {getCryptoAmount(selectedAmount, selectedCrypto) && (
-                              <p className="text-[9px] font-bold text-[#2D2A26] leading-tight">
-                                {getCryptoAmount(selectedAmount, selectedCrypto)} {cryptoData.symbol}
-                              </p>
+                      {/* QR Code */}
+                      <div className="flex-shrink-0">
+                        {/* Crypto: QR from blockchain URI */}
+                        {selectedMethod === 'crypto' && (
+                          <div className="bg-white p-2 rounded-lg shadow-sm border border-stone-100">
+                            {qrImageUrl ? (
+                              <img src={qrImageUrl} alt="QR Code" width={120} height={120} />
+                            ) : (
+                              <div className="w-[120px] h-[120px] flex items-center justify-center">
+                                <div className="w-6 h-6 border-2 border-[#FFBE98] border-t-transparent rounded-full animate-spin" />
+                              </div>
+                            )}
+                            {cryptoData && (
+                              <div className="mt-1.5 text-center space-y-0.5">
+                                <p className="text-[9px] font-bold text-red-600 leading-tight">
+                                  Rede: {cryptoData.network}
+                                </p>
+                                {cryptoAmountCalc && (
+                                  <p className="text-[9px] font-bold text-[#2D2A26] leading-tight">
+                                    {cryptoAmountCalc} {cryptoData.symbol}
+                                  </p>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        {/* Non-crypto: simple QR */}
+                        {selectedMethod !== 'crypto' && (
+                          <div className="bg-white p-2 rounded-lg shadow-sm border border-stone-100">
+                            {nonCryptoQrUrl ? (
+                              <img src={nonCryptoQrUrl} alt="QR Code" width={120} height={120} />
+                            ) : (
+                              <div className="w-[120px] h-[120px] flex items-center justify-center">
+                                <div className="w-6 h-6 border-2 border-[#FFBE98] border-t-transparent rounded-full animate-spin" />
+                              </div>
                             )}
                           </div>
                         )}
@@ -579,11 +645,11 @@ const CheckoutModal = ({
                                 {cryptoData.network}
                               </span>
                             </div>
-                            {getCryptoAmount(selectedAmount, selectedCrypto) && (
+                            {cryptoAmountCalc && (
                               <div className="bg-[#FFBE98]/10 rounded-md px-2 py-1.5">
                                 <p className="text-[10px] text-[#6B6661]">Valor aprox:</p>
                                 <p className="font-bold text-sm text-[#2D2A26]">
-                                  {getCryptoAmount(selectedAmount, selectedCrypto)} {cryptoData.symbol}
+                                  {cryptoAmountCalc} {cryptoData.symbol}
                                 </p>
                               </div>
                             )}
