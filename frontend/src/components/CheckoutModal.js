@@ -200,10 +200,10 @@ const CheckoutModal = ({
       uri = `ethereum:${address}?amount=${amount.toFixed(8)}`;
     }
     if (symbol === "USDT") {
-      uri = `tron:${address}?amount=${eurAmount}`;
+      uri = `tron:${address}`;
     }
     if (symbol === "USDC") {
-      uri = `xdc:${address}?amount=${eurAmount}`;
+      uri = `xdc:${address}`;
     }
 
     console.log('Generated crypto URI:', uri);
@@ -782,6 +782,11 @@ const CheckoutModal = ({
                       </button>
                     </div>
                     <p className="text-xs text-red-600 font-bold mt-1">Inclui esta referência na descrição do pagamento!</p>
+                  </div>
+
+                  {/* Return reminder */}
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-center">
+                    <p className="text-xs text-blue-700">Depois de enviar o pagamento, volte aqui e clique <strong>"Já efetuei o pagamento"</strong></p>
                   </div>
 
                   {/* Confirm button */}
