@@ -169,32 +169,15 @@ const CheckoutModal = ({
     }
   };
 
-  // Generate QR code value for crypto - standard wallet URI formats
+  // Generate QR code value for crypto - blockchain URI format: protocol:address?amount=value
   const getCryptoQRValue = (cryptoId, euroAmount) => {
     const crypto = cryptoConfig[cryptoId];
     if (!crypto) return '';
     
     const cryptoAmount = getCryptoAmount(euroAmount, cryptoId);
-    if (!cryptoAmount) return crypto.address;
+    if (!cryptoAmount) return `${crypto.protocol}:${crypto.address}`;
     
-    switch (cryptoId) {
-      case 'btc':
-        // BIP-21: universally supported by all Bitcoin wallets
-        return `bitcoin:${crypto.address}?amount=${cryptoAmount}&label=4Luis%20Contribution`;
-      case 'eth': {
-        // EIP-681: value must be in wei (1 ETH = 1e18 wei)
-        const weiValue = BigInt(Math.round(parseFloat(cryptoAmount) * 1e18));
-        return `ethereum:${crypto.address}?value=${weiValue.toString()}`;
-      }
-      case 'usdt':
-        // USDT TRC20: plain address with amount for TronLink compatibility
-        return `${crypto.address}?amount=${cryptoAmount}`;
-      case 'usdc':
-        // USDC XDC: plain address with amount
-        return `${crypto.address}?amount=${cryptoAmount}`;
-      default:
-        return crypto.address;
-    }
+    return `${crypto.protocol}:${crypto.address}?amount=${cryptoAmount}`;
   };
 
   // Generate QR code value for payment methods
