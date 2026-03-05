@@ -759,7 +759,7 @@ const CheckoutModal = ({
                   )}
 
                   {/* Reference code */}
-                  <div className="bg-[#FFBE98]/10 border border-[#FFBE98]/30 rounded-xl px-3 py-2">
+                  <div className="bg-red-50 border-2 border-red-300 rounded-xl px-3 py-2.5">
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-[10px] text-[#6B6661] leading-none mb-0.5">Referência:</p>
@@ -773,7 +773,7 @@ const CheckoutModal = ({
                         <span className="text-[#FFBE98]">{copiedField === 'ref' ? 'OK' : 'Copiar'}</span>
                       </button>
                     </div>
-                    <p className="text-[10px] text-red-500 font-medium mt-0.5">Inclui esta referência na descrição do pagamento</p>
+                    <p className="text-xs text-red-600 font-bold mt-1">Inclui esta referência na descrição do pagamento!</p>
                   </div>
 
                   {/* Confirm button */}
