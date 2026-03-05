@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, User, Heart } from 'lucide-react';
@@ -9,6 +9,10 @@ const Login = () => {
   const { login, register, loginWithGoogle } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   
   const [isRegister, setIsRegister] = useState(false);
   const [loading, setLoading] = useState(false);
