@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit2, Trash2, Save, X, BarChart3, Settings, CheckCircle, XCircle, Mail, Users, Award, Gift, Crown, TrendingUp, UserPlus, ChevronRight, Star, FileText, Clock, MapPin, Target, Calendar, Eye, MessageSquare, AlertCircle, ExternalLink, History, Search } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, X, BarChart3, Settings, CheckCircle, XCircle, Mail, Users, Award, Gift, Crown, TrendingUp, UserPlus, ChevronRight, Star, FileText, Clock, MapPin, Target, Calendar, Eye, MessageSquare, AlertCircle, ExternalLink, History, Search, Heart } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -922,6 +922,38 @@ const Admin = () => {
                                 className="w-full px-4 py-2.5 bg-white border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FFBE98]/50"
                               />
                             </div>
+                          </div>
+                        </div>
+
+                        {/* Descrições de Contribuição */}
+                        <div className="space-y-4">
+                          <h4 className="font-semibold text-[#2D2A26] flex items-center gap-2">
+                            <Heart className="w-4 h-4 text-[#FFBE98]" />
+                            Descrições de Contribuição
+                            <span className="text-xs font-normal text-[#6B6661]">(opcional — aparece no checkout)</span>
+                          </h4>
+                          <div className="grid md:grid-cols-2 gap-3">
+                            {[10, 20, 50, 100, 200, 500, 1000].map((amt) => (
+                              <div key={amt} className="flex items-center gap-2">
+                                <span className="text-sm font-bold text-[#2D2A26] min-w-[50px]">€{amt}</span>
+                                <input
+                                  type="text"
+                                  value={(editingJourney.contribution_descriptions || {})[String(amt)] || ''}
+                                  onChange={(e) => {
+                                    const descs = { ...(editingJourney.contribution_descriptions || {}) };
+                                    if (e.target.value) {
+                                      descs[String(amt)] = e.target.value;
+                                    } else {
+                                      delete descs[String(amt)];
+                                    }
+                                    setEditingJourney({ ...editingJourney, contribution_descriptions: descs });
+                                  }}
+                                  placeholder={`Ex: Uma experiência especial...`}
+                                  className="flex-1 px-3 py-2 bg-white border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FFBE98]/50"
+                                  data-testid={`contrib-desc-${amt}`}
+                                />
+                              </div>
+                            ))}
                           </div>
                         </div>
 

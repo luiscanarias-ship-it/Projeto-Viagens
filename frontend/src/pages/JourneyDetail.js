@@ -776,6 +776,7 @@ const JourneyDetail = () => {
         onClose={() => setShowCheckout(false)}
         journeyName={journey?.name || "China"}
         journeyId={id}
+        contributionDescriptions={journey?.contribution_descriptions}
         paymentInfo={paymentInfo}
         getAuthHeaders={getAuthHeaders}
         user={user}

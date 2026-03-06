@@ -165,6 +165,7 @@ class Journey(BaseModel):
     visibility_boost: float = 0.0  # Manual boost by admin (-100 to +100)
     hide_from_listings: bool = False  # Admin can hide journey from listings
     show_goal_amount: bool = False  # If true, show total goal publicly; if false, show only percentage
+    contribution_descriptions: Optional[dict] = None  # {"10": "desc", "20": "desc", ...}
     # Admin fields
     owner_user_id: Optional[str] = None  # Admin who created/approved the journey
     admin_notes: Optional[str] = None
@@ -199,6 +200,7 @@ class JourneyUpdate(BaseModel):
     story: Optional[str] = None
     photos: Optional[List[str]] = None
     show_goal_amount: Optional[bool] = None  # Added: Toggle public visibility of goal amount
+    contribution_descriptions: Optional[dict] = None  # {"10": "desc", "20": "desc", ...}
 
 # Ambassador journey application
 class AmbassadorJourneyApplication(BaseModel):
