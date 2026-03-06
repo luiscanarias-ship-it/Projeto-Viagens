@@ -39,6 +39,13 @@ Plataforma de angariação de fundos para viagens solidárias com sistema de ní
 - Gestao viagens, utilizadores, contribuicoes
 - Pesquisa por referencia de pagamento
 
+### Onboarding de Convite (Implementado 2026-03-06)
+- Fluxo guiado apos registo via /invite/{alias}
+- 6 seccoes: Boas-vindas, Viagem Principal, Progressao, Beneficios Embaixador, Progresso, Citacao inspiradora
+- Botao "Contribuir para este sonho" abre CheckoutModal
+- Botao "Ir para o Meu Painel" limpa contexto de convite e redireciona
+- InvitePage guarda alias e nome no localStorage para uso pos-registo
+
 ### Sistema de Partilha Viral (Implementado 2026-03-06)
 - Componente ShareMenu reutilizavel com WhatsApp, Telegram, Email, Copiar link
 - Mensagem automatica de partilha com texto motivacional
