@@ -722,10 +722,9 @@ const Home = () => {
         <div className="max-w-4xl mx-auto px-6 text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
             <p className="font-handwritten text-3xl md:text-4xl text-[#6B6661] leading-relaxed">
-              "{t('home.quote1')}<br />
+              "{t('home.quote1')}<br /><br />
               <span className="text-[#FFBE98]">{t('home.quote2')}</span><br />
-              {t('home.quote3')}<br />
-              <span className="text-[#FFBE98]">{t('home.quote4')}</span>"
+              {t('home.quote3')}"
             </p>
           </motion.div>
         </div>
