@@ -48,6 +48,8 @@ Plataforma de angariação de fundos para viagens solidárias com sistema de ní
 - Seletor de idioma persistente: preferencia guardada na conta do utilizador
 - PATCH /api/users/preferred-language para guardar preferencia
 - Auto-sync no login: ao entrar, a plataforma muda para o idioma preferido
+- Auto-traduz ao carregar pagina se idioma guardado nao e portugues
+- Homepage totalmente traduzivel (50+ chaves de traducao)
 
 ## Key Files
 - `frontend/src/components/CheckoutModal.js` - Modal de checkout 3 passos

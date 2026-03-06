@@ -166,7 +166,7 @@ const Home = () => {
               <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
                 <Link to={`/journey/${mainJourney.journey.journey_id}`}
                   className="inline-block px-4 py-2 bg-[#FFBE98]/20 rounded-full text-[#FFBE98] font-medium text-sm mb-4 hover:bg-[#FFBE98]/30 transition-colors cursor-pointer">
-                  Viagem Principal
+                  {t('home.main_journey')}
                 </Link>
                 <h2 className="text-4xl md:text-5xl font-bold text-[#2D2A26] mb-4">
                   {mainJourney.journey.name}
@@ -193,7 +193,7 @@ const Home = () => {
                   {mainJourney.progress && (
                     <div className="mb-6">
                       <div className="flex justify-between items-center mb-2">
-                        <span className="text-white/80 text-sm">Progresso</span>
+                        <span className="text-white/80 text-sm">{t('home.progress')}</span>
                         <div className="flex items-center gap-2">
                           {mainJourney.progress.show_goal_amount && mainJourney.progress.goal_amount ? (
                             <span className="text-white/80 text-sm">
@@ -214,7 +214,7 @@ const Home = () => {
                       </div>
                       {mainJourney.progress.is_funded && (
                         <p className="text-green-400 text-sm mt-2 flex items-center gap-2">
-                          <Sparkles className="w-4 h-4" /> Objetivo atingido! Ainda podes contribuir.
+                          <Sparkles className="w-4 h-4" /> {t('home.goal_reached')}
                         </p>
                       )}
                     </div>
@@ -223,7 +223,7 @@ const Home = () => {
                   <Link to={`/journey/${mainJourney.journey.journey_id}?pay=true`}
                     className="inline-flex items-center gap-2 px-8 py-4 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-bold hover:bg-[#FFAB7D] transition-colors"
                     data-testid="contribute-main-btn">
-                    <Heart className="w-5 h-5" /> Contribuir para este Sonho
+                    <Heart className="w-5 h-5" /> {t('home.contribute_dream')}
                   </Link>
                 </div>
               </motion.div>
@@ -234,7 +234,7 @@ const Home = () => {
                 <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
                   className="bg-[#FAFAF9] rounded-2xl p-6 md:p-8">
                   <h3 className="text-xl font-bold text-[#2D2A26] mb-6 flex items-center gap-2">
-                    <Heart className="w-5 h-5 text-[#FFBE98]" /> Últimas Contribuições
+                    <Heart className="w-5 h-5 text-[#FFBE98]" /> {t('home.latest_contributions')}
                   </h3>
                   <div className="space-y-4">
                     {mainJourney.contributions.slice(0, 5).map((contrib, idx) => (
@@ -267,14 +267,14 @@ const Home = () => {
                   </div>
                   <Link to={`/journey/${mainJourney.journey.journey_id}`}
                     className="block text-center mt-6 text-[#FFBE98] hover:text-[#E6A07C] font-medium">
-                    Ver todas as contribuições →
+                    {t('home.view_all_contributions')} →
                   </Link>
                 </motion.div>
               )}
             </>
           ) : (
             <div className="text-center py-20">
-              <p className="text-[#6B6661]">Nenhuma viagem principal ativa de momento.</p>
+              <p className="text-[#6B6661]">{t('home.no_main_journey')}</p>
             </div>
           )}
         </div>
@@ -287,7 +287,7 @@ const Home = () => {
             <div className="text-center">
               <Users className="w-8 h-8 mx-auto mb-2 text-[#FFBE98]" />
               <p className="text-3xl font-bold">{dreamersStats?.total_dreamers || 0}</p>
-              <p className="text-white/70">Sonhadores</p>
+              <p className="text-white/70">{t('home.dreamers')}</p>
             </div>
             {dreamersStats?.top_dreamer && (
               <>
@@ -295,7 +295,7 @@ const Home = () => {
                 <div className="text-center">
                   <Star className="w-8 h-8 mx-auto mb-2 text-[#F2C94C]" />
                   <p className="text-xl font-bold">{dreamersStats.top_dreamer.name}</p>
-                  <p className="text-white/70">Maior Sonhador</p>
+                  <p className="text-white/70">{t('home.top_dreamer')}</p>
                 </div>
               </>
             )}
@@ -312,7 +312,7 @@ const Home = () => {
               className="flex items-center justify-center gap-2 mb-10">
               <Users className="w-5 h-5 text-[#FFBE98]" />
               <p className="text-lg text-[#6B6661]">
-                <strong className="text-[#2D2A26] text-xl">{platformStats.total_dreamers}</strong> sonhadores já ajudaram esta plataforma
+                <strong className="text-[#2D2A26] text-xl">{platformStats.total_dreamers}</strong> {t('home.social_proof')}
               </p>
             </motion.div>
           )}
@@ -320,7 +320,7 @@ const Home = () => {
           {/* How it Works */}
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
             className="text-center mb-10">
-            <h2 className="text-3xl font-bold text-[#2D2A26]">Como funciona o Crowddreaming</h2>
+            <h2 className="text-3xl font-bold text-[#2D2A26]">{t('home.how_it_works')}</h2>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -330,8 +330,8 @@ const Home = () => {
                 <Heart className="w-7 h-7 text-[#FFBE98]" />
               </div>
               <div className="w-8 h-8 bg-[#2D2A26] rounded-full flex items-center justify-center mx-auto mb-3 text-white text-sm font-bold">1</div>
-              <p className="text-base font-semibold text-[#2D2A26]">Contribui para um sonho</p>
-              <p className="text-sm text-[#6B6661] mt-2">Ajuda a concretizar uma viagem com qualquer valor</p>
+              <p className="text-base font-semibold text-[#2D2A26]">{t('home.step1_title')}</p>
+              <p className="text-sm text-[#6B6661] mt-2">{t('home.step1_desc')}</p>
             </motion.div>
 
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.2 }}
@@ -340,8 +340,8 @@ const Home = () => {
                 <Users className="w-7 h-7 text-[#2D2A26]" />
               </div>
               <div className="w-8 h-8 bg-[#2D2A26] rounded-full flex items-center justify-center mx-auto mb-3 text-white text-sm font-bold">2</div>
-              <p className="text-base font-semibold text-[#2D2A26]">Convida 3 amigos a contribuir</p>
-              <p className="text-sm text-[#6B6661] mt-2">Partilha o sonho e torna-te embaixador</p>
+              <p className="text-base font-semibold text-[#2D2A26]">{t('home.step2_title')}</p>
+              <p className="text-sm text-[#6B6661] mt-2">{t('home.step2_desc')}</p>
             </motion.div>
 
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.3 }}
@@ -350,8 +350,8 @@ const Home = () => {
                 <Star className="w-7 h-7 text-[#F2C94C]" />
               </div>
               <div className="w-8 h-8 bg-[#2D2A26] rounded-full flex items-center justify-center mx-auto mb-3 text-white text-sm font-bold">3</div>
-              <p className="text-base font-semibold text-[#2D2A26]">Desbloqueia o teu próprio sonho</p>
-              <p className="text-sm text-[#6B6661] mt-2">Cria a tua própria viagem e recebe apoio</p>
+              <p className="text-base font-semibold text-[#2D2A26]">{t('home.step3_title')}</p>
+              <p className="text-sm text-[#6B6661] mt-2">{t('home.step3_desc')}</p>
             </motion.div>
           </div>
 
@@ -364,7 +364,7 @@ const Home = () => {
                 data-testid="howit-works-cta"
               >
                 <Heart className="w-5 h-5" />
-                Apoiar este sonho
+                {t('home.support_dream')}
               </Link>
             </motion.div>
           )}
@@ -377,19 +377,19 @@ const Home = () => {
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-8">
             <div className="flex items-center justify-center gap-2 mb-4">
               <Map className="w-6 h-6 text-[#FFBE98]" />
-              <h2 className="text-3xl font-bold text-[#2D2A26]">Planeia a Tua Viagem</h2>
+              <h2 className="text-3xl font-bold text-[#2D2A26]">{t('home.plan_trip')}</h2>
             </div>
-            <p className="text-[#6B6661] mb-6">Ferramentas úteis para planear a viagem dos teus sonhos</p>
+            <p className="text-[#6B6661] mb-6">{t('home.plan_trip_desc')}</p>
             
             <div className="max-w-md mx-auto flex gap-2">
               <input type="text" value={customDestination} onChange={(e) => setCustomDestination(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && searchDestination()}
-                placeholder="Escreve o teu destino... (ex: Paris, Tóquio)"
+                placeholder={t('home.plan_placeholder')}
                 className="flex-1 px-4 py-3 rounded-xl border border-stone-200 bg-white text-[#2D2A26] focus:outline-none focus:ring-2 focus:ring-[#FFBE98]"
               />
               <button onClick={searchDestination} disabled={!customDestination.trim() || loadingResources}
                 className="px-6 py-3 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-medium hover:bg-[#FFAB7D] transition-colors disabled:opacity-50">
-                {loadingResources ? '...' : 'Pesquisar'}
+                {loadingResources ? '...' : t('home.search')}
               </button>
             </div>
           </motion.div>
@@ -397,35 +397,35 @@ const Home = () => {
           {travelResources && (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mt-6">
               <p className="text-center text-sm text-[#6B6661] mb-4">
-                Recursos para: <span className="font-semibold text-[#2D2A26]">{travelResources.destination}</span>
+                {t('home.resources_for')} <span className="font-semibold text-[#2D2A26]">{travelResources.destination}</span>
               </p>
               
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <a href={travelResources.map?.url} target="_blank" rel="noopener noreferrer"
                   className="bg-stone-50 rounded-xl p-4 hover:bg-stone-100 transition-colors text-center">
                   <Map className="w-6 h-6 text-[#FFBE98] mx-auto mb-2" />
-                  <p className="text-sm font-medium text-[#2D2A26]">{travelResources.map?.title || 'Mapa'}</p>
+                  <p className="text-sm font-medium text-[#2D2A26]">{travelResources.map?.title || t('home.map')}</p>
                 </a>
 
                 <div className="bg-stone-50 rounded-xl p-4 cursor-pointer hover:bg-stone-100 transition-colors text-center"
                   onClick={() => setExpandedSection(expandedSection === 'hotels' ? null : 'hotels')}>
                   <Hotel className="w-6 h-6 text-[#FFBE98] mx-auto mb-2" />
-                  <p className="text-sm font-medium text-[#2D2A26]">Onde Ficar</p>
-                  <p className="text-xs text-[#6B6661]">{travelResources.hotels?.length} opções</p>
+                  <p className="text-sm font-medium text-[#2D2A26]">{t('home.where_to_stay')}</p>
+                  <p className="text-xs text-[#6B6661]">{travelResources.hotels?.length} {t('home.options')}</p>
                 </div>
 
                 <div className="bg-stone-50 rounded-xl p-4 cursor-pointer hover:bg-stone-100 transition-colors text-center"
                   onClick={() => setExpandedSection(expandedSection === 'flights' ? null : 'flights')}>
                   <Plane className="w-6 h-6 text-[#FFBE98] mx-auto mb-2" />
-                  <p className="text-sm font-medium text-[#2D2A26]">Voos</p>
-                  <p className="text-xs text-[#6B6661]">{travelResources.flights?.length} companhias</p>
+                  <p className="text-sm font-medium text-[#2D2A26]">{t('home.flights')}</p>
+                  <p className="text-xs text-[#6B6661]">{travelResources.flights?.length} {t('home.airlines')}</p>
                 </div>
 
                 <div className="bg-stone-50 rounded-xl p-4 cursor-pointer hover:bg-stone-100 transition-colors text-center"
                   onClick={() => setExpandedSection(expandedSection === 'social' ? null : 'social')}>
                   <Compass className="w-6 h-6 text-[#FFBE98] mx-auto mb-2" />
-                  <p className="text-sm font-medium text-[#2D2A26]">Recursos</p>
-                  <p className="text-xs text-[#6B6661]">{travelResources.social?.length} sites</p>
+                  <p className="text-sm font-medium text-[#2D2A26]">{t('home.resources')}</p>
+                  <p className="text-xs text-[#6B6661]">{travelResources.social?.length} {t('home.sites')}</p>
                 </div>
               </div>
 
@@ -454,13 +454,13 @@ const Home = () => {
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
             <span className="inline-block px-4 py-2 bg-[#E6F4F1] rounded-full text-[#2D2A26] font-medium text-sm mb-4">
               <Sparkles className="w-4 h-4 inline mr-2" />
-              Viagens dos Embaixadores
+              {t('home.ambassador_journeys')}
             </span>
             <h2 className="text-3xl md:text-4xl font-bold text-[#2D2A26] mb-4">
-              Sonhos em Fase de Materialização
+              {t('home.materializing_dreams')}
             </h2>
             <p className="text-[#6B6661] max-w-xl mx-auto">
-              Ajuda outros sonhadores a concretizar as suas viagens de sonho
+              {t('home.help_dreamers')}
             </p>
           </motion.div>
 
@@ -473,7 +473,7 @@ const Home = () => {
                     <div className="w-8 h-8 bg-gradient-to-br from-[#F2C94C] to-[#FFBE98] rounded-full flex items-center justify-center">
                       <Star className="w-4 h-4 text-white" />
                     </div>
-                    <h3 className="text-xl font-bold text-[#2D2A26]">Em Destaque</h3>
+                    <h3 className="text-xl font-bold text-[#2D2A26]">{t('home.featured')}</h3>
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -485,7 +485,7 @@ const Home = () => {
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                           <div className="absolute top-4 left-4 px-3 py-1 bg-gradient-to-r from-[#F2C94C] to-[#FFBE98] rounded-full text-white text-sm font-medium flex items-center gap-1">
-                            <Star className="w-3 h-3" /> Destaque
+                            <Star className="w-3 h-3" /> {t('home.highlight')}
                           </div>
                           <div className="absolute top-4 right-4 px-3 py-1 bg-white/90 rounded-full text-sm font-medium">
                             {journey.show_goal_amount && journey.goal_amount ? (
@@ -496,7 +496,7 @@ const Home = () => {
                           </div>
                           <div className="absolute bottom-4 left-4 right-4">
                             <h4 className="text-xl font-bold text-white mb-1">{journey.name}</h4>
-                            <p className="text-white/80 text-sm">por {journey.ambassador_name}</p>
+                            <p className="text-white/80 text-sm">{t('home.by')} {journey.ambassador_name}</p>
                           </div>
                         </div>
                         <div className="p-5">
@@ -540,7 +540,7 @@ const Home = () => {
                           <h4 className="font-bold text-[#2D2A26] mb-1">{journey.name}</h4>
                           <p className="text-sm text-[#6B6661] mb-3 line-clamp-2">{journey.description}</p>
                           <div className="flex items-center justify-between">
-                            <span className="text-xs text-[#6B6661]">por {journey.ambassador_name}</span>
+                            <span className="text-xs text-[#6B6661]">{t('home.by')} {journey.ambassador_name}</span>
                             <div className="h-2 flex-1 mx-4 bg-stone-100 rounded-full overflow-hidden">
                               <div className="h-full bg-[#FFBE98] rounded-full" style={{ width: `${journey.progress_percentage}%` }} />
                             </div>
@@ -555,8 +555,8 @@ const Home = () => {
           ) : (
             <div className="text-center py-16 bg-white rounded-2xl">
               <Globe className="w-16 h-16 text-[#E6F4F1] mx-auto mb-4" />
-              <p className="text-[#6B6661] mb-4">Ainda não existem viagens de embaixadores em angariação.</p>
-              <p className="text-sm text-[#6B6661]">Torna-te Embaixador para criar a tua viagem!</p>
+              <p className="text-[#6B6661] mb-4">{t('home.no_ambassador_journeys')}</p>
+              <p className="text-sm text-[#6B6661]">{t('home.become_ambassador')}</p>
             </div>
           )}
         </div>
@@ -568,13 +568,13 @@ const Home = () => {
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
             <span className="inline-block px-4 py-2 bg-green-100 rounded-full text-green-700 font-medium text-sm mb-4">
               <Camera className="w-4 h-4 inline mr-2" />
-              Histórias Reais
+              {t('home.real_stories')}
             </span>
             <h2 className="text-3xl md:text-4xl font-bold text-[#2D2A26] mb-4">
-              Sonhos Realizados
+              {t('home.realized_dreams')}
             </h2>
             <p className="text-[#6B6661] max-w-xl mx-auto">
-              Viagens que se tornaram realidade graças à comunidade 4Luis
+              {t('home.realized_desc')}
             </p>
           </motion.div>
 
@@ -599,7 +599,7 @@ const Home = () => {
                         </p>
                       </div>
                       <span className="absolute top-4 right-4 px-2 py-1 bg-white/20 backdrop-blur text-white text-xs rounded-full">
-                        Inspiração
+                        {t('home.inspiration')}
                       </span>
                     </div>
                     <div className="p-4">
@@ -616,7 +616,7 @@ const Home = () => {
                   <div className="flex items-center gap-3 mb-4">
                     <MapPin className="w-5 h-5 text-green-600" />
                     <h3 className="text-xl font-bold text-[#2D2A26]">{country}</h3>
-                    <span className="text-sm text-[#6B6661]">({data.journeys.length} {data.journeys.length === 1 ? 'sonho' : 'sonhos'})</span>
+                    <span className="text-sm text-[#6B6661]">({data.journeys.length} {data.journeys.length === 1 ? t('home.dream_singular') : t('home.dream_plural')})</span>
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -629,11 +629,11 @@ const Home = () => {
                           <div className="absolute bottom-4 left-4 right-4">
                             <p className="text-white font-bold">{journey.name}</p>
                             {journey.ambassador_name && (
-                              <p className="text-white/80 text-sm">por {journey.ambassador_name}</p>
+                            <p className="text-white/80 text-sm">{t('home.by')} {journey.ambassador_name}</p>
                             )}
                           </div>
                           <span className="absolute top-4 right-4 px-2 py-1 bg-green-500 text-white text-xs rounded-full flex items-center gap-1">
-                            <Check className="w-3 h-3" /> Realizado
+                            <Check className="w-3 h-3" /> {t('home.realized')}
                           </span>
                         </div>
                         {journey.story && (
@@ -662,8 +662,8 @@ const Home = () => {
           ) : (
             <div className="text-center py-16 bg-[#FAFAF9] rounded-2xl">
               <Camera className="w-16 h-16 text-stone-200 mx-auto mb-4" />
-              <p className="text-[#6B6661]">Ainda não existem sonhos realizados.</p>
-              <p className="text-sm text-[#6B6661] mt-2">Sê o primeiro a completar uma viagem!</p>
+              <p className="text-[#6B6661]">{t('home.no_realized')}</p>
+              <p className="text-sm text-[#6B6661] mt-2">{t('home.be_first')}</p>
             </div>
           )}
         </div>
@@ -674,10 +674,10 @@ const Home = () => {
         <div className="max-w-4xl mx-auto px-6 text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
             <p className="font-handwritten text-3xl md:text-4xl text-[#6B6661] leading-relaxed">
-              "Não é apenas crowdfunding,<br />
-              <span className="text-[#FFBE98]">é CrowdDreaming.</span><br />
-              Não é um donativo,<br />
-              <span className="text-[#FFBE98]">é um gesto fraternal.</span>"
+              "{t('home.quote1')}<br />
+              <span className="text-[#FFBE98]">{t('home.quote2')}</span><br />
+              {t('home.quote3')}<br />
+              <span className="text-[#FFBE98]">{t('home.quote4')}</span>"
             </p>
           </motion.div>
         </div>

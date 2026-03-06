@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
 
@@ -20,6 +20,71 @@ const defaultTexts = {
   "hero.subtitle": "A plataforma de CrowdDreaming para quem acredita que os sonhos se podem concretizar.",
   "hero.cta": "Descobrir Viagens",
   
+  // Main Journey
+  "home.main_journey": "Viagem Principal",
+  "home.progress": "Progresso",
+  "home.goal_reached": "Objetivo atingido! Ainda podes contribuir.",
+  "home.contribute_dream": "Contribuir para este Sonho",
+  "home.latest_contributions": "Últimas Contribuições",
+  "home.view_all_contributions": "Ver todas as contribuições",
+  "home.no_main_journey": "Nenhuma viagem principal ativa de momento.",
+  
+  // Community Stats
+  "home.dreamers": "Sonhadores",
+  "home.top_dreamer": "Maior Sonhador",
+  
+  // Social Proof & How it Works
+  "home.social_proof": "sonhadores já ajudaram esta plataforma",
+  "home.how_it_works": "Como funciona o Crowddreaming",
+  "home.step1_title": "Contribui para um sonho",
+  "home.step1_desc": "Ajuda a concretizar uma viagem com qualquer valor",
+  "home.step2_title": "Convida 3 amigos a contribuir",
+  "home.step2_desc": "Partilha o sonho e torna-te embaixador",
+  "home.step3_title": "Desbloqueia o teu próprio sonho",
+  "home.step3_desc": "Cria a tua própria viagem e recebe apoio",
+  "home.support_dream": "Apoiar este sonho",
+  
+  // Plan Your Trip
+  "home.plan_trip": "Planeia a Tua Viagem",
+  "home.plan_trip_desc": "Ferramentas úteis para planear a viagem dos teus sonhos",
+  "home.plan_placeholder": "Escreve o teu destino... (ex: Paris, Tóquio)",
+  "home.search": "Pesquisar",
+  "home.resources_for": "Recursos para:",
+  "home.map": "Mapa",
+  "home.where_to_stay": "Onde Ficar",
+  "home.options": "opções",
+  "home.flights": "Voos",
+  "home.airlines": "companhias",
+  "home.resources": "Recursos",
+  "home.sites": "sites",
+  
+  // Ambassador Journeys
+  "home.ambassador_journeys": "Viagens dos Embaixadores",
+  "home.materializing_dreams": "Sonhos em Fase de Materialização",
+  "home.help_dreamers": "Ajuda outros sonhadores a concretizar as suas viagens de sonho",
+  "home.featured": "Em Destaque",
+  "home.highlight": "Destaque",
+  "home.by": "por",
+  "home.no_ambassador_journeys": "Ainda não existem viagens de embaixadores em angariação.",
+  "home.become_ambassador": "Torna-te Embaixador para criar a tua viagem!",
+  
+  // Realized Dreams
+  "home.real_stories": "Histórias Reais",
+  "home.realized_dreams": "Sonhos Realizados",
+  "home.realized_desc": "Viagens que se tornaram realidade graças à comunidade 4Luis",
+  "home.inspiration": "Inspiração",
+  "home.dream_singular": "sonho",
+  "home.dream_plural": "sonhos",
+  "home.realized": "Realizado",
+  "home.no_realized": "Ainda não existem sonhos realizados.",
+  "home.be_first": "Sê o primeiro a completar uma viagem!",
+  
+  // Emotional Quote
+  "home.quote1": "Não é apenas crowdfunding,",
+  "home.quote2": "é CrowdDreaming.",
+  "home.quote3": "Não é um donativo,",
+  "home.quote4": "é um gesto fraternal.",
+
   // Journeys
   "journeys.title": "Viagens de Sonho",
   "journeys.subtitle": "Cada viagem é uma história à espera de ser vivida",
@@ -178,6 +243,15 @@ export const LanguageProvider = ({ children }) => {
       // Silent fail - localStorage still works as fallback
     }
   }, []);
+
+  // Translate on mount if language is not Portuguese
+  const initialTranslated = useRef(false);
+  useEffect(() => {
+    if (!initialTranslated.current && language !== 'pt') {
+      initialTranslated.current = true;
+      translateTexts(language);
+    }
+  }, [language, translateTexts]);
 
   const changeLanguage = useCallback(async (newLang) => {
     setLanguage(newLang);
