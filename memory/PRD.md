@@ -12,6 +12,7 @@ Plataforma de angariação de fundos para viagens solidárias com sistema de ní
 - **Auth**: JWT + Google OAuth
 - **QR Codes**: qrcode (npm, toDataURL)
 - **Crypto Prices**: CoinGecko API
+- **Translation**: OpenAI GPT-5.2 via Emergent LLM Key (emergentintegrations)
 
 ## What's Been Implemented
 
@@ -19,19 +20,12 @@ Plataforma de angariação de fundos para viagens solidárias com sistema de ní
 - Step 1: Selecao de valor (10/20/50/100/custom)
 - Step 2: Metodo de pagamento (Crypto com badge TOP, MBWay, Revolut, Wise, PayPal)
 - Step 3: Instrucoes com QR codes crypto (URI blockchain), deep links, referencia CN-XXXX
-- Crypto: QR com `protocol:address?amount=value`, botao "Abrir carteira", aviso de rede
-- MBWay: Sem QR, botao "Abrir MBWay" (mbway://transfer) + "Copiar numero"
-- Revolut: Botao "Abrir Revolut" (revolut.me/luism2npb)
-- Wise: Botao "Abrir Wise" (wise.com/pay/me/luisc8030)
-- PayPal: Botao "Abrir PayPal" (paypal.me/LuisCanarias/{amount})
-- Navegacao entre passos (seta voltar)
-- Mensagem "Depois de enviar o pagamento, volte aqui..."
 
 ### Homepage
 - "Como funciona o Crowddreaming" - 3 cards com icones
 - Prova social "X sonhadores ja ajudaram esta plataforma"
 - Imagem e badge "Viagem Principal" clicaveis -> detalhe da viagem
-- "Planeia a tua viagem" com cards de ferramentas futuras
+- "Planeia a tua viagem" com pesquisa de destino e links de recursos
 
 ### Pagina Detalhe Viagem
 - Botao sticky "Apoiar esta viagem" fixo no topo ao fazer scroll
@@ -40,11 +34,17 @@ Plataforma de angariação de fundos para viagens solidárias com sistema de ní
 - Dashboard: Progresso com referrals individuais (verde/cinza)
 - Botao "Convidar mais amigos" copia link /invite/{alias}
 - Pagina /invite/{alias} com imagem, mensagem convite, barra progresso, botao contribuir
-- Promocao automatica: referrals >= 3 AND contributed = true
 
 ### Admin
 - Gestao viagens, utilizadores, contribuicoes
 - Pesquisa por referencia de pagamento
+
+### Traducao por IA (Implementado 2026-03-06)
+- Endpoint POST /api/translate usando GPT-5.2 via Emergent LLM Key
+- 6 idiomas suportados: PT, EN, ES, FR, DE, IT
+- Cache de traducoes no frontend para evitar chamadas repetidas
+- Toast notification com aviso "Traducao automatica por IA"
+- Nota no footer quando idioma nao e portugues
 
 ## Key Files
 - `frontend/src/components/CheckoutModal.js` - Modal de checkout 3 passos
@@ -53,12 +53,13 @@ Plataforma de angariação de fundos para viagens solidárias com sistema de ní
 - `frontend/src/pages/Dashboard.js` - Dashboard com progresso Embaixador
 - `frontend/src/pages/InvitePage.js` - Pagina de convite
 - `frontend/src/pages/Admin.js` - Painel de administracao
+- `frontend/src/contexts/LanguageContext.js` - Contexto de traducao com cache
 - `backend/server.py` - API FastAPI principal
 
 ## Prioritized Backlog
 
 ### P1
-- Verificar estabilidade do Painel de Administracao
+- Verificar estabilidade do Painel de Administracao (smoke test passado)
 - Melhorar formulario de edicao de viagens no Admin
 
 ### P2
@@ -66,6 +67,7 @@ Plataforma de angariação de fundos para viagens solidárias com sistema de ní
 - Sorteio real
 - Notificacoes in-app
 - Ferramentas de planeamento (afiliados)
+- Refactoring: Dividir CheckoutModal.js em sub-componentes
 
 ## Credentials
 - **Admin**: admin@4luis.com / Admin1

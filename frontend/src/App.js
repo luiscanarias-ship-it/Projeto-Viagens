@@ -3,6 +3,7 @@ import "@/App.css";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
+import { Toaster } from "./components/ui/sonner";
 
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -61,6 +62,7 @@ function App() {
           <BrowserRouter>
             <AppRouter />
           </BrowserRouter>
+          <Toaster position="bottom-center" richColors />
         </LanguageProvider>
       </AuthProvider>
     </div>

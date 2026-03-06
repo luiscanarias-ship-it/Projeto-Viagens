@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import axios from 'axios';
+import { toast } from 'sonner';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -119,10 +120,21 @@ export const LanguageProvider = ({ children }) => {
   const [language, setLanguage] = useState(localStorage.getItem('language') || 'pt');
   const [texts, setTexts] = useState(defaultTexts);
   const [isTranslating, setIsTranslating] = useState(false);
+  const [cache, setCache] = useState({});
 
   const translateTexts = useCallback(async (targetLang) => {
     if (targetLang === 'pt') {
       setTexts(defaultTexts);
+      return;
+    }
+
+    // Use cached translation if available
+    if (cache[targetLang]) {
+      setTexts(cache[targetLang]);
+      toast.info('Tradução automática por IA. Podem existir pequenas imprecisões.', {
+        duration: 4000,
+        icon: '🌐',
+      });
       return;
     }
 
@@ -139,14 +151,19 @@ export const LanguageProvider = ({ children }) => {
       
       if (response.data.translations) {
         setTexts(response.data.translations);
+        setCache(prev => ({ ...prev, [targetLang]: response.data.translations }));
+        toast.info('Tradução automática por IA. Podem existir pequenas imprecisões.', {
+          duration: 5000,
+          icon: '🌐',
+        });
       }
     } catch (error) {
       console.error('Translation error:', error);
-      // Keep current texts on error
+      toast.error('Erro na tradução. A mostrar textos originais.');
     } finally {
       setIsTranslating(false);
     }
-  }, []);
+  }, [cache]);
 
   const changeLanguage = useCallback(async (newLang) => {
     setLanguage(newLang);
