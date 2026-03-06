@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Copy, Check, Share2, X } from 'lucide-react';
+import { toast } from 'sonner';
 
 const SHARE_TEXT = (link, name) => {
   const who = name ? `O/A ${name} acredita` : 'Acredito';
@@ -62,10 +63,11 @@ const ShareMenu = ({ inviteLink, senderName, buttonLabel = "Partilhar convite", 
     setIsOpen(false);
   };
 
-  const shareGmail = () => {
+  const shareGmail = async () => {
+    await navigator.clipboard.writeText(plainMessage);
     const subject = encodeURIComponent(senderName ? `${senderName} convidou-te para a 4Luis` : 'Junta-te a mim na 4Luis');
-    const body = encodeURIComponent(plainMessage);
-    window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=&su=${subject}&body=${body}`, '_blank');
+    window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=&su=${subject}`, '_blank');
+    toast.success('Mensagem copiada! Cola no corpo do email com Ctrl+V', { duration: 5000 });
     setIsOpen(false);
   };
 
