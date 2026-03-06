@@ -63,11 +63,10 @@ const ShareMenu = ({ inviteLink, senderName, buttonLabel = "Partilhar convite", 
     setIsOpen(false);
   };
 
-  const shareGmail = async () => {
-    await navigator.clipboard.writeText(plainMessage);
+  const shareGmail = () => {
     const subject = encodeURIComponent(senderName ? `${senderName} convidou-te para a 4Luis` : 'Junta-te a mim na 4Luis');
-    window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=&su=${subject}`, '_blank');
-    toast.success('Mensagem copiada! Cola no corpo do email com Ctrl+V', { duration: 5000 });
+    const body = encodeURIComponent(plainMessage);
+    window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=&su=${subject}&body=${body}`, '_blank');
     setIsOpen(false);
   };
 
