@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { 
@@ -23,7 +23,7 @@ const REGION_CONFIG = {
 };
 
 const Home = () => {
-  const { t } = useLanguage();
+  const { t, language, translateDynamic } = useLanguage();
   const [mainJourney, setMainJourney] = useState(null);
   const [ambassadorJourneys, setAmbassadorJourneys] = useState(null);
   const [realizedJourneys, setRealizedJourneys] = useState(null);
@@ -31,6 +31,10 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [dreamersStats, setDreamersStats] = useState(null);
   const [platformStats, setPlatformStats] = useState(null);
+  
+  // Translated dynamic content from DB
+  const [dynTexts, setDynTexts] = useState({});
+  const lastTransLang = useRef('pt');
   
   // Travel planner state
   const [customDestination, setCustomDestination] = useState('');
@@ -67,6 +71,45 @@ const Home = () => {
 
     fetchData();
   }, []);
+
+  // Translate dynamic DB content when language or data changes
+  const translateContent = useCallback(async () => {
+    if (language === 'pt') {
+      setDynTexts({});
+      lastTransLang.current = 'pt';
+      return;
+    }
+    if (language === lastTransLang.current) return;
+    
+    const toTranslate = {};
+    if (mainJourney?.journey) {
+      const j = mainJourney.journey;
+      if (j.poetic_name) toTranslate['main.poetic'] = j.poetic_name;
+      if (j.emotional_message) toTranslate['main.emotional'] = j.emotional_message;
+    }
+    if (curatedDreams?.message) toTranslate['curated.message'] = curatedDreams.message;
+    if (curatedDreams?.curated_dreams) {
+      curatedDreams.curated_dreams.forEach((dream, i) => {
+        if (dream.name) toTranslate[`curated.${i}.name`] = dream.name;
+        if (dream.country) toTranslate[`curated.${i}.country`] = dream.country;
+        if (dream.story) toTranslate[`curated.${i}.story`] = dream.story;
+      });
+    }
+    
+    if (Object.keys(toTranslate).length === 0) return;
+    const translated = await translateDynamic(toTranslate);
+    if (translated) {
+      setDynTexts(translated);
+      lastTransLang.current = language;
+    }
+  }, [language, mainJourney, curatedDreams, translateDynamic]);
+
+  useEffect(() => {
+    if (!loading) translateContent();
+  }, [loading, language, translateContent]);
+
+  // Helper to get dynamic translated text
+  const d = useCallback((key, fallback) => dynTexts[key] || fallback, [dynTexts]);
 
   const searchDestination = async () => {
     if (!customDestination.trim()) return;
@@ -172,7 +215,7 @@ const Home = () => {
                   {mainJourney.journey.name}
                 </h2>
                 <p className="font-handwritten text-2xl text-[#FFBE98] mb-6">
-                  {mainJourney.journey.poetic_name}
+                  {d('main.poetic', mainJourney.journey.poetic_name)}
                 </p>
               </motion.div>
 
@@ -186,7 +229,7 @@ const Home = () => {
                 
                 <div className="absolute bottom-0 left-0 right-0 p-8 z-20">
                   <p className="text-white/90 text-lg md:text-xl mb-6 max-w-2xl">
-                    {mainJourney.journey.emotional_message}
+                    {d('main.emotional', mainJourney.journey.emotional_message)}
                   </p>
                   
                   {/* Progress Bar */}
@@ -582,10 +625,10 @@ const Home = () => {
           {curatedDreams?.use_curated ? (
             <div>
               <p className="text-center text-sm text-[#FFBE98] mb-8 italic">
-                {curatedDreams.message}
+                {d('curated.message', curatedDreams.message)}
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {curatedDreams.curated_dreams.map((dream) => (
+                {curatedDreams.curated_dreams.map((dream, idx) => (
                   <motion.div key={dream.id} initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}
                     className="bg-[#FAFAF9] rounded-2xl overflow-hidden group">
                     <div className="relative h-48 overflow-hidden">
@@ -593,9 +636,9 @@ const Home = () => {
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                       <div className="absolute bottom-4 left-4 right-4">
-                        <p className="text-white font-bold">{dream.name}</p>
+                        <p className="text-white font-bold">{d(`curated.${idx}.name`, dream.name)}</p>
                         <p className="text-white/80 text-sm flex items-center gap-1">
-                          <MapPin className="w-3 h-3" /> {dream.country}
+                          <MapPin className="w-3 h-3" /> {d(`curated.${idx}.country`, dream.country)}
                         </p>
                       </div>
                       <span className="absolute top-4 right-4 px-2 py-1 bg-white/20 backdrop-blur text-white text-xs rounded-full">
@@ -603,7 +646,7 @@ const Home = () => {
                       </span>
                     </div>
                     <div className="p-4">
-                      <p className="text-sm text-[#6B6661] italic">"{dream.story}"</p>
+                      <p className="text-sm text-[#6B6661] italic">"{d(`curated.${idx}.story`, dream.story)}"</p>
                     </div>
                   </motion.div>
                 ))}

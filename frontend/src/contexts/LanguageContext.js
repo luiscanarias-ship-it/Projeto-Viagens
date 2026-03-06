@@ -253,6 +253,22 @@ export const LanguageProvider = ({ children }) => {
     }
   }, [language, translateTexts]);
 
+  const langNameMap = { en: 'English', es: 'Spanish', fr: 'French', de: 'German', it: 'Italian' };
+
+  // Translate arbitrary dynamic texts (DB content)
+  const translateDynamic = useCallback(async (textsObj) => {
+    if (language === 'pt' || !textsObj || Object.keys(textsObj).length === 0) return textsObj;
+    try {
+      const response = await axios.post(`${API}/translate`, {
+        texts: textsObj,
+        target_language: langNameMap[language] || 'English'
+      });
+      return response.data.translations || textsObj;
+    } catch {
+      return textsObj;
+    }
+  }, [language]);
+
   const changeLanguage = useCallback(async (newLang) => {
     setLanguage(newLang);
     localStorage.setItem('language', newLang);
@@ -277,6 +293,7 @@ export const LanguageProvider = ({ children }) => {
       language,
       changeLanguage,
       syncFromUser,
+      translateDynamic,
       t,
       isTranslating,
       texts
