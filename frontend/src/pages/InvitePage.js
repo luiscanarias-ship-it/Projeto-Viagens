@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Heart, Users, ArrowRight } from 'lucide-react';
 import axios from 'axios';
-import ShareMenu from '../components/ShareMenu';
+import ShareMenu, { buildInviteLink } from '../components/ShareMenu';
 
 const API = process.env.REACT_APP_BACKEND_URL + '/api';
 
@@ -125,7 +125,7 @@ const InvitePage = () => {
             {/* Share this dream */}
             <div className="pt-2 flex justify-center">
               <ShareMenu
-                inviteLink={`${window.location.origin}/invite/${encodeURIComponent(alias)}`}
+                inviteLink={buildInviteLink(alias)}
                 senderName={data?.inviter_name}
                 buttonLabel="Partilhar este sonho"
                 buttonClassName="flex items-center justify-center gap-2 py-2.5 px-5 bg-stone-100 text-[#2D2A26] rounded-xl text-sm font-semibold hover:bg-stone-200 transition-colors"

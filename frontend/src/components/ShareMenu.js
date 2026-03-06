@@ -6,6 +6,12 @@ const SHARE_TEXT = (link, name) => {
   return `${who} que os sonhos podem tornar-se realidade.\n\nEst${name ? 'á' : 'ou'} a ajudar a financiar uma viagem de sonho na 4Luis.\nSe quiseres participar também:\n\n${link}`;
 };
 
+// Build a clean invite URL with hyphens instead of spaces (Gmail-friendly)
+export const buildInviteLink = (alias) => {
+  const slug = alias.replace(/\s+/g, '-');
+  return `${window.location.origin}/invite/${slug}`;
+};
+
 const SHARE_HTML = (link, name) => {
   const who = name ? `O/A <strong>${name}</strong> acredita` : 'Acredito';
   return `${who} que os sonhos podem tornar-se realidade.<br><br>Est${name ? 'á' : 'ou'} a ajudar a financiar uma viagem de sonho na 4Luis.<br>Se quiseres participar também:<br><br><a href="${link}">${link}</a>`;

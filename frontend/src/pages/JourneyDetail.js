@@ -11,7 +11,7 @@ import axios from 'axios';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import CheckoutModal from '../components/CheckoutModal';
-import ShareMenu from '../components/ShareMenu';
+import ShareMenu, { buildInviteLink } from '../components/ShareMenu';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -270,7 +270,7 @@ const JourneyDetail = () => {
           {user?.anonymous_alias && (
             <div className="flex justify-center -mt-4 mb-8 relative z-10">
               <ShareMenu
-                inviteLink={`${window.location.origin}/invite/${encodeURIComponent(user.anonymous_alias)}`}
+                inviteLink={buildInviteLink(user.anonymous_alias)}
                 senderName={user?.name}
                 buttonLabel="Partilhar este sonho"
                 buttonClassName="flex items-center gap-2 py-2.5 px-6 bg-white text-[#2D2A26] rounded-xl text-sm font-semibold hover:bg-stone-50 transition-colors shadow-md border border-stone-100"

@@ -5138,17 +5138,20 @@ async def get_platform_stats():
     }
 
 # Invite page endpoint - get inviter info by alias
-@api_router.get("/invite/{alias}")
+@api_router.get("/invite/{alias:path}")
 async def get_invite_page(alias: str):
-    # Find user by anonymous_alias or name
+    # Normalize: convert hyphens back to spaces for lookup
+    normalized = alias.replace("-", " ")
+    
+    # Find user by anonymous_alias (try both original and normalized)
     user = await db.users.find_one(
-        {"anonymous_alias": alias},
+        {"anonymous_alias": {"$in": [alias, normalized]}},
         {"_id": 0, "name": 1, "anonymous_alias": 1, "user_id": 1}
     )
     if not user:
         # Try by name
         user = await db.users.find_one(
-            {"name": alias},
+            {"name": {"$in": [alias, normalized]}},
             {"_id": 0, "name": 1, "anonymous_alias": 1, "user_id": 1}
         )
     if not user:
