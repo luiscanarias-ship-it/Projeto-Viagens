@@ -85,6 +85,7 @@ const defaultTexts = {
   "home.quote1": "Todos os sonhos começam com um primeiro passo.",
   "home.quote2": "Ajuda alguém a viajar hoje.",
   "home.quote3": "E amanhã pode ser a tua vez.",
+  "home.quote4": "Juntos, transformamos sonhos em destinos.",
 
   // Journeys
   "journeys.title": "Viagens de Sonho",

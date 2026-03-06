@@ -316,14 +316,15 @@ const Home = () => {
                     {t('home.view_all_contributions')} →
                   </Link>
                 </motion.div>
-              )}
+                </div>
+              </div>
+            )}
             </>
           ) : (
             <div className="text-center py-20">
               <p className="text-[#6B6661]">{t('home.no_main_journey')}</p>
             </div>
           )}
-        </div>
       </section>
 
       {/* Community Stats */}
@@ -425,7 +426,8 @@ const Home = () => {
               <Map className="w-6 h-6 text-[#FFBE98]" />
               <h2 className="text-3xl font-bold text-[#2D2A26]">{t('home.plan_trip')}</h2>
             </div>
-            <p className="text-[#6B6661] mb-6">{t('home.plan_trip_desc')}</p>
+            <p className="text-[#6B6661] mb-2">{t('home.plan_trip_intro')}</p>
+            <p className="text-sm text-[#6B6661]/70 mb-6">{t('home.plan_trip_desc')}</p>
             
             <div className="max-w-md mx-auto flex gap-2">
               <input type="text" value={customDestination} onChange={(e) => setCustomDestination(e.target.value)}
@@ -728,6 +730,55 @@ const Home = () => {
           </motion.div>
         </div>
       </section>
+
+      {/* Sticky Contribution Bar */}
+      <AnimatePresence>
+        {showStickyBar && mainJourney?.journey && !showCheckout && (
+          <motion.div
+            initial={{ y: 80, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 80, opacity: 0 }}
+            className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-stone-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
+            data-testid="home-sticky-bar"
+          >
+            <div className="max-w-5xl mx-auto px-4 md:px-6 py-3 flex items-center gap-3 md:gap-5">
+              <div className="flex-1 min-w-0 hidden sm:block">
+                <p className="text-sm font-bold text-[#2D2A26] truncate">
+                  {mainJourney.journey.name} — <span className="font-handwritten text-[#FFBE98]">{d('main.poetic', mainJourney.journey.poetic_name)}</span>
+                </p>
+                {mainJourney.progress && (
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="flex-1 h-1.5 bg-stone-100 rounded-full overflow-hidden max-w-[180px]">
+                      <div className="h-full bg-gradient-to-r from-[#FFBE98] to-[#F2C94C] rounded-full" style={{ width: `${Math.min(100, mainJourney.progress.percentage)}%` }} />
+                    </div>
+                    <span className="text-xs font-semibold text-[#6B6661]">{mainJourney.progress.percentage}%</span>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => setShowCheckout(true)}
+                className="w-full sm:w-auto py-3 px-6 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-[#FFAB7D] transition-colors"
+                data-testid="home-sticky-contribute-btn"
+              >
+                <Heart className="w-4 h-4" />
+                {t('home.contribute_dream')}
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Checkout Modal */}
+      {mainJourney?.journey && (
+        <CheckoutModal
+          isOpen={showCheckout}
+          onClose={() => setShowCheckout(false)}
+          journeyName={mainJourney.journey.name}
+          journeyId={mainJourney.journey.journey_id}
+          getAuthHeaders={getAuthHeaders}
+          user={user}
+        />
+      )}
     </div>
   );
 };
