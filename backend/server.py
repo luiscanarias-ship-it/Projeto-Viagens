@@ -113,6 +113,7 @@ class User(UserBase):
     created_at: datetime
     picture: Optional[str] = None
     preferred_language: Optional[str] = None
+    anonymous_alias: Optional[str] = None
 
 # Journey status lifecycle
 JOURNEY_STATUSES = {

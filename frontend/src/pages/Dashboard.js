@@ -9,6 +9,7 @@ import {
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import JourneyApplicationModal from '../components/JourneyApplicationModal';
+import ShareMenu from '../components/ShareMenu';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -460,47 +461,18 @@ const Dashboard = () => {
               
               {/* Invite link section */}
               {!isEmbaixador && dashboardData?.user_alias && (
-                <div className="p-4 bg-stone-50 rounded-xl border border-stone-200">
+                <div className="mt-6 p-4 bg-stone-50 rounded-xl border border-stone-200">
                   <p className="text-xs text-[#6B6661] mb-1.5">O teu link de convite</p>
                   <a href={`${window.location.origin}/invite/${encodeURIComponent(dashboardData.user_alias)}`}
                     target="_blank" rel="noopener noreferrer"
                     className="text-sm font-mono font-semibold text-[#FFBE98] hover:underline mb-3 break-all block">
                     {window.location.origin}/invite/{dashboardData.user_alias}
                   </a>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(`${window.location.origin}/invite/${encodeURIComponent(dashboardData.user_alias)}`);
-                        setCopiedLink(true);
-                        setTimeout(() => setCopiedLink(false), 2000);
-                      }}
-                      className="flex-1 py-2.5 bg-[#2D2A26] text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-[#4A4640] transition-colors"
-                      data-testid="copy-invite-link-btn"
-                    >
-                      {copiedLink ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                      {copiedLink ? 'Copiado!' : 'Copiar link'}
-                    </button>
-                    <button
-                      onClick={() => {
-                        if (navigator.share) {
-                          navigator.share({
-                            title: 'Convite 4Luis',
-                            text: 'Junta-te a mim e ajuda a financiar um sonho!',
-                            url: `${window.location.origin}/invite/${encodeURIComponent(dashboardData.user_alias)}`
-                          });
-                        } else {
-                          navigator.clipboard.writeText(`${window.location.origin}/invite/${encodeURIComponent(dashboardData.user_alias)}`);
-                          setCopiedLink(true);
-                          setTimeout(() => setCopiedLink(false), 2000);
-                        }
-                      }}
-                      className="flex-1 py-2.5 bg-[#FFBE98] text-[#2D2A26] rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-[#FFBE98]/80 transition-colors"
-                      data-testid="share-invite-btn"
-                    >
-                      <Share2 className="w-3.5 h-3.5" />
-                      Partilhar
-                    </button>
-                  </div>
+                  <ShareMenu
+                    inviteLink={`${window.location.origin}/invite/${encodeURIComponent(dashboardData.user_alias)}`}
+                    buttonLabel="Partilhar convite"
+                    buttonClassName="w-full flex items-center justify-center gap-2 py-2.5 bg-[#FFBE98] text-[#2D2A26] rounded-lg text-sm font-semibold hover:bg-[#FFBE98]/80 transition-colors"
+                  />
                 </div>
               )}
             </>
