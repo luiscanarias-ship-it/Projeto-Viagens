@@ -462,9 +462,11 @@ const Dashboard = () => {
               {!isEmbaixador && dashboardData?.user_alias && (
                 <div className="p-4 bg-stone-50 rounded-xl border border-stone-200">
                   <p className="text-xs text-[#6B6661] mb-1.5">O teu link de convite</p>
-                  <p className="text-sm font-mono font-semibold text-[#2D2A26] mb-3 break-all">
+                  <a href={`${window.location.origin}/invite/${encodeURIComponent(dashboardData.user_alias)}`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="text-sm font-mono font-semibold text-[#FFBE98] hover:underline mb-3 break-all block">
                     {window.location.origin}/invite/{dashboardData.user_alias}
-                  </p>
+                  </a>
                   <div className="flex gap-2">
                     <button
                       onClick={() => {
