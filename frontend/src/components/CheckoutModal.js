@@ -445,11 +445,18 @@ const CheckoutModal = ({
                         className={`py-3 px-4 rounded-xl font-semibold transition-all text-left flex items-center justify-between ${
                           selectedAmount === amt
                             ? 'bg-[#FFBE98] text-white shadow-md ring-2 ring-[#FFBE98]/30'
-                            : 'bg-stone-100 text-[#2D2A26] hover:bg-stone-200'
+                            : amt === 20
+                              ? 'bg-[#FFBE98]/10 text-[#2D2A26] hover:bg-[#FFBE98]/20 ring-1 ring-[#FFBE98]/40'
+                              : 'bg-stone-100 text-[#2D2A26] hover:bg-stone-200'
                         }`}
                       >
                         <div className="flex items-center gap-3">
                           <span className="text-lg font-bold min-w-[60px]">€{amt}</span>
+                          {amt === 20 && selectedAmount !== amt && (
+                            <span className="text-xs font-semibold text-[#FFBE98] bg-[#FFBE98]/15 px-2 py-0.5 rounded-full" data-testid="most-popular-badge">
+                              Mais popular
+                            </span>
+                          )}
                           {contributionDescriptions?.[String(amt)] && (
                             <span className={`text-sm font-normal ${
                               selectedAmount === amt ? 'text-white/85' : 'text-[#6B6661]'
@@ -497,6 +504,10 @@ const CheckoutModal = ({
                       Alterar valor
                     </button>
                   </div>
+
+                  <p className="text-center text-sm text-[#6B6661] italic leading-relaxed" data-testid="motivational-text">
+                    Mesmo uma pequena contribuição<br />ajuda este sonho a ganhar forma.
+                  </p>
 
                   <p className="text-sm text-[#6B6661]">Escolhe o método de pagamento:</p>
 
