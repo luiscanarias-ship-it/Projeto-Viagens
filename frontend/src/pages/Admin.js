@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit2, Trash2, Save, X, BarChart3, Settings, CheckCircle, XCircle, Mail, Users, Award, Gift, Crown, TrendingUp, UserPlus, ChevronRight, Star, FileText, Clock, MapPin, Target, Calendar, Eye, MessageSquare, AlertCircle, ExternalLink, History, Search, Heart } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, X, BarChart3, Settings, CheckCircle, XCircle, Mail, Users, Award, Gift, Crown, TrendingUp, UserPlus, ChevronRight, Star, FileText, Clock, MapPin, Target, Calendar, Eye, MessageSquare, AlertCircle, ExternalLink, History, Search, Heart, Sparkles } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -55,6 +55,7 @@ const Admin = () => {
   const [showAdjustmentModal, setShowAdjustmentModal] = useState(false);
   const [adjustmentRequest, setAdjustmentRequest] = useState('');
   const [adjustmentJourneyId, setAdjustmentJourneyId] = useState(null);
+  const [generatingDescs, setGeneratingDescs] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     poetic_name: '',
@@ -927,11 +928,41 @@ const Admin = () => {
 
                         {/* Descrições de Contribuição */}
                         <div className="space-y-4">
-                          <h4 className="font-semibold text-[#2D2A26] flex items-center gap-2">
-                            <Heart className="w-4 h-4 text-[#FFBE98]" />
-                            Descrições de Contribuição
-                            <span className="text-xs font-normal text-[#6B6661]">(opcional — aparece no checkout)</span>
-                          </h4>
+                          <div className="flex items-center justify-between">
+                            <h4 className="font-semibold text-[#2D2A26] flex items-center gap-2">
+                              <Heart className="w-4 h-4 text-[#FFBE98]" />
+                              Descrições de Contribuição
+                              <span className="text-xs font-normal text-[#6B6661]">(opcional — aparece no checkout)</span>
+                            </h4>
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                setGeneratingDescs(true);
+                                try {
+                                  const headers = getAuthHeaders();
+                                  const res = await axios.post(`${API}/admin/generate-contribution-descriptions`, {
+                                    journey_name: editingJourney.name,
+                                    poetic_name: editingJourney.poetic_name || '',
+                                    description: editingJourney.description || ''
+                                  }, { headers, withCredentials: true });
+                                  if (res.data?.descriptions) {
+                                    setEditingJourney({ ...editingJourney, contribution_descriptions: res.data.descriptions });
+                                  }
+                                } catch (err) {
+                                  console.error('AI generation error:', err);
+                                  alert('Erro ao gerar descrições com IA');
+                                } finally {
+                                  setGeneratingDescs(false);
+                                }
+                              }}
+                              disabled={generatingDescs || !editingJourney.name}
+                              className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-[#FFBE98] to-[#F2C94C] text-[#2D2A26] rounded-lg text-xs font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
+                              data-testid="generate-ai-descriptions-btn"
+                            >
+                              <Sparkles className="w-3.5 h-3.5" />
+                              {generatingDescs ? 'A gerar...' : 'Gerar com IA'}
+                            </button>
+                          </div>
                           <div className="grid md:grid-cols-2 gap-3">
                             {[10, 20, 50, 100, 200, 500, 1000].map((amt) => (
                               <div key={amt} className="flex items-center gap-2">

@@ -2224,6 +2224,57 @@ async def translate_texts(translation_req: TranslationRequest):
         logger.error(f"Translation error: {e}")
         return {"translations": translation_req.texts, "error": "Erro na tradução"}
 
+@api_router.post("/admin/generate-contribution-descriptions")
+async def generate_contribution_descriptions(request: Request):
+    """Generate inspirational contribution descriptions using AI"""
+    user = await require_admin(request)
+    
+    body = await request.json()
+    journey_name = body.get("journey_name", "")
+    poetic_name = body.get("poetic_name", "")
+    description = body.get("description", "")
+    
+    if not journey_name:
+        raise HTTPException(status_code=400, detail="Nome da viagem é obrigatório")
+    
+    from emergentintegrations.llm.chat import LlmChat, UserMessage
+    
+    api_key = os.environ.get("EMERGENT_LLM_KEY")
+    if not api_key:
+        raise HTTPException(status_code=500, detail="Chave de IA não configurada")
+    
+    context = f"Destino: {journey_name}"
+    if poetic_name:
+        context += f" — {poetic_name}"
+    if description:
+        context += f". {description}"
+    
+    chat = LlmChat(
+        api_key=api_key,
+        session_id=f"contrib_desc_{uuid.uuid4().hex[:8]}",
+        system_message="""Gera descrições curtas e inspiradoras para valores de contribuição numa plataforma de crowdfunding de viagens.
+Cada descrição deve evocar uma experiência concreta relacionada com o destino.
+Responde APENAS com um JSON com as chaves "10", "20", "50", "100", "200", "500", "1000" e os valores são frases curtas em português.
+Exemplo: {"10": "Um café com vista para a Torre Eiffel", "20": "Um almoço num bistrô parisiense", ...}
+Sem explicações, apenas o JSON."""
+    ).with_model("openai", "gpt-5.2")
+    
+    user_message = UserMessage(text=f"Gera descrições de contribuição para: {context}")
+    
+    try:
+        response = await chat.send_message(user_message)
+        clean_response = response.strip()
+        if clean_response.startswith("```"):
+            clean_response = clean_response.split("```")[1]
+            if clean_response.startswith("json"):
+                clean_response = clean_response[4:]
+        import json as json_mod
+        descriptions = json_mod.loads(clean_response)
+        return {"descriptions": descriptions}
+    except Exception as e:
+        logger.error(f"AI description generation error: {e}")
+        raise HTTPException(status_code=500, detail="Erro ao gerar descrições com IA")
+
 # ==================== STRIPE SUBSCRIPTIONS ====================
 
 @api_router.post("/subscription/create-checkout")
