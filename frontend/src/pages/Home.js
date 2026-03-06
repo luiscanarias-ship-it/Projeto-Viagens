@@ -8,6 +8,8 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useAuth } from '../contexts/AuthContext';
+import CheckoutModal from '../components/CheckoutModal';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -24,6 +26,7 @@ const REGION_CONFIG = {
 
 const Home = () => {
   const { t, language, translateDynamic } = useLanguage();
+  const { user, getAuthHeaders } = useAuth();
   const [mainJourney, setMainJourney] = useState(null);
   const [ambassadorJourneys, setAmbassadorJourneys] = useState(null);
   const [realizedJourneys, setRealizedJourneys] = useState(null);
@@ -31,6 +34,8 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [dreamersStats, setDreamersStats] = useState(null);
   const [platformStats, setPlatformStats] = useState(null);
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [showStickyBar, setShowStickyBar] = useState(false);
   
   // Translated dynamic content from DB
   const [dynTexts, setDynTexts] = useState({});
@@ -41,6 +46,13 @@ const Home = () => {
   const [travelResources, setTravelResources] = useState(null);
   const [expandedSection, setExpandedSection] = useState(null);
   const [loadingResources, setLoadingResources] = useState(false);
+
+  // Sticky bar scroll listener
+  useEffect(() => {
+    const handleScroll = () => setShowStickyBar(window.scrollY > 600);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -201,58 +213,46 @@ const Home = () => {
       </section>
 
       {/* ==================== 1. VIAGEM PRINCIPAL ==================== */}
-      <section id="main-journey" className="py-16 md:py-24 bg-white" data-testid="main-journey-section">
-        <div className="max-w-6xl mx-auto px-6">
-          {mainJourney?.journey ? (
-            <>
-              {/* Journey Header */}
-              <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
-                <Link to={`/journey/${mainJourney.journey.journey_id}`}
-                  className="inline-block px-4 py-2 bg-[#FFBE98]/20 rounded-full text-[#FFBE98] font-medium text-sm mb-4 hover:bg-[#FFBE98]/30 transition-colors cursor-pointer">
-                  {t('home.main_journey')}
-                </Link>
-                <h2 className="text-4xl md:text-5xl font-bold text-[#2D2A26] mb-4">
-                  {mainJourney.journey.name}
-                </h2>
-                <p className="font-handwritten text-2xl text-[#FFBE98] mb-6">
-                  {d('main.poetic', mainJourney.journey.poetic_name)}
-                </p>
-              </motion.div>
-
-              {/* Live Experience Card */}
-              <Link to={`/journey/${mainJourney.journey.journey_id}`} className="block">
-              <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-                className="relative rounded-3xl overflow-hidden shadow-xl mb-12 cursor-pointer hover:shadow-2xl transition-shadow">
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent z-10" />
-                <img src={mainJourney.journey.image_url} alt={mainJourney.journey.name}
-                  className="w-full h-[400px] md:h-[500px] object-cover" />
-                
-                <div className="absolute bottom-0 left-0 right-0 p-8 z-20">
-                  <p className="text-white/90 text-lg md:text-xl mb-6 max-w-2xl">
+      <section id="main-journey" className="relative" data-testid="main-journey-section">
+        {mainJourney?.journey ? (
+          <>
+            {/* Immersive Hero Card */}
+            <div className="relative min-h-[85vh] flex items-end overflow-hidden">
+              <img src={mainJourney.journey.image_url} alt={mainJourney.journey.name}
+                className="absolute inset-0 w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10" />
+              
+              <div className="relative z-10 w-full max-w-5xl mx-auto px-6 pb-16 pt-32">
+                <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+                  <Link to={`/journey/${mainJourney.journey.journey_id}`}
+                    className="inline-block px-4 py-1.5 bg-white/15 backdrop-blur rounded-full text-white/90 font-medium text-sm mb-5 hover:bg-white/25 transition-colors">
+                    {t('home.main_journey')}
+                  </Link>
+                  
+                  <h2 className="text-5xl md:text-7xl font-bold text-white mb-3">
+                    {mainJourney.journey.name}
+                  </h2>
+                  <p className="font-handwritten text-3xl md:text-4xl text-[#FFBE98] mb-6">
+                    {d('main.poetic', mainJourney.journey.poetic_name)}
+                  </p>
+                  <p className="text-white/85 text-lg md:text-xl mb-10 max-w-xl leading-relaxed">
                     {d('main.emotional', mainJourney.journey.emotional_message)}
                   </p>
-                  
+
                   {/* Progress Bar */}
                   {mainJourney.progress && (
-                    <div className="mb-6">
+                    <div className="max-w-md mb-8">
                       <div className="flex justify-between items-center mb-2">
-                        <span className="text-white/80 text-sm">{t('home.progress')}</span>
-                        <div className="flex items-center gap-2">
-                          {mainJourney.progress.show_goal_amount && mainJourney.progress.goal_amount ? (
-                            <span className="text-white/80 text-sm">
-                              €{mainJourney.progress.current_amount?.toLocaleString()} / €{mainJourney.progress.goal_amount?.toLocaleString()}
-                            </span>
-                          ) : null}
-                          <span className="text-white font-bold text-lg">{mainJourney.progress.percentage}%</span>
-                        </div>
+                        <span className="text-white/70 text-sm">{t('home.progress')}</span>
+                        <span className="text-white font-bold text-lg">{mainJourney.progress.percentage}% <span className="text-white/60 text-sm font-normal">{t('home.funded')}</span></span>
                       </div>
-                      <div className="h-3 bg-white/20 rounded-full overflow-hidden">
+                      <div className="h-2.5 bg-white/15 rounded-full overflow-hidden">
                         <motion.div
                           initial={{ width: 0 }}
                           whileInView={{ width: `${Math.min(mainJourney.progress.percentage, 100)}%` }}
                           viewport={{ once: true }}
                           transition={{ duration: 1.5, ease: "easeOut" }}
-                          className={`h-full rounded-full ${mainJourney.progress.is_funded ? 'bg-green-400' : 'bg-[#FFBE98]'}`}
+                          className={`h-full rounded-full ${mainJourney.progress.is_funded ? 'bg-green-400' : 'bg-gradient-to-r from-[#FFBE98] to-[#F2C94C]'}`}
                         />
                       </div>
                       {mainJourney.progress.is_funded && (
@@ -262,18 +262,21 @@ const Home = () => {
                       )}
                     </div>
                   )}
-                  
-                  <Link to={`/journey/${mainJourney.journey.journey_id}?pay=true`}
-                    className="inline-flex items-center gap-2 px-8 py-4 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-bold hover:bg-[#FFAB7D] transition-colors"
+
+                  <button
+                    onClick={() => setShowCheckout(true)}
+                    className="inline-flex items-center gap-2 px-8 py-4 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-bold text-lg hover:bg-[#FFAB7D] transition-colors"
                     data-testid="contribute-main-btn">
                     <Heart className="w-5 h-5" /> {t('home.contribute_dream')}
-                  </Link>
-                </div>
-              </motion.div>
-              </Link>
+                  </button>
+                </motion.div>
+              </div>
+            </div>
 
-              {/* Contributions Feed */}
-              {mainJourney.contributions?.length > 0 && (
+            {/* Contributions Feed */}
+            {mainJourney.contributions?.length > 0 && (
+              <div className="bg-white py-12">
+                <div className="max-w-6xl mx-auto px-6">
                 <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
                   className="bg-[#FAFAF9] rounded-2xl p-6 md:p-8">
                   <h3 className="text-xl font-bold text-[#2D2A26] mb-6 flex items-center gap-2">

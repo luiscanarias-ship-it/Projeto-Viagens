@@ -1,27 +1,22 @@
 <analysis>Análise da Sessão e Resumo de Transferência
 
 ### original_problem_statement
-O utilizador solicitou a continuação do trabalho no projeto Projeto-Viagens, focando-se em múltiplas melhorias de UI/UX e funcionalidade.
+O utilizador solicitou a continuação do desenvolvimento da plataforma de crowdfunding de viagens 4Luis, com um foco contínuo em melhorias de UI/UX e na implementação de funcionalidades de viralidade e onboarding.
 
 **PRODUCT REQUIREMENTS (Latest):**
-- **Melhorias na Homepage:**
-    - Adicionar uma secção Como funciona o Crowddreaming com 3 passos visuais.
-    - Adicionar um bloco de Prova social com o número total de contribuidores da plataforma.
-    - Adicionar uma secção placeholder Planeia a tua viagem com futuras ferramentas.
-    - Garantir que o botão principal e a imagem da viagem principal levam diretamente à página de detalhe da viagem.
-- **Melhorias na Página de Detalhe da Viagem:**
-    - Implementar um botão fixo (sticky) Apoiar esta viagem que aparece durante o scroll.
-- **Melhorias no Sistema de Referências e Dashboard:**
-    - Melhorar as mensagens motivacionais para incentivar o progresso para Embaixador.
-    - Exibir o link de convite do utilizador () com botões de Copiar e Partilhar.
-    - Melhorar a visualização do progresso dos referrals com uma checklist visual (ex: 🟢 Ana contribuiu).
-- **Criação da Página de Convite:**
-    - Criar uma página  que mostra quem convidou, a barra de progresso da viagem, e um botão para contribuir.
+- **Melhorias na Homepage (Pedido mais recente):**
+    1.  Adicionar uma barra de contribuição fixa (sticky) que aparece no scroll, mostrando detalhes da viagem principal e um botão Contribuir.
+    2.  Tornar a secção da viagem principal mais imersiva, com uma imagem de fundo e layout de texto melhorado.
+    3.  Adicionar um texto introdutório à secção Planeia a tua viagem.
+    4.  Atualizar a mensagem inspiradora na secção final da página.
+- **Sistema de Partilha Viral:** Implementar um menu de partilha reutilizável (WhatsApp, Telegram, Gmail, Copiar) no Dashboard, Página da Viagem e Página de Convite para promover o link de sponsor do utilizador ().
+- **Fluxo de Onboarding Pós-Convite:** Criar uma página de onboarding dedicada para novos utilizadores que se registam através de um link de convite, guiando-os sobre como contribuir e tornarem-se Embaixadores.
+- **Sistema de Tradução e Persistência:**
+    - Implementar um sistema de tradução por IA para todo o conteúdo do site, tanto estático (UI) como dinâmico (títulos de viagens, descrições, etc. vindos da base de dados).
+    - Tornar a seleção de idioma do utilizador persistente, guardando-a no seu perfil e aplicando-a automaticamente no login.
 - **Correções de Bugs:**
-    - Corrigir o fluxo de autenticação social (Google Auth).
-    - Garantir que a navegação para a página de login leva ao topo da página.
-    - Tornar o link de convite no dashboard clicável.
-    - Implementar um sistema de tradução funcional.
+    - Corrigir o problema recorrente do link de partilha do Gmail não ser clicável.
+    - Garantir que o link de convite está sempre visível no Dashboard para todos os tipos de utilizador.
 
 ### **User's preferred language**:
 Português. O próximo agente DEVE comunicar exclusivamente em português.
@@ -29,237 +24,39 @@ Português. O próximo agente DEVE comunicar exclusivamente em português.
 ### **what currently exists?**
 Uma aplicação full-stack de crowdfunding para viagens (4Luis) com backend FastAPI/MongoDB e frontend React/TailwindCSS. As funcionalidades principais incluem:
 - Autenticação de utilizadores (JWT e Google OAuth).
-- Um checkout modal de 3 passos complexo com suporte para pagamentos manuais (MBWay, PayPal) e criptomoedas (BTC, ETH, USDT, USDC), utilizando deep links e QR codes com URIs dinâmicos.
-- Um painel de utilizador (Dashboard) com um sistema de gamificação para progredir de Sonhador para Embaixador através de referências.
-- Uma página de detalhe da viagem com barra de progresso e um botão sticky para contribuir.
-- Uma homepage com secções de Prova Social e Como funciona.
-- Uma página de convite () para o sistema de referrals.
+- Um checkout modal de 3 passos para contribuições.
+- Um painel de utilizador (Dashboard) com um sistema de gamificação (Sonhador -> Embaixador).
+- Um sistema de tradução completo, alimentado por IA (), que traduz tanto o texto estático da UI como o conteúdo dinâmico vindo da base de dados.
+- Um seletor de idioma persistente que guarda a preferência do utilizador na sua conta.
+- Um sistema de partilha viral com um componente  reutilizável para partilhar links de convite em várias páginas.
+- Um fluxo de onboarding para novos utilizadores que se registam através de um link de convite.
+- Uma barra de contribuição fixa (sticky) na página de detalhe da viagem.
 
 ### **Last working item**:
-- **Last item agent was working:** Investigar por que a funcionalidade de tradução não está a funcionar. O agente observou que o frontend faz uma chamada para o endpoint , mas suspeita que este endpoint não existe ou não está a funcionar corretamente no backend.
+- **Last item agent was working:** O agente iniciou a implementação de um novo conjunto de 4 melhorias para a homepage, conforme solicitado pelo utilizador na sua última mensagem. O objetivo é tornar a página mais imersiva e melhorar a conversão.
 - **Status:** IN PROGRESS
 - **Agent Testing Done:** N
-- **Which testing method agent to use?** backend testing agent. É necessário verificar a existência e o comportamento do endpoint  no backend. Um teste com  seria o primeiro passo.
+- **Which testing method agent to use?** Frontend testing agent. Após a implementação das 4 melhorias visuais na homepage, o agente de testes deve ser chamado para verificar se a barra sticky funciona corretamente em desktop/mobile, se o novo layout da viagem principal é renderizado sem erros e se os novos textos foram aplicados corretamente. Um screenshot também seria útil para uma verificação visual rápida.
 - **User Testing Done:** N
 
 ### **All Pending/In progress Issue list**:
-- **Issue 1: Funcionalidade de tradução não funciona (P0)**
-  - **Descrição:** O utilizador seleciona outro idioma na UI, mas nenhum texto é traduzido. O frontend está a chamar o endpoint , que parece estar a falhar.
+- **Issue 1: Implementar as 4 Melhorias da Homepage (P0)**
+  - **Descrição:** Concluir a implementação do último pedido do utilizador, que inclui: 1) uma barra sticky de contribuição na homepage; 2) um layout mais imersivo para a viagem principal; 3) um novo texto para a secção Planeia a tua viagem; 4) uma nova mensagem final na página.
   - **Next debug checklist:**
-    1. Verificar no  se o endpoint  existe.
-    2. Se não existir, deve ser criado. Se existir, verificar a sua lógica e os logs do backend (==> /var/log/supervisor/backend.err.log <==
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [90]
-INFO:     Started server process [229]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-WARNING:  WatchFiles detected changes in 'server.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [229]
-INFO:     Started server process [4329]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [4329]
-INFO:     Stopping reloader process [46]
-INFO:     Will watch for changes in these directories: ['/app/backend']
-INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
-INFO:     Started reloader process [5477] using WatchFiles
-INFO:     Started server process [5479]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-WARNING:  WatchFiles detected changes in 'server.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [5479]
-INFO:     Started server process [6629]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-WARNING:  WatchFiles detected changes in 'server.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [6629]
-INFO:     Started server process [6645]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-WARNING:  WatchFiles detected changes in 'server.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [6645]
-INFO:     Started server process [6676]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-/root/.venv/lib/python3.11/site-packages/jwt/api_jwt.py:153: InsecureKeyLengthWarning: The HMAC key is 27 bytes long, which is below the minimum recommended length of 32 bytes for SHA256. See RFC 7518 Section 3.2.
-  return self._jws.encode(
-/root/.venv/lib/python3.11/site-packages/jwt/api_jwt.py:371: InsecureKeyLengthWarning: The HMAC key is 27 bytes long, which is below the minimum recommended length of 32 bytes for SHA256. See RFC 7518 Section 3.2.
-  decoded = self.decode_complete(
-WARNING:  WatchFiles detected changes in 'server.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [6676]
-INFO:     Started server process [7035]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-/root/.venv/lib/python3.11/site-packages/jwt/api_jwt.py:153: InsecureKeyLengthWarning: The HMAC key is 27 bytes long, which is below the minimum recommended length of 32 bytes for SHA256. See RFC 7518 Section 3.2.
-  return self._jws.encode(
-/root/.venv/lib/python3.11/site-packages/jwt/api_jwt.py:371: InsecureKeyLengthWarning: The HMAC key is 27 bytes long, which is below the minimum recommended length of 32 bytes for SHA256. See RFC 7518 Section 3.2.
-  decoded = self.decode_complete(
-2026-03-05 21:49:49,788 - httpx - INFO - HTTP Request: GET https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data "HTTP/1.1 200 OK"
-2026-03-05 21:54:42,761 - httpx - INFO - HTTP Request: GET https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data "HTTP/1.1 200 OK"
-2026-03-05 21:55:59,865 - httpx - INFO - HTTP Request: GET https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data "HTTP/1.1 200 OK"
-WARNING:  WatchFiles detected changes in 'server.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [7035]
-INFO:     Started server process [8051]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-WARNING:  WatchFiles detected changes in 'server.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [8051]
-INFO:     Started server process [8215]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-2026-03-05 22:00:34,282 - httpx - INFO - HTTP Request: GET https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data "HTTP/1.1 200 OK"
-/root/.venv/lib/python3.11/site-packages/jwt/api_jwt.py:153: InsecureKeyLengthWarning: The HMAC key is 27 bytes long, which is below the minimum recommended length of 32 bytes for SHA256. See RFC 7518 Section 3.2.
-  return self._jws.encode(
-2026-03-05 22:02:47,893 - httpx - INFO - HTTP Request: GET https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data "HTTP/1.1 200 OK"
-INFO:     Will watch for changes in these directories: ['/app/backend']
-INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
-INFO:     Started reloader process [48] using WatchFiles
-INFO:     Started server process [80]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-INFO:     Will watch for changes in these directories: ['/app/backend']
-INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
-INFO:     Started reloader process [46] using WatchFiles
-INFO:     Started server process [83]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-
-==> /var/log/supervisor/backend.out.log <==
-INFO:     10.208.140.72:35138 - "GET /api/dreamers-stats HTTP/1.1" 200 OK
-INFO:     10.208.140.72:35132 - "GET /api/platform/stats HTTP/1.1" 200 OK
-INFO:     10.208.140.71:46138 - "GET /api/homepage/ambassador-journeys HTTP/1.1" 200 OK
-INFO:     10.208.140.71:46138 - "GET /api/settings HTTP/1.1" 200 OK
-INFO:     10.208.140.72:35132 - "GET /api/homepage/main-journey HTTP/1.1" 200 OK
-INFO:     10.208.140.71:46138 - "GET /api/platform/stats HTTP/1.1" 200 OK
-INFO:     10.208.140.71:46122 - "GET /api/dreamers-stats HTTP/1.1" 200 OK
-INFO:     10.208.140.72:35132 - "GET /api/homepage/realized-journeys HTTP/1.1" 200 OK
-INFO:     10.208.140.71:46122 - "GET /api/homepage/curated-dreams HTTP/1.1" 200 OK
-INFO:     10.208.140.71:54214 - "GET /api/homepage/ambassador-journeys HTTP/1.1" 200 OK
-INFO:     10.208.140.72:35132 - "GET /api/settings HTTP/1.1" 200 OK
-INFO:     10.208.140.72:35132 - "GET /api/dashboard/user-stats HTTP/1.1" 200 OK
-INFO:     10.208.140.71:54214 - "GET /api/profile HTTP/1.1" 200 OK
-INFO:     10.208.140.72:35132 - "GET /api/dashboard/user-stats HTTP/1.1" 200 OK
-INFO:     10.208.140.72:35132 - "GET /api/profile HTTP/1.1" 200 OK
-INFO:     10.208.140.71:38974 - "GET /api/settings HTTP/1.1" 200 OK
-INFO:     10.208.140.71:38988 - "POST /api/seed-journeys HTTP/1.1" 200 OK
-INFO:     10.208.140.72:38616 - "POST /api/seed-journeys HTTP/1.1" 200 OK
-INFO:     10.208.140.72:38616 - "GET /api/auth/me HTTP/1.1" 200 OK
-INFO:     10.208.140.72:38616 - "GET /api/settings HTTP/1.1" 200 OK
-INFO:     10.208.140.72:38616 - "GET /api/homepage/curated-dreams HTTP/1.1" 200 OK
-INFO:     10.208.140.71:38988 - "GET /api/homepage/main-journey HTTP/1.1" 200 OK
-INFO:     10.208.140.71:38974 - "GET /api/homepage/ambassador-journeys HTTP/1.1" 200 OK
-INFO:     10.208.140.72:38626 - "GET /api/platform/stats HTTP/1.1" 200 OK
-INFO:     10.208.140.72:38626 - "GET /api/dreamers-stats HTTP/1.1" 200 OK
-INFO:     10.208.140.72:38618 - "GET /api/homepage/realized-journeys HTTP/1.1" 200 OK
-INFO:     10.208.140.71:38974 - "GET /api/auth/me HTTP/1.1" 200 OK
-INFO:     10.208.140.72:38618 - "GET /api/settings HTTP/1.1" 200 OK
-INFO:     10.208.140.72:38618 - "GET /api/homepage/ambassador-journeys HTTP/1.1" 200 OK
-INFO:     10.208.140.71:38974 - "GET /api/homepage/main-journey HTTP/1.1" 200 OK
-INFO:     10.208.140.71:38988 - "GET /api/platform/stats HTTP/1.1" 200 OK
-INFO:     10.208.140.71:38974 - "GET /api/homepage/realized-journeys HTTP/1.1" 200 OK
-INFO:     10.208.140.71:38988 - "GET /api/homepage/curated-dreams HTTP/1.1" 200 OK
-INFO:     10.208.140.71:38994 - "GET /api/dreamers-stats HTTP/1.1" 200 OK
-INFO:     10.208.140.71:38974 - "GET /api/settings HTTP/1.1" 200 OK
-INFO:     10.208.140.71:38974 - "POST /api/seed-journeys HTTP/1.1" 200 OK
-INFO:     10.208.140.72:38618 - "POST /api/seed-journeys HTTP/1.1" 200 OK
-INFO:     10.208.140.71:38974 - "GET /api/settings HTTP/1.1" 200 OK
-INFO:     10.208.140.72:38618 - "GET /api/auth/me HTTP/1.1" 200 OK
-INFO:     10.208.140.72:38618 - "GET /api/homepage/main-journey HTTP/1.1" 200 OK
-INFO:     10.208.140.71:38974 - "GET /api/dreamers-stats HTTP/1.1" 200 OK
-INFO:     10.208.140.72:38632 - "GET /api/platform/stats HTTP/1.1" 200 OK
-INFO:     10.208.140.72:38632 - "GET /api/homepage/curated-dreams HTTP/1.1" 200 OK
-INFO:     10.208.140.71:38974 - "GET /api/homepage/ambassador-journeys HTTP/1.1" 200 OK
-INFO:     10.208.140.71:38994 - "GET /api/homepage/realized-journeys HTTP/1.1" 200 OK
-INFO:     10.208.140.72:38618 - "GET /api/settings HTTP/1.1" 200 OK
-INFO:     10.208.140.71:38974 - "GET /api/auth/me HTTP/1.1" 200 OK
-INFO:     10.208.140.71:38974 - "GET /api/homepage/main-journey HTTP/1.1" 200 OK
-INFO:     10.208.140.71:38994 - "GET /api/platform/stats HTTP/1.1" 200 OK
-INFO:     10.208.140.72:38618 - "GET /api/homepage/realized-journeys HTTP/1.1" 200 OK
-INFO:     10.208.140.72:38618 - "GET /api/dreamers-stats HTTP/1.1" 200 OK
-INFO:     10.208.140.72:38632 - "GET /api/homepage/curated-dreams HTTP/1.1" 200 OK
-INFO:     10.208.140.71:38994 - "GET /api/homepage/ambassador-journeys HTTP/1.1" 200 OK
-INFO:     10.208.140.72:38618 - "GET /api/settings HTTP/1.1" 200 OK
-INFO:     10.208.140.72:38618 - "GET /api/settings HTTP/1.1" 200 OK
-INFO:     10.208.140.72:38632 - "GET /api/profile HTTP/1.1" 200 OK
-INFO:     10.208.140.72:38618 - "GET /api/dashboard/user-stats HTTP/1.1" 200 OK
-INFO:     10.208.140.71:38994 - "GET /api/profile HTTP/1.1" 200 OK
-INFO:     10.208.140.71:38994 - "GET /api/dashboard/user-stats HTTP/1.1" 200 OK
-INFO:     10.208.140.72:49450 - "GET /api/settings HTTP/1.1" 200 OK
-INFO:     10.208.140.72:49448 - "POST /api/seed-journeys HTTP/1.1" 200 OK
-INFO:     10.208.140.72:49450 - "POST /api/seed-journeys HTTP/1.1" 200 OK
-INFO:     10.208.140.72:49454 - "GET /api/auth/me HTTP/1.1" 200 OK
-INFO:     10.208.140.72:49456 - "GET /api/homepage/ambassador-journeys HTTP/1.1" 200 OK
-INFO:     10.208.140.72:49448 - "GET /api/homepage/curated-dreams HTTP/1.1" 200 OK
-INFO:     10.208.140.71:37682 - "GET /api/auth/me HTTP/1.1" 200 OK
-INFO:     10.208.140.72:49456 - "GET /api/homepage/realized-journeys HTTP/1.1" 200 OK
-INFO:     10.208.140.71:37670 - "GET /api/homepage/main-journey HTTP/1.1" 200 OK
-INFO:     10.208.140.71:37662 - "GET /api/dreamers-stats HTTP/1.1" 200 OK
-INFO:     10.208.140.71:37684 - "GET /api/settings HTTP/1.1" 200 OK
-INFO:     10.208.140.71:37698 - "GET /api/platform/stats HTTP/1.1" 200 OK
-INFO:     10.208.140.71:37670 - "GET /api/homepage/ambassador-journeys HTTP/1.1" 200 OK
-INFO:     10.208.140.72:49456 - "GET /api/dreamers-stats HTTP/1.1" 200 OK
-INFO:     10.208.140.71:37670 - "GET /api/homepage/curated-dreams HTTP/1.1" 200 OK
-INFO:     10.208.140.72:49456 - "GET /api/platform/stats HTTP/1.1" 200 OK
-INFO:     10.208.140.72:49448 - "GET /api/homepage/main-journey HTTP/1.1" 200 OK
-INFO:     10.208.140.71:37682 - "GET /api/settings HTTP/1.1" 200 OK
-INFO:     10.208.140.71:37682 - "GET /api/homepage/realized-journeys HTTP/1.1" 200 OK
-INFO:     10.208.140.72:49456 - "GET /api/settings HTTP/1.1" 200 OK
-INFO:     10.208.140.71:37682 - "GET /api/auth/me HTTP/1.1" 200 OK
-INFO:     10.208.140.72:49456 - "GET /api/settings HTTP/1.1" 200 OK
-INFO:     10.208.140.72:49456 - "POST /api/seed-journeys HTTP/1.1" 200 OK
-INFO:     10.208.140.72:49448 - "POST /api/seed-journeys HTTP/1.1" 200 OK
-INFO:     10.208.140.71:37682 - "GET /api/auth/me HTTP/1.1" 200 OK
-INFO:     10.208.140.71:37682 - "GET /api/settings HTTP/1.1" 200 OK
-INFO:     10.208.140.71:37670 - "GET /api/homepage/ambassador-journeys HTTP/1.1" 200 OK
-INFO:     10.208.140.71:37670 - "GET /api/platform/stats HTTP/1.1" 200 OK
-INFO:     10.208.140.72:49456 - "GET /api/homepage/main-journey HTTP/1.1" 200 OK
-INFO:     10.208.140.71:47396 - "GET /api/homepage/curated-dreams HTTP/1.1" 200 OK
-INFO:     10.208.140.71:47396 - "GET /api/dreamers-stats HTTP/1.1" 200 OK
-INFO:     10.208.140.71:37682 - "GET /api/homepage/realized-journeys HTTP/1.1" 200 OK
-INFO:     10.208.140.71:37670 - "GET /api/homepage/main-journey HTTP/1.1" 200 OK
-INFO:     10.208.140.72:49456 - "GET /api/homepage/ambassador-journeys HTTP/1.1" 200 OK
-INFO:     10.208.140.71:37670 - "GET /api/settings HTTP/1.1" 200 OK
-INFO:     10.208.140.71:47404 - "GET /api/homepage/curated-dreams HTTP/1.1" 200 OK
-INFO:     10.208.140.72:49456 - "GET /api/platform/stats HTTP/1.1" 200 OK
-INFO:     10.208.140.72:49448 - "GET /api/homepage/realized-journeys HTTP/1.1" 200 OK
-INFO:     10.208.140.71:47404 - "GET /api/dreamers-stats HTTP/1.1" 200 OK
-INFO:     10.208.140.72:49456 - "GET /api/settings HTTP/1.1" 200 OK
-INFO:     10.208.140.71:45540 - "POST /api/translate HTTP/1.1" 500 Internal Server Error) para identificar a causa do erro.
-    3. Testar o endpoint isoladamente com  para confirmar o seu comportamento.
-  - **Why fix this issue?** Para permitir que a plataforma seja usada por um público internacional, como solicitado pelo utilizador.
+    1.  Continuar a edição do ficheiro .
+    2.  Implementar a lógica do  com um  para controlar a visibilidade da barra sticky.
+    3.  Adicionar o JSX para a barra sticky, utilizando  para a animação, replicando o padrão já usado em .
+    4.  Reestruturar o JSX da secção da viagem principal para incluir uma imagem de fundo e o novo layout de texto.
+    5.  Substituir os textos nas secções Planeia a tua viagem e final usando as chaves de tradução já adicionadas ao .
+  - **Why fix this issue?** Para completar o pedido mais recente do utilizador e melhorar a experiência visual e a taxa de conversão da página principal.
   - **Status:** IN PROGRESS
   - **Is recurring issue?** N
-  - **Should Test frontend/backend/both after fix?** Both.
+  - **Should Test frontend/backend/both after fix?** Frontend.
 
-- **Issue 2: Instabilidade do Painel de Administração (P1)**
-  - **Descrição:** O painel de administração () apresentou erros de renderização e instabilidade em sessões anteriores. Embora bugs específicos tenham sido corrigidos, a estabilidade geral continua a ser uma preocupação.
-  - **Next debug checklist:** Realizar um smoke test completo em todas as abas do painel de administração para garantir que não há erros de runtime e que a UI se comporta como esperado, especialmente após as recentes alterações nos modelos de dados.
-  - **Why fix this issue?** O painel de administração é uma ferramenta crítica para a gestão da plataforma pelo utilizador.
+- **Issue 2: Estabilidade do Painel de Administração (P2)**
+  - **Descrição:** O painel de administração () apresentou instabilidade em sessões anteriores. Embora os testes automatizados do backend tenham passado, a UI não foi submetida a um teste de stress completo.
+  - **Next debug checklist:** Efetuar um smoke test manual ou com o agente de testes em todas as secções do painel de administração () para garantir que não existem erros de renderização ou de runtime, especialmente após as recentes alterações nos modelos de dados.
+  - **Why fix this issue?** O painel de administração é uma ferramenta crítica para a gestão da plataforma. A sua estabilidade é fundamental.
   - **Status:** TESTING PENDING
   - **Is recurring issue?** Y
   - **Should Test frontend/backend/both after fix?** Frontend.
@@ -268,112 +65,90 @@ INFO:     10.208.140.71:45540 - "POST /api/translate HTTP/1.1" 500 Internal Serv
 N/A
 
 ### **Upcoming and Future Tasks**
-- **Task 1: Concluir a Secção Planeia a tua viagem na Homepage (P1)**
-    - **Descrição:** O utilizador solicitou a criação de uma secção Planeia a tua viagem com cards ou botões para futuras ferramentas (Ex: Encontrar voos, Reservar hotéis). O agente implementou apenas o título e o texto da secção.
-    - **Onde retomar:** No ficheiro , adicionar os elementos visuais (cards/botões) em estado de placeholder dentro desta secção.
-
-- **Task 2: Melhorar o Formulário de Edição de Viagens no Admin (P2)**
-    - **Descrição:** O utilizador queixou-se que o formulário para editar viagens no painel de admin era pouco friendly. Esta tarefa foi mencionada numa sessão anterior mas adiada.
-    - **Onde retomar:** Revisitar o componente em , confirmar os requisitos com o utilizador e implementar um formulário de edição mais robusto e intuitivo, possivelmente dentro de um modal.
+- **Task 1: Melhorar o Formulário de Edição de Viagens no Admin (P2)**
+    - **Descrição:** O utilizador mencionou numa sessão anterior que o formulário para editar viagens no painel de administração não era amigável. Esta tarefa foi adiada.
+    - **Onde retomar:** Rever o componente em , confirmar os requisitos específicos com o utilizador e implementar um formulário de edição mais robusto e intuitivo.
 
 ### **Completed work in this session**
-- **Melhorias no Checkout Modal:**
-  - Otimizado o layout para caber sem scroll, implementado auto-scroll para criptomoedas.
-  - Corrigida a geração de QR codes para criptomoedas para usar o formato URI completo (), resolvendo múltiplos bugs de compatibilidade com wallets.
-  - Substituídos os QR codes para MBWay, Revolut e Wise por botões Abrir App com deep links, melhorando a experiência mobile.
-  - Corrigido o link do PayPal para incluir dinamicamente o valor da contribuição.
-  - Implementada a navegação para o passo anterior em vez de fechar o modal.
-  - Aumentada a visibilidade da mensagem de referência do pagamento.
-- **Melhorias na Homepage:**
-  - Adicionadas as secções Como funciona o Crowddreaming e Prova social (com dados do backend).
-  - Corrigidos os links da viagem principal para navegar para a página de detalhe.
-  - Adicionado um botão CTA Apoiar este sonho que leva diretamente para o checkout da viagem principal.
-- **Melhorias na Página da Viagem:**
-  - Implementado um botão sticky Apoiar esta viagem que aparece durante o scroll.
-- **Sistema de Referências e Dashboard:**
-  - Criada a página .
-  - O Dashboard foi melhorado com mensagens motivacionais dinâmicas, um link de convite visível e clicável (com botões Copiar e Partilhar), e uma checklist visual do progresso dos referrals.
-- **Correções de Bugs Críticos:**
-  - **Resolvido o fluxo de autenticação com Google**, que falhava após o login (erro 401). A correção envolveu garantir a criação completa do utilizador e devolver um token JWT no backend, que é guardado no  do frontend.
-  - Corrigido um crash no Dashboard ().
-  - Corrigido o bug que fazia a página de login abrir no fundo em vez do topo.
-  - Corrigido o link de convite no dashboard que não era clicável.
+- **Sistema de Tradução por IA (Estático e Dinâmico):** Foi implementado e depurado um sistema de tradução completo. Corrigido o endpoint  e substituído todo o texto estático da homepage para usar o sistema de tradução. Criada uma função  para traduzir conteúdo da base de dados em tempo real.
+- **Seletor de Idioma Persistente:** A preferência de idioma do utilizador é agora guardada na base de dados e aplicada automaticamente no login.
+- **Sistema de Partilha Viral e Correção de Bugs:** Criado um componente  para partilha em redes sociais e email, integrado em várias páginas. Resolvido um problema recorrente em que o link de partilha no Gmail não era clicável, alterando o formato dos URLs de convite para usar hífens em vez de espaços (ex: ).
+- **Fluxo de Onboarding Pós-Convite:** Criada uma página de onboarding () para novos utilizadores que chegam através de um link de convite, explicando o funcionamento da plataforma e os benefícios.
+- **Barra de Contribuição Fixa (Página da Viagem):** Implementada uma barra sticky na página de detalhe da viagem () que aparece durante o scroll.
 
 ### **Code Architecture**
 
 
 ### **Key Technical Concepts**
-- **Frontend:** React, TailwindCSS, Axios, React Hooks (, , ), .
-- **Backend:** FastAPI, Pydantic, Beanie (ODM para MongoDB), JWT.
-- **Pagamentos:** Geração de QR codes com a biblioteca , uso de deep links para apps mobile (ex: , ).
-- **APIs Externas:** CoinGecko para preços de criptomoedas.
-- **Autenticação:** Autenticação dupla com JWT em  e  em cookies HTTPOnly para robustez.
+- **Tradução Dinâmica:** Foi introduzido um padrão para traduzir conteúdo dinâmico (da base de dados) no lado do cliente, utilizando um  que reage a mudanças de idioma e chama uma função  no .
+- **URL Limpos para Partilha:** Os URLs de convite são gerados usando uma função  que substitui espaços por hífens para garantir que são reconhecidos como links clicáveis em clientes de email como o Gmail. O backend foi adaptado para aceitar este novo formato.
+- **Componentes Reutilizáveis:** Criação do  como um componente de partilha centralizado, recebendo  e  como props para máxima reutilização.
+- **Animações com Framer Motion:** Uso de  e  para criar as barras sticky que aparecem e desaparecem suavemente durante o scroll.
 
 ### **key DB schema**
-- : 
-- : 
-- : 
+- : O modelo foi estendido para incluir  e , que agora são retornados pelo endpoint .
 
 ### **All files of reference**
-- : **Fortemente modificado.** Contém toda a lógica do checkout de 3 passos.
-- : Modificado para adicionar o botão sticky e mover secções para a Homepage.
-- : Modificado para adicionar as secções Como funciona, Prova social e corrigir links.
-- : **Fortemente modificado.** Implementação de todas as melhorias de UX para o sistema de referrals.
-- : **Ficheiro novo.** Página de aterragem para links de convite.
-- : Modificado para corrigir o fluxo de autenticação do Google.
-- : Adicionada a rota para a .
-- : **Fortemente modificado.** Adicionados endpoints (, ), corrigido o fluxo de autenticação do Google e o modelo de utilizador.
+- **Ficheiros Principalmente Modificados:**
+  - : Contém toda a lógica de tradução estática e dinâmica.
+  - : Passou por uma internacionalização completa e está a ser modificado novamente.
+  - : Integrado com o .
+  - : Adicionado o  e uma barra sticky.
+  - : Adicionado endpoint para guardar o idioma e lógica para tratar aliases com hífens.
+- **Ficheiros Novos:**
+  - 
+  - 
+  - 
+  - 
 
 ### **Areas that need refactoring**:
-- O componente  tornou-se extremamente grande e complexo. Poderia ser dividido em sub-componentes para cada passo (Step 1, 2, 3) e para cada tipo de método de pagamento (Crypto, Non-Crypto) para melhorar a manutenibilidade.
+- O  continua a ser um componente muito grande e complexo, que beneficiaria de ser dividido em sub-componentes.
+- O  está a crescer em complexidade com múltiplos  para carregar e traduzir dados, podendo também ser um candidato a refatorização.
 
 ### **key api endpoints**
-- , , 
-- 
-- 
-- 
-- 
-- 
--  (Endpoint com problemas)
+-  (Novo)
+-  (Modificado para aceitar hífens)
+-  (Corrigido)
 
 ### **Critical Info for New Agent**
-- **Seguir os Snippets do Utilizador:** O utilizador é tecnicamente proficiente e fornece snippets de código detalhados. É crucial implementá-los exatamente como solicitado.
-- **Problemas de Cache:** O utilizador reporta frequentemente que não vê as alterações no preview. A causa é quase sempre cache do browser. O agente deve proativamente sugerir um hard refresh () ou o uso de uma janela anónima.
-- **Autenticação:** A autenticação com Google foi um ponto de falha significativo. O sistema agora depende tanto de um token JWT no  como de um cookie de sessão, uma solução robusta que deve ser mantida.
-- **Foco nas Tarefas:** O utilizador fornece listas claras de requisitos. Concentre-se em entregar exatamente o que foi pedido.
+- **Tradução:** Qualquer novo texto na UI deve ser adicionado ao dicionário em  e envolvido na função . Conteúdo dinâmico deve usar a função  para ser traduzido.
+- **Links de Convite:** Utilize sempre a função  de  para criar links de convite. Isto é crucial para que os links funcionem corretamente no Gmail.
+- **Componentes Sticky:** O padrão para barras sticky que aparecem no scroll está implementado em  usando um  e . Este padrão deve ser replicado para a nova barra na .
 
 ### **documents and test reports created in this job**
-Nenhum.
+- 
+- 
+- 
+-  (atualizado múltiplas vezes)
 
 ### **Last 10 User Messages and any pending HUMAN messages**
-1.  **[PENDING] User (Msg 607):** Reportou que a funcionalidade de tradução de idiomas não está a funcionar.
-2.  **User (Msg 601):** Pediu para tornar o link de convite (o texto) no dashboard clicável. (Resolvido)
-3.  **User (Msg 594):** Reportou que o link de convite partilhado está inativo. (Resolvido)
-4.  **User (Msg 590, 579):** Solicitou melhorias de UX no dashboard (mensagens dinâmicas, link de convite, checklist visual). (Resolvido)
-5.  **User (Msg 564):** Reportou um erro de runtime  após a correção do Google Auth. (Resolvido)
-6.  **User (Msg 521):** Reportou que a autenticação social com Google estava a falhar. (Resolvido)
-7.  **User (Msg 514):** Reportou que o botão Entrar levava ao fundo da página de login. (Resolvido)
-8.  **User (Msg 501):** Pediu que após a secção Como funciona, o botão Apoiar este sonho abrisse diretamente o checkout. (Resolvido)
-9.  **User (Msg 398):** Pediu para que clicar na imagem ou no badge da viagem principal na homepage levasse à página de detalhe. (Resolvido)
-10. **User (Msg 361, 345, 334):** Várias mensagens reportando que não via as alterações no preview, o que se revelou ser um problema de cache do browser. (Resolvido)
+1.  **[IN PROGRESS] User (Msg 516):** Pediu 4 melhorias visuais e de funcionalidade para a homepage.
+2.  **[DONE] User (Msg 485):** Pediu uma barra de contribuição fixa na página da viagem.
+3.  **[ADDRESSED] User (Msg 480):** Queixou-se que a solução de copiar para clipboard para o Gmail era pior. O agente reverteu e implementou a solução dos hífens.
+4.  **[ADDRESSED] User (Msg 469):** Apontou que o link do Gmail não era clicável, fornecendo um screenshot que foi crucial para o diagnóstico (problema do ).
+5.  **[EXPLAINED] User (Msg 444):** Questionou o texto Login to journey funding no login social. O agente explicou que é uma limitação do ambiente de preview.
+6.  **[ADDRESSED] User (Msg 376):** Reportou que o link do Gmail não era clicável e que o remetente não era identificado.
+7.  **[ADDRESSED] User (Msg 325):** Reportou problemas com o menu de partilha no dashboard.
+8.  **[DONE] User (Msg 284):** Solicitou o fluxo de onboarding completo para utilizadores convidados.
+9.  **[DONE] User (Msg 227):** Pediu a implementação do sistema de partilha viral.
+10. **[ADDRESSED] User (Msg 186):** Reportou que o conteúdo dinâmico da homepage não estava a ser traduzido.
 
 ### **Project Health Check:**
-- **Broken:** A funcionalidade de tradução de idiomas está quebrada.
-- **Mocked:** A secção Planeia a tua viagem na homepage é um placeholder sem funcionalidade.
+- **Broken:** Nenhuma funcionalidade está atualmente quebrada. O sistema de tradução, que era o principal problema, foi corrigido.
+- **Mocked:** A secção Planeia a tua viagem na homepage ainda tem funcionalidade de pesquisa simulada.
 
 ### **3rd Party Integrations**
-- **Google OAuth:** Para login de utilizadores.
-- **Resend:** Para emails transacionais (código existe, mas não foi usado nesta sessão).
-- **Stripe:** Código existe, mas está desativado na UI por pedido do utilizador.
-- **CoinGecko:** Usado via API  direta para obter preços de criptomoedas em tempo real.
+- **Emergent LLM Key (via ):** Usado para as traduções via IA. É uma integração central e funcional.
+- **Google OAuth:** Para login.
+- **CoinGecko:** Para preços de criptomoedas.
 
 ### **Testing status**
-- **Testing agent used after significant changes:** NO
-- **Troubleshoot agent used after agent stuck in loop:** NO
-- **Test files created:** Nenhum. O agente usou  e screenshots para testes manuais.
+- **Testing agent used after significant changes:** YES. O agente de testes foi usado com sucesso para validar o backend, o sistema de partilha e o fluxo de onboarding, tendo inclusive detetado e corrigido um bug de props em falta no .
+- **Test files created:** O agente de testes gerou relatórios em  e utilizou testes de backend criados pelo agente principal.
+- **Known regressions:** O problema do link do Gmail não ser clicável foi uma regressão recorrente que foi finalmente resolvida com a mudança para URLs com hífens.
 
 ### **Credentials to test flow:**
 - **Admin:**  / 
 
 ### **What agent forgot to execute**
-- Na implementação da secção Planeia a tua viagem na homepage, o agente adicionou o título e o texto, mas esqueceu-se de adicionar os cards/botões placeholder para as futuras ferramentas (Encontrar voos, Reservar hotéis, etc.), conforme solicitado na mensagem #415.</analysis>
+- A tarefa de Melhorar o Formulário de Edição de Viagens no Admin, mencionada no handoff inicial, continua pendente e não foi abordada nesta sessão.</analysis>

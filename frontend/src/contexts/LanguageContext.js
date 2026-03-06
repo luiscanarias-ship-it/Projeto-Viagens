@@ -28,6 +28,7 @@ const defaultTexts = {
   "home.latest_contributions": "Últimas Contribuições",
   "home.view_all_contributions": "Ver todas as contribuições",
   "home.no_main_journey": "Nenhuma viagem principal ativa de momento.",
+  "home.funded": "financiado",
   
   // Community Stats
   "home.dreamers": "Sonhadores",
@@ -47,6 +48,7 @@ const defaultTexts = {
   // Plan Your Trip
   "home.plan_trip": "Planeia a Tua Viagem",
   "home.plan_trip_desc": "Ferramentas úteis para planear a viagem dos teus sonhos",
+  "home.plan_trip_intro": "Descobre quanto pode custar a tua viagem e encontra as melhores opções de voos, alojamento e experiências.",
   "home.plan_placeholder": "Escreve o teu destino... (ex: Paris, Tóquio)",
   "home.search": "Pesquisar",
   "home.resources_for": "Recursos para:",
@@ -80,10 +82,9 @@ const defaultTexts = {
   "home.be_first": "Sê o primeiro a completar uma viagem!",
   
   // Emotional Quote
-  "home.quote1": "Não é apenas crowdfunding,",
-  "home.quote2": "é CrowdDreaming.",
-  "home.quote3": "Não é um donativo,",
-  "home.quote4": "é um gesto fraternal.",
+  "home.quote1": "Todos os sonhos começam com um primeiro passo.",
+  "home.quote2": "Ajuda alguém a viajar hoje.",
+  "home.quote3": "E amanhã pode ser a tua vez.",
 
   // Journeys
   "journeys.title": "Viagens de Sonho",
