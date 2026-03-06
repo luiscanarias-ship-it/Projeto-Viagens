@@ -533,13 +533,15 @@ const Dashboard = () => {
               
               {sponsorLinkId ? (
                 <div className="flex gap-2">
-                  <input
-                    type="text"
-                    readOnly
-                    value={sponsorLinkUrl}
-                    className="flex-1 px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm text-[#2D2A26] truncate"
+                  <a
+                    href={sponsorLinkUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm text-[#FFBE98] font-medium truncate hover:underline"
                     data-testid="sponsor-link-input"
-                  />
+                  >
+                    {sponsorLinkUrl}
+                  </a>
                   <button
                     onClick={() => copyLink(sponsorLinkId, main_journey.journey_id)}
                     className={`px-4 py-3 rounded-xl font-medium transition-all flex items-center gap-2 ${
