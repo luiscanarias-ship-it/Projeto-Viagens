@@ -271,6 +271,7 @@ const JourneyDetail = () => {
             <div className="flex justify-center -mt-4 mb-8 relative z-10">
               <ShareMenu
                 inviteLink={`${window.location.origin}/invite/${encodeURIComponent(user.anonymous_alias)}`}
+                senderName={user?.name}
                 buttonLabel="Partilhar este sonho"
                 buttonClassName="flex items-center gap-2 py-2.5 px-6 bg-white text-[#2D2A26] rounded-xl text-sm font-semibold hover:bg-stone-50 transition-colors shadow-md border border-stone-100"
               />

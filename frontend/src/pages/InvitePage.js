@@ -126,6 +126,7 @@ const InvitePage = () => {
             <div className="pt-2 flex justify-center">
               <ShareMenu
                 inviteLink={`${window.location.origin}/invite/${encodeURIComponent(alias)}`}
+                senderName={data?.inviter_name}
                 buttonLabel="Partilhar este sonho"
                 buttonClassName="flex items-center justify-center gap-2 py-2.5 px-5 bg-stone-100 text-[#2D2A26] rounded-xl text-sm font-semibold hover:bg-stone-200 transition-colors"
               />

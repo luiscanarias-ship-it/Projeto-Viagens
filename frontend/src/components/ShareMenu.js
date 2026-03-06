@@ -1,7 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Copy, Check, Share2, X } from 'lucide-react';
 
-const SHARE_MESSAGE = (link) => `Acredito que os sonhos podem tornar-se realidade.\n\nEstou a ajudar a financiar uma viagem de sonho na 4Luis.\nSe quiseres participar também:\n\n${link}`;
+const SHARE_TEXT = (link, name) => {
+  const who = name ? `O/A ${name} acredita` : 'Acredito';
+  return `${who} que os sonhos podem tornar-se realidade.\n\nEst${name ? 'á' : 'ou'} a ajudar a financiar uma viagem de sonho na 4Luis.\nSe quiseres participar também:\n\n${link}`;
+};
+
+const SHARE_HTML = (link, name) => {
+  const who = name ? `O/A <strong>${name}</strong> acredita` : 'Acredito';
+  return `${who} que os sonhos podem tornar-se realidade.<br><br>Est${name ? 'á' : 'ou'} a ajudar a financiar uma viagem de sonho na 4Luis.<br>Se quiseres participar também:<br><br><a href="${link}">${link}</a>`;
+};
 
 const WhatsAppIcon = () => (
   <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
@@ -21,7 +29,7 @@ const GmailIcon = () => (
   </svg>
 );
 
-const ShareMenu = ({ inviteLink, buttonLabel = "Partilhar convite", buttonClassName }) => {
+const ShareMenu = ({ inviteLink, senderName, buttonLabel = "Partilhar convite", buttonClassName }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const menuRef = useRef(null);
@@ -34,23 +42,24 @@ const ShareMenu = ({ inviteLink, buttonLabel = "Partilhar convite", buttonClassN
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen]);
 
-  const message = SHARE_MESSAGE(inviteLink);
-  const encodedMsg = encodeURIComponent(message);
+  const plainMessage = SHARE_TEXT(inviteLink, senderName);
+  const encodedPlain = encodeURIComponent(plainMessage);
 
   const shareWhatsApp = () => {
-    window.open(`https://wa.me/?text=${encodedMsg}`, '_blank');
+    window.open(`https://wa.me/?text=${encodedPlain}`, '_blank');
     setIsOpen(false);
   };
 
   const shareTelegram = () => {
-    window.open(`https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=${encodeURIComponent(message.replace(inviteLink, '').trim())}`, '_blank');
+    const textWithoutLink = plainMessage.replace(inviteLink, '').trim();
+    window.open(`https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=${encodeURIComponent(textWithoutLink)}`, '_blank');
     setIsOpen(false);
   };
 
   const shareGmail = () => {
-    const subject = encodeURIComponent('Junta-te a mim na 4Luis');
-    const body = encodedMsg;
-    window.open(`https://mail.google.com/mail/?view=cm&fs=1&su=${subject}&body=${body}`, '_blank');
+    const subject = encodeURIComponent(senderName ? `${senderName} convidou-te para a 4Luis` : 'Junta-te a mim na 4Luis');
+    const body = encodeURIComponent(plainMessage);
+    window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=&su=${subject}&body=${body}`, '_blank');
     setIsOpen(false);
   };
 

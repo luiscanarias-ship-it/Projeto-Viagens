@@ -475,6 +475,7 @@ const Dashboard = () => {
               </a>
               <ShareMenu
                 inviteLink={`${window.location.origin}/invite/${encodeURIComponent(dashboardData.user_alias)}`}
+                senderName={user?.name}
                 buttonLabel="Partilhar convite"
                 buttonClassName="w-full flex items-center justify-center gap-2 py-2.5 bg-[#FFBE98] text-[#2D2A26] rounded-lg text-sm font-semibold hover:bg-[#FFBE98]/80 transition-colors"
               />
@@ -532,6 +533,7 @@ const Dashboard = () => {
                     </button>
                     <ShareMenu
                       inviteLink={sponsorLinkUrl}
+                      senderName={user?.name}
                       buttonLabel="Partilhar"
                       buttonClassName="flex-1 px-4 py-3 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-medium hover:bg-[#FFAB7D] transition-all flex items-center justify-center gap-2"
                     />
