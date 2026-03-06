@@ -15,6 +15,7 @@ import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import Onboarding from "./pages/Onboarding";
+import InviteOnboarding from "./pages/InviteOnboarding";
 import AmbassadorProfile from "./pages/AmbassadorProfile";
 import InvitePage from "./pages/InvitePage";
 
@@ -44,9 +45,14 @@ const AppRouter = () => {
     return <AuthCallback />;
   }
 
-  // Onboarding page without header/footer
-  if (location.pathname === '/onboarding') {
-    return <Onboarding />;
+  // Onboarding pages without header/footer
+  if (location.pathname === '/onboarding' || location.pathname === '/onboarding/invite') {
+    return (
+      <Routes>
+        <Route path="/onboarding" element={<Onboarding />} />
+        <Route path="/onboarding/invite" element={<InviteOnboarding />} />
+      </Routes>
+    );
   }
 
   return (
@@ -62,6 +68,7 @@ const AppRouter = () => {
           <Route path="/admin" element={<Admin />} />
           <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="/onboarding/invite" element={<InviteOnboarding />} />
           <Route path="/ambassador/:userId" element={<AmbassadorProfile />} />
           <Route path="/invite/:alias" element={<InvitePage />} />
         </Routes>

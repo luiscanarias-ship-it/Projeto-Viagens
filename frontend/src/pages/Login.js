@@ -33,8 +33,13 @@ const Login = () => {
     try {
       if (isRegister) {
         await register(formData.email, formData.password, formData.name, formData.surname);
-        // Redirect new users to onboarding
-        navigate('/onboarding');
+        // Redirect to invite onboarding if coming from invite link
+        const inviteAlias = localStorage.getItem('invite_alias');
+        if (inviteAlias) {
+          navigate('/onboarding/invite');
+        } else {
+          navigate('/onboarding');
+        }
       } else {
         await login(formData.email, formData.password);
         navigate('/dashboard');

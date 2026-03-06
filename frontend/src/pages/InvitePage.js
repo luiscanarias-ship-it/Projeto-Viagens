@@ -15,8 +15,15 @@ const InvitePage = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    // Store invite context for post-registration onboarding
+    localStorage.setItem('invite_alias', alias);
+    if (data?.inviter_name) localStorage.setItem('invite_name', data.inviter_name);
+    
     axios.get(`${API}/invite/${encodeURIComponent(alias)}`)
-      .then(res => setData(res.data))
+      .then(res => {
+        setData(res.data);
+        if (res.data?.inviter_name) localStorage.setItem('invite_name', res.data.inviter_name);
+      })
       .catch(() => setError('Convite não encontrado'))
       .finally(() => setLoading(false));
   }, [alias]);
