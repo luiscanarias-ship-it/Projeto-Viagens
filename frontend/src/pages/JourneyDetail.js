@@ -180,24 +180,33 @@ const JourneyDetail = () => {
 
   return (
     <div className="min-h-screen pt-20" data-testid="journey-detail">
-      {/* Sticky CTA Button */}
+      {/* Sticky Bottom Bar */}
       <AnimatePresence>
         {showStickyBtn && !showCheckout && (
           <motion.div
-            initial={{ y: -80, opacity: 0 }}
+            initial={{ y: 80, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -80, opacity: 0 }}
-            className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-stone-200 shadow-sm"
+            exit={{ y: 80, opacity: 0 }}
+            className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-stone-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
+            data-testid="sticky-bar"
           >
-            <div className="max-w-6xl mx-auto px-6 py-2.5 flex items-center justify-between">
-              <p className="text-sm font-medium text-[#2D2A26] hidden sm:block">{journey?.name}</p>
+            <div className="max-w-5xl mx-auto px-4 md:px-6 py-3 flex items-center gap-3 md:gap-5">
+              <div className="flex-1 min-w-0 hidden sm:block">
+                <p className="text-sm font-bold text-[#2D2A26] truncate">{journey?.name} — <span className="font-handwritten text-[#FFBE98]">{journey?.poetic_name}</span></p>
+                <div className="flex items-center gap-2 mt-1">
+                  <div className="flex-1 h-1.5 bg-stone-100 rounded-full overflow-hidden max-w-[180px]">
+                    <div className="h-full bg-gradient-to-r from-[#FFBE98] to-[#F2C94C] rounded-full" style={{ width: `${Math.min(100, progress?.percentage || 0)}%` }} />
+                  </div>
+                  <span className="text-xs font-semibold text-[#6B6661]">{(progress?.percentage || 0).toFixed(1)}%</span>
+                </div>
+              </div>
               <button
                 onClick={handleSupport}
-                className="btn-primary flex items-center gap-2 text-sm py-2.5 px-6 ml-auto"
+                className="w-full sm:w-auto py-3 px-6 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-[#FFAB7D] transition-colors"
                 data-testid="sticky-contribute-btn"
               >
                 <Heart className="w-4 h-4" />
-                Apoiar esta viagem
+                Contribuir para este sonho
               </button>
             </div>
           </motion.div>
