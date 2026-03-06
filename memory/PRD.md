@@ -39,7 +39,14 @@ Plataforma de angariação de fundos para viagens solidárias com sistema de ní
 - Gestao viagens, utilizadores, contribuicoes
 - Pesquisa por referencia de pagamento
 
-### Traducao por IA (Implementado 2026-03-06)
+### Sistema de Partilha Viral (Implementado 2026-03-06)
+- Componente ShareMenu reutilizavel com WhatsApp, Telegram, Email, Copiar link
+- Mensagem automatica de partilha com texto motivacional
+- Dashboard: link de convite com botao "Partilhar convite"
+- InvitePage: botao "Partilhar este sonho"
+- JourneyDetail: botao "Partilhar este sonho" para utilizadores logados
+- Sempre usa /invite/{alias} como link de partilha
+- Backend: anonymous_alias adicionado ao modelo User (retornado em /auth/me)
 - Endpoint POST /api/translate usando GPT-5.2 via Emergent LLM Key
 - 6 idiomas suportados: PT, EN, ES, FR, DE, IT
 - Cache de traducoes no frontend para evitar chamadas repetidas
