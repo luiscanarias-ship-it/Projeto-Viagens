@@ -1,7 +1,7 @@
 # 4Luis - Plataforma de CrowdDreaming
 
 ## Original Problem Statement
-Plataforma de angariação de fundos para viagens solidárias com sistema de níveis (Sonhador - Embaixador), múltiplos métodos de pagamento, e sistema de referrals.
+Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis (Sonhador - Embaixador), multiplos metodos de pagamento, e sistema de referrals.
 
 ## Architecture & Tech Stack
 - **Frontend**: React 18 + Tailwind CSS + Framer Motion
@@ -21,10 +21,15 @@ Plataforma de angariação de fundos para viagens solidárias com sistema de ní
 - Step 2: Metodo de pagamento (Crypto com badge TOP, MBWay, Revolut, Wise, PayPal)
 - Step 3: Instrucoes com QR codes crypto (URI blockchain), deep links, referencia CN-XXXX
 
-### Homepage
+### Homepage (Atualizada 2026-03-06)
 - "Como funciona o Crowddreaming" - 3 cards com icones
 - Prova social "X sonhadores ja ajudaram esta plataforma"
 - Imagem e badge "Viagem Principal" clicaveis -> detalhe da viagem
+- Layout imersivo para viagem principal com imagem de fundo e overlay de texto
+- Barra sticky de contribuicao que aparece no scroll (>600px) com detalhes da viagem e botao "Contribuir"
+- Texto introdutorio na seccao "Planeia a tua viagem"
+- Citacao inspiradora final com 4 linhas, incluindo "Juntos, transformamos sonhos em destinos."
+- CheckoutModal renderizado corretamente na homepage
 - "Planeia a tua viagem" com pesquisa de destino e links de recursos
 
 ### Pagina Detalhe Viagem
@@ -39,46 +44,36 @@ Plataforma de angariação de fundos para viagens solidárias com sistema de ní
 - Gestao viagens, utilizadores, contribuicoes
 - Pesquisa por referencia de pagamento
 
-### Onboarding de Convite (Implementado 2026-03-06)
+### Onboarding de Convite
 - Fluxo guiado apos registo via /invite/{alias}
 - 6 seccoes: Boas-vindas, Viagem Principal, Progressao, Beneficios Embaixador, Progresso, Citacao inspiradora
-- Botao "Contribuir para este sonho" abre CheckoutModal
-- Botao "Ir para o Meu Painel" limpa contexto de convite e redireciona
-- InvitePage guarda alias e nome no localStorage para uso pos-registo
 
-### Sistema de Partilha Viral (Implementado 2026-03-06)
+### Sistema de Partilha Viral
 - Componente ShareMenu reutilizavel com WhatsApp, Telegram, Email, Copiar link
-- Mensagem automatica de partilha com texto motivacional
 - Dashboard: link de convite com botao "Partilhar convite"
-- InvitePage: botao "Partilhar este sonho"
-- JourneyDetail: botao "Partilhar este sonho" para utilizadores logados
-- Sempre usa /invite/{alias} como link de partilha
-- Backend: anonymous_alias adicionado ao modelo User (retornado em /auth/me)
+- InvitePage e JourneyDetail com partilha integrada
+
+### Sistema de Traducao
 - Endpoint POST /api/translate usando GPT-5.2 via Emergent LLM Key
 - 6 idiomas suportados: PT, EN, ES, FR, DE, IT
-- Cache de traducoes no frontend para evitar chamadas repetidas
-- Toast notification com aviso "Traducao automatica por IA"
-- Nota no footer quando idioma nao e portugues
-- Seletor de idioma persistente: preferencia guardada na conta do utilizador
-- PATCH /api/users/preferred-language para guardar preferencia
-- Auto-sync no login: ao entrar, a plataforma muda para o idioma preferido
-- Auto-traduz ao carregar pagina se idioma guardado nao e portugues
-- Homepage totalmente traduzivel (50+ chaves de traducao)
+- Cache de traducoes no frontend
+- Seletor de idioma persistente guardado na conta do utilizador
 
 ## Key Files
 - `frontend/src/components/CheckoutModal.js` - Modal de checkout 3 passos
 - `frontend/src/pages/JourneyDetail.js` - Pagina de viagem com sticky CTA
-- `frontend/src/pages/Home.js` - Homepage com Como funciona + Prova social
+- `frontend/src/pages/Home.js` - Homepage com melhorias visuais
 - `frontend/src/pages/Dashboard.js` - Dashboard com progresso Embaixador
 - `frontend/src/pages/InvitePage.js` - Pagina de convite
 - `frontend/src/pages/Admin.js` - Painel de administracao
 - `frontend/src/contexts/LanguageContext.js` - Contexto de traducao com cache
+- `frontend/src/components/ShareMenu.js` - Componente de partilha viral
 - `backend/server.py` - API FastAPI principal
 
 ## Prioritized Backlog
 
 ### P1
-- Verificar estabilidade do Painel de Administracao (smoke test passado)
+- Verificar estabilidade do Painel de Administracao (smoke test)
 - Melhorar formulario de edicao de viagens no Admin
 
 ### P2
@@ -87,6 +82,7 @@ Plataforma de angariação de fundos para viagens solidárias com sistema de ní
 - Notificacoes in-app
 - Ferramentas de planeamento (afiliados)
 - Refactoring: Dividir CheckoutModal.js em sub-componentes
+- Refactoring: Home.js a crescer em complexidade
 
 ## Credentials
 - **Admin**: admin@4luis.com / Admin1
