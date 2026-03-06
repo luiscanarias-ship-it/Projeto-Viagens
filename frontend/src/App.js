@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import "@/App.css";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-import { AuthProvider } from "./contexts/AuthContext";
-import { LanguageProvider } from "./contexts/LanguageContext";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { LanguageProvider, useLanguage } from "./contexts/LanguageContext";
 import { Toaster } from "./components/ui/sonner";
 
 import Header from "./components/Header";
@@ -17,6 +17,23 @@ import PaymentSuccess from "./pages/PaymentSuccess";
 import Onboarding from "./pages/Onboarding";
 import AmbassadorProfile from "./pages/AmbassadorProfile";
 import InvitePage from "./pages/InvitePage";
+
+// Syncs user's preferred language on login
+const LanguageSync = () => {
+  const { user } = useAuth();
+  const { syncFromUser } = useLanguage();
+  const synced = useRef(false);
+
+  useEffect(() => {
+    if (user?.preferred_language && !synced.current) {
+      synced.current = true;
+      syncFromUser(user.preferred_language);
+    }
+    if (!user) synced.current = false;
+  }, [user, syncFromUser]);
+
+  return null;
+};
 
 // Router wrapper to handle auth callback
 const AppRouter = () => {
@@ -60,6 +77,7 @@ function App() {
       <AuthProvider>
         <LanguageProvider>
           <BrowserRouter>
+            <LanguageSync />
             <AppRouter />
           </BrowserRouter>
           <Toaster position="bottom-center" richColors />

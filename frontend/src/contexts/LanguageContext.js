@@ -165,11 +165,34 @@ export const LanguageProvider = ({ children }) => {
     }
   }, [cache]);
 
+  // Save language preference to user account
+  const saveLanguageToAccount = useCallback(async (lang) => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    try {
+      await axios.patch(`${API}/users/preferred-language`, 
+        { language: lang },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    } catch (e) {
+      // Silent fail - localStorage still works as fallback
+    }
+  }, []);
+
   const changeLanguage = useCallback(async (newLang) => {
     setLanguage(newLang);
     localStorage.setItem('language', newLang);
+    saveLanguageToAccount(newLang);
     await translateTexts(newLang);
-  }, [translateTexts]);
+  }, [translateTexts, saveLanguageToAccount]);
+
+  // Sync language from user's account preference (called after login)
+  const syncFromUser = useCallback(async (preferredLang) => {
+    if (!preferredLang || preferredLang === language) return;
+    setLanguage(preferredLang);
+    localStorage.setItem('language', preferredLang);
+    await translateTexts(preferredLang);
+  }, [language, translateTexts]);
 
   const t = useCallback((key) => {
     return texts[key] || defaultTexts[key] || key;
@@ -179,6 +202,7 @@ export const LanguageProvider = ({ children }) => {
     <LanguageContext.Provider value={{
       language,
       changeLanguage,
+      syncFromUser,
       t,
       isTranslating,
       texts

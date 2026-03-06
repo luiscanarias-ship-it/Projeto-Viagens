@@ -112,6 +112,7 @@ class User(UserBase):
     is_admin: bool = False
     created_at: datetime
     picture: Optional[str] = None
+    preferred_language: Optional[str] = None
 
 # Journey status lifecycle
 JOURNEY_STATUSES = {
@@ -2168,6 +2169,20 @@ async def upload_avatar(request: Request):
     )
     
     return {"message": "Avatar atualizado com sucesso", "avatar": image_data}
+
+
+@api_router.patch("/users/preferred-language")
+async def update_preferred_language(request: Request):
+    user = await require_auth(request)
+    body = await request.json()
+    lang = body.get("language", "pt")
+    if lang not in ("pt", "en", "es", "fr", "de", "it"):
+        raise HTTPException(status_code=400, detail="Idioma não suportado")
+    await db.users.update_one(
+        {"user_id": user.user_id},
+        {"$set": {"preferred_language": lang}}
+    )
+    return {"message": "Idioma atualizado", "preferred_language": lang}
 
 # ==================== TRANSLATION ====================
 
