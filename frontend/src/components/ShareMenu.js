@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Copy, Check, Share2, X, Mail } from 'lucide-react';
+import { Copy, Check, Share2, X } from 'lucide-react';
 
 const SHARE_MESSAGE = (link) => `Acredito que os sonhos podem tornar-se realidade.\n\nEstou a ajudar a financiar uma viagem de sonho na 4Luis.\nSe quiseres participar também:\n\n${link}`;
 
@@ -15,7 +15,13 @@ const TelegramIcon = () => (
   </svg>
 );
 
-const ShareMenu = ({ inviteLink, buttonLabel = "Partilhar convite", buttonClassName, compact = false }) => {
+const GmailIcon = () => (
+  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z"/>
+  </svg>
+);
+
+const ShareMenu = ({ inviteLink, buttonLabel = "Partilhar convite", buttonClassName }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const menuRef = useRef(null);
@@ -41,10 +47,10 @@ const ShareMenu = ({ inviteLink, buttonLabel = "Partilhar convite", buttonClassN
     setIsOpen(false);
   };
 
-  const shareEmail = () => {
+  const shareGmail = () => {
     const subject = encodeURIComponent('Junta-te a mim na 4Luis');
     const body = encodedMsg;
-    window.open(`mailto:?subject=${subject}&body=${body}`, '_self');
+    window.open(`https://mail.google.com/mail/?view=cm&fs=1&su=${subject}&body=${body}`, '_blank');
     setIsOpen(false);
   };
 
@@ -63,12 +69,12 @@ const ShareMenu = ({ inviteLink, buttonLabel = "Partilhar convite", buttonClassN
         className={buttonClassName || defaultBtnClass}
         data-testid="share-menu-trigger"
       >
-        <Share2 className={compact ? "w-4 h-4" : "w-4 h-4"} />
+        <Share2 className="w-4 h-4" />
         {buttonLabel}
       </button>
 
       {isOpen && (
-        <div className="absolute z-50 bottom-full mb-2 left-1/2 -translate-x-1/2 w-64 bg-white rounded-2xl shadow-2xl border border-stone-100 overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200"
+        <div className="absolute z-50 top-full mt-2 left-1/2 -translate-x-1/2 w-64 bg-white rounded-2xl shadow-2xl border border-stone-100 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200"
           data-testid="share-menu-dropdown"
         >
           <div className="flex items-center justify-between px-4 pt-3 pb-2">
@@ -95,12 +101,12 @@ const ShareMenu = ({ inviteLink, buttonLabel = "Partilhar convite", buttonClassN
               <span className="text-sm font-medium text-[#2D2A26] group-hover:text-[#0088cc]">Telegram</span>
             </button>
 
-            <button onClick={shareEmail} data-testid="share-email"
-              className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-orange-50 rounded-xl transition-colors group">
+            <button onClick={shareGmail} data-testid="share-gmail"
+              className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-red-50 rounded-xl transition-colors group">
               <div className="w-9 h-9 bg-[#EA4335] rounded-full flex items-center justify-center text-white flex-shrink-0">
-                <Mail className="w-5 h-5" />
+                <GmailIcon />
               </div>
-              <span className="text-sm font-medium text-[#2D2A26] group-hover:text-[#EA4335]">Email</span>
+              <span className="text-sm font-medium text-[#2D2A26] group-hover:text-[#EA4335]">Gmail</span>
             </button>
 
             <button onClick={copyLink} data-testid="share-copy-link"

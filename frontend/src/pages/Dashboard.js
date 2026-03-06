@@ -459,23 +459,26 @@ const Dashboard = () => {
                 </div>
               )}
               
-              {/* Invite link section */}
-              {!isEmbaixador && dashboardData?.user_alias && (
-                <div className="mt-6 p-4 bg-stone-50 rounded-xl border border-stone-200">
-                  <p className="text-xs text-[#6B6661] mb-1.5">O teu link de convite</p>
-                  <a href={`${window.location.origin}/invite/${encodeURIComponent(dashboardData.user_alias)}`}
-                    target="_blank" rel="noopener noreferrer"
-                    className="text-sm font-mono font-semibold text-[#FFBE98] hover:underline mb-3 break-all block">
-                    {window.location.origin}/invite/{dashboardData.user_alias}
-                  </a>
-                  <ShareMenu
-                    inviteLink={`${window.location.origin}/invite/${encodeURIComponent(dashboardData.user_alias)}`}
-                    buttonLabel="Partilhar convite"
-                    buttonClassName="w-full flex items-center justify-center gap-2 py-2.5 bg-[#FFBE98] text-[#2D2A26] rounded-lg text-sm font-semibold hover:bg-[#FFBE98]/80 transition-colors"
-                  />
-                </div>
-              )}
+              
             </>
+          )}
+
+          {/* Invite link section - always visible regardless of level */}
+          {dashboardData?.user_alias && (
+            <div className="mt-6 p-4 bg-stone-50 rounded-xl border border-stone-200 overflow-visible">
+              <p className="text-xs text-[#6B6661] mb-1.5">O teu link de convite</p>
+              <a href={`${window.location.origin}/invite/${encodeURIComponent(dashboardData.user_alias)}`}
+                target="_blank" rel="noopener noreferrer"
+                className="text-sm font-mono font-semibold text-[#FFBE98] hover:underline mb-3 break-all block"
+                data-testid="invite-link-clickable">
+                {window.location.origin}/invite/{dashboardData.user_alias}
+              </a>
+              <ShareMenu
+                inviteLink={`${window.location.origin}/invite/${encodeURIComponent(dashboardData.user_alias)}`}
+                buttonLabel="Partilhar convite"
+                buttonClassName="w-full flex items-center justify-center gap-2 py-2.5 bg-[#FFBE98] text-[#2D2A26] rounded-lg text-sm font-semibold hover:bg-[#FFBE98]/80 transition-colors"
+              />
+            </div>
           )}
         </motion.div>
 
@@ -504,36 +507,35 @@ const Dashboard = () => {
               </label>
               
               {sponsorLinkId ? (
-                <div className="flex gap-2">
+                <div className="space-y-2">
                   <a
                     href={sponsorLinkUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm text-[#FFBE98] font-medium truncate hover:underline"
+                    className="block w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm text-[#FFBE98] font-medium break-all hover:underline"
                     data-testid="sponsor-link-input"
                   >
                     {sponsorLinkUrl}
                   </a>
-                  <button
-                    onClick={() => copyLink(sponsorLinkId, main_journey.journey_id)}
-                    className={`px-4 py-3 rounded-xl font-medium transition-all flex items-center gap-2 ${
-                      copiedLink 
-                        ? 'bg-green-100 text-green-700' 
-                        : 'bg-[#FFBE98] text-[#2D2A26] hover:bg-[#FFAB7D]'
-                    }`}
-                    data-testid="copy-link-btn"
-                  >
-                    {copiedLink ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
-                    {copiedLink ? 'Copiado!' : 'Copiar'}
-                  </button>
-                  <button
-                    onClick={() => shareLink(sponsorLinkId, main_journey.journey_id)}
-                    className="px-4 py-3 bg-[#2D2A26] text-white rounded-xl font-medium hover:bg-[#4A4640] transition-all flex items-center gap-2"
-                    data-testid="share-link-btn"
-                  >
-                    <Share2 className="w-5 h-5" />
-                    <span className="hidden sm:inline">Partilhar</span>
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => copyLink(sponsorLinkId, main_journey.journey_id)}
+                      className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2 ${
+                        copiedLink 
+                          ? 'bg-green-100 text-green-700' 
+                          : 'bg-[#2D2A26] text-white hover:bg-[#4A4640]'
+                      }`}
+                      data-testid="copy-link-btn"
+                    >
+                      {copiedLink ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
+                      {copiedLink ? 'Copiado!' : 'Copiar link'}
+                    </button>
+                    <ShareMenu
+                      inviteLink={sponsorLinkUrl}
+                      buttonLabel="Partilhar"
+                      buttonClassName="flex-1 px-4 py-3 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-medium hover:bg-[#FFAB7D] transition-all flex items-center justify-center gap-2"
+                    />
+                  </div>
                 </div>
               ) : (
                 <button
