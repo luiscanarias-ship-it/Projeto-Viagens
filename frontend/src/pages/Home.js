@@ -548,103 +548,103 @@ const Home = () => {
             </p>
           </motion.div>
 
-          {ambassadorJourneys?.total_count > 0 ? (
-            <div className="space-y-10">
-              {/* Featured Journeys Section */}
-              {ambassadorJourneys.featured?.length > 0 && (
-                <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-8 h-8 bg-gradient-to-br from-[#F2C94C] to-[#FFBE98] rounded-full flex items-center justify-center">
-                      <Star className="w-4 h-4 text-white" />
-                    </div>
-                    <h3 className="text-xl font-bold text-[#2D2A26]">{t('home.featured')}</h3>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {ambassadorJourneys.featured.map((journey) => (
-                      <Link key={journey.journey_id} to={`/journey/${journey.journey_id}`}
-                        className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all group border-2 border-[#FFBE98]/30">
-                        <div className="relative h-56 overflow-hidden">
-                          <img src={journey.image_url} alt={journey.name}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                          <div className="absolute top-4 left-4 px-3 py-1 bg-gradient-to-r from-[#F2C94C] to-[#FFBE98] rounded-full text-white text-sm font-medium flex items-center gap-1">
-                            <Star className="w-3 h-3" /> {t('home.highlight')}
-                          </div>
-                          <div className="absolute top-4 right-4 px-3 py-1 bg-white/90 rounded-full text-sm font-medium">
-                            {journey.show_goal_amount && journey.goal_amount ? (
-                              <span>€{journey.current_amount?.toLocaleString()} / €{journey.goal_amount?.toLocaleString()}</span>
-                            ) : (
-                              <span>{journey.progress_percentage}%</span>
-                            )}
-                          </div>
-                          <div className="absolute bottom-4 left-4 right-4">
-                            <h4 className="text-xl font-bold text-white mb-1">{journey.name}</h4>
-                            <p className="text-white/80 text-sm">{t('home.by')} {journey.ambassador_name}</p>
-                          </div>
-                        </div>
-                        <div className="p-5">
-                          <p className="text-sm text-[#6B6661] mb-4 line-clamp-2">{journey.description}</p>
-                          <div className="h-3 bg-stone-100 rounded-full overflow-hidden">
-                            <div className="h-full bg-gradient-to-r from-[#FFBE98] to-[#E6A07C] rounded-full transition-all" 
-                              style={{ width: `${journey.progress_percentage}%` }} />
-                          </div>
-                          <MilestoneProgress progressPercentage={journey.progress_percentage} />
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
+          {(() => {
+            const allJourneys = [
+              ...(ambassadorJourneys?.featured || []),
+              ...Object.values(ambassadorJourneys?.regions || {}).flatMap(r => r.journeys || [])
+            ];
+            const displayJourneys = allJourneys.slice(0, 4);
 
-              {/* Regular Journeys by Region */}
-              {Object.entries(ambassadorJourneys.regions || {}).map(([regionKey, region]) => (
-                <motion.div key={regionKey} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-                  <div className="flex items-center gap-3 mb-4">
-                    <span className="text-2xl">{REGION_CONFIG[regionKey]?.emoji || '🌐'}</span>
-                    <h3 className="text-xl font-bold text-[#2D2A26]">{region.name}</h3>
-                    <span className="text-sm text-[#6B6661]">({region.journeys.length})</span>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {region.journeys.map((journey) => (
-                      <Link key={journey.journey_id} to={`/journey/${journey.journey_id}`}
-                        className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow group">
-                        <div className="relative h-48 overflow-hidden">
-                          <img src={journey.image_url} alt={journey.name}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                          <div className="absolute top-4 right-4 px-3 py-1 bg-white/90 rounded-full text-sm font-medium">
-                            {journey.show_goal_amount && journey.goal_amount ? (
-                              <span>€{journey.current_amount?.toLocaleString()} / €{journey.goal_amount?.toLocaleString()}</span>
-                            ) : (
-                              <span>{journey.progress_percentage}%</span>
-                            )}
-                          </div>
-                        </div>
-                        <div className="p-5">
-                          <h4 className="font-bold text-[#2D2A26] mb-1">{journey.name}</h4>
-                          <p className="text-sm text-[#6B6661] mb-3 line-clamp-2">{journey.description}</p>
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-[#6B6661]">{t('home.by')} {journey.ambassador_name}</span>
-                            <div className="h-2 flex-1 mx-4 bg-stone-100 rounded-full overflow-hidden">
-                              <div className="h-full bg-[#FFBE98] rounded-full" style={{ width: `${journey.progress_percentage}%` }} />
+            if (displayJourneys.length === 0) {
+              return (
+                <div className="text-center py-16 bg-white rounded-2xl">
+                  <Globe className="w-16 h-16 text-[#E6F4F1] mx-auto mb-4" />
+                  <p className="text-[#6B6661] mb-4">{t('home.no_ambassador_journeys')}</p>
+                  <p className="text-sm text-[#6B6661]">{t('home.become_ambassador')}</p>
+                </div>
+              );
+            }
+
+            return (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {displayJourneys.map((journey, idx) => {
+                    const pct = journey.progress_percentage || 0;
+                    return (
+                      <motion.div
+                        key={journey.journey_id}
+                        initial={{ opacity: 0, y: 30 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: idx * 0.1 }}
+                      >
+                        <Link
+                          to={`/journey/${journey.journey_id}`}
+                          className="block bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group h-full"
+                          data-testid={`dream-card-${journey.journey_id}`}
+                        >
+                          {/* Image */}
+                          <div className="relative h-48 overflow-hidden">
+                            <img
+                              src={journey.image_url}
+                              alt={journey.name}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                            <div className="absolute bottom-3 left-4 right-4">
+                              <h4 className="text-lg font-bold text-white leading-tight">{journey.name}</h4>
                             </div>
                           </div>
-                          <MilestoneProgress progressPercentage={journey.progress_percentage} />
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-16 bg-white rounded-2xl">
-              <Globe className="w-16 h-16 text-[#E6F4F1] mx-auto mb-4" />
-              <p className="text-[#6B6661] mb-4">{t('home.no_ambassador_journeys')}</p>
-              <p className="text-sm text-[#6B6661]">{t('home.become_ambassador')}</p>
-            </div>
-          )}
+
+                          {/* Content */}
+                          <div className="p-4">
+                            <p className="text-sm text-[#6B6661] mb-3 font-medium">
+                              Sonho de <span className="text-[#2D2A26] font-semibold">{journey.ambassador_name}</span>
+                            </p>
+
+                            {/* Progress Bar */}
+                            <div className="mb-2">
+                              <div className="h-2 bg-stone-100 rounded-full overflow-hidden">
+                                <div
+                                  className="h-full bg-gradient-to-r from-[#FFBE98] to-[#E6A07C] rounded-full transition-all duration-700"
+                                  style={{ width: `${Math.min(pct, 100)}%` }}
+                                />
+                              </div>
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm font-bold text-[#FFBE98]">{Math.round(pct)}% financiado</span>
+                              <span className="text-xs text-[#FFBE98] font-semibold group-hover:translate-x-1 transition-transform flex items-center gap-1">
+                                Descobre <ChevronRight className="w-3 h-3" />
+                              </span>
+                            </div>
+                          </div>
+                        </Link>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+
+                {allJourneys.length > 4 && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true }}
+                    className="text-center mt-10"
+                  >
+                    <Link
+                      to="/journeys"
+                      className="inline-flex items-center gap-2 px-8 py-3 bg-white border-2 border-[#FFBE98]/40 text-[#2D2A26] rounded-xl font-semibold hover:bg-[#FFBE98]/10 hover:border-[#FFBE98] transition-all"
+                      data-testid="explore-more-dreams-btn"
+                    >
+                      <Compass className="w-5 h-5 text-[#FFBE98]" />
+                      Explorar mais sonhos
+                    </Link>
+                  </motion.div>
+                )}
+              </>
+            );
+          })()}
         </div>
       </section>
 
