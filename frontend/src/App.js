@@ -19,6 +19,7 @@ import InviteOnboarding from "./pages/InviteOnboarding";
 import AmbassadorProfile from "./pages/AmbassadorProfile";
 import InvitePage from "./pages/InvitePage";
 import CookieConsent from "./components/CookieConsent";
+import CookiePolicy from "./pages/CookiePolicy";
 
 // Syncs user's preferred language on login
 const LanguageSync = () => {
@@ -72,6 +73,7 @@ const AppRouter = () => {
           <Route path="/onboarding/invite" element={<InviteOnboarding />} />
           <Route path="/ambassador/:userId" element={<AmbassadorProfile />} />
           <Route path="/invite/:alias" element={<InvitePage />} />
+          <Route path="/politica-cookies" element={<CookiePolicy />} />
         </Routes>
       </main>
       <Footer />
@@ -87,9 +89,9 @@ function App() {
           <BrowserRouter>
             <LanguageSync />
             <AppRouter />
+            <CookieConsent />
           </BrowserRouter>
           <Toaster position="bottom-center" richColors />
-          <CookieConsent />
         </LanguageProvider>
       </AuthProvider>
     </div>
