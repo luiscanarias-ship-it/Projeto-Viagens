@@ -494,6 +494,12 @@ const CheckoutModal = ({
                     Continuar
                     <ArrowRight className="w-4 h-4" />
                   </button>
+
+                  <div className="mt-3 pt-3 border-t border-stone-100" data-testid="checkout-disclaimer">
+                    <p className="text-[10px] leading-relaxed text-[#6B6661]/70 text-center">
+                      As contribuições feitas na plataforma 4Luis são voluntárias e destinam-se a apoiar sonhos de viagem. A 4Luis funciona como uma plataforma de CrowdDreaming que liga sonhadores e apoiantes. Dependendo do método de pagamento escolhido, os valores podem ser enviados diretamente ao sonhador responsável pela viagem. A 4Luis não garante a realização das viagens nem assume responsabilidade pela utilização dos fundos.
+                    </p>
+                  </div>
                 </motion.div>
               )}
 

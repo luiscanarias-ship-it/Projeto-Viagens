@@ -737,6 +737,12 @@ const JourneyDetail = () => {
                   <span>A plataforma não retém comissões. O valor integral vai para o sonhador.</span>
                 </p>
               </div>
+
+              <div className="mt-3 px-1" data-testid="journey-disclaimer">
+                <p className="text-[10px] leading-relaxed text-[#6B6661]/70">
+                  As contribuições feitas na plataforma 4Luis são voluntárias e destinam-se a apoiar sonhos de viagem. A 4Luis funciona como uma plataforma de CrowdDreaming que liga sonhadores e apoiantes. Dependendo do método de pagamento escolhido, os valores podem ser enviados diretamente ao sonhador responsável pela viagem. A 4Luis não garante a realização das viagens nem assume responsabilidade pela utilização dos fundos.
+                </p>
+              </div>
             </motion.div>
 
             {/* Contributions Feed */}
