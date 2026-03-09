@@ -14,13 +14,15 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 
 ## What's Been Implemented
 
-### Banner de Cookies RGPD (2026-03-09)
-- Banner fixo no fundo na primeira visita com animacao slide-up
+### Banner de Cookies RGPD (2026-03-09, refinado 2026-03-09)
+- Banner amigavel aparece 15 segundos apos aceder ao site
 - Imagem de bolacha a sonhar gerada por IA
-- Texto + botoes "Aceitar" e "Configurar"
-- Painel de configuracao: Essenciais (sempre ativas), Analiticos, Marketing
+- Texto pessoal: "Ola... Nos somos as cookies!" + "Autorizas-nos?"
+- Botoes "Aceitar" e "Nao, obrigado"
+- Link "aqui" para pagina /politica-cookies
 - Preferencias guardadas em localStorage com validade de 6 meses
-- z-index 9999 para aparecer acima de todos os elementos
+- z-index 9999, posicao bottom-right
+- Pagina de Politica de Cookies (/politica-cookies) com 4 seccoes e 3 tipos de cookies
 
 ### Sistema de Emails (5 tipos - COMPLETO)
 1. Mudanca de capitulo — Automatico nos marcos 25/50/75/100%
