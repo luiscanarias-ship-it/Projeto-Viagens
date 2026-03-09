@@ -134,6 +134,11 @@ const InvitePage = () => {
           </div>
         </div>
       </motion.div>
+      {/* Brand tagline */}
+      <div className="text-center py-8">
+        <span className="text-lg font-bold text-[#2D2A26]">4Luis</span>
+        <p className="font-handwritten text-[#FFBE98] text-lg mt-1">Sonha connosco.</p>
+      </div>
     </div>
   );
 };

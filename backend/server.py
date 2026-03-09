@@ -408,6 +408,8 @@ def get_email_base_template(content: str, title: str = "4Luis") -> str:
                     <tr>
                         <td style="padding: 24px 40px; background-color: #FAFAF9; border-radius: 0 0 16px 16px;">
                             <p style="margin: 0; color: #6B6661; font-size: 12px; text-align: center;">
+                                <span style="font-size: 16px; font-weight: bold; color: #2D2A26;">4Luis</span><br>
+                                <span style="color: #FFBE98; font-style: italic; font-size: 14px;">Sonha connosco.</span><br><br>
                                 Este é um email transacional automático da 4Luis.<br>
                                 <a href="{FRONTEND_URL}" style="color: #FFBE98; text-decoration: none;">4Luis.com</a>
                             </p>

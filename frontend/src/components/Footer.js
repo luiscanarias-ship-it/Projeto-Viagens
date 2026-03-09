@@ -31,10 +31,11 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div>
-            <Link to="/" className="flex items-center gap-2 mb-4">
+            <Link to="/" className="flex items-center gap-2 mb-2">
               <Heart className="w-6 h-6 text-[#FFBE98] fill-[#FFBE98]" />
               <span className="text-xl font-bold text-[#2D2A26]">4Luis</span>
             </Link>
+            <p className="font-handwritten text-[#FFBE98] text-lg">Sonha connosco.</p>
           </div>
 
           {/* Links */}
