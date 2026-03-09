@@ -187,7 +187,12 @@ const Home = () => {
         </div>
 
         <div className="relative max-w-4xl mx-auto px-6 text-center pt-20">
-          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1 }}
+            className="text-sm md:text-base text-[#6B6661]/70 italic mb-6" data-testid="opening-question">
+            E se os sonhos pudessem ser financiados por todos?
+          </motion.p>
+
+          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }}>
             <h1 className="tracking-tight mb-6">
               <span className="font-handwritten text-6xl md:text-8xl text-[#FFBE98] block mb-4">4Luis</span>
               <span className="font-handwritten text-4xl md:text-6xl text-[#FFBE98] whitespace-nowrap" style={{ fontWeight: 700 }}>{t('hero.tagline')}</span>
