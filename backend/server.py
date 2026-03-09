@@ -1842,17 +1842,19 @@ async def get_user_dashboard_stats(request: Request):
     impact_amount = sum(c.get("amount", 0) for c in invited_contributions)
     
     # Build individual referral details
-    contributor_user_ids = set(c.get("user_id") for c in invited_contributions)
     referral_details = []
     for inv_user in invited_users:
-        has_contributed = inv_user["user_id"] in contributor_user_ids
+        user_contribs = [c for c in invited_contributions if c.get("user_id") == inv_user["user_id"]]
+        user_total = sum(c.get("amount", 0) for c in user_contribs)
+        has_contributed = len(user_contribs) > 0
         display_name = inv_user.get("name") or inv_user.get("anonymous_alias") or "Amigo"
         referral_details.append({
             "name": display_name,
-            "has_contributed": has_contributed
+            "has_contributed": has_contributed,
+            "amount": user_total
         })
     # Sort: contributors first
-    referral_details.sort(key=lambda x: (not x["has_contributed"], x["name"]))
+    referral_details.sort(key=lambda x: (-x["amount"], not x["has_contributed"], x["name"]))
     
     # Count unique users who contributed (valid referrals)
     valid_referrals_from_db = user_data.get("valid_referrals_count", 0)

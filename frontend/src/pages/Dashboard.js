@@ -587,6 +587,29 @@ const Dashboard = () => {
               <p className="text-xs text-[#6B6661] mt-1">Impacto gerado</p>
             </div>
           </div>
+
+          {/* Impact Details */}
+          {invites?.referral_details?.length > 0 && (
+            <div className="mt-4 p-4 bg-gradient-to-br from-[#FFF8F0] to-[#FFBE98]/5 rounded-xl border border-[#FFBE98]/20" data-testid="invite-impact-panel">
+              <p className="text-sm font-semibold text-[#2D2A26] mb-3">Impacto dos teus convites</p>
+              <div className="space-y-2 mb-3">
+                {invites.referral_details.map((r, i) => (
+                  <div key={i} className="flex items-center justify-between text-sm">
+                    <span className="text-[#6B6661]">{r.name}</span>
+                    {r.has_contributed ? (
+                      <span className="font-semibold text-[#FFBE98]">€{r.amount}</span>
+                    ) : (
+                      <span className="text-xs text-[#6B6661]/50 italic">ainda não contribuiu</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <div className="border-t border-[#FFBE98]/20 pt-2 flex items-center justify-between">
+                <span className="text-xs font-semibold text-[#6B6661]">Total gerado pelos teus convites</span>
+                <span className="text-lg font-bold text-[#FFBE98]" data-testid="invite-impact-total">€{invites?.impact_amount?.toFixed(0) || 0}</span>
+              </div>
+            </div>
+          )}
         </motion.div>
 
         {/* BLOCO 4 — Contribuições Pessoais */}
