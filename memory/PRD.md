@@ -24,14 +24,24 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - "Como funciona o CrowdDreaming" com realce pessego
 - Texto introdutorio na seccao "Planeia a tua viagem"
 - Citacao inspiradora final com 3 linhas
+- Mensagem de progresso para proximo marco (MilestoneProgress) no hero e cards
 
 ### Checkout Modal
 - Step 1: Selecao de valor (10-1000) com descricoes inspiradoras
-- Badge "Mais popular" no valor de 20EUR
+- Badge "Mais popular" no valor de 20EUR - destaque visual com gradiente, texto branco, animacao pulse
+- Botao de 20EUR com enfase visual (ring-2, shadow-sm)
 - Step 2: Texto motivacional + metodo de pagamento
 - Step 3: Instrucoes com QR codes crypto, deep links, referencia
 - Ecra de agradecimento pos-contribuicao com ShareMenu
 - Geracao automatica de descricoes por IA (GPT-5.2)
+
+### MilestoneProgress (NOVO - 2026-03-09)
+- Componente reutilizavel que mostra progresso para proximo marco
+- Marcos: 25% (O Primeiro Passo), 50% (Meio Caminho), 75% (Quase La), 100% (Sonho Realizado)
+- Mensagem urgente com icone Flame quando faltam < 5%
+- Mensagem de conclusao com icone PartyPopper quando >= 100%
+- Variantes dark e light para diferentes fundos
+- Integrado em: Homepage hero, Homepage cards, JourneyDetail
 
 ### Storytelling Progressivo
 - 5 capitulos (0-25%, 25-50%, 50-75%, 75-100%, 100%+)
@@ -66,6 +76,7 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - 6 idiomas com cache e persistencia
 
 ## Key Files
+- `frontend/src/components/MilestoneProgress.js` - Progresso para proximo marco
 - `frontend/src/components/StoryChapter.js` - Componente storytelling
 - `frontend/src/components/CheckoutModal.js` - Modal checkout
 - `frontend/src/components/ShareMenu.js` - Partilha viral
@@ -79,12 +90,14 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 ### P1
 - Verificar dominio no Resend para enviar emails a todos os utilizadores
 - Melhorar formulario de edicao de viagens no Admin
+- Corrigir aviso HTML invalido no Admin (tr dentro de span)
 
 ### P2
 - Sistema de pontos
 - Sorteio real
 - Notificacoes in-app
 - Refactoring: Dividir CheckoutModal.js
+- Refactoring: Dividir backend/server.py (monolito ~4k linhas)
 
 ## Credentials
 - **Admin**: admin@4luis.com / Admin1
