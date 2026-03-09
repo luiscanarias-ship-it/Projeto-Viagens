@@ -1266,7 +1266,7 @@ async def get_journey(journey_id: str):
         raise HTTPException(status_code=404, detail="Viagem não encontrada")
     
     # If this is an ambassador journey, include ambassador info
-    if journey.get("is_ambassador_journey") and journey.get("ambassador_user_id"):
+    if journey.get("ambassador_user_id"):
         ambassador = await db.users.find_one(
             {"user_id": journey["ambassador_user_id"]},
             {"_id": 0, "password_hash": 0, "email": 0}
@@ -1286,7 +1286,19 @@ async def get_journey(journey_id: str):
                 "display_name": display_name,
                 "avatar": display_avatar,
                 "country": ambassador.get("country"),
-                "level": ambassador.get("level", "sonhador")
+                "level": ambassador.get("level", "sonhador"),
+                "member_since": ambassador.get("registered_at") or ambassador.get("created_at")
+            }
+        elif journey.get("ambassador_name"):
+            # Fallback for sample/seeded journeys where user doesn't exist in DB
+            name = journey["ambassador_name"]
+            journey["ambassador_info"] = {
+                "user_id": journey["ambassador_user_id"],
+                "display_name": name,
+                "avatar": f"https://api.dicebear.com/7.x/initials/svg?seed={name}",
+                "country": None,
+                "level": "sonhador",
+                "member_since": journey.get("created_at")
             }
     
     return journey
@@ -3816,16 +3828,16 @@ async def update_user_level(user_id: str, request: Request):
     data = await request.json()
     new_level = data.get("level")
     
-    if new_level not in ["curioso", "sonhador", "premium"]:
-        raise HTTPException(status_code=400, detail="Nível inválido. Use: curioso, sonhador, premium")
+    if new_level not in ["sonhador", "verificado", "embaixador"]:
+        raise HTTPException(status_code=400, detail="Nível inválido. Use: sonhador, verificado, embaixador")
     
     user = await db.users.find_one({"user_id": user_id}, {"_id": 0})
     if not user:
         raise HTTPException(status_code=404, detail="Utilizador não encontrado")
     
     update_data = {"level": new_level}
-    if new_level == "premium" and not user.get("premium_unlocked_at"):
-        update_data["premium_unlocked_at"] = datetime.now(timezone.utc).isoformat()
+    if new_level == "embaixador" and not user.get("embaixador_unlocked_at"):
+        update_data["embaixador_unlocked_at"] = datetime.now(timezone.utc).isoformat()
     
     await db.users.update_one(
         {"user_id": user_id},

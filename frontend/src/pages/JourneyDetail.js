@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, Heart, Copy, Check, CreditCard, Smartphone, Bitcoin, ExternalLink,
   Map, Hotel, Plane, MessageCircle, Sparkles, Send, ChevronDown, ChevronUp,
-  BookOpen, Compass, Globe, User, AlertCircle, ChevronRight, ArrowRight
+  BookOpen, Compass, Globe, User, AlertCircle, ChevronRight, ArrowRight, Flag
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import axios from 'axios';
@@ -65,6 +65,65 @@ const ViatorIcon = () => (
     <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
   </svg>
 );
+
+const TrustBadge = ({ level, memberSince }) => {
+  const config = {
+    sonhador: {
+      label: 'Sonhador 4Luis',
+      gradient: 'from-[#FFBE98]/20 to-[#FFD4B8]/20',
+      textColor: 'text-[#E6A07C]',
+      borderColor: 'border-[#FFBE98]/30',
+      icon: (
+        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 3c.5 0 9 2 9 9s-8.5 9-9 9-9-2-9-9 8.5-9 9-9z" fill="currentColor" opacity="0.15"/>
+          <circle cx="12" cy="12" r="3" fill="currentColor" opacity="0.4"/>
+        </svg>
+      )
+    },
+    verificado: {
+      label: 'Sonhador Verificado',
+      gradient: 'from-[#5BB5A2]/15 to-[#E6F4F1]/30',
+      textColor: 'text-[#5BB5A2]',
+      borderColor: 'border-[#5BB5A2]/30',
+      icon: (
+        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.15"/>
+          <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      )
+    },
+    embaixador: {
+      label: 'Embaixador 4Luis',
+      gradient: 'from-[#F2C94C]/15 to-[#FFBE98]/15',
+      textColor: 'text-[#D4A017]',
+      borderColor: 'border-[#F2C94C]/40',
+      icon: (
+        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" opacity="0.85">
+          <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8l-6.2 4.5 2.4-7.4L2 9.4h7.6z"/>
+        </svg>
+      )
+    }
+  };
+
+  const c = config[level] || config.sonhador;
+  const formattedDate = memberSince
+    ? new Date(memberSince).toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    : null;
+
+  return (
+    <div className="space-y-1.5" data-testid="trust-badge">
+      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r ${c.gradient} ${c.textColor} border ${c.borderColor}`}>
+        {c.icon}
+        {c.label}
+      </span>
+      {formattedDate && (
+        <p className="text-[10px] text-[#6B6661]/60" data-testid="member-since">
+          Membro da 4Luis desde {formattedDate}
+        </p>
+      )}
+    </div>
+  );
+};
 
 const JourneyDetail = () => {
   const { id } = useParams();
@@ -370,11 +429,18 @@ const JourneyDetail = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.15 }}
                 className="bg-white rounded-2xl p-6 border border-stone-100 shadow-sm"
+                data-testid="dreamer-info-section"
               >
-                <h3 className="text-lg font-bold text-[#2D2A26] mb-4 flex items-center gap-2">
+                <h3 className="text-lg font-bold text-[#2D2A26] mb-1 flex items-center gap-2">
                   <User className="w-5 h-5 text-[#FFBE98]" />
-                  Sobre o Embaixador
+                  Sonho de {journey.ambassador_info.display_name}
                 </h3>
+                <div className="mb-4">
+                  <TrustBadge
+                    level={journey.ambassador_info.level}
+                    memberSince={journey.ambassador_info.member_since}
+                  />
+                </div>
                 <a 
                   href={`/ambassador/${journey.ambassador_info.user_id}`}
                   className="flex items-center gap-4 p-3 -m-3 rounded-xl hover:bg-stone-50 transition-colors group"
@@ -394,9 +460,6 @@ const JourneyDetail = () => {
                         <Globe className="w-3 h-3" /> {journey.ambassador_info.country}
                       </p>
                     )}
-                    <span className="inline-block mt-1 px-2 py-0.5 bg-gradient-to-r from-[#FFBE98]/20 to-[#E6F4F1]/20 rounded-full text-xs font-medium text-[#FFBE98]">
-                      Embaixador 4Luis
-                    </span>
                   </div>
                   <ChevronRight className="w-5 h-5 text-[#6B6661] group-hover:text-[#FFBE98] transition-colors" />
                 </a>
@@ -813,6 +876,18 @@ const JourneyDetail = () => {
             )}
           </div>
         </div>
+      </div>
+
+      {/* Report Problem - Discrete */}
+      <div className="max-w-6xl mx-auto px-6 md:px-12 pb-8 flex justify-end">
+        <a
+          href={`mailto:mail@4luis.com?subject=Reportar problema — ${journey?.name || 'Viagem'}&body=Olá equipa 4Luis,%0A%0AGostaria de reportar um problema com a viagem "${journey?.name || ''}".%0A%0ADescrição do problema:%0A`}
+          className="inline-flex items-center gap-1.5 text-xs text-[#6B6661]/50 hover:text-[#6B6661] transition-colors"
+          data-testid="report-problem-btn"
+        >
+          <Flag className="w-3 h-3" />
+          Reportar problema
+        </a>
       </div>
 
 

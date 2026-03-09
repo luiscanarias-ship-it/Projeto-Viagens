@@ -477,11 +477,11 @@ const Admin = () => {
 
   const getLevelBadge = (level) => {
     const badges = {
-      curioso: { bg: 'bg-stone-100', text: 'text-stone-600', label: 'Curioso' },
       sonhador: { bg: 'bg-[#FFBE98]/20', text: 'text-[#FFBE98]', label: 'Sonhador' },
-      premium: { bg: 'bg-[#F2C94C]/20', text: 'text-[#F2C94C]', label: 'Premium' }
+      verificado: { bg: 'bg-[#5BB5A2]/20', text: 'text-[#5BB5A2]', label: 'Verificado' },
+      embaixador: { bg: 'bg-[#F2C94C]/20', text: 'text-[#F2C94C]', label: 'Embaixador' }
     };
-    const badge = badges[level] || badges.curioso;
+    const badge = badges[level] || badges.sonhador;
     return (
       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${badge.bg} ${badge.text}`}>
         {badge.label}
@@ -2326,14 +2326,14 @@ const Admin = () => {
                           <p className="text-sm text-[#6B6661]">Atual: {getLevelBadge(userDetail.user.level)}</p>
                         </div>
                         <select
-                          value={userDetail.user.level || 'curioso'}
+                          value={userDetail.user.level || 'sonhador'}
                           onChange={(e) => updateUserLevel(userDetail.user.user_id, e.target.value)}
                           disabled={updatingUser}
                           className="px-4 py-2 border border-stone-200 rounded-xl bg-white"
                         >
-                          <option value="curioso">Curioso</option>
                           <option value="sonhador">Sonhador</option>
-                          <option value="premium">Premium</option>
+                          <option value="verificado">Sonhador Verificado</option>
+                          <option value="embaixador">Embaixador</option>
                         </select>
                       </div>
 
