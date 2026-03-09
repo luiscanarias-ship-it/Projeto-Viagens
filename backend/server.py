@@ -884,6 +884,203 @@ async def send_journey_funded_emails(journey: dict, ambassador_user: dict, amoun
         html_content=admin_html
     )
 
+# ==================== SHARED EMAIL HELPERS ====================
+
+def _build_email_progress_bar(percentage: float) -> str:
+    """Reusable HTML progress bar for all email types"""
+    pct_int = int(min(percentage, 100))
+    filled_blocks = max(1, pct_int // 5) if pct_int > 0 else 0
+    empty_blocks = 20 - filled_blocks
+    progress_bar_text = "\u2588" * filled_blocks + "\u2591" * empty_blocks
+    
+    return f"""
+    <div style="background: #F5F5F4; border-radius: 16px; padding: 20px; margin: 20px 0;">
+        <p style="color: #6B6661; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">
+            Progresso atual
+        </p>
+        <div style="background: #E7E5E4; border-radius: 8px; height: 12px; overflow: hidden; margin-bottom: 8px;">
+            <div style="background: linear-gradient(90deg, #FFBE98, #F2C94C); height: 100%; width: {pct_int}%; border-radius: 8px;"></div>
+        </div>
+        <p style="font-family: monospace; color: #6B6661; font-size: 12px; letter-spacing: 1px; margin-bottom: 4px;">
+            {progress_bar_text}
+        </p>
+        <p style="color: #2D2A26; font-size: 18px; font-weight: bold;">
+            {percentage}% financiado
+        </p>
+    </div>
+    """
+
+def _build_email_cta_button(url: str, text: str) -> str:
+    """Reusable CTA button for all email types"""
+    return f"""
+    <div style="text-align: center; margin-top: 24px;">
+        <a href="{url}" style="display: inline-block; background: #FFBE98; color: #2D2A26; padding: 14px 28px; border-radius: 12px; font-weight: bold; text-decoration: none; font-size: 16px;">
+            {text}
+        </a>
+    </div>
+    """
+
+def _build_standard_email(title: str, narrative: str, percentage: float, cta_url: str, cta_text: str, extra_html: str = "") -> str:
+    """Build a standard email body with title, narrative, progress bar and CTA"""
+    progress_bar = _build_email_progress_bar(percentage) if percentage is not None else ""
+    cta = _build_email_cta_button(cta_url, cta_text)
+    
+    return f"""
+    <div style="text-align: center; padding: 20px 0;">
+        <h1 style="margin: 0 0 16px 0; color: #2D2A26; font-size: 24px;">{title}</h1>
+        <p style="color: #6B6661; font-size: 16px; line-height: 1.8; margin-bottom: 8px;">
+            {narrative}
+        </p>
+        {extra_html}
+        {progress_bar}
+        {cta}
+    </div>
+    """
+
+# ==================== EMAIL TYPE 2: WEEKLY SUMMARY ====================
+
+async def send_weekly_summary_emails():
+    """Send weekly progress summary to all users for all active journeys"""
+    active_journeys = await db.journeys.find(
+        {"status": "ativa", "is_active": True},
+        {"_id": 0}
+    ).to_list(50)
+    
+    if not active_journeys:
+        return {"sent": 0, "message": "No active journeys"}
+    
+    journeys_html = ""
+    for j in active_journeys:
+        pct = round((j.get("current_amount", 0) / j.get("goal_amount", 1)) * 100, 1) if j.get("goal_amount", 0) > 0 else 0
+        pct_int = int(min(pct, 100))
+        journey_url = f"{FRONTEND_URL}/journey/{j['journey_id']}"
+        
+        journeys_html += f"""
+        <div style="background: #FFF8F3; border-radius: 12px; padding: 20px; margin-bottom: 16px;">
+            <p style="color: #2D2A26; font-size: 18px; font-weight: bold; margin: 0 0 4px 0;">{j.get('name', '')}</p>
+            <p style="color: #FFBE98; font-style: italic; font-size: 14px; margin: 0 0 12px 0;">{j.get('poetic_name', '')}</p>
+            <div style="background: #E7E5E4; border-radius: 8px; height: 10px; overflow: hidden; margin-bottom: 8px;">
+                <div style="background: linear-gradient(90deg, #FFBE98, #F2C94C); height: 100%; width: {pct_int}%; border-radius: 8px;"></div>
+            </div>
+            <p style="color: #2D2A26; font-size: 14px; font-weight: bold; margin: 0 0 12px 0;">{pct}% financiado</p>
+            <a href="{journey_url}" style="color: #FFBE98; font-size: 14px; font-weight: bold; text-decoration: none;">Ver este sonho &rarr;</a>
+        </div>
+        """
+    
+    body = f"""
+    <div style="text-align: center; padding: 20px 0;">
+        <h1 style="margin: 0 0 16px 0; color: #2D2A26; font-size: 24px;">Resumo Semanal dos Sonhos</h1>
+        <p style="color: #6B6661; font-size: 16px; line-height: 1.8; margin-bottom: 24px;">
+            Aqui esta o progresso dos sonhos que estamos a construir juntos esta semana.
+        </p>
+        {journeys_html}
+        {_build_email_cta_button(FRONTEND_URL, "Explorar todos os sonhos")}
+    </div>
+    """
+    
+    html = get_email_base_template(body, "Resumo Semanal - 4Luis")
+    subject = "Resumo semanal dos sonhos - 4Luis"
+    
+    users = await db.users.find({"email": {"$exists": True, "$ne": ""}}, {"_id": 0, "email": 1}).to_list(500)
+    sent_count = 0
+    for u in users:
+        email = u.get("email", "")
+        if email and "@" in email and not email.endswith("@test.com"):
+            try:
+                await send_email_resend(email, subject, html)
+                sent_count += 1
+            except Exception as e:
+                logger.error(f"Weekly summary email failed for {email}: {e}")
+    
+    logger.info(f"Weekly summary sent to {sent_count} users")
+    return {"sent": sent_count, "journeys_count": len(active_journeys)}
+
+# ==================== EMAIL TYPE 4: DREAM FUNDED (ADMIN APPROVED) ====================
+
+async def send_dream_funded_announcement(journey: dict):
+    """Send dream funded email to ALL users — only triggered by admin approval"""
+    journey_name = journey.get("name", "")
+    poetic_name = journey.get("poetic_name", "")
+    journey_id = journey.get("journey_id", "")
+    current_amount = journey.get("current_amount", 0)
+    goal_amount = journey.get("goal_amount", 1)
+    percentage = round((current_amount / goal_amount) * 100, 1) if goal_amount > 0 else 100
+    journey_url = f"{FRONTEND_URL}/journey/{journey_id}"
+    
+    # Count contributors
+    contributors = await db.contributions.find(
+        {"journey_id": journey_id, "status": "completed"},
+        {"_id": 0, "contributor_name": 1}
+    ).to_list(500)
+    contributor_count = len(contributors)
+    
+    body = _build_standard_email(
+        title="Este sonho tornou-se realidade!",
+        narrative=f"""A viagem &ldquo;<strong>{poetic_name or journey_name}</strong>&rdquo; acaba de ser totalmente financiada.<br><br>
+        Gracas a <strong>{contributor_count} sonhadores</strong> que acreditaram, este sonho vai acontecer.<br>
+        Obrigado a todos os que ajudaram a transformar este sonho em realidade.""",
+        percentage=percentage,
+        cta_url=journey_url,
+        cta_text="Ver este sonho realizado"
+    )
+    
+    html = get_email_base_template(body, f"Sonho Realizado: {journey_name} - 4Luis")
+    subject = f"O sonho da {journey_name} tornou-se realidade!"
+    
+    users = await db.users.find({"email": {"$exists": True, "$ne": ""}}, {"_id": 0, "email": 1}).to_list(500)
+    sent_count = 0
+    for u in users:
+        email = u.get("email", "")
+        if email and "@" in email and not email.endswith("@test.com"):
+            try:
+                await send_email_resend(email, subject, html)
+                sent_count += 1
+            except Exception as e:
+                logger.error(f"Dream funded email failed for {email}: {e}")
+    
+    logger.info(f"Dream funded announcement sent to {sent_count} users for {journey_id}")
+    return {"sent": sent_count}
+
+# ==================== EMAIL TYPE 5: NEW JOURNEY PUBLISHED ====================
+
+async def send_new_journey_email(journey: dict):
+    """Send email to all users when a new journey is published"""
+    journey_name = journey.get("name", "")
+    poetic_name = journey.get("poetic_name", "")
+    description = journey.get("description", "")
+    journey_id = journey.get("journey_id", "")
+    ambassador_name = journey.get("ambassador_name", "")
+    journey_url = f"{FRONTEND_URL}/journey/{journey_id}"
+    
+    ambassador_line = f"<br>Sonho de <strong>{ambassador_name}</strong>" if ambassador_name else ""
+    
+    body = _build_standard_email(
+        title=f"Novo sonho: {journey_name}",
+        narrative=f"""Um novo sonho acabou de chegar a plataforma 4Luis.<br><br>
+        &ldquo;<em>{poetic_name or description}</em>&rdquo;{ambassador_line}<br><br>
+        Cada sonho comeca com um primeiro passo. Sera que este vai ser o teu?""",
+        percentage=0,
+        cta_url=journey_url,
+        cta_text="Descobrir este sonho"
+    )
+    
+    html = get_email_base_template(body, f"Novo Sonho: {journey_name} - 4Luis")
+    subject = f"Novo sonho na 4Luis: {journey_name}"
+    
+    users = await db.users.find({"email": {"$exists": True, "$ne": ""}}, {"_id": 0, "email": 1}).to_list(500)
+    sent_count = 0
+    for u in users:
+        email = u.get("email", "")
+        if email and "@" in email and not email.endswith("@test.com"):
+            try:
+                await send_email_resend(email, subject, html)
+                sent_count += 1
+            except Exception as e:
+                logger.error(f"New journey email failed for {email}: {e}")
+    
+    logger.info(f"New journey email sent to {sent_count} users for {journey_id}")
+    return {"sent": sent_count}
+
 # ==================== AUTH ROUTES ====================
 
 @api_router.post("/auth/register")
@@ -4003,6 +4200,54 @@ async def test_chapter_email(journey_id: str, chapter_num: int, request: Request
         "percentage": percentage,
         "result": result
     }
+
+@api_router.post("/admin/emails/weekly-summary")
+async def trigger_weekly_summary(request: Request):
+    """Admin: Send weekly progress summary email to all users"""
+    await require_admin(request)
+    result = await send_weekly_summary_emails()
+    return {"message": "Resumo semanal enviado", **result}
+
+@api_router.post("/admin/emails/dream-funded/{journey_id}")
+async def trigger_dream_funded_email(journey_id: str, request: Request):
+    """Admin: Send dream funded announcement email to all users"""
+    await require_admin(request)
+    
+    journey = await db.journeys.find_one({"journey_id": journey_id}, {"_id": 0})
+    if not journey:
+        raise HTTPException(status_code=404, detail="Viagem não encontrada")
+    
+    # Mark journey as funded
+    await db.journeys.update_one(
+        {"journey_id": journey_id},
+        {"$set": {
+            "status": "financiada",
+            "funded_at": datetime.now(timezone.utc).isoformat(),
+            "funded_email_sent": True,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    result = await send_dream_funded_announcement(journey)
+    return {"message": f"Email de sonho financiado enviado para {result['sent']} utilizadores", **result}
+
+@api_router.post("/admin/emails/new-journey/{journey_id}")
+async def trigger_new_journey_email(journey_id: str, request: Request):
+    """Admin: Send new journey announcement email to all users"""
+    await require_admin(request)
+    
+    journey = await db.journeys.find_one({"journey_id": journey_id}, {"_id": 0})
+    if not journey:
+        raise HTTPException(status_code=404, detail="Viagem não encontrada")
+    
+    result = await send_new_journey_email(journey)
+    
+    await db.journeys.update_one(
+        {"journey_id": journey_id},
+        {"$set": {"announcement_email_sent": True}}
+    )
+    
+    return {"message": f"Email de novo sonho enviado para {result['sent']} utilizadores", **result}
 
 @api_router.post("/ambassador/journey/apply")
 async def apply_for_ambassador_journey(request: Request):

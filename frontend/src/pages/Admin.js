@@ -673,14 +673,30 @@ const Admin = () => {
             >
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold">{t('admin.journeys')}</h2>
-                <button
-                  onClick={() => setShowCreateForm(true)}
-                  className="btn-primary text-sm px-4 py-2 flex items-center gap-2"
-                  data-testid="create-journey-btn"
-                >
-                  <Plus className="w-4 h-4" />
-                  {t('admin.create')}
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={async () => {
+                      if (!window.confirm('Enviar resumo semanal para TODOS os utilizadores?')) return;
+                      try {
+                        const res = await axios.post(`${API}/admin/emails/weekly-summary`, {}, { headers: { Authorization: `Bearer ${token}` } });
+                        alert(`Resumo semanal enviado para ${res.data.sent} utilizadores!`);
+                      } catch (err) { alert('Erro: ' + (err.response?.data?.detail || err.message)); }
+                    }}
+                    className="px-3 py-2 bg-stone-100 text-[#2D2A26] rounded-xl font-medium text-xs hover:bg-stone-200 transition-colors flex items-center gap-1.5"
+                    data-testid="send-weekly-summary-btn"
+                  >
+                    <Mail className="w-3.5 h-3.5" />
+                    Resumo Semanal
+                  </button>
+                  <button
+                    onClick={() => setShowCreateForm(true)}
+                    className="btn-primary text-sm px-4 py-2 flex items-center gap-2"
+                    data-testid="create-journey-btn"
+                  >
+                    <Plus className="w-4 h-4" />
+                    {t('admin.create')}
+                  </button>
+                </div>
               </div>
 
               {/* Create Form */}
@@ -1100,6 +1116,62 @@ const Admin = () => {
                             <Settings className="w-4 h-4 text-[#FFBE98]" />
                             Configurações
                           </h4>
+
+                          {/* Email Actions */}
+                          <div className="bg-stone-50 rounded-xl p-4">
+                            <p className="text-xs font-semibold text-[#6B6661] uppercase tracking-wider mb-3">Emails</p>
+                            <div className="flex flex-wrap gap-2">
+                              {journey.status !== 'financiada' && (() => {
+                                const pct = journey.goal_amount > 0 ? (journey.current_amount / journey.goal_amount) * 100 : 0;
+                                return pct >= 100 ? (
+                                  <button
+                                    onClick={async () => {
+                                      if (!window.confirm(`Confirmas o envio do email "Sonho Financiado" para TODOS os utilizadores? A viagem será marcada como financiada.`)) return;
+                                      try {
+                                        await axios.post(`${API}/admin/emails/dream-funded/${journey.journey_id}`, {}, { headers: { Authorization: `Bearer ${token}` } });
+                                        alert('Email de sonho financiado enviado!');
+                                        fetchJourneys();
+                                      } catch (err) { alert('Erro ao enviar email: ' + (err.response?.data?.detail || err.message)); }
+                                    }}
+                                    className="px-3 py-2 bg-purple-100 text-purple-700 rounded-lg text-xs font-semibold hover:bg-purple-200 transition-colors flex items-center gap-1.5"
+                                    data-testid={`send-funded-email-${journey.journey_id}`}
+                                  >
+                                    <Heart className="w-3.5 h-3.5" />
+                                    Anunciar Sonho Financiado
+                                  </button>
+                                ) : null;
+                              })()}
+                              {!journey.announcement_email_sent && (
+                                <button
+                                  onClick={async () => {
+                                    if (!window.confirm(`Confirmas o envio do email "Novo Sonho" para TODOS os utilizadores?`)) return;
+                                    try {
+                                      await axios.post(`${API}/admin/emails/new-journey/${journey.journey_id}`, {}, { headers: { Authorization: `Bearer ${token}` } });
+                                      alert('Email de novo sonho enviado!');
+                                      fetchJourneys();
+                                    } catch (err) { alert('Erro ao enviar email: ' + (err.response?.data?.detail || err.message)); }
+                                  }}
+                                  className="px-3 py-2 bg-blue-100 text-blue-700 rounded-lg text-xs font-semibold hover:bg-blue-200 transition-colors flex items-center gap-1.5"
+                                  data-testid={`send-new-journey-email-${journey.journey_id}`}
+                                >
+                                  <Mail className="w-3.5 h-3.5" />
+                                  Anunciar Novo Sonho
+                                </button>
+                              )}
+                              {journey.announcement_email_sent && (
+                                <span className="px-3 py-2 bg-stone-100 text-stone-500 rounded-lg text-xs flex items-center gap-1.5">
+                                  <CheckCircle className="w-3.5 h-3.5" />
+                                  Anuncio enviado
+                                </span>
+                              )}
+                              {journey.funded_email_sent && (
+                                <span className="px-3 py-2 bg-stone-100 text-stone-500 rounded-lg text-xs flex items-center gap-1.5">
+                                  <CheckCircle className="w-3.5 h-3.5" />
+                                  Email financiado enviado
+                                </span>
+                              )}
+                            </div>
+                          </div>
                           <div className="grid md:grid-cols-3 gap-4">
                             <div>
                               <label className="block text-sm font-medium text-[#6B6661] mb-1">Estado</label>
