@@ -14,6 +14,13 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 
 ## What's Been Implemented
 
+### Sistema de Confianca (2026-03-09)
+- 3 niveis de confianca: Sonhador, Sonhador Verificado, Embaixador
+- Badge visual na pagina da viagem (peach/verde/dourado) com icones criativos
+- "Membro da 4Luis desde dd/mm/aaaa" junto ao nome do sonhador
+- Admin pode alterar nivel via painel de utilizadores
+- Botao discreto "Reportar problema" (mailto:mail@4luis.com) no final da pagina da viagem
+
 ### Disclaimer de Contribuicoes (2026-03-09)
 - Disclaimer subtil na pagina da viagem (sidebar, abaixo do botao "Apoiar esta Viagem")
 - Disclaimer subtil no checkout modal (step 1, abaixo do botao "Continuar")
