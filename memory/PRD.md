@@ -8,7 +8,7 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - **Backend**: FastAPI (Python 3.11)
 - **Database**: MongoDB
 - **Payments**: Crypto (BTC, ETH, USDT, USDC), MBWay, PayPal, Revolut, Wise
-- **Email**: Resend (configured but needs RESEND_API_KEY in .env)
+- **Email**: Resend (ATIVO - re_KsK6NdBc_*)
 - **Auth**: JWT + Google OAuth
 - **QR Codes**: qrcode (npm, toDataURL)
 - **Crypto Prices**: CoinGecko API
@@ -26,67 +26,66 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - Citacao inspiradora final com 3 linhas
 
 ### Checkout Modal
-- Step 1: Selecao de valor (10-1000) com descricoes inspiradoras opcionais
+- Step 1: Selecao de valor (10-1000) com descricoes inspiradoras
 - Badge "Mais popular" no valor de 20EUR
 - Step 2: Texto motivacional + metodo de pagamento
 - Step 3: Instrucoes com QR codes crypto, deep links, referencia
 - Ecra de agradecimento pos-contribuicao com ShareMenu
-- Descricoes de contribuicao configuraveis por viagem no Admin
 - Geracao automatica de descricoes por IA (GPT-5.2)
 
-### Storytelling Progressivo (Novo - 2026-03-09)
-- Componente StoryChapter com 5 capitulos (0-25%, 25-50%, 50-75%, 75-100%, 100%+)
+### Storytelling Progressivo
+- 5 capitulos (0-25%, 25-50%, 50-75%, 75-100%, 100%+)
 - Variantes light (detalhe viagem) e dark (homepage)
 - Capitulos personalizaveis por viagem no Admin
-- Detecao automatica de mudanca de capitulo na confirmacao de contribuicao
-- Email automatico para todos os utilizadores na mudanca de fase
+- Detecao automatica de mudanca de capitulo
+- Protecao contra emails duplicados (chapters_emails_sent)
 - Toggle de emails automaticos no Admin
-- China populada com capitulos especificos
+
+### Emails Automaticos (ATIVO - 2026-03-09)
+- Resend configurado com API key real
+- Email automatico na mudanca de capitulo
+- Template com storytelling (titulo, texto, botao contribuir)
+- Protecao contra duplicados (flags por milestone: 25/50/75/100)
+- Endpoint de teste: POST /api/admin/test-chapter-email/{journey_id}/{chapter_num}
+- NOTA: Free tier - envia apenas para luis.canarias@gmail.com (verificar dominio para producao)
 
 ### Sistema Embaixador
 - Dashboard: Progresso com referrals individuais
-- Botao "Convidar mais amigos" copia link /invite/{alias}
-- Pagina /invite/{alias} com convite e progresso
+- Convite por link /invite/{alias}
 
 ### Admin
 - Gestao viagens, utilizadores, contribuicoes
 - Descricoes de contribuicao com geracao IA
 - Storytelling Progressivo com 5 editores de capitulos
-- Pesquisa por referencia de pagamento
-- Smoke test 100% estavel
+- Teste de email de capitulo
 
 ### Sistema de Partilha Viral
-- Componente ShareMenu com WhatsApp, Telegram, Email, Copiar
-- Suporte para customMessage (usado no ecra de agradecimento)
-- Integrado em Dashboard, InvitePage, JourneyDetail, CheckoutModal
+- ShareMenu com WhatsApp, Telegram, Email, Copiar
 
 ### Sistema de Traducao
-- 6 idiomas: PT, EN, ES, FR, DE, IT
-- Cache de traducoes no frontend
-- Seletor de idioma persistente
+- 6 idiomas com cache e persistencia
 
 ## Key Files
-- `frontend/src/components/StoryChapter.js` - Componente de storytelling
-- `frontend/src/components/CheckoutModal.js` - Modal de checkout
-- `frontend/src/components/ShareMenu.js` - Componente de partilha
-- `frontend/src/pages/JourneyDetail.js` - Pagina de viagem
+- `frontend/src/components/StoryChapter.js` - Componente storytelling
+- `frontend/src/components/CheckoutModal.js` - Modal checkout
+- `frontend/src/components/ShareMenu.js` - Partilha viral
 - `frontend/src/pages/Home.js` - Homepage
-- `frontend/src/pages/Admin.js` - Painel de administracao
-- `frontend/src/contexts/LanguageContext.js` - Contexto de traducao
-- `backend/server.py` - API FastAPI principal
+- `frontend/src/pages/JourneyDetail.js` - Detalhe viagem
+- `frontend/src/pages/Admin.js` - Admin
+- `backend/server.py` - API principal
 
 ## Prioritized Backlog
 
 ### P1
+- Verificar dominio no Resend para enviar emails a todos os utilizadores
 - Melhorar formulario de edicao de viagens no Admin
-- Adicionar RESEND_API_KEY ao .env para emails funcionarem
 
 ### P2
 - Sistema de pontos
 - Sorteio real
 - Notificacoes in-app
-- Ferramentas de planeamento (afiliados)
-- Refactoring: Dividir CheckoutModal.js em sub-componentes
+- Refactoring: Dividir CheckoutModal.js
 
 ## Credentials
 - **Admin**: admin@4luis.com / Admin1
+- **Resend test recipient**: luis.canarias@gmail.com
