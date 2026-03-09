@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Shield } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const COOKIE_KEY = '4luis_cookie_consent';
-const CONSENT_DURATION_MS = 6 * 30 * 24 * 60 * 60 * 1000; // ~6 months
+const CONSENT_DURATION_MS = 6 * 30 * 24 * 60 * 60 * 1000;
 
 const COOKIE_IMG = 'https://static.prod-images.emergentagent.com/jobs/8a5b92db-fc59-4780-b378-fec6b9aa8e90/images/60d59430be7bad45065488503910150dede4ed708858f32128aeaf27e89e35e3.png';
 
@@ -20,9 +20,9 @@ function getConsent() {
   } catch { return null; }
 }
 
-function saveConsent(preferences) {
+function saveConsent(accepted) {
   localStorage.setItem(COOKIE_KEY, JSON.stringify({
-    ...preferences,
+    accepted,
     timestamp: Date.now(),
     expires: Date.now() + CONSENT_DURATION_MS,
   }));
@@ -30,143 +30,89 @@ function saveConsent(preferences) {
 
 export default function CookieConsent() {
   const [visible, setVisible] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-  const [prefs, setPrefs] = useState({ essential: true, analytics: true, marketing: false });
 
   useEffect(() => {
     const consent = getConsent();
     if (!consent) {
-      const timer = setTimeout(() => setVisible(true), 1500);
+      const timer = setTimeout(() => setVisible(true), 15000);
       return () => clearTimeout(timer);
     }
   }, []);
 
   const handleAccept = () => {
-    saveConsent({ essential: true, analytics: true, marketing: true });
+    saveConsent(true);
     setVisible(false);
   };
 
-  const handleSavePrefs = () => {
-    saveConsent(prefs);
+  const handleDecline = () => {
+    saveConsent(false);
     setVisible(false);
-    setShowSettings(false);
   };
-
-  if (!visible) return null;
 
   return (
     <AnimatePresence>
-      <motion.div
-        initial={{ y: 100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        exit={{ y: 100, opacity: 0 }}
-        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className="fixed bottom-0 left-0 right-0 z-[9999] p-4 md:p-6"
-        data-testid="cookie-banner"
-      >
-        <div className="max-w-4xl mx-auto bg-[#2D2A26] rounded-2xl shadow-2xl overflow-hidden border border-white/10">
-          {!showSettings ? (
-            /* Main Banner */
-            <div className="flex flex-col sm:flex-row items-center gap-4 p-5 md:p-6">
+      {visible && (
+        <motion.div
+          initial={{ y: 40, opacity: 0, scale: 0.95 }}
+          animate={{ y: 0, opacity: 1, scale: 1 }}
+          exit={{ y: 40, opacity: 0, scale: 0.95 }}
+          transition={{ type: 'spring', damping: 20, stiffness: 250 }}
+          className="fixed bottom-6 right-6 z-[9999] max-w-sm"
+          data-testid="cookie-banner"
+        >
+          <div className="bg-white rounded-2xl shadow-2xl border border-stone-100 p-6 relative">
+            {/* Cookie image */}
+            <div className="flex justify-center mb-4">
               <img
                 src={COOKIE_IMG}
                 alt="Cookie a sonhar"
-                className="w-16 h-16 md:w-20 md:h-20 rounded-xl object-cover flex-shrink-0"
+                className="w-20 h-20 object-cover rounded-full"
               />
-              <div className="flex-1 text-center sm:text-left">
-                <p className="text-white text-sm md:text-base leading-relaxed">
-                  Utilizamos cookies para melhorar a experiencia
-                  na plataforma <strong className="text-[#FFBE98]">4Luis</strong> e analisar o trafego do site.
-                </p>
-              </div>
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <button
-                  onClick={() => setShowSettings(true)}
-                  className="px-4 py-2.5 text-white/70 hover:text-white border border-white/20 hover:border-white/40 rounded-xl text-sm font-medium transition-all"
-                  data-testid="cookie-configure-btn"
-                >
-                  Configurar
-                </button>
-                <button
-                  onClick={handleAccept}
-                  className="px-6 py-2.5 bg-[#FFBE98] hover:bg-[#FFAB7D] text-[#2D2A26] rounded-xl text-sm font-bold transition-colors"
-                  data-testid="cookie-accept-btn"
-                >
-                  Aceitar
-                </button>
-              </div>
             </div>
-          ) : (
-            /* Settings Panel */
-            <div className="p-5 md:p-6">
-              <div className="flex items-center justify-between mb-5">
-                <div className="flex items-center gap-2">
-                  <Shield className="w-5 h-5 text-[#FFBE98]" />
-                  <h3 className="text-white font-bold text-base">Preferencias de Cookies</h3>
-                </div>
-                <button
-                  onClick={() => setShowSettings(false)}
-                  className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"
-                >
-                  <X className="w-4 h-4 text-white/60" />
-                </button>
-              </div>
 
-              <div className="space-y-3 mb-5">
-                <label className="flex items-center justify-between p-3 bg-white/5 rounded-xl">
-                  <div>
-                    <p className="text-white text-sm font-medium">Essenciais</p>
-                    <p className="text-white/50 text-xs">Necessarios para o funcionamento do site</p>
-                  </div>
-                  <input type="checkbox" checked disabled className="w-5 h-5 rounded accent-[#FFBE98]" />
-                </label>
-                <label className="flex items-center justify-between p-3 bg-white/5 rounded-xl cursor-pointer">
-                  <div>
-                    <p className="text-white text-sm font-medium">Analiticos</p>
-                    <p className="text-white/50 text-xs">Ajudam a entender como o site e utilizado</p>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={prefs.analytics}
-                    onChange={(e) => setPrefs({ ...prefs, analytics: e.target.checked })}
-                    className="w-5 h-5 rounded accent-[#FFBE98] cursor-pointer"
-                    data-testid="cookie-analytics-toggle"
-                  />
-                </label>
-                <label className="flex items-center justify-between p-3 bg-white/5 rounded-xl cursor-pointer">
-                  <div>
-                    <p className="text-white text-sm font-medium">Marketing</p>
-                    <p className="text-white/50 text-xs">Permitem personalizar conteudo e anuncios</p>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={prefs.marketing}
-                    onChange={(e) => setPrefs({ ...prefs, marketing: e.target.checked })}
-                    className="w-5 h-5 rounded accent-[#FFBE98] cursor-pointer"
-                    data-testid="cookie-marketing-toggle"
-                  />
-                </label>
-              </div>
-
-              <div className="flex justify-end gap-2">
-                <button
-                  onClick={() => setShowSettings(false)}
-                  className="px-4 py-2.5 text-white/70 hover:text-white text-sm font-medium transition-colors"
+            {/* Text */}
+            <div className="text-center space-y-3 mb-5">
+              <p className="text-[#2D2A26] font-bold text-lg">
+                Ola... Nos somos as cookies!
+              </p>
+              <p className="text-[#6B6661] text-sm leading-relaxed">
+                Esperamos um pouco para ter a certeza que o conteudo do nosso site te interessava antes de te incomodar.
+              </p>
+              <p className="text-[#2D2A26] font-semibold text-base">
+                Autorizas-nos?
+              </p>
+              <p className="text-xs text-[#6B6661]">
+                Podes ler a nossa politica{' '}
+                <Link
+                  to="/politica-cookies"
+                  className="text-[#FFBE98] font-semibold underline hover:text-[#E6A07C] transition-colors"
+                  data-testid="cookie-policy-link"
                 >
-                  Voltar
-                </button>
-                <button
-                  onClick={handleSavePrefs}
-                  className="px-6 py-2.5 bg-[#FFBE98] hover:bg-[#FFAB7D] text-[#2D2A26] rounded-xl text-sm font-bold transition-colors"
-                  data-testid="cookie-save-prefs-btn"
-                >
-                  Guardar preferencias
-                </button>
-              </div>
+                  aqui
+                </Link>
+              </p>
             </div>
-          )}
-        </div>
-      </motion.div>
+
+            {/* Buttons */}
+            <div className="flex gap-3">
+              <button
+                onClick={handleDecline}
+                className="flex-1 py-2.5 text-[#6B6661] border border-stone-200 rounded-xl text-sm font-medium hover:bg-stone-50 transition-colors"
+                data-testid="cookie-decline-btn"
+              >
+                Nao, obrigado
+              </button>
+              <button
+                onClick={handleAccept}
+                className="flex-1 py-2.5 bg-[#FFBE98] text-[#2D2A26] rounded-xl text-sm font-bold hover:bg-[#FFAB7D] transition-colors"
+                data-testid="cookie-accept-btn"
+              >
+                Aceitar
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      )}
     </AnimatePresence>
   );
 }
