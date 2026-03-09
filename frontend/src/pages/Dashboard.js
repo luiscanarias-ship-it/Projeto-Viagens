@@ -465,7 +465,24 @@ const Dashboard = () => {
 
           {/* Invite link section - always visible regardless of level */}
           {dashboardData?.user_alias && (
-            <div className="mt-6 p-4 bg-stone-50 rounded-xl border border-stone-200 overflow-visible">
+            <div className="mt-6 p-5 bg-gradient-to-br from-[#FFF8F0] to-[#FFBE98]/10 rounded-xl border border-[#FFBE98]/30 overflow-visible" data-testid="invite-section">
+              {!isEmbaixador && referralsNeeded > 0 && (
+                <div className="mb-4 text-center">
+                  <p className="text-lg font-bold text-[#2D2A26]" data-testid="referrals-needed-msg">
+                    Faltam <span className="text-[#FFBE98]">{referralsNeeded} amigo{referralsNeeded > 1 ? 's' : ''}</span> para desbloquear Embaixador
+                  </p>
+                  <p className="text-xs text-[#6B6661] mt-1">
+                    Cada convite aceite aproxima-te do próximo nível
+                  </p>
+                </div>
+              )}
+              {isEmbaixador && (
+                <div className="mb-4 text-center">
+                  <p className="text-sm font-semibold text-green-700">
+                    Embaixador desbloqueado! Continua a convidar amigos.
+                  </p>
+                </div>
+              )}
               <p className="text-xs text-[#6B6661] mb-1.5">O teu link de convite</p>
               <a href={buildInviteLink(dashboardData.user_alias)}
                 target="_blank" rel="noopener noreferrer"
@@ -479,6 +496,9 @@ const Dashboard = () => {
                 buttonLabel="Partilhar convite"
                 buttonClassName="w-full flex items-center justify-center gap-2 py-2.5 bg-[#FFBE98] text-[#2D2A26] rounded-lg text-sm font-semibold hover:bg-[#FFBE98]/80 transition-colors"
               />
+              <p className="text-[10px] text-center text-[#6B6661]/60 mt-3">
+                Mais convites = mais contribuições = mais sonhos realizados
+              </p>
             </div>
           )}
         </motion.div>
