@@ -14,6 +14,11 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 
 ## What's Been Implemented
 
+### Disclaimer de Contribuicoes (2026-03-09)
+- Disclaimer subtil na pagina da viagem (sidebar, abaixo do botao "Apoiar esta Viagem")
+- Disclaimer subtil no checkout modal (step 1, abaixo do botao "Continuar")
+- Texto sobre natureza voluntaria das contribuicoes e limitacao de responsabilidade
+
 ### Paginas Legais (2026-03-09)
 - Pagina de Privacidade (/privacy) com 8 seccoes e email luis@4luis.com
 - Pagina de Termos e Condicoes (/terms) com 7 seccoes
