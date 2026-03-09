@@ -36,7 +36,7 @@ const GmailIcon = () => (
   </svg>
 );
 
-const ShareMenu = ({ inviteLink, senderName, buttonLabel = "Partilhar convite", buttonClassName }) => {
+const ShareMenu = ({ inviteLink, senderName, customMessage, buttonLabel = "Partilhar convite", buttonClassName }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const menuRef = useRef(null);
@@ -49,7 +49,7 @@ const ShareMenu = ({ inviteLink, senderName, buttonLabel = "Partilhar convite", 
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen]);
 
-  const plainMessage = SHARE_TEXT(inviteLink, senderName);
+  const plainMessage = customMessage || SHARE_TEXT(inviteLink, senderName);
   const encodedPlain = encodeURIComponent(plainMessage);
 
   const shareWhatsApp = () => {

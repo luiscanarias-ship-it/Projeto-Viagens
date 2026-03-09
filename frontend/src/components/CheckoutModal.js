@@ -2,10 +2,11 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, Check, Copy, Bitcoin, Smartphone, ExternalLink,
-  Wallet, CreditCard, ArrowRight, QrCode
+  Wallet, CreditCard, ArrowRight, QrCode, Heart
 } from 'lucide-react';
 import QRCode from 'qrcode';
 import axios from 'axios';
+import ShareMenu, { buildInviteLink } from './ShareMenu';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -831,30 +832,49 @@ const CheckoutModal = ({
                   key="confirmation"
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="text-center py-6 space-y-4"
+                  className="text-center py-6 space-y-5"
                 >
-                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
-                    <Check className="w-8 h-8 text-green-500" />
+                  <div className="w-16 h-16 bg-[#FFBE98]/20 rounded-full flex items-center justify-center mx-auto">
+                    <Heart className="w-8 h-8 text-[#FFBE98]" />
                   </div>
                   
                   <div>
-                    <h3 className="text-xl font-bold text-[#2D2A26]">Obrigado!</h3>
-                    <p className="text-[#6B6661] mt-2">
+                    <h3 className="text-xl font-bold text-[#2D2A26]" data-testid="thank-you-title">
+                      Obrigado por ajudares este sonho.
+                    </h3>
+                    <p className="text-sm text-[#6B6661] mt-2">
                       A tua contribuição foi registada.<br />
                       Será confirmada assim que o pagamento for recebido.
                     </p>
                   </div>
 
                   {contribution && (
-                    <div className="bg-stone-50 rounded-xl p-4 inline-block">
+                    <div className="bg-stone-50 rounded-xl p-3 inline-block">
                       <p className="text-xs text-[#6B6661]">Referência:</p>
                       <p className="font-bold text-lg">{contribution.payment_reference}</p>
+                    </div>
+                  )}
+
+                  {user?.anonymous_alias && (
+                    <div className="border-t border-stone-100 pt-4 space-y-2">
+                      <p className="text-sm text-[#6B6661]">
+                        Convida amigos e ajuda este sonho a crescer:
+                      </p>
+                      <div className="flex justify-center" data-testid="thank-you-share">
+                        <ShareMenu
+                          inviteLink={buildInviteLink(user.anonymous_alias)}
+                          senderName={null}
+                          customMessage={`Acredito que os sonhos podem tornar-se realidade.\n\nAcabei de ajudar a financiar uma viagem na 4Luis.\nSe quiseres participar também:\n\n${buildInviteLink(user.anonymous_alias)}`}
+                          buttonLabel="Partilhar convite"
+                        />
+                      </div>
                     </div>
                   )}
 
                   <button
                     onClick={handleClose}
                     className="w-full bg-[#2D2A26] text-white py-3 px-6 rounded-xl font-medium hover:bg-[#4A4640] transition-all"
+                    data-testid="thank-you-close-btn"
                   >
                     Fechar
                   </button>
