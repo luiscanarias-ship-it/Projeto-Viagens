@@ -473,6 +473,16 @@ const CheckoutModal = ({
                     ))}
                   </div>
 
+                  {selectedAmount && (
+                    <p className="text-center text-sm text-[#6B6661] italic mt-2" data-testid="impact-message">
+                      {selectedAmount >= 50
+                        ? 'Com este apoio estás a aproximar muito este sonho da realidade.'
+                        : selectedAmount >= 20
+                          ? 'A tua contribuição ajuda este sonho a dar um grande passo.'
+                          : 'A tua contribuição ajuda este sonho a ganhar forma.'}
+                    </p>
+                  )}
+
                   <button
                     onClick={() => setStep(2)}
                     className="w-full mt-4 bg-[#2D2A26] text-white py-3 px-6 rounded-xl font-medium hover:bg-[#4A4640] transition-all flex items-center justify-center gap-2"
