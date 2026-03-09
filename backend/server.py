@@ -169,6 +169,7 @@ class Journey(BaseModel):
     story_chapters: Optional[dict] = None  # {"1": {"title": "...", "lines": [...]}, ...}
     current_chapter: int = 1  # Current story chapter (1-5)
     story_emails_enabled: bool = True  # Send emails on chapter change
+    chapters_emails_sent: Optional[dict] = None  # {"25": true, "50": true, ...} prevent duplicates
     # Admin fields
     owner_user_id: Optional[str] = None  # Admin who created/approved the journey
     admin_notes: Optional[str] = None
@@ -2947,7 +2948,7 @@ async def test_email_send(request: Request):
     await require_admin(request)
     data = await request.json()
     
-    test_email = data.get("email", ADMIN_EMAIL)
+    test_email = data.get("to_email", data.get("email", ADMIN_EMAIL))
     
     # Create a simple test email
     content = f"""
@@ -3811,17 +3812,34 @@ async def check_and_update_story_chapter(journey_id: str):
     old_chapter = journey.get("current_chapter", 1)
     
     if new_chapter > old_chapter:
-        # Update the chapter in database
+        # Check which milestone was crossed (25, 50, 75, 100)
+        milestones = {2: "25", 3: "50", 4: "75", 5: "100"}
+        milestone_key = milestones.get(new_chapter)
+        
+        # Check if email was already sent for this milestone
+        chapters_sent = journey.get("chapters_emails_sent") or {}
+        already_sent = chapters_sent.get(milestone_key, False) if milestone_key else False
+        
+        # Update the chapter and mark milestone as sent
+        update_fields = {
+            "current_chapter": new_chapter,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }
+        if milestone_key:
+            update_fields[f"chapters_emails_sent.{milestone_key}"] = True
+        
         await db.journeys.update_one(
             {"journey_id": journey_id},
-            {"$set": {"current_chapter": new_chapter, "updated_at": datetime.now(timezone.utc).isoformat()}}
+            {"$set": update_fields}
         )
         
         logger.info(f"Journey {journey_id} moved from chapter {old_chapter} to {new_chapter}")
         
-        # Send emails if enabled
-        if journey.get("story_emails_enabled", True):
+        # Send emails only if enabled AND not already sent for this milestone
+        if journey.get("story_emails_enabled", True) and not already_sent:
             await send_chapter_change_emails(journey, new_chapter)
+        elif already_sent:
+            logger.info(f"Email for chapter {new_chapter} (milestone {milestone_key}%) already sent, skipping")
 
 async def send_chapter_change_emails(journey: dict, chapter_num: int):
     """Send email to all users when a journey enters a new chapter"""
@@ -3882,6 +3900,68 @@ async def send_chapter_change_emails(journey: dict, chapter_num: int):
                 logger.error(f"Failed to send chapter email to {email}: {e}")
     
     logger.info(f"Chapter {chapter_num} emails sent to {sent_count} users for journey {journey.get('journey_id')}")
+
+@api_router.post("/admin/test-chapter-email/{journey_id}/{chapter_num}")
+async def test_chapter_email(journey_id: str, chapter_num: int, request: Request):
+    """Test chapter change email - sends to admin only"""
+    await require_admin(request)
+    
+    journey = await db.journeys.find_one({"journey_id": journey_id}, {"_id": 0})
+    if not journey:
+        raise HTTPException(status_code=404, detail="Viagem não encontrada")
+    
+    if chapter_num < 1 or chapter_num > 5:
+        raise HTTPException(status_code=400, detail="Capítulo deve ser entre 1 e 5")
+    
+    chapters = journey.get("story_chapters") or DEFAULT_STORY_CHAPTERS
+    chapter = chapters.get(str(chapter_num), DEFAULT_STORY_CHAPTERS.get(str(chapter_num)))
+    
+    if not chapter:
+        raise HTTPException(status_code=404, detail="Capítulo não encontrado")
+    
+    journey_name = journey.get("name", "")
+    poetic_name = journey.get("poetic_name", "")
+    chapter_title = chapter.get("title", "")
+    chapter_lines = chapter.get("lines", [])
+    chapter_text = "<br>".join(line if line else "<br>" for line in chapter_lines)
+    journey_url = f"{FRONTEND_URL}/journey/{journey_id}"
+    
+    subject = f'O sonho da {journey_name} entrou numa nova fase'
+    
+    html_content = get_email_base_template(f"""
+        <div style="text-align: center; padding: 20px 0;">
+            <p style="color: #6B6661; font-size: 16px; line-height: 1.6;">
+                O sonho da viagem "<strong>{poetic_name}</strong>"<br>
+                acabou de entrar numa nova fase.
+            </p>
+            <div style="background: #FFF8F3; border-radius: 16px; padding: 24px; margin: 24px 0; border-left: 4px solid #FFBE98;">
+                <p style="color: #6B6661; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">
+                    Capítulo {chapter_num}
+                </p>
+                <p style="color: #FFBE98; font-size: 22px; font-style: italic; margin-bottom: 12px;">
+                    {chapter_title}
+                </p>
+                <p style="color: #6B6661; font-size: 14px; line-height: 1.8;">
+                    {chapter_text}
+                </p>
+            </div>
+            <p style="color: #6B6661; font-size: 14px; margin-bottom: 20px;">
+                Se quiseres ajudar a dar o próximo passo:
+            </p>
+            <a href="{journey_url}" style="display: inline-block; background: #FFBE98; color: #2D2A26; padding: 14px 28px; border-radius: 12px; font-weight: bold; text-decoration: none; font-size: 16px;">
+                Contribuir para este sonho
+            </a>
+        </div>
+    """, title=f"4Luis — Capítulo {chapter_num}")
+    
+    # Send test email to admin only
+    result = await send_email_resend("luis.canarias@gmail.com", subject, html_content)
+    
+    return {
+        "message": f"Email de teste do capítulo {chapter_num} enviado",
+        "chapter_title": chapter_title,
+        "result": result
+    }
 
 @api_router.post("/ambassador/journey/apply")
 async def apply_for_ambassador_journey(request: Request):
