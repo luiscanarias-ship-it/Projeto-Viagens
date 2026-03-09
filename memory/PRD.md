@@ -14,71 +14,61 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 
 ## What's Been Implemented
 
-### Sistema de Emails (5 tipos - COMPLETO 2026-03-09)
-1. **Mudanca de capitulo** — Automatico quando viagem atinge 25/50/75/100%
-2. **Resumo semanal** — Botao no admin, envia progresso de todas as viagens ativas
-3. **Contribuicao via referral** — Automatico quando convidado contribui
-4. **Sonho financiado** — Botao no admin (so aparece quando >= 100%), marca viagem como financiada
-5. **Novo sonho** — Botao no admin para anunciar nova viagem a todos os utilizadores
-- Template padrao: titulo, texto narrativo, barra de progresso, botao CTA
-- Remetente: mail@4luis.com (dominio verificado na Resend)
-- Helpers reutilizaveis: _build_standard_email, _build_email_progress_bar, _build_email_cta_button
+### Banner de Cookies RGPD (2026-03-09)
+- Banner fixo no fundo na primeira visita com animacao slide-up
+- Imagem de bolacha a sonhar gerada por IA
+- Texto + botoes "Aceitar" e "Configurar"
+- Painel de configuracao: Essenciais (sempre ativas), Analiticos, Marketing
+- Preferencias guardadas em localStorage com validade de 6 meses
+- z-index 9999 para aparecer acima de todos os elementos
 
-### Endpoints de Email Admin
-- POST /api/admin/emails/weekly-summary
-- POST /api/admin/emails/dream-funded/{journey_id}
-- POST /api/admin/emails/new-journey/{journey_id}
+### Sistema de Emails (5 tipos - COMPLETO)
+1. Mudanca de capitulo — Automatico nos marcos 25/50/75/100%
+2. Resumo semanal — Botao no admin
+3. Contribuicao via referral — Automatico
+4. Sonho financiado — Botao no admin (>= 100%), marca viagem como financiada
+5. Novo sonho — Botao no admin para anunciar nova viagem
+- Template padrao: titulo, narrativa, barra de progresso, botao CTA
+- Remetente: mail@4luis.com
 
 ### Homepage
-- Hero com subtitulo CrowdDreaming
-- Storytelling Progressivo com capitulos
-- Barra sticky de contribuicao
-- MilestoneProgress no hero e cards
-- MilestoneCelebration banner
-- Seccao "Sonhos em Fase de Materializacao" com 4 cartoes visuais
+- Hero CrowdDreaming, Storytelling Progressivo, Barra sticky
+- MilestoneProgress, MilestoneCelebration
+- Seccao "Sonhos em Materializacao" com 4 cartoes visuais
 
-### Viagens Artificiais (Embaixadores)
+### Viagens Embaixadores
 - Japao (Manuel, 42%), Coreia do Sul (Sofia, 15%), Martinique (Ana, 60%), Maldivas (Pedro, 75%)
 
 ### Checkout Modal
-- Badge "Mais popular" 20EUR com gradiente e animacao pulse
-- 3 passos com descricoes inspiradoras
-- Ecra de agradecimento com partilha
-
-### MilestoneProgress
-- Marcos: 25%, 50%, 75%, 100% com mensagens dinamicas
-- Mensagem urgente quando faltam < 5%
-
-### MilestoneCelebration
-- Banner animado com confetti nos marcos
-- Auto-dismiss 8s, sessionStorage previne repeticao
+- Badge "Mais popular" 20EUR, 3 passos, ecra de agradecimento
 
 ### Admin
-- Gestao viagens, utilizadores, contribuicoes
-- Botoes de email por viagem (Novo Sonho, Sonho Financiado)
-- Botao Resumo Semanal no header
-- Storytelling Progressivo com 5 editores de capitulos
+- Gestao viagens/utilizadores/contribuicoes
+- Botoes de email (Novo Sonho, Sonho Financiado, Resumo Semanal)
+- Storytelling com 5 editores de capitulos
 
 ## Key Files
+- frontend/src/components/CookieConsent.js
 - frontend/src/components/MilestoneCelebration.js
 - frontend/src/components/MilestoneProgress.js
 - frontend/src/components/CheckoutModal.js
 - frontend/src/pages/Home.js
 - frontend/src/pages/JourneyDetail.js
 - frontend/src/pages/Admin.js
+- frontend/src/App.js
 - backend/server.py
 
 ## Prioritized Backlog
 
 ### P1
-- Celebracao especial quando viagem atinge 100% (pagina com contribuidores, partilha, confetti)
+- Celebracao especial quando viagem atinge 100%
 - Melhorar formulario de edicao de viagens no Admin
 
 ### P2
 - Sistema de pontos
 - Sorteio real
 - Notificacoes in-app
-- Refactoring: Dividir backend/server.py (monolito ~5k linhas)
+- Refactoring: Dividir backend/server.py
 
 ## Credentials
 - **Admin**: admin@4luis.com / Admin1
