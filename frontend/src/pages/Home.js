@@ -10,6 +10,7 @@ import axios from 'axios';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import CheckoutModal from '../components/CheckoutModal';
+import StoryChapter from '../components/StoryChapter';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -235,9 +236,15 @@ const Home = () => {
                   <p className="font-handwritten text-3xl md:text-4xl text-[#FFBE98] mb-6">
                     {d('main.poetic', mainJourney.journey.poetic_name)}
                   </p>
-                  <p className="text-white/85 text-lg md:text-xl mb-10 max-w-xl leading-relaxed">
-                    {d('main.emotional', mainJourney.journey.emotional_message)}
-                  </p>
+                  
+                  {/* Story Chapter */}
+                  <div className="max-w-lg mb-8">
+                    <StoryChapter
+                      percentage={mainJourney.progress?.percentage || 0}
+                      customChapters={mainJourney.journey.story_chapters}
+                      variant="dark"
+                    />
+                  </div>
 
                   {/* Progress Bar */}
                   {mainJourney.progress && (

@@ -12,6 +12,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import CheckoutModal from '../components/CheckoutModal';
 import ShareMenu, { buildInviteLink } from '../components/ShareMenu';
+import StoryChapter from '../components/StoryChapter';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -245,6 +246,14 @@ const JourneyDetail = () => {
       </div>
 
       <div className="max-w-6xl mx-auto px-6 md:px-12 py-12">
+        {/* Story Chapter */}
+        <div className="mb-4 -mt-8 relative z-10 max-w-2xl mx-auto">
+          <StoryChapter
+            percentage={progressPercent}
+            customChapters={journey.story_chapters}
+          />
+        </div>
+
         {/* Progress Bar - Always visible, percentage public, goal amount hidden */}
         <div className="bg-white rounded-3xl p-8 shadow-lg -mt-16 relative z-10 mb-8">
           {/* Funded Banner */}

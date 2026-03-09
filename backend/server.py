@@ -166,6 +166,9 @@ class Journey(BaseModel):
     hide_from_listings: bool = False  # Admin can hide journey from listings
     show_goal_amount: bool = False  # If true, show total goal publicly; if false, show only percentage
     contribution_descriptions: Optional[dict] = None  # {"10": "desc", "20": "desc", ...}
+    story_chapters: Optional[dict] = None  # {"1": {"title": "...", "lines": [...]}, ...}
+    current_chapter: int = 1  # Current story chapter (1-5)
+    story_emails_enabled: bool = True  # Send emails on chapter change
     # Admin fields
     owner_user_id: Optional[str] = None  # Admin who created/approved the journey
     admin_notes: Optional[str] = None
@@ -201,6 +204,9 @@ class JourneyUpdate(BaseModel):
     photos: Optional[List[str]] = None
     show_goal_amount: Optional[bool] = None  # Added: Toggle public visibility of goal amount
     contribution_descriptions: Optional[dict] = None  # {"10": "desc", "20": "desc", ...}
+    story_chapters: Optional[dict] = None
+    current_chapter: Optional[int] = None
+    story_emails_enabled: Optional[bool] = None
 
 # Ambassador journey application
 class AmbassadorJourneyApplication(BaseModel):
@@ -1493,6 +1499,9 @@ async def stripe_webhook(request: Request):
                 
                 # Check if journey is now funded
                 await check_and_update_journey_funding_status(journey_id)
+                
+                # Check story chapter progression
+                await check_and_update_story_chapter(journey_id)
                 
                 # Process user progression if logged in
                 if user_id:
@@ -2802,6 +2811,9 @@ async def confirm_contribution(contribution_id: str, request: Request):
     # Check if journey reached goal - update status automatically
     await check_and_update_journey_funding_status(contribution["journey_id"])
     
+    # Check story chapter progression
+    await check_and_update_story_chapter(contribution["journey_id"])
+    
     # Update sponsor link if applicable
     if contribution.get("sponsor_link_id"):
         await db.sponsor_links.update_one(
@@ -3195,6 +3207,9 @@ async def validate_contribution(contribution_id: str, request: Request):
         
         # Check if journey reached goal - use helper function
         await check_and_update_journey_funding_status(contribution["journey_id"])
+        
+        # Check story chapter progression
+        await check_and_update_story_chapter(contribution["journey_id"])
         
         # MOTOR EMBAIXADOR: Update user progression
         if contribution.get("user_id"):
@@ -3761,6 +3776,112 @@ async def check_and_update_journey_funding_status(journey_id: str):
         return "financiada"
     
     return current_status
+
+def get_chapter_number(percentage: float) -> int:
+    """Get story chapter number based on funding percentage"""
+    if percentage >= 100:
+        return 5
+    if percentage >= 75:
+        return 4
+    if percentage >= 50:
+        return 3
+    if percentage >= 25:
+        return 2
+    return 1
+
+DEFAULT_STORY_CHAPTERS = {
+    "1": {"title": "O sonho nasce", "lines": ["Um sonho de atravessar terras distantes,", "de descobrir culturas e paisagens novas.", "", "Esta jornada começa aqui."]},
+    "2": {"title": "O sonho ganha forma", "lines": ["Cada contribuição aproxima esta viagem da realidade.", "", "A comunidade já começou a construir este sonho."]},
+    "3": {"title": "O sonho está a caminho", "lines": ["A jornada começa a ganhar forma.", "", "A rota começa a desenhar-se entre cidades", "e paisagens milenares."]},
+    "4": {"title": "O sonho quase acontece", "lines": ["A viagem está cada vez mais próxima.", "", "Em breve esta história deixará de ser apenas um sonho."]},
+    "5": {"title": "O sonho torna-se realidade", "lines": ["A comunidade tornou este sonho possível.", "", "Agora começa a verdadeira aventura."]}
+}
+
+async def check_and_update_story_chapter(journey_id: str):
+    """Check if the journey has entered a new story chapter and send emails if needed"""
+    journey = await db.journeys.find_one({"journey_id": journey_id}, {"_id": 0})
+    if not journey:
+        return
+    
+    current_amount = journey.get("current_amount", 0)
+    goal_amount = journey.get("goal_amount", 1)
+    percentage = (current_amount / goal_amount) * 100 if goal_amount > 0 else 0
+    
+    new_chapter = get_chapter_number(percentage)
+    old_chapter = journey.get("current_chapter", 1)
+    
+    if new_chapter > old_chapter:
+        # Update the chapter in database
+        await db.journeys.update_one(
+            {"journey_id": journey_id},
+            {"$set": {"current_chapter": new_chapter, "updated_at": datetime.now(timezone.utc).isoformat()}}
+        )
+        
+        logger.info(f"Journey {journey_id} moved from chapter {old_chapter} to {new_chapter}")
+        
+        # Send emails if enabled
+        if journey.get("story_emails_enabled", True):
+            await send_chapter_change_emails(journey, new_chapter)
+
+async def send_chapter_change_emails(journey: dict, chapter_num: int):
+    """Send email to all users when a journey enters a new chapter"""
+    chapters = journey.get("story_chapters") or DEFAULT_STORY_CHAPTERS
+    chapter = chapters.get(str(chapter_num), DEFAULT_STORY_CHAPTERS.get(str(chapter_num)))
+    
+    if not chapter:
+        return
+    
+    journey_name = journey.get("name", "")
+    poetic_name = journey.get("poetic_name", "")
+    journey_id = journey.get("journey_id", "")
+    chapter_title = chapter.get("title", "")
+    chapter_lines = chapter.get("lines", [])
+    chapter_text = "<br>".join(line if line else "<br>" for line in chapter_lines)
+    
+    journey_url = f"{FRONTEND_URL}/journey/{journey_id}"
+    
+    subject = f'O sonho da {journey_name} entrou numa nova fase'
+    
+    html_content = get_email_base_template(f"""
+        <div style="text-align: center; padding: 20px 0;">
+            <p style="color: #6B6661; font-size: 16px; line-height: 1.6;">
+                O sonho da viagem "<strong>{poetic_name}</strong>"<br>
+                acabou de entrar numa nova fase.
+            </p>
+            <div style="background: #FFF8F3; border-radius: 16px; padding: 24px; margin: 24px 0; border-left: 4px solid #FFBE98;">
+                <p style="color: #6B6661; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">
+                    Capítulo {chapter_num}
+                </p>
+                <p style="color: #FFBE98; font-size: 22px; font-style: italic; margin-bottom: 12px;">
+                    {chapter_title}
+                </p>
+                <p style="color: #6B6661; font-size: 14px; line-height: 1.8;">
+                    {chapter_text}
+                </p>
+            </div>
+            <p style="color: #6B6661; font-size: 14px; margin-bottom: 20px;">
+                Se quiseres ajudar a dar o próximo passo:
+            </p>
+            <a href="{journey_url}" style="display: inline-block; background: #FFBE98; color: #2D2A26; padding: 14px 28px; border-radius: 12px; font-weight: bold; text-decoration: none; font-size: 16px;">
+                Contribuir para este sonho
+            </a>
+        </div>
+    """, title=f"4Luis — Capítulo {chapter_num}")
+    
+    # Get all users with email
+    users = await db.users.find({"email": {"$exists": True, "$ne": ""}}, {"_id": 0, "email": 1}).to_list(500)
+    
+    sent_count = 0
+    for user_doc in users:
+        email = user_doc.get("email", "")
+        if email and "@" in email and not email.endswith("@test.com"):
+            try:
+                await send_email_resend(email, subject, html_content)
+                sent_count += 1
+            except Exception as e:
+                logger.error(f"Failed to send chapter email to {email}: {e}")
+    
+    logger.info(f"Chapter {chapter_num} emails sent to {sent_count} users for journey {journey.get('journey_id')}")
 
 @api_router.post("/ambassador/journey/apply")
 async def apply_for_ambassador_journey(request: Request):

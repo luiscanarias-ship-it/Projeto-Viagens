@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit2, Trash2, Save, X, BarChart3, Settings, CheckCircle, XCircle, Mail, Users, Award, Gift, Crown, TrendingUp, UserPlus, ChevronRight, Star, FileText, Clock, MapPin, Target, Calendar, Eye, MessageSquare, AlertCircle, ExternalLink, History, Search, Heart, Sparkles } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, X, BarChart3, Settings, CheckCircle, XCircle, Mail, Users, Award, Gift, Crown, TrendingUp, UserPlus, ChevronRight, Star, FileText, Clock, MapPin, Target, Calendar, Eye, MessageSquare, AlertCircle, ExternalLink, History, Search, Heart, Sparkles, BookOpen } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -985,6 +985,69 @@ const Admin = () => {
                                 />
                               </div>
                             ))}
+                          </div>
+                        </div>
+
+                        {/* Storytelling Progressivo */}
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <h4 className="font-semibold text-[#2D2A26] flex items-center gap-2">
+                              <BookOpen className="w-4 h-4 text-[#FFBE98]" />
+                              Storytelling Progressivo
+                            </h4>
+                            <div className="flex items-center gap-3">
+                              <span className="text-xs text-[#6B6661]">
+                                Capítulo atual: <strong className="text-[#FFBE98]">{editingJourney.current_chapter || 1}</strong>
+                              </span>
+                              <label className="flex items-center gap-1.5 text-xs cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={editingJourney.story_emails_enabled !== false}
+                                  onChange={(e) => setEditingJourney({ ...editingJourney, story_emails_enabled: e.target.checked })}
+                                  className="rounded border-stone-300 text-[#FFBE98] focus:ring-[#FFBE98]/50"
+                                />
+                                <span className="text-[#6B6661]">Emails automáticos</span>
+                              </label>
+                            </div>
+                          </div>
+                          <div className="space-y-3">
+                            {[1, 2, 3, 4, 5].map((ch) => {
+                              const ranges = ['0% – 25%', '25% – 50%', '50% – 75%', '75% – 100%', '100%+'];
+                              const chapters = editingJourney.story_chapters || {};
+                              const chapter = chapters[String(ch)] || {};
+                              return (
+                                <div key={ch} className={`border rounded-xl p-3 ${(editingJourney.current_chapter || 1) === ch ? 'border-[#FFBE98] bg-[#FFBE98]/5' : 'border-stone-200'}`}>
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <span className="text-xs font-bold text-[#FFBE98]">Cap. {ch}</span>
+                                    <span className="text-xs text-[#6B6661]">({ranges[ch - 1]})</span>
+                                  </div>
+                                  <input
+                                    type="text"
+                                    value={chapter.title || ''}
+                                    onChange={(e) => {
+                                      const chs = { ...(editingJourney.story_chapters || {}) };
+                                      chs[String(ch)] = { ...(chs[String(ch)] || {}), title: e.target.value };
+                                      setEditingJourney({ ...editingJourney, story_chapters: chs });
+                                    }}
+                                    placeholder="Título do capítulo"
+                                    className="w-full px-3 py-1.5 bg-white border border-stone-200 rounded-lg text-sm font-semibold mb-1 focus:outline-none focus:ring-2 focus:ring-[#FFBE98]/50"
+                                    data-testid={`story-chapter-title-${ch}`}
+                                  />
+                                  <textarea
+                                    value={(chapter.lines || []).join('\n')}
+                                    onChange={(e) => {
+                                      const chs = { ...(editingJourney.story_chapters || {}) };
+                                      chs[String(ch)] = { ...(chs[String(ch)] || {}), lines: e.target.value.split('\n') };
+                                      setEditingJourney({ ...editingJourney, story_chapters: chs });
+                                    }}
+                                    placeholder="Texto do capítulo (uma linha por parágrafo)"
+                                    rows={3}
+                                    className="w-full px-3 py-1.5 bg-white border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FFBE98]/50"
+                                    data-testid={`story-chapter-text-${ch}`}
+                                  />
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
 
