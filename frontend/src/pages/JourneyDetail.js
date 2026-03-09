@@ -14,6 +14,7 @@ import CheckoutModal from '../components/CheckoutModal';
 import ShareMenu, { buildInviteLink } from '../components/ShareMenu';
 import StoryChapter from '../components/StoryChapter';
 import MilestoneProgress from '../components/MilestoneProgress';
+import MilestoneCelebration from '../components/MilestoneCelebration';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -307,6 +308,11 @@ const JourneyDetail = () => {
             )}
           </div>
           <MilestoneProgress progressPercentage={progressPercent} />
+        </div>
+
+        {/* Milestone Celebration Banner */}
+        <div className="max-w-4xl mx-auto px-4 md:px-8">
+          <MilestoneCelebration journey={journey} customChapters={journey?.story_chapters} />
         </div>
 
           {/* Share this dream - for logged-in users */}

@@ -3838,6 +3838,8 @@ async def check_and_update_story_chapter(journey_id: str):
         }
         if milestone_key:
             update_fields[f"chapters_emails_sent.{milestone_key}"] = True
+            update_fields["last_milestone_reached"] = int(milestone_key)
+            update_fields["last_milestone_at"] = datetime.now(timezone.utc).isoformat()
         
         await db.journeys.update_one(
             {"journey_id": journey_id},

@@ -12,6 +12,7 @@ import { useAuth } from '../contexts/AuthContext';
 import CheckoutModal from '../components/CheckoutModal';
 import StoryChapter from '../components/StoryChapter';
 import MilestoneProgress from '../components/MilestoneProgress';
+import MilestoneCelebration from '../components/MilestoneCelebration';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -301,6 +302,11 @@ const Home = () => {
                   </button>
                 </motion.div>
               </div>
+            </div>
+
+            {/* Milestone Celebration Banner */}
+            <div className="max-w-5xl mx-auto px-6 pt-8">
+              <MilestoneCelebration journey={mainJourney.journey} customChapters={mainJourney.journey?.story_chapters} />
             </div>
 
             {/* Contributions Feed */}
