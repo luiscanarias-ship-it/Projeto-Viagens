@@ -54,7 +54,7 @@ const InvitePage = () => {
   const sponsorParam = data.sponsor_link_id ? `?sponsor=${data.sponsor_link_id}` : '';
 
   return (
-    <div className="min-h-screen bg-[#FAFAF9] flex items-center justify-center px-6 py-12" data-testid="invite-page">
+    <div className="min-h-screen bg-[#FAFAF9] flex flex-col items-center justify-center px-6 py-12" data-testid="invite-page">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -75,13 +75,22 @@ const InvitePage = () => {
           )}
 
           <div className="p-6 space-y-5">
-            {/* Invite message */}
-            <div className="text-center">
+            {/* Social proof messages */}
+            <div className="text-center space-y-2">
               <div className="w-14 h-14 bg-[#FFBE98]/15 rounded-full flex items-center justify-center mx-auto mb-3">
                 <Users className="w-7 h-7 text-[#FFBE98]" />
               </div>
-              <p className="text-lg text-[#2D2A26]">
-                <strong>{data.inviter_name}</strong> convidou-te para ajudar a financiar um sonho.
+              <p className="text-lg text-[#2D2A26]" data-testid="invite-main-msg">
+                <strong>{data.inviter_name}</strong> convidou-te para participar neste sonho.
+              </p>
+              {data.inviter_has_contributed && (
+                <p className="text-sm text-[#FFBE98] font-semibold" data-testid="inviter-contributed-msg">
+                  {data.inviter_name} já contribuiu para este sonho.
+                </p>
+              )}
+              <p className="text-sm text-[#6B6661] leading-relaxed" data-testid="cooperative-msg">
+                Se participares também,<br />
+                ajudas <strong>{data.inviter_name}</strong> a aproximar-se de desbloquear o nível Embaixador.
               </p>
             </div>
 

@@ -5466,8 +5466,18 @@ async def get_invite_page(alias: str):
     
     display_name = user.get("name") or user.get("anonymous_alias") or "Alguém"
     
+    # Check if inviter has contributed to this journey
+    inviter_has_contributed = False
+    if main_journey:
+        contrib = await db.contributions.find_one(
+            {"user_id": user["user_id"], "journey_id": main_journey["journey_id"], "status": "confirmed"},
+            {"_id": 0, "amount": 1}
+        )
+        inviter_has_contributed = contrib is not None
+    
     return {
         "inviter_name": display_name,
+        "inviter_has_contributed": inviter_has_contributed,
         "journey": main_journey,
         "sponsor_link_id": sponsor_link.get("link_id") if sponsor_link else None
     }
