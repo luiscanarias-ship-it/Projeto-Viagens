@@ -8,112 +8,78 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - **Backend**: FastAPI (Python 3.11)
 - **Database**: MongoDB
 - **Payments**: Crypto (BTC, ETH, USDT, USDC), MBWay, PayPal, Revolut, Wise
-- **Email**: Resend (ATIVO - re_KsK6NdBc_*)
+- **Email**: Resend (PRODUCAO - mail@4luis.com)
 - **Auth**: JWT + Google OAuth
-- **QR Codes**: qrcode (npm, toDataURL)
-- **Crypto Prices**: CoinGecko API
 - **Translation**: OpenAI GPT-5.2 via Emergent LLM Key
 
 ## What's Been Implemented
 
-### Homepage
-- Hero com subtitulo CrowdDreaming em cor pessego
-- Layout imersivo para viagem principal com imagem de fundo
-- Storytelling Progressivo com capitulos baseados na percentagem
-- Barra sticky de contribuicao no scroll
-- "Como funciona o CrowdDreaming" com realce pessego
-- Texto introdutorio na seccao "Planeia a tua viagem"
-- Citacao inspiradora final com 3 linhas
-- Mensagem de progresso para proximo marco (MilestoneProgress) no hero e cards
-- Banner de celebracao de marcos (MilestoneCelebration)
-- Seccao "Sonhos em Fase de Materializacao" redesenhada com cartoes visuais (max 4)
+### Sistema de Emails (5 tipos - COMPLETO 2026-03-09)
+1. **Mudanca de capitulo** — Automatico quando viagem atinge 25/50/75/100%
+2. **Resumo semanal** — Botao no admin, envia progresso de todas as viagens ativas
+3. **Contribuicao via referral** — Automatico quando convidado contribui
+4. **Sonho financiado** — Botao no admin (so aparece quando >= 100%), marca viagem como financiada
+5. **Novo sonho** — Botao no admin para anunciar nova viagem a todos os utilizadores
+- Template padrao: titulo, texto narrativo, barra de progresso, botao CTA
+- Remetente: mail@4luis.com (dominio verificado na Resend)
+- Helpers reutilizaveis: _build_standard_email, _build_email_progress_bar, _build_email_cta_button
 
-### Seccao Sonhos em Materializacao (2026-03-09)
-- Grid de 4 cartoes visuais com imagem, titulo, nome do sonhador, barra de progresso, percentagem
-- Layout responsivo: 4 colunas desktop, 2 tablet, 1 mobile
-- Cada cartao liga a pagina de detalhe da viagem
-- Botao "Explorar mais sonhos" quando existem mais de 4 viagens
-- 4 viagens artificiais criadas: Costa Amalfitana (Manuel, 42%), Bali (Sofia, 15%), Pamukkale (Ana, 60%), Ha Long Bay (Pedro, 75%)
+### Endpoints de Email Admin
+- POST /api/admin/emails/weekly-summary
+- POST /api/admin/emails/dream-funded/{journey_id}
+- POST /api/admin/emails/new-journey/{journey_id}
+
+### Homepage
+- Hero com subtitulo CrowdDreaming
+- Storytelling Progressivo com capitulos
+- Barra sticky de contribuicao
+- MilestoneProgress no hero e cards
+- MilestoneCelebration banner
+- Seccao "Sonhos em Fase de Materializacao" com 4 cartoes visuais
+
+### Viagens Artificiais (Embaixadores)
+- Japao (Manuel, 42%), Coreia do Sul (Sofia, 15%), Martinique (Ana, 60%), Maldivas (Pedro, 75%)
 
 ### Checkout Modal
-- Step 1: Selecao de valor (10-1000) com descricoes inspiradoras
-- Badge "Mais popular" no valor de 20EUR - destaque visual com gradiente, texto branco, animacao pulse
-- Botao de 20EUR com enfase visual (ring-2, shadow-sm)
-- Step 2: Texto motivacional + metodo de pagamento
-- Step 3: Instrucoes com QR codes crypto, deep links, referencia
-- Ecra de agradecimento pos-contribuicao com ShareMenu
-- Geracao automatica de descricoes por IA (GPT-5.2)
+- Badge "Mais popular" 20EUR com gradiente e animacao pulse
+- 3 passos com descricoes inspiradoras
+- Ecra de agradecimento com partilha
 
-### MilestoneProgress (2026-03-09)
-- Componente reutilizavel que mostra progresso para proximo marco
-- Marcos: 25% (O Primeiro Passo), 50% (Meio Caminho), 75% (Quase La), 100% (Sonho Realizado)
-- Mensagem urgente com icone Flame quando faltam < 5%
-- Variantes dark e light para diferentes fundos
-- Integrado em: Homepage hero, JourneyDetail
+### MilestoneProgress
+- Marcos: 25%, 50%, 75%, 100% com mensagens dinamicas
+- Mensagem urgente quando faltam < 5%
 
-### MilestoneCelebration (2026-03-09)
-- Banner animado com confetti quando um marco e atingido (25%, 50%, 75%, 100%)
-- Mensagem: "O sonho entrou numa nova fase" com titulo do capitulo
-- Auto-dismiss apos 8 segundos, botao de fechar (X)
-- SessionStorage previne repeticao na mesma sessao
-- Backend rastreia last_milestone_reached e last_milestone_at
-- Integrado em: JourneyDetail e Homepage
-
-### Storytelling Progressivo
-- 5 capitulos (0-25%, 25-50%, 50-75%, 75-100%, 100%+)
-- Variantes light (detalhe viagem) e dark (homepage)
-- Capitulos personalizaveis por viagem no Admin
-- Detecao automatica de mudanca de capitulo
-- Protecao contra emails duplicados (chapters_emails_sent)
-- Toggle de emails automaticos no Admin
-
-### Emails Automaticos (ATIVO)
-- Resend configurado com API key real
-- Email automatico na mudanca de capitulo
-- NOTA: Free tier - envia apenas para luis.canarias@gmail.com
-
-### Sistema Embaixador
-- Dashboard: Progresso com referrals individuais
-- Convite por link /invite/{alias}
+### MilestoneCelebration
+- Banner animado com confetti nos marcos
+- Auto-dismiss 8s, sessionStorage previne repeticao
 
 ### Admin
 - Gestao viagens, utilizadores, contribuicoes
-- Descricoes de contribuicao com geracao IA
+- Botoes de email por viagem (Novo Sonho, Sonho Financiado)
+- Botao Resumo Semanal no header
 - Storytelling Progressivo com 5 editores de capitulos
 
-### Sistema de Partilha Viral
-- ShareMenu com WhatsApp, Telegram, Email, Copiar
-
-### Sistema de Traducao
-- 6 idiomas com cache e persistencia
-
 ## Key Files
-- `frontend/src/components/MilestoneCelebration.js` - Celebracao de marcos
-- `frontend/src/components/MilestoneProgress.js` - Progresso para proximo marco
-- `frontend/src/components/StoryChapter.js` - Componente storytelling
-- `frontend/src/components/CheckoutModal.js` - Modal checkout
-- `frontend/src/components/ShareMenu.js` - Partilha viral
-- `frontend/src/pages/Home.js` - Homepage
-- `frontend/src/pages/JourneyDetail.js` - Detalhe viagem
-- `frontend/src/pages/Admin.js` - Admin
-- `backend/server.py` - API principal
+- frontend/src/components/MilestoneCelebration.js
+- frontend/src/components/MilestoneProgress.js
+- frontend/src/components/CheckoutModal.js
+- frontend/src/pages/Home.js
+- frontend/src/pages/JourneyDetail.js
+- frontend/src/pages/Admin.js
+- backend/server.py
 
 ## Prioritized Backlog
 
-### P0
-- Celebracao especial quando viagem atinge 100% (pagina dedicada com contribuidores, partilha, confetti)
-
 ### P1
-- Verificar dominio no Resend para enviar emails a todos os utilizadores
+- Celebracao especial quando viagem atinge 100% (pagina com contribuidores, partilha, confetti)
 - Melhorar formulario de edicao de viagens no Admin
 
 ### P2
 - Sistema de pontos
 - Sorteio real
 - Notificacoes in-app
-- Refactoring: Dividir CheckoutModal.js
 - Refactoring: Dividir backend/server.py (monolito ~5k linhas)
 
 ## Credentials
 - **Admin**: admin@4luis.com / Admin1
-- **Resend test recipient**: luis.canarias@gmail.com
+- **Resend sender**: mail@4luis.com
