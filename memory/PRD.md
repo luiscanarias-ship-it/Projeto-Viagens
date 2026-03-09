@@ -25,6 +25,7 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - Texto introdutorio na seccao "Planeia a tua viagem"
 - Citacao inspiradora final com 3 linhas
 - Mensagem de progresso para proximo marco (MilestoneProgress) no hero e cards
+- Banner de celebracao de marcos (MilestoneCelebration)
 
 ### Checkout Modal
 - Step 1: Selecao de valor (10-1000) com descricoes inspiradoras
@@ -35,13 +36,22 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - Ecra de agradecimento pos-contribuicao com ShareMenu
 - Geracao automatica de descricoes por IA (GPT-5.2)
 
-### MilestoneProgress (NOVO - 2026-03-09)
+### MilestoneProgress (2026-03-09)
 - Componente reutilizavel que mostra progresso para proximo marco
 - Marcos: 25% (O Primeiro Passo), 50% (Meio Caminho), 75% (Quase La), 100% (Sonho Realizado)
 - Mensagem urgente com icone Flame quando faltam < 5%
 - Mensagem de conclusao com icone PartyPopper quando >= 100%
 - Variantes dark e light para diferentes fundos
 - Integrado em: Homepage hero, Homepage cards, JourneyDetail
+
+### MilestoneCelebration (2026-03-09)
+- Banner animado com confetti quando um marco e atingido (25%, 50%, 75%, 100%)
+- Mensagem: "O sonho entrou numa nova fase" com titulo do capitulo
+- Auto-dismiss apos 8 segundos, botao de fechar (X)
+- SessionStorage previne repeticao na mesma sessao
+- Janela de 48 horas para exibicao do banner
+- Backend rastreia last_milestone_reached e last_milestone_at
+- Integrado em: JourneyDetail e Homepage
 
 ### Storytelling Progressivo
 - 5 capitulos (0-25%, 25-50%, 50-75%, 75-100%, 100%+)
@@ -51,13 +61,12 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - Protecao contra emails duplicados (chapters_emails_sent)
 - Toggle de emails automaticos no Admin
 
-### Emails Automaticos (ATIVO - 2026-03-09)
+### Emails Automaticos (ATIVO)
 - Resend configurado com API key real
 - Email automatico na mudanca de capitulo
 - Template com storytelling (titulo, texto, botao contribuir)
 - Protecao contra duplicados (flags por milestone: 25/50/75/100)
-- Endpoint de teste: POST /api/admin/test-chapter-email/{journey_id}/{chapter_num}
-- NOTA: Free tier - envia apenas para luis.canarias@gmail.com (verificar dominio para producao)
+- NOTA: Free tier - envia apenas para luis.canarias@gmail.com
 
 ### Sistema Embaixador
 - Dashboard: Progresso com referrals individuais
@@ -76,6 +85,7 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - 6 idiomas com cache e persistencia
 
 ## Key Files
+- `frontend/src/components/MilestoneCelebration.js` - Celebracao de marcos
 - `frontend/src/components/MilestoneProgress.js` - Progresso para proximo marco
 - `frontend/src/components/StoryChapter.js` - Componente storytelling
 - `frontend/src/components/CheckoutModal.js` - Modal checkout
@@ -90,7 +100,6 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 ### P1
 - Verificar dominio no Resend para enviar emails a todos os utilizadores
 - Melhorar formulario de edicao de viagens no Admin
-- Corrigir aviso HTML invalido no Admin (tr dentro de span)
 
 ### P2
 - Sistema de pontos
