@@ -18,6 +18,7 @@ import Onboarding from "./pages/Onboarding";
 import InviteOnboarding from "./pages/InviteOnboarding";
 import AmbassadorProfile from "./pages/AmbassadorProfile";
 import InvitePage from "./pages/InvitePage";
+import CookieConsent from "./components/CookieConsent";
 
 // Syncs user's preferred language on login
 const LanguageSync = () => {
@@ -88,6 +89,7 @@ function App() {
             <AppRouter />
           </BrowserRouter>
           <Toaster position="bottom-center" richColors />
+          <CookieConsent />
         </LanguageProvider>
       </AuthProvider>
     </div>
