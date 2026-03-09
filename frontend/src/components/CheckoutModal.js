@@ -447,15 +447,19 @@ const CheckoutModal = ({
                           selectedAmount === amt
                             ? 'bg-[#FFBE98] text-white shadow-md ring-2 ring-[#FFBE98]/30'
                             : amt === 20
-                              ? 'bg-[#FFBE98]/10 text-[#2D2A26] hover:bg-[#FFBE98]/20 ring-1 ring-[#FFBE98]/40'
+                              ? 'bg-[#FFBE98]/15 text-[#2D2A26] hover:bg-[#FFBE98]/25 ring-2 ring-[#FFBE98]/50 shadow-sm'
                               : 'bg-stone-100 text-[#2D2A26] hover:bg-stone-200'
                         }`}
                       >
                         <div className="flex items-center gap-3">
                           <span className="text-lg font-bold min-w-[60px]">€{amt}</span>
                           {amt === 20 && selectedAmount !== amt && (
-                            <span className="text-xs font-semibold text-[#FFBE98] bg-[#FFBE98]/15 px-2 py-0.5 rounded-full" data-testid="most-popular-badge">
-                              Mais popular
+                            <span 
+                              className="text-xs font-bold text-white bg-gradient-to-r from-[#FFBE98] to-[#E6A07C] px-3 py-1 rounded-full shadow-sm animate-pulse-subtle ring-1 ring-[#FFBE98]/50" 
+                              data-testid="most-popular-badge"
+                              style={{ animationDuration: '2.5s' }}
+                            >
+                              ⭐ Mais popular
                             </span>
                           )}
                           {contributionDescriptions?.[String(amt)] && (

@@ -11,6 +11,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import CheckoutModal from '../components/CheckoutModal';
 import StoryChapter from '../components/StoryChapter';
+import MilestoneProgress from '../components/MilestoneProgress';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -281,6 +282,9 @@ const Home = () => {
                         <p className="text-green-400 text-sm mt-2 flex items-center gap-2">
                           <Sparkles className="w-4 h-4" /> {t('home.goal_reached')}
                         </p>
+                      )}
+                      {!mainJourney.progress.is_funded && (
+                        <MilestoneProgress progressPercentage={mainJourney.progress.percentage} variant="dark" />
                       )}
                     </div>
                   )}
@@ -579,6 +583,7 @@ const Home = () => {
                             <div className="h-full bg-gradient-to-r from-[#FFBE98] to-[#E6A07C] rounded-full transition-all" 
                               style={{ width: `${journey.progress_percentage}%` }} />
                           </div>
+                          <MilestoneProgress progressPercentage={journey.progress_percentage} />
                         </div>
                       </Link>
                     ))}
@@ -619,6 +624,7 @@ const Home = () => {
                               <div className="h-full bg-[#FFBE98] rounded-full" style={{ width: `${journey.progress_percentage}%` }} />
                             </div>
                           </div>
+                          <MilestoneProgress progressPercentage={journey.progress_percentage} />
                         </div>
                       </Link>
                     ))}

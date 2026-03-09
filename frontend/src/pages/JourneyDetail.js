@@ -13,6 +13,7 @@ import { useAuth } from '../contexts/AuthContext';
 import CheckoutModal from '../components/CheckoutModal';
 import ShareMenu, { buildInviteLink } from '../components/ShareMenu';
 import StoryChapter from '../components/StoryChapter';
+import MilestoneProgress from '../components/MilestoneProgress';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -305,6 +306,7 @@ const JourneyDetail = () => {
               </p>
             )}
           </div>
+          <MilestoneProgress progressPercentage={progressPercent} />
         </div>
 
           {/* Share this dream - for logged-in users */}
