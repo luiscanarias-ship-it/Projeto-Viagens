@@ -53,8 +53,15 @@ const Footer = () => {
 
           {/* Legal */}
           <div className="flex flex-col gap-2">
-            <span className="text-[#6B6661] text-sm">{t('footer.privacy')}</span>
-            <span className="text-[#6B6661] text-sm">{t('footer.terms')}</span>
+            <Link to="/privacy" className="text-[#6B6661] hover:text-[#2D2A26] text-sm transition-colors" data-testid="footer-privacy-link">
+              Privacy
+            </Link>
+            <Link to="/terms" className="text-[#6B6661] hover:text-[#2D2A26] text-sm transition-colors" data-testid="footer-terms-link">
+              Terms
+            </Link>
+            <Link to="/cookies" className="text-[#6B6661] hover:text-[#2D2A26] text-sm transition-colors" data-testid="footer-cookies-link">
+              Cookies
+            </Link>
           </div>
 
           {/* Contact */}

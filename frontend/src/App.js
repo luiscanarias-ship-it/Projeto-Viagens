@@ -20,6 +20,8 @@ import AmbassadorProfile from "./pages/AmbassadorProfile";
 import InvitePage from "./pages/InvitePage";
 import CookieConsent from "./components/CookieConsent";
 import CookiePolicy from "./pages/CookiePolicy";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 
 // Syncs user's preferred language on login
 const LanguageSync = () => {
@@ -74,6 +76,9 @@ const AppRouter = () => {
           <Route path="/ambassador/:userId" element={<AmbassadorProfile />} />
           <Route path="/invite/:alias" element={<InvitePage />} />
           <Route path="/politica-cookies" element={<CookiePolicy />} />
+          <Route path="/cookies" element={<CookiePolicy />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
         </Routes>
       </main>
       <Footer />

@@ -1,0 +1,116 @@
+import { ArrowLeft } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
+export default function Privacy() {
+  return (
+    <div className="min-h-screen bg-[#FAFAF9] pt-24 pb-12 px-4" data-testid="privacy-page">
+      <div className="max-w-3xl mx-auto">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 text-[#FFBE98] font-medium text-sm mb-8 hover:text-[#E6A07C] transition-colors"
+          data-testid="privacy-back-link"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Voltar ao inicio
+        </Link>
+
+        <h1 className="text-3xl font-bold text-[#2D2A26] mb-2">Politica de Privacidade</h1>
+        <p className="text-sm text-[#6B6661] mb-8">Ultima atualizacao: Fevereiro 2026</p>
+
+        <div className="bg-white rounded-2xl p-8 shadow-sm space-y-8 text-[#6B6661] leading-relaxed">
+          <p>
+            A 4Luis respeita a privacidade dos seus utilizadores e compromete-se a proteger os dados pessoais de acordo com o Regulamento Geral de Protecao de Dados (RGPD).
+          </p>
+
+          <section>
+            <h2 className="text-lg font-bold text-[#2D2A26] mb-3">1. Quem somos</h2>
+            <p>
+              A 4Luis e uma plataforma digital de CrowdDreaming, onde utilizadores podem apoiar sonhos de viagem e acompanhar a evolucao desses sonhos atraves de uma comunidade de sonhadores.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-lg font-bold text-[#2D2A26] mb-3">2. Dados que recolhemos</h2>
+            <p>Podemos recolher os seguintes dados:</p>
+            <ul className="list-disc pl-6 mt-2 space-y-1">
+              <li>Nome</li>
+              <li>Endereco de email</li>
+              <li>Dados de autenticacao</li>
+              <li>Informacoes relacionadas com contribuicoes</li>
+              <li>Dados tecnicos (IP, navegador, dispositivo)</li>
+              <li>Dados de utilizacao da plataforma</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-lg font-bold text-[#2D2A26] mb-3">3. Finalidade do tratamento</h2>
+            <p>Os dados sao utilizados para:</p>
+            <ul className="list-disc pl-6 mt-2 space-y-1">
+              <li>Criar e gerir contas de utilizador</li>
+              <li>Processar contribuicoes</li>
+              <li>Enviar comunicacoes relacionadas com sonhos e progresso das viagens</li>
+              <li>Gerir convites e sistema de patrocinadores</li>
+              <li>Melhorar o funcionamento da plataforma</li>
+              <li>Garantir seguranca e prevencao de fraude</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-lg font-bold text-[#2D2A26] mb-3">4. Partilha de dados</h2>
+            <p>A 4Luis nao vende dados pessoais.</p>
+            <p className="mt-2">
+              Os dados podem ser partilhados apenas com prestadores de servicos necessarios ao funcionamento da plataforma, como:
+            </p>
+            <ul className="list-disc pl-6 mt-2 space-y-1">
+              <li>Servicos de envio de email</li>
+              <li>Servicos de alojamento e infraestrutura</li>
+              <li>Servicos de analise de utilizacao</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-lg font-bold text-[#2D2A26] mb-3">5. Conservacao de dados</h2>
+            <p>
+              Os dados sao conservados apenas pelo periodo necessario ao funcionamento da plataforma e cumprimento de obrigacoes legais.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-lg font-bold text-[#2D2A26] mb-3">6. Direitos dos utilizadores</h2>
+            <p>Os utilizadores tem o direito de:</p>
+            <ul className="list-disc pl-6 mt-2 space-y-1">
+              <li>Aceder aos seus dados</li>
+              <li>Corrigir dados incorretos</li>
+              <li>Solicitar a eliminacao dos dados</li>
+              <li>Limitar ou opor-se ao tratamento</li>
+            </ul>
+            <p className="mt-3">
+              Pedidos podem ser enviados para:{' '}
+              <a
+                href="mailto:luis@4luis.com"
+                className="text-[#FFBE98] font-semibold hover:text-[#E6A07C] transition-colors"
+                data-testid="privacy-email"
+              >
+                luis@4luis.com
+              </a>
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-lg font-bold text-[#2D2A26] mb-3">7. Seguranca</h2>
+            <p>
+              A 4Luis implementa medidas tecnicas e organizativas adequadas para proteger os dados pessoais.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-lg font-bold text-[#2D2A26] mb-3">8. Alteracoes</h2>
+            <p>
+              Esta politica pode ser atualizada periodicamente. A versao mais recente estara sempre disponivel nesta pagina.
+            </p>
+          </section>
+        </div>
+      </div>
+    </div>
+  );
+}
