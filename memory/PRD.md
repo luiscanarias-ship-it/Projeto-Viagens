@@ -26,6 +26,14 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - Citacao inspiradora final com 3 linhas
 - Mensagem de progresso para proximo marco (MilestoneProgress) no hero e cards
 - Banner de celebracao de marcos (MilestoneCelebration)
+- Seccao "Sonhos em Fase de Materializacao" redesenhada com cartoes visuais (max 4)
+
+### Seccao Sonhos em Materializacao (2026-03-09)
+- Grid de 4 cartoes visuais com imagem, titulo, nome do sonhador, barra de progresso, percentagem
+- Layout responsivo: 4 colunas desktop, 2 tablet, 1 mobile
+- Cada cartao liga a pagina de detalhe da viagem
+- Botao "Explorar mais sonhos" quando existem mais de 4 viagens
+- 4 viagens artificiais criadas: Costa Amalfitana (Manuel, 42%), Bali (Sofia, 15%), Pamukkale (Ana, 60%), Ha Long Bay (Pedro, 75%)
 
 ### Checkout Modal
 - Step 1: Selecao de valor (10-1000) com descricoes inspiradoras
@@ -40,16 +48,14 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - Componente reutilizavel que mostra progresso para proximo marco
 - Marcos: 25% (O Primeiro Passo), 50% (Meio Caminho), 75% (Quase La), 100% (Sonho Realizado)
 - Mensagem urgente com icone Flame quando faltam < 5%
-- Mensagem de conclusao com icone PartyPopper quando >= 100%
 - Variantes dark e light para diferentes fundos
-- Integrado em: Homepage hero, Homepage cards, JourneyDetail
+- Integrado em: Homepage hero, JourneyDetail
 
 ### MilestoneCelebration (2026-03-09)
 - Banner animado com confetti quando um marco e atingido (25%, 50%, 75%, 100%)
 - Mensagem: "O sonho entrou numa nova fase" com titulo do capitulo
 - Auto-dismiss apos 8 segundos, botao de fechar (X)
 - SessionStorage previne repeticao na mesma sessao
-- Janela de 48 horas para exibicao do banner
 - Backend rastreia last_milestone_reached e last_milestone_at
 - Integrado em: JourneyDetail e Homepage
 
@@ -64,8 +70,6 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 ### Emails Automaticos (ATIVO)
 - Resend configurado com API key real
 - Email automatico na mudanca de capitulo
-- Template com storytelling (titulo, texto, botao contribuir)
-- Protecao contra duplicados (flags por milestone: 25/50/75/100)
 - NOTA: Free tier - envia apenas para luis.canarias@gmail.com
 
 ### Sistema Embaixador
@@ -76,7 +80,6 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - Gestao viagens, utilizadores, contribuicoes
 - Descricoes de contribuicao com geracao IA
 - Storytelling Progressivo com 5 editores de capitulos
-- Teste de email de capitulo
 
 ### Sistema de Partilha Viral
 - ShareMenu com WhatsApp, Telegram, Email, Copiar
@@ -97,6 +100,9 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 
 ## Prioritized Backlog
 
+### P0
+- Celebracao especial quando viagem atinge 100% (pagina dedicada com contribuidores, partilha, confetti)
+
 ### P1
 - Verificar dominio no Resend para enviar emails a todos os utilizadores
 - Melhorar formulario de edicao de viagens no Admin
@@ -106,7 +112,7 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - Sorteio real
 - Notificacoes in-app
 - Refactoring: Dividir CheckoutModal.js
-- Refactoring: Dividir backend/server.py (monolito ~4k linhas)
+- Refactoring: Dividir backend/server.py (monolito ~5k linhas)
 
 ## Credentials
 - **Admin**: admin@4luis.com / Admin1
