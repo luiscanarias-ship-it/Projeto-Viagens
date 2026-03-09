@@ -14,6 +14,13 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 
 ## What's Been Implemented
 
+### Paginas Legais (2026-03-09)
+- Pagina de Privacidade (/privacy) com 8 seccoes e email luis@4luis.com
+- Pagina de Termos e Condicoes (/terms) com 7 seccoes
+- Pagina de Politica de Cookies (/cookies e /politica-cookies) com 4 seccoes e 3 tipos de cookies
+- Links no footer: Privacy, Terms, Cookies
+- Todas as paginas com design consistente e link "Voltar ao inicio"
+
 ### Banner de Cookies RGPD (2026-03-09, refinado 2026-03-09)
 - Banner amigavel aparece 15 segundos apos aceder ao site
 - Imagem de bolacha a sonhar gerada por IA
