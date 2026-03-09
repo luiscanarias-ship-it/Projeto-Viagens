@@ -3856,11 +3856,48 @@ async def send_chapter_change_emails(journey: dict, chapter_num: int):
     chapter_lines = chapter.get("lines", [])
     chapter_text = "<br>".join(line if line else "<br>" for line in chapter_lines)
     
-    journey_url = f"{FRONTEND_URL}/journey/{journey_id}"
+    current_amount = journey.get("current_amount", 0)
+    goal_amount = journey.get("goal_amount", 1)
+    percentage = round((current_amount / goal_amount) * 100, 1) if goal_amount > 0 else 0
     
+    next_milestones = {1: 25, 2: 50, 3: 75, 4: 100}
+    next_milestone = next_milestones.get(chapter_num)
+    remaining_text = ""
+    if next_milestone and percentage < next_milestone:
+        remaining = round(next_milestone - percentage, 1)
+        remaining_text = f'<p style="color: #FFBE98; font-size: 14px; font-style: italic; margin-top: 12px;">Faltam {remaining}% para o próximo capítulo do sonho.</p>'
+    
+    journey_url = f"{FRONTEND_URL}/journey/{journey_id}"
     subject = f'O sonho da {journey_name} entrou numa nova fase'
     
-    html_content = get_email_base_template(f"""
+    html_content = get_email_base_template(_build_chapter_email_body(
+        poetic_name, chapter_num, chapter_title, chapter_text,
+        percentage, remaining_text, journey_url
+    ), title=f"4Luis — Capítulo {chapter_num}")
+    
+    # Get all users with email
+    users = await db.users.find({"email": {"$exists": True, "$ne": ""}}, {"_id": 0, "email": 1}).to_list(500)
+    
+    sent_count = 0
+    for user_doc in users:
+        email = user_doc.get("email", "")
+        if email and "@" in email and not email.endswith("@test.com"):
+            try:
+                await send_email_resend(email, subject, html_content)
+                sent_count += 1
+            except Exception as e:
+                logger.error(f"Failed to send chapter email to {email}: {e}")
+    
+    logger.info(f"Chapter {chapter_num} emails sent to {sent_count} users for journey {journey.get('journey_id')}")
+
+def _build_chapter_email_body(poetic_name, chapter_num, chapter_title, chapter_text, percentage, remaining_text, journey_url):
+    """Build the HTML body for chapter change emails"""
+    pct_int = int(min(percentage, 100))
+    filled_blocks = max(1, pct_int // 5)
+    empty_blocks = 20 - filled_blocks
+    progress_bar_text = "█" * filled_blocks + "░" * empty_blocks
+    
+    return f"""
         <div style="text-align: center; padding: 20px 0;">
             <p style="color: #6B6661; font-size: 16px; line-height: 1.6;">
                 O sonho da viagem "<strong>{poetic_name}</strong>"<br>
@@ -3877,6 +3914,21 @@ async def send_chapter_change_emails(journey: dict, chapter_num: int):
                     {chapter_text}
                 </p>
             </div>
+            <div style="background: #F5F5F4; border-radius: 16px; padding: 20px; margin: 20px 0;">
+                <p style="color: #6B6661; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">
+                    Progresso atual da viagem
+                </p>
+                <div style="background: #E7E5E4; border-radius: 8px; height: 12px; overflow: hidden; margin-bottom: 8px;">
+                    <div style="background: linear-gradient(90deg, #FFBE98, #F2C94C); height: 100%; width: {pct_int}%; border-radius: 8px;"></div>
+                </div>
+                <p style="font-family: monospace; color: #6B6661; font-size: 12px; letter-spacing: 1px; margin-bottom: 4px;">
+                    {progress_bar_text}
+                </p>
+                <p style="color: #2D2A26; font-size: 18px; font-weight: bold;">
+                    {percentage}% financiado
+                </p>
+                {remaining_text}
+            </div>
             <p style="color: #6B6661; font-size: 14px; margin-bottom: 20px;">
                 Se quiseres ajudar a dar o próximo passo:
             </p>
@@ -3884,22 +3936,7 @@ async def send_chapter_change_emails(journey: dict, chapter_num: int):
                 Contribuir para este sonho
             </a>
         </div>
-    """, title=f"4Luis — Capítulo {chapter_num}")
-    
-    # Get all users with email
-    users = await db.users.find({"email": {"$exists": True, "$ne": ""}}, {"_id": 0, "email": 1}).to_list(500)
-    
-    sent_count = 0
-    for user_doc in users:
-        email = user_doc.get("email", "")
-        if email and "@" in email and not email.endswith("@test.com"):
-            try:
-                await send_email_resend(email, subject, html_content)
-                sent_count += 1
-            except Exception as e:
-                logger.error(f"Failed to send chapter email to {email}: {e}")
-    
-    logger.info(f"Chapter {chapter_num} emails sent to {sent_count} users for journey {journey.get('journey_id')}")
+    """
 
 @api_router.post("/admin/test-chapter-email/{journey_id}/{chapter_num}")
 async def test_chapter_email(journey_id: str, chapter_num: int, request: Request):
@@ -3926,33 +3963,23 @@ async def test_chapter_email(journey_id: str, chapter_num: int, request: Request
     chapter_text = "<br>".join(line if line else "<br>" for line in chapter_lines)
     journey_url = f"{FRONTEND_URL}/journey/{journey_id}"
     
+    current_amount = journey.get("current_amount", 0)
+    goal_amount = journey.get("goal_amount", 1)
+    percentage = round((current_amount / goal_amount) * 100, 1) if goal_amount > 0 else 0
+    
+    next_milestones = {1: 25, 2: 50, 3: 75, 4: 100}
+    next_milestone = next_milestones.get(chapter_num)
+    remaining_text = ""
+    if next_milestone and percentage < next_milestone:
+        remaining = round(next_milestone - percentage, 1)
+        remaining_text = f'<p style="color: #FFBE98; font-size: 14px; font-style: italic; margin-top: 12px;">Faltam {remaining}% para o próximo capítulo do sonho.</p>'
+    
     subject = f'O sonho da {journey_name} entrou numa nova fase'
     
-    html_content = get_email_base_template(f"""
-        <div style="text-align: center; padding: 20px 0;">
-            <p style="color: #6B6661; font-size: 16px; line-height: 1.6;">
-                O sonho da viagem "<strong>{poetic_name}</strong>"<br>
-                acabou de entrar numa nova fase.
-            </p>
-            <div style="background: #FFF8F3; border-radius: 16px; padding: 24px; margin: 24px 0; border-left: 4px solid #FFBE98;">
-                <p style="color: #6B6661; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">
-                    Capítulo {chapter_num}
-                </p>
-                <p style="color: #FFBE98; font-size: 22px; font-style: italic; margin-bottom: 12px;">
-                    {chapter_title}
-                </p>
-                <p style="color: #6B6661; font-size: 14px; line-height: 1.8;">
-                    {chapter_text}
-                </p>
-            </div>
-            <p style="color: #6B6661; font-size: 14px; margin-bottom: 20px;">
-                Se quiseres ajudar a dar o próximo passo:
-            </p>
-            <a href="{journey_url}" style="display: inline-block; background: #FFBE98; color: #2D2A26; padding: 14px 28px; border-radius: 12px; font-weight: bold; text-decoration: none; font-size: 16px;">
-                Contribuir para este sonho
-            </a>
-        </div>
-    """, title=f"4Luis — Capítulo {chapter_num}")
+    html_content = get_email_base_template(_build_chapter_email_body(
+        poetic_name, chapter_num, chapter_title, chapter_text,
+        percentage, remaining_text, journey_url
+    ), title=f"4Luis — Capítulo {chapter_num}")
     
     # Send test email to admin only
     result = await send_email_resend("luis.canarias@gmail.com", subject, html_content)
@@ -3960,6 +3987,7 @@ async def test_chapter_email(journey_id: str, chapter_num: int, request: Request
     return {
         "message": f"Email de teste do capítulo {chapter_num} enviado",
         "chapter_title": chapter_title,
+        "percentage": percentage,
         "result": result
     }
 
