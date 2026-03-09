@@ -87,6 +87,8 @@ const JourneyDetail = () => {
   const [aiResponse, setAiResponse] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
   const [showAiPlanner, setShowAiPlanner] = useState(false);
+  const [showExitIntent, setShowExitIntent] = useState(false);
+  const exitIntentShown = useRef(false);
   
   const sponsorCode = searchParams.get('sponsor');
   const openPayment = searchParams.get('pay') === 'true';
@@ -97,6 +99,27 @@ const JourneyDetail = () => {
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  // Exit intent detection
+  useEffect(() => {
+    const handleMouseLeave = (e) => {
+      if (e.clientY <= 0 && !exitIntentShown.current && !showCheckout) {
+        exitIntentShown.current = true;
+        setShowExitIntent(true);
+      }
+    };
+    const inactivityTimer = setTimeout(() => {
+      if (!exitIntentShown.current && !showCheckout) {
+        exitIntentShown.current = true;
+        setShowExitIntent(true);
+      }
+    }, 30000);
+    document.addEventListener('mouseleave', handleMouseLeave);
+    return () => {
+      document.removeEventListener('mouseleave', handleMouseLeave);
+      clearTimeout(inactivityTimer);
+    };
+  }, [showCheckout]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -790,6 +813,49 @@ const JourneyDetail = () => {
         getAuthHeaders={getAuthHeaders}
         user={user}
       />
+
+      {/* Exit Intent Modal */}
+      <AnimatePresence>
+        {showExitIntent && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowExitIntent(false)}
+            data-testid="exit-intent-overlay"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl"
+              data-testid="exit-intent-modal"
+            >
+              <p className="text-sm text-[#FFBE98] font-semibold mb-3">Antes de partires...</p>
+              <p className="text-[#6B6661] leading-relaxed mb-2">
+                O sonho da viagem pela <strong className="text-[#2D2A26]">{journey?.name}</strong> já começou.
+              </p>
+              <p className="text-[#2D2A26] font-semibold mb-1">Não fiques fora deste sonho.</p>
+              <p className="font-handwritten text-xl text-[#FFBE98] mb-6">Sonha connosco.</p>
+              <button
+                onClick={() => { setShowExitIntent(false); setShowCheckout(true); }}
+                className="w-full py-3 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-[#FFAB7D] transition-colors"
+                data-testid="exit-intent-contribute-btn"
+              >
+                <Heart className="w-4 h-4" /> Contribuir para este sonho
+              </button>
+              <button
+                onClick={() => setShowExitIntent(false)}
+                className="mt-3 text-sm text-[#6B6661] hover:text-[#2D2A26] transition-colors"
+              >
+                Talvez mais tarde
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
