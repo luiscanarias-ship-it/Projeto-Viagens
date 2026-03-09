@@ -270,6 +270,10 @@ const Home = () => {
                     </div>
                   )}
 
+                  <p className="text-white/70 text-sm italic mb-4" data-testid="micro-question">
+                    Queres ajudar este sonho a dar o próximo passo?
+                  </p>
+
                   <button
                     onClick={() => setShowCheckout(true)}
                     className="inline-flex items-center gap-2 px-8 py-4 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-bold text-lg hover:bg-[#FFAB7D] transition-colors"
