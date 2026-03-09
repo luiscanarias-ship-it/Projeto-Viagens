@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { 
   ArrowDown, Users, Star, MapPin, Map, Hotel, Plane, 
   Sparkles, ChevronDown, ExternalLink, Compass, Globe, 
-  Heart, Bitcoin, Clock, Camera, ChevronRight, Play
+  Heart, Bitcoin, Clock, Camera, ChevronRight, Play, CheckCircle
 } from 'lucide-react';
 import axios from 'axios';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -203,6 +203,16 @@ const Home = () => {
             <button onClick={scrollToMain} className="btn-primary text-lg" data-testid="discover-btn">
               {t('hero.cta')}
             </button>
+          </motion.div>
+
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}
+            className="mt-8 flex flex-col sm:flex-row items-center gap-3 sm:gap-6" data-testid="trust-signals">
+            {['Pagamentos diretos ao sonhador', 'Sem comissões da plataforma', 'Clube de sonhadores'].map((text) => (
+              <span key={text} className="flex items-center gap-1.5 text-sm text-[#6B6661]">
+                <CheckCircle className="w-4 h-4 text-[#FFBE98]" />
+                {text}
+              </span>
+            ))}
           </motion.div>
 
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }} className="absolute bottom-10 left-1/2 -translate-x-1/2">
