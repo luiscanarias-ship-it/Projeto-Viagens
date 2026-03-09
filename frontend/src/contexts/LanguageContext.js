@@ -37,12 +37,12 @@ const defaultTexts = {
   // Social Proof & How it Works
   "home.social_proof": "sonhadores já ajudaram esta plataforma",
   "home.how_it_works": "Como funciona o Crowddreaming",
-  "home.step1_title": "Contribui para um sonho",
-  "home.step1_desc": "Ajuda a concretizar uma viagem com qualquer valor",
-  "home.step2_title": "Convida 3 amigos a contribuir",
-  "home.step2_desc": "Partilha o sonho e torna-te embaixador",
-  "home.step3_title": "Desbloqueia o teu próprio sonho",
-  "home.step3_desc": "Cria a tua própria viagem e recebe apoio",
+  "home.step1_title": "Apoia um sonho",
+  "home.step1_desc": "Apoia a viagem principal e ajuda a concretizar um sonho",
+  "home.step2_title": "Convida 3 amigos a contribuirem",
+  "home.step2_desc": "Partilha o sonho com os teus amigos e torna-te embaixador da 4Luis",
+  "home.step3_title": "Embaixador: financia a tua viagem",
+  "home.step3_desc": "Angaria apoio para realizares a tua viagem de sonho",
   "home.support_dream": "Apoiar este sonho",
   
   // Plan Your Trip
