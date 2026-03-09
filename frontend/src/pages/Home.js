@@ -195,7 +195,7 @@ const Home = () => {
 
           <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }}
             className="text-xl md:text-2xl text-[#6B6661] mb-12 max-w-2xl mx-auto leading-relaxed">
-            {t('hero.subtitle')}
+            A plataforma de <span className="font-bold text-[#FFBE98]">CrowdDreaming</span> para quem acredita que os sonhos se podem concretizar.
           </motion.p>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.4 }}>
@@ -367,7 +367,7 @@ const Home = () => {
           {/* How it Works */}
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
             className="text-center mb-10">
-            <h2 className="text-3xl font-bold text-[#2D2A26]">{t('home.how_it_works')}</h2>
+            <h2 className="text-3xl font-bold text-[#2D2A26]">Como funciona o <span className="text-[#FFBE98]">CrowdDreaming</span></h2>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
