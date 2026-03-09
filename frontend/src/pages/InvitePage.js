@@ -118,8 +118,8 @@ const InvitePage = () => {
               <ArrowRight className="w-4 h-4" />
             </button>
 
-            <p className="text-xs text-center text-[#6B6661]">
-              A tua contribuição ajuda a concretizar este sonho
+            <p className="text-xs text-center text-[#6B6661]/80 italic" data-testid="invite-register-hint">
+              Se criares uma conta, o teu amigo poderá acompanhar o teu apoio e aproximar-se de desbloquear Embaixador.
             </p>
 
             {/* Share this dream */}

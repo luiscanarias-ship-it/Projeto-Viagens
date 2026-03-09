@@ -871,6 +871,27 @@ const CheckoutModal = ({
                     </div>
                   )}
 
+                  {!user && (
+                    <div className="border-t border-stone-100 pt-4 space-y-3" data-testid="register-incentive">
+                      <p className="text-sm font-semibold text-[#2D2A26]">Cria uma conta gratuita para:</p>
+                      <div className="space-y-1.5 text-left max-w-[220px] mx-auto">
+                        {['Acompanhar a evolução da viagem', 'Convidar amigos', 'Desbloquear o teu próprio sonho'].map((t) => (
+                          <span key={t} className="flex items-center gap-2 text-sm text-[#6B6661]">
+                            <Check className="w-4 h-4 text-[#FFBE98] flex-shrink-0" />
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+                      <a
+                        href="/login"
+                        className="inline-flex items-center justify-center gap-2 w-full py-2.5 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-semibold text-sm hover:bg-[#FFAB7D] transition-colors"
+                        data-testid="register-cta-btn"
+                      >
+                        Criar conta
+                      </a>
+                    </div>
+                  )}
+
                   <button
                     onClick={handleClose}
                     className="w-full bg-[#2D2A26] text-white py-3 px-6 rounded-xl font-medium hover:bg-[#4A4640] transition-all"
