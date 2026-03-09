@@ -1132,6 +1132,13 @@ async def delete_journey(journey_id: str, request: Request):
 async def get_all_journeys_admin(request: Request):
     await require_admin(request)
     journeys = await db.journeys.find({}, {"_id": 0}).to_list(100)
+    
+    # Enrich with ambassador names
+    for j in journeys:
+        if j.get("is_ambassador_journey") and j.get("ambassador_user_id"):
+            amb = await db.users.find_one({"user_id": j["ambassador_user_id"]}, {"_id": 0, "name": 1})
+            j["ambassador_name"] = amb.get("name", "Embaixador") if amb else "Embaixador"
+    
     return journeys
 
 # ==================== CONTRIBUTIONS & PAYMENTS ====================

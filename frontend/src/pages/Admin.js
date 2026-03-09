@@ -56,6 +56,7 @@ const Admin = () => {
   const [adjustmentRequest, setAdjustmentRequest] = useState('');
   const [adjustmentJourneyId, setAdjustmentJourneyId] = useState(null);
   const [generatingDescs, setGeneratingDescs] = useState(false);
+  const [journeyFilter, setJourneyFilter] = useState('todas');
   const [formData, setFormData] = useState({
     name: '',
     poetic_name: '',
@@ -770,11 +771,53 @@ const Admin = () => {
               )}
 
               {/* Journeys List */}
-              <div className="space-y-4">
-                {journeys.map((journey) => (
+              <div className="space-y-3">
+                {/* Status Filters */}
+                <div className="flex gap-2 flex-wrap" data-testid="journey-filters">
+                  {[
+                    { id: 'todas', label: 'Todas', count: journeys.length },
+                    { id: 'candidatura', label: 'Candidaturas', color: 'bg-amber-100 text-amber-700' },
+                    { id: 'ativa', label: 'Ativas', color: 'bg-green-100 text-green-700' },
+                    { id: 'financiada', label: 'Financiadas', color: 'bg-blue-100 text-blue-700' },
+                    { id: 'realizada', label: 'Realizadas', color: 'bg-purple-100 text-purple-700' },
+                    { id: 'encerrada', label: 'Encerradas', color: 'bg-stone-100 text-stone-500' }
+                  ].map(f => {
+                    const count = f.id === 'todas' ? journeys.length : journeys.filter(j => (j.status || 'ativa') === f.id).length;
+                    return (
+                      <button
+                        key={f.id}
+                        onClick={() => setJourneyFilter(f.id)}
+                        data-testid={`filter-${f.id}`}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                          journeyFilter === f.id
+                            ? 'bg-[#FFBE98] text-[#2D2A26] shadow-sm'
+                            : 'bg-stone-50 text-[#6B6661] hover:bg-stone-100'
+                        }`}
+                      >
+                        {f.label}
+                        <span className={`w-5 h-5 text-[10px] rounded-full flex items-center justify-center ${
+                          journeyFilter === f.id ? 'bg-white/40 text-[#2D2A26]' : 'bg-stone-200 text-[#6B6661]'
+                        }`}>{count}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Table Header */}
+                <div className="grid grid-cols-[1fr_100px_120px_130px_60px] gap-3 px-4 py-2 text-xs font-semibold text-[#6B6661] uppercase tracking-wider border-b border-stone-100">
+                  <span>Viagem</span>
+                  <span>Estado</span>
+                  <span>Progresso</span>
+                  <span>Owner</span>
+                  <span></span>
+                </div>
+
+                {journeys
+                  .filter(j => journeyFilter === 'todas' || (j.status || 'ativa') === journeyFilter)
+                  .map((journey) => (
                   <div
                     key={journey.journey_id}
-                    className="p-4 border border-stone-100 rounded-2xl"
+                    className="border border-stone-100 rounded-2xl overflow-hidden"
                   >
                     {editingJourney?.journey_id === journey.journey_id ? (
                       <div className="bg-stone-50 rounded-xl p-5 space-y-5">
@@ -1113,46 +1156,63 @@ const Admin = () => {
                         </div>
                       </div>
                     ) : (
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
+                      <div className="grid grid-cols-[1fr_100px_120px_130px_60px] gap-3 items-center p-4" data-testid={`journey-row-${journey.journey_id}`}>
+                        <div className="flex items-center gap-3 min-w-0">
                           <img
                             src={journey.image_url}
                             alt={journey.name}
-                            className="w-16 h-16 rounded-xl object-cover"
+                            className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
                           />
-                          <div>
-                            <h3 className="font-semibold">{journey.name}</h3>
-                            <p className="text-sm text-[#6B6661]">{journey.poetic_name}</p>
-                            <p className="text-xs text-[#6B6661]">
-                              €{journey.current_amount.toLocaleString()} / €{journey.goal_amount.toLocaleString()}
-                              {journey.target_date && (
-                                <span className="ml-2 text-[#FFBE98]">
-                                  • Objetivo: {new Date(journey.target_date).toLocaleDateString('pt-PT')}
-                                </span>
-                              )}
-                              {!journey.is_active && (
-                                <span className="ml-2 bg-red-100 text-red-600 px-2 py-0.5 rounded">Inativa</span>
-                              )}
-                              {journey.show_goal_amount ? (
-                                <span className="ml-2 bg-green-100 text-green-600 px-2 py-0.5 rounded text-xs">€ Público</span>
-                              ) : (
-                                <span className="ml-2 bg-stone-100 text-stone-500 px-2 py-0.5 rounded text-xs">% Apenas</span>
-                              )}
-                            </p>
+                          <div className="min-w-0">
+                            <h3 className="font-semibold text-sm text-[#2D2A26] truncate">{journey.name}</h3>
+                            <p className="text-xs text-[#6B6661] truncate">{journey.poetic_name}</p>
                           </div>
                         </div>
-                        <div className="flex gap-2">
+                        <div>
+                          {(() => {
+                            const s = journey.status || 'ativa';
+                            const styles = {
+                              candidatura: 'bg-amber-100 text-amber-700',
+                              ativa: 'bg-green-100 text-green-700',
+                              financiada: 'bg-blue-100 text-blue-700',
+                              realizada: 'bg-purple-100 text-purple-700',
+                              encerrada: 'bg-stone-100 text-stone-500'
+                            };
+                            return (
+                              <span className={`text-xs font-semibold px-2 py-1 rounded-lg ${styles[s] || styles.ativa}`} data-testid={`status-${journey.journey_id}`}>
+                                {s.charAt(0).toUpperCase() + s.slice(1)}
+                              </span>
+                            );
+                          })()}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1 h-1.5 bg-stone-100 rounded-full overflow-hidden max-w-[70px]">
+                              <div
+                                className="h-full bg-gradient-to-r from-[#FFBE98] to-[#F2C94C] rounded-full"
+                                style={{ width: `${Math.min(100, journey.goal_amount > 0 ? (journey.current_amount / journey.goal_amount) * 100 : 0)}%` }}
+                              />
+                            </div>
+                            <span className="text-xs font-bold text-[#2D2A26]">
+                              {journey.goal_amount > 0 ? Math.round((journey.current_amount / journey.goal_amount) * 100) : 0}%
+                            </span>
+                          </div>
+                        </div>
+                        <div className="text-xs text-[#6B6661] truncate">
+                          {journey.is_ambassador_journey ? (journey.ambassador_name || 'Embaixador') : 'Admin'}
+                        </div>
+                        <div className="flex gap-1">
                           <button
                             onClick={() => setEditingJourney(journey)}
-                            className="p-2 hover:bg-stone-100 rounded-lg transition-colors"
+                            className="p-1.5 hover:bg-stone-100 rounded-lg transition-colors"
                           >
-                            <Edit2 className="w-4 h-4 text-[#6B6661]" />
+                            <Edit2 className="w-3.5 h-3.5 text-[#6B6661]" />
                           </button>
                           <button
                             onClick={() => handleDelete(journey.journey_id)}
-                            className="p-2 hover:bg-red-50 rounded-lg transition-colors"
+                            className="p-1.5 hover:bg-red-50 rounded-lg transition-colors"
                           >
-                            <Trash2 className="w-4 h-4 text-red-500" />
+                            <Trash2 className="w-3.5 h-3.5 text-red-500" />
                           </button>
                         </div>
                       </div>
