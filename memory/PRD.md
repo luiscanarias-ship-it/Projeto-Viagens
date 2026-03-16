@@ -14,6 +14,13 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 
 ## What's Been Implemented
 
+### Preview de Emails antes de Enviar (2026-03-09)
+- Todos os emails requerem confirmacao do admin antes de serem enviados
+- Modal de preview mostra: HTML completo do email, assunto, numero de destinatarios
+- Botoes "Cancelar" e "Confirmar e Enviar"
+- 3 endpoints de preview: resumo semanal, novo sonho, sonho financiado
+- Aplica-se a todos os emails: resumo semanal, anunciar novo sonho (com selector de viagem), sonho financiado
+
 ### Correcoes Admin e Navegacao (2026-03-09)
 - Fix: Link "Viagens" no header agora faz scroll ate a seccao de viagens
 - Fix: Login como admin redireciona para /admin automaticamente
