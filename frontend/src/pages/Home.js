@@ -292,12 +292,12 @@ const Home = () => {
         {mainJourney?.journey ? (
           <>
             {/* Immersive Hero Card */}
-            <div className="relative min-h-[85vh] flex items-end overflow-hidden">
+            <div className="relative min-h-[75vh] flex items-end overflow-hidden">
               <img src={mainJourney.journey.image_url} alt={mainJourney.journey.name}
                 className="absolute inset-0 w-full h-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10" />
               
-              <div className="relative z-10 w-full max-w-5xl mx-auto px-6 pb-16 pt-32">
+              <div className="relative z-10 w-full max-w-5xl mx-auto px-6 pb-12 pt-16">
                 <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
                   <div className="flex justify-center mb-8">
                     <Link to={`/journey/${mainJourney.journey.journey_id}`}
