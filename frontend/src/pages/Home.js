@@ -299,10 +299,18 @@ const Home = () => {
               
               <div className="relative z-10 w-full max-w-5xl mx-auto px-6 pb-16 pt-32">
                 <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-                  <Link to={`/journey/${mainJourney.journey.journey_id}`}
-                    className="inline-block px-4 py-1.5 bg-white/15 backdrop-blur rounded-full text-white/90 font-medium text-sm mb-5 hover:bg-white/25 transition-colors">
-                    {t('home.main_journey')}
-                  </Link>
+                  <div className="flex justify-center mb-8">
+                    <Link to={`/journey/${mainJourney.journey.journey_id}`}
+                      className="group relative inline-flex items-center gap-2.5 px-6 py-2.5 rounded-full font-semibold text-base text-white border border-white/25 hover:border-white/40 transition-all duration-500 overflow-hidden"
+                      data-testid="main-journey-label"
+                    >
+                      <span className="absolute inset-0 bg-white/10 backdrop-blur-md" />
+                      <span className="absolute inset-0 bg-gradient-to-r from-[#FFBE98]/20 via-transparent to-[#F2C94C]/20 animate-pulse" style={{ animationDuration: '3s' }} />
+                      <Sparkles className="w-4 h-4 text-[#FFBE98] relative z-10 group-hover:rotate-12 transition-transform duration-300" />
+                      <span className="relative z-10 tracking-wide">{t('home.main_journey')}</span>
+                      <span className="relative z-10 w-1.5 h-1.5 rounded-full bg-[#FFBE98] animate-pulse" />
+                    </Link>
+                  </div>
                   
                   <h2 className="text-5xl md:text-7xl font-bold text-white mb-3">
                     {mainJourney.journey.name}
