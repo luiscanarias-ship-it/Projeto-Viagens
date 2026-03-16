@@ -11,56 +11,78 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - **Email**: Resend (PRODUCAO - mail@4luis.com)
 - **Auth**: JWT + Google OAuth
 - **Translation**: OpenAI GPT-5.2 via Emergent LLM Key
+- **Object Storage**: Emergent Object Storage (suporte a uploads de ficheiros)
 
 ## What's Been Implemented
 
+### Sistema de Suporte Completo (2026-03-16)
+**Area do Utilizador:**
+- Seccao "Ajuda e Suporte" no dashboard com lista de pedidos e botao "Abrir novo pedido"
+- Formulario de criacao: nome/email auto-preenchidos, tipo (8 opcoes), assunto, descricao, upload opcional
+- Pagina de detalhe com visual de conversa (chat-like), campo de resposta, suporte a anexos
+- IDs automaticos: SUP-2026-XXXXX
+
+**Area do Admin:**
+- Tab "Suporte" no painel admin com tabela completa (ID, utilizador, email, tipo, assunto, estado, prioridade, data)
+- Filtros por estado, tipo, prioridade + pesquisa por ID/email/assunto
+- Detalhe com conversa, resposta admin, alterar estado/prioridade, notas internas, download de anexos
+- Botoes rapidos "Marcar como resolvido" e "Fechar pedido"
+
+**Estados:** Aberto, Em analise, A aguardar resposta, Resolvido, Fechado
+**Prioridades (admin only):** Baixa, Media, Alta, Urgente (auto-atribuidas por tipo)
+**Emails automaticos:** Confirmacao, resposta admin, alteracao estado, resolvido, fechado, notificacao admin
+
+**Uploads:** Object storage Emergent para screenshots/anexos (png, jpg, webp, pdf, max 5MB)
+
 ### Autosave com Sincronizacao no Servidor (2026-03-16)
-- Dual-layer: localStorage (backup instantaneo) + servidor MongoDB (sync async)
-- JourneyEditForm: autosave com debounce 2s local + 0.5s servidor
-- Create Journey Form: mesmo mecanismo com chave journey_create/new
+- Dual-layer: localStorage + servidor MongoDB
+- JourneyEditForm e Create Journey Form: autosave com debounce
 - Recuperacao de rascunhos do servidor (multi-dispositivo)
-- Banner "Rascunho recuperado do servidor" com opcoes Manter/Descartar
-- Indicador "Sincronizado" (verde) ou "Guardado localmente" (amber se server falhar)
-- Limpeza automatica do draft apos guardar ou cancelar (local + servidor)
-- Warning beforeunload quando ha alteracoes por guardar
-- Dados expiram apos 24h (localStorage), servidor sem expiracao
-- Backend endpoints: PUT/GET/DELETE /api/admin/drafts/{type}/{ref_id}, GET /api/admin/drafts
+- Indicador "Sincronizado" / "Guardado localmente"
 
 ### Correcao FRONTEND_URL (2026-03-16)
-- FRONTEND_URL no backend agora le de variavel de ambiente (nao hardcoded)
-- Adicionado FRONTEND_URL ao backend/.env
+- FRONTEND_URL no backend agora le de variavel de ambiente
 
 ### Preview de Emails antes de Enviar (2026-03-09)
-- Todos os emails requerem confirmacao do admin antes de serem enviados
-- Modal de preview mostra: HTML completo do email, assunto, numero de destinatarios
-- Botoes "Cancelar" e "Confirmar e Enviar"
+- Modal de preview com confirmacao antes de envio
 - 3 endpoints de preview: resumo semanal, novo sonho, sonho financiado
 
 ### Formulario de Edicao de Viagens no Admin (2026-03-09)
-- JourneyEditForm.js com 4 tabs (Basico/Conteudo/Storytelling/Configuracoes)
-- Preview em tempo real, validacao inline, geracao IA de storytelling
+- 4 tabs (Basico/Conteudo/Storytelling/Configuracoes), preview em tempo real
 
 ### Sistema de Confianca (2026-03-09)
 - 3 niveis: Sonhador, Sonhador Verificado, Embaixador
-- Badge visual na pagina da viagem
 
 ### Paginas Legais (2026-03-09)
-- Privacidade, Termos, Cookies com design consistente
+- Privacidade, Termos, Cookies
 
-### Sistema de Emails (5 tipos - COMPLETO)
-1. Mudanca de capitulo (automatico nos marcos 25/50/75/100%)
-2. Resumo semanal (botao admin)
-3. Contribuicao via referral (automatico)
-4. Sonho financiado (botao admin >= 100%)
-5. Novo sonho (botao admin com selector)
+### Sistema de Emails (5 tipos + 6 suporte)
+- Mudanca de capitulo, resumo semanal, contribuicao via referral, sonho financiado, novo sonho
+- Suporte: confirmacao, resposta admin, alteracao estado, resolvido, fechado, notificacao admin
 
 ## Key Files
-- frontend/src/components/JourneyEditForm.js (autosave dual-layer)
+- frontend/src/components/SupportDashboard.js (seccao suporte no dashboard)
+- frontend/src/pages/SupportNewTicket.js (formulario criacao)
+- frontend/src/pages/SupportTicketDetail.js (detalhe com conversa)
+- frontend/src/components/AdminSupportSection.js (gestao admin)
+- frontend/src/components/JourneyEditForm.js (autosave)
 - frontend/src/components/EmailPreviewModal.js
-- frontend/src/pages/Admin.js (autosave create form)
-- frontend/src/pages/Home.js
-- frontend/src/pages/JourneyDetail.js
-- backend/server.py (drafts endpoints)
+- frontend/src/pages/Admin.js
+- frontend/src/pages/Dashboard.js
+- backend/server.py
+
+## Key API Endpoints (Support)
+- POST /api/support/tickets — criar ticket
+- GET /api/support/tickets — listar tickets do user
+- GET /api/support/tickets/{id} — detalhe
+- POST /api/support/tickets/{id}/reply — resposta do user
+- POST /api/support/upload — upload ficheiro
+- GET /api/admin/support/tickets — listar todos (com filtros)
+- GET /api/admin/support/tickets/{id} — detalhe admin
+- POST /api/admin/support/tickets/{id}/reply — resposta admin
+- PUT /api/admin/support/tickets/{id}/status — alterar estado
+- PUT /api/admin/support/tickets/{id}/priority — alterar prioridade
+- POST /api/admin/support/tickets/{id}/note — nota interna
 
 ## Prioritized Backlog
 
