@@ -1,154 +1,178 @@
-<analysis>Análise da Sessão e Resumo de Transferência
+<analysis>**original_problem_statement**:
+O utilizador solicitou uma série de melhorias e correções de bugs para a plataforma de crowdfunding 4Luis. Os pedidos incluíram a criação de páginas legais (Privacidade, Termos), a adição de links no rodapé, a implementação de um sistema de nível de confiança para os utilizadores, a reorganização da homepage, melhorias significativas no formulário de edição de viagens do administrador e a implementação de uma pré-visualização de e-mails antes do envio.
 
-### original_problem_statement
-O utilizador solicitou a continuação do desenvolvimento da plataforma de crowdfunding de viagens 4Luis, com um foco contínuo em melhorias de UI/UX e na implementação de funcionalidades de viralidade e onboarding.
+A última interação foi um relatório de bug do utilizador, indicando que duas funcionalidades recentemente implementadas não estavam a funcionar como esperado:
+1.  Após o login como administrador, o redirecionamento para a página  não ocorre.
+2.  O e-mail de convite para patrocinadores contém um URL antigo e incorreto.
 
 **PRODUCT REQUIREMENTS (Latest):**
-- **Melhorias na Homepage (Pedido mais recente):**
-    1.  Adicionar uma barra de contribuição fixa (sticky) que aparece no scroll, mostrando detalhes da viagem principal e um botão Contribuir.
-    2.  Tornar a secção da viagem principal mais imersiva, com uma imagem de fundo e layout de texto melhorado.
-    3.  Adicionar um texto introdutório à secção Planeia a tua viagem.
-    4.  Atualizar a mensagem inspiradora na secção final da página.
-- **Sistema de Partilha Viral:** Implementar um menu de partilha reutilizável (WhatsApp, Telegram, Gmail, Copiar) no Dashboard, Página da Viagem e Página de Convite para promover o link de sponsor do utilizador ().
-- **Fluxo de Onboarding Pós-Convite:** Criar uma página de onboarding dedicada para novos utilizadores que se registam através de um link de convite, guiando-os sobre como contribuir e tornarem-se Embaixadores.
-- **Sistema de Tradução e Persistência:**
-    - Implementar um sistema de tradução por IA para todo o conteúdo do site, tanto estático (UI) como dinâmico (títulos de viagens, descrições, etc. vindos da base de dados).
-    - Tornar a seleção de idioma do utilizador persistente, guardando-a no seu perfil e aplicando-a automaticamente no login.
-- **Correções de Bugs:**
-    - Corrigir o problema recorrente do link de partilha do Gmail não ser clicável.
-    - Garantir que o link de convite está sempre visível no Dashboard para todos os tipos de utilizador.
+1.  **Corrigir Redirecionamento de Admin (P0):** Garantir que, após o login com credenciais de administrador, o utilizador seja imediatamente redirecionado para a página .
+2.  **Corrigir URL no Email de Convite (P0):** Atualizar o template de e-mail de convite para usar a variável de ambiente do URL do frontend (REACT_APP_BACKEND_URL) em vez de um valor estático.
+3.  **Melhorar Formulário de Edição de Viagens (Em Progresso):** Continuar a melhorar o formulário de edição de viagens, que foi recentemente refatorado, mas que o utilizador deseja que seja o mais funcional e automatizado possível.
+4.  **Implementar Celebração de 100% (P1):** Criar uma vista especial para quando uma viagem atinge 100% do financiamento.
 
-### **User's preferred language**:
+**User's preferred language**:
 Português. O próximo agente DEVE comunicar exclusivamente em português.
 
-### **what currently exists?**
-Uma aplicação full-stack de crowdfunding para viagens (4Luis) com backend FastAPI/MongoDB e frontend React/TailwindCSS. As funcionalidades principais incluem:
-- Autenticação de utilizadores (JWT e Google OAuth).
-- Um checkout modal de 3 passos para contribuições.
-- Um painel de utilizador (Dashboard) com um sistema de gamificação (Sonhador -> Embaixador).
-- Um sistema de tradução completo, alimentado por IA (), que traduz tanto o texto estático da UI como o conteúdo dinâmico vindo da base de dados.
-- Um seletor de idioma persistente que guarda a preferência do utilizador na sua conta.
-- Um sistema de partilha viral com um componente  reutilizável para partilhar links de convite em várias páginas.
-- Um fluxo de onboarding para novos utilizadores que se registam através de um link de convite.
-- Uma barra de contribuição fixa (sticky) na página de detalhe da viagem.
+**what currently exists?**
+Uma aplicação full-stack (React/FastAPI/MongoDB) de crowdfunding de viagens com um conjunto alargado de funcionalidades. A plataforma inclui autenticação de utilizador (JWT e Google OAuth), um painel de administração robusto para gestão de viagens, utilizadores e e-mails, um sistema de storytelling progressivo, um sistema de e-mail transacional (via Resend), um sistema de nível de confiança do utilizador, e várias páginas legais (Privacidade, Termos, Cookies). O formulário de edição de viagens foi recentemente refatorado para usar um layout de separadores, pré-visualização em tempo real e geração de conteúdo por IA.
 
-### **Last working item**:
-- **Last item agent was working:** O agente iniciou a implementação de um novo conjunto de 4 melhorias para a homepage, conforme solicitado pelo utilizador na sua última mensagem. O objetivo é tornar a página mais imersiva e melhorar a conversão.
-- **Status:** IN PROGRESS
-- **Agent Testing Done:** N
-- **Which testing method agent to use?** Frontend testing agent. Após a implementação das 4 melhorias visuais na homepage, o agente de testes deve ser chamado para verificar se a barra sticky funciona corretamente em desktop/mobile, se o novo layout da viagem principal é renderizado sem erros e se os novos textos foram aplicados corretamente. Um screenshot também seria útil para uma verificação visual rápida.
-- **User Testing Done:** N
+**Last working item**:
+-   **Last item agent was working:** O agente estava a investigar dois bugs críticos reportados pelo utilizador através de screenshots.
+    1.  O redirecionamento automático para a página  após o login de administrador não está a funcionar.
+    2.  O template de e-mail para convite de patrocinadores () está a usar um URL de frontend antigo e estático em vez de um dinâmico.
+    O agente já tinha começado a analisar os ficheiros  e  para diagnosticar as causas.
+-   **Status:** IN PROGRESS
+-   **Agent Testing Done:** N
+-   **Which testing method agent to use?** Frontend testing agent para validar o fluxo de login e redirecionamento do administrador. Teste manual (curl) para verificar o conteúdo HTML gerado pelo endpoint de e-mail.
+-   **User Testing Done:** Y
 
-### **All Pending/In progress Issue list**:
-- **Issue 1: Implementar as 4 Melhorias da Homepage (P0)**
-  - **Descrição:** Concluir a implementação do último pedido do utilizador, que inclui: 1) uma barra sticky de contribuição na homepage; 2) um layout mais imersivo para a viagem principal; 3) um novo texto para a secção Planeia a tua viagem; 4) uma nova mensagem final na página.
-  - **Next debug checklist:**
-    1.  Continuar a edição do ficheiro .
-    2.  Implementar a lógica do  com um  para controlar a visibilidade da barra sticky.
-    3.  Adicionar o JSX para a barra sticky, utilizando  para a animação, replicando o padrão já usado em .
-    4.  Reestruturar o JSX da secção da viagem principal para incluir uma imagem de fundo e o novo layout de texto.
-    5.  Substituir os textos nas secções Planeia a tua viagem e final usando as chaves de tradução já adicionadas ao .
-  - **Why fix this issue?** Para completar o pedido mais recente do utilizador e melhorar a experiência visual e a taxa de conversão da página principal.
-  - **Status:** IN PROGRESS
-  - **Is recurring issue?** N
-  - **Should Test frontend/backend/both after fix?** Frontend.
+**All Pending/In progress Issue list**:
+-   **Issue 1: Redirecionamento do Admin após o login não funciona (P0)**
+-   **Issue 2: URL incorreto no e-mail de convite de patrocinador (P0)**
 
-- **Issue 2: Estabilidade do Painel de Administração (P2)**
-  - **Descrição:** O painel de administração () apresentou instabilidade em sessões anteriores. Embora os testes automatizados do backend tenham passado, a UI não foi submetida a um teste de stress completo.
-  - **Next debug checklist:** Efetuar um smoke test manual ou com o agente de testes em todas as secções do painel de administração () para garantir que não existem erros de renderização ou de runtime, especialmente após as recentes alterações nos modelos de dados.
-  - **Why fix this issue?** O painel de administração é uma ferramenta crítica para a gestão da plataforma. A sua estabilidade é fundamental.
-  - **Status:** TESTING PENDING
-  - **Is recurring issue?** Y
-  - **Should Test frontend/backend/both after fix?** Frontend.
+**Issues Detail:**
+-   **Issue 1:**
+    -   **Descrição:** O utilizador faz login como  mas permanece na homepage em vez de ser redirecionado para .
+    -   **Attempted fixes:** O agente analisou  e , onde a lógica de redirecionamento está implementada, mas ainda não aplicou uma correção.
+    -   **Next debug checklist:**
+        1.  Verificar a lógica no  dentro do  que lida com o redirecionamento baseado no .
+        2.  Consolar o valor de  após o login para garantir que  está presente e a ser lido corretamente.
+        3.  Validar o fluxo de navegação usando  para garantir que a chamada de navegação está a ser executada.
+    -   **Why fix this issue and what will be achieved with the fix?** Corrigir isto irá restaurar o fluxo de trabalho esperado para o administrador, melhorando a usabilidade do painel de administração.
+    -   **Status:** IN PROGRESS
+    -   **Is recurring issue?** Y (Foi implementado, mas está a falhar).
+    -   **Should Test frontend/backend/both after fix?** Frontend.
+-   **Issue 2:**
+    -   **Descrição:** O e-mail de convite enviado a patrocinadores contém um link com um URL de preview antigo ().
+    -   **Attempted fixes:** O agente analisou  e identificou a função  como a provável fonte do problema.
+    -   **Next debug checklist:**
+        1.  Localizar a função  em .
+        2.  Identificar o URL estático no template HTML.
+        3.  Substituir o URL estático por uma forma dinâmica de obter o URL do frontend, idealmente lendo a variável de ambiente  e passando-a para o template.
+    -   **Why fix this issue and what will be achieved with the fix?** Corrigir isto garante que os links de convite funcionem corretamente, o que é crítico para o sistema de referências da plataforma.
+    -   **Status:** IN PROGRESS
+    -   **Is recurring issue?** N
+    -   **Should Test frontend/backend/both after fix?** Backend.
 
-### **In progress Task List**:
+**In progress Task List**:
 N/A
 
-### **Upcoming and Future Tasks**
-- **Task 1: Melhorar o Formulário de Edição de Viagens no Admin (P2)**
-    - **Descrição:** O utilizador mencionou numa sessão anterior que o formulário para editar viagens no painel de administração não era amigável. Esta tarefa foi adiada.
-    - **Onde retomar:** Rever o componente em , confirmar os requisitos específicos com o utilizador e implementar um formulário de edição mais robusto e intuitivo.
+**Upcoming and Future Tasks**
+-   **Upcoming Tasks:**
+    -   **Implementar Celebração de Sonho 100% Financiado (P1):** Criar uma vista especial para quando uma viagem atinge 100% de financiamento, incluindo uma mensagem de celebração, lista de contribuidores e animação de confetti.
+-   **Future Tasks:**
+    -   **Sistema de Pontos e Sorteios (Backlog):** Implementar um sistema de gamificação.
+    -   **Notificações In-App (Backlog):** Criar um sistema de notificações dentro da plataforma.
+    -   **Refatoração do Backend (Backlog):** Dividir o ficheiro monolítico  em múltiplos módulos/routers para melhorar a manutenção.
 
-### **Completed work in this session**
-- **Sistema de Tradução por IA (Estático e Dinâmico):** Foi implementado e depurado um sistema de tradução completo. Corrigido o endpoint  e substituído todo o texto estático da homepage para usar o sistema de tradução. Criada uma função  para traduzir conteúdo da base de dados em tempo real.
-- **Seletor de Idioma Persistente:** A preferência de idioma do utilizador é agora guardada na base de dados e aplicada automaticamente no login.
-- **Sistema de Partilha Viral e Correção de Bugs:** Criado um componente  para partilha em redes sociais e email, integrado em várias páginas. Resolvido um problema recorrente em que o link de partilha no Gmail não era clicável, alterando o formato dos URLs de convite para usar hífens em vez de espaços (ex: ).
-- **Fluxo de Onboarding Pós-Convite:** Criada uma página de onboarding () para novos utilizadores que chegam através de um link de convite, explicando o funcionamento da plataforma e os benefícios.
-- **Barra de Contribuição Fixa (Página da Viagem):** Implementada uma barra sticky na página de detalhe da viagem () que aparece durante o scroll.
+**Completed work in this session**
+-   **Refatoração do Formulário Admin:** O formulário de edição de viagens foi completamente reconstruído no componente  com uma UI baseada em separadores (Tabs), pré-visualização em tempo real, upload de imagem, geração de storytelling por IA e indicador de alterações por guardar.
+-   **Pré-visualização de E-mails:** Implementado um fluxo onde o administrador pode pré-visualizar o conteúdo HTML de todos os e-mails transacionais (, , ) num modal () antes de confirmar o envio.
+-   **Funcionalidades de Gestão de Viagens:** Adicionados botões no painel de administração para Suspender/Ativar uma viagem (controlando a sua visibilidade pública) e para Definir como Viagem Principal.
+-   **Correções de Bugs no Admin:**
+    -   Corrigido o bug que impedia a edição de texto nos campos de storytelling (problema de perda de foco).
+    -   Corrigido o link de navegação Viagens que não funcionava.
+    -   Corrigida a lógica de suspensão de viagens para garantir que as viagens inativas não aparecem na homepage.
+-   **Sistema de Nível de Confiança:** Implementado um sistema de  para utilizadores (, , ), visível na página da viagem e gerível no painel de administração.
+-   **Melhorias na UI/UX da Homepage:**
+    -   A secção Como funciona foi movida para antes da viagem principal.
+    -   O contador de sonhadores foi movido para o final da página e o seu valor inicial foi definido para 67.
+    -   O design da etiqueta Viagem Principal foi melhorado para maior destaque.
+    -   O layout da secção da viagem principal foi ajustado para um formato de duas colunas.
+-   **Páginas Legais:** Criadas as páginas  e  e adicionados os respetivos links ao rodapé do site.
 
-### **Code Architecture**
+**Earlier issues found/mentioned but not fixed**
+-   Os dois bugs mencionados em  foram reportados pelo utilizador no final da sessão e ainda não foram corrigidos.
+
+**Known issue recurrence from previous fork**
+-   N/A
+
+**Code Architecture**
 
 
-### **Key Technical Concepts**
-- **Tradução Dinâmica:** Foi introduzido um padrão para traduzir conteúdo dinâmico (da base de dados) no lado do cliente, utilizando um  que reage a mudanças de idioma e chama uma função  no .
-- **URL Limpos para Partilha:** Os URLs de convite são gerados usando uma função  que substitui espaços por hífens para garantir que são reconhecidos como links clicáveis em clientes de email como o Gmail. O backend foi adaptado para aceitar este novo formato.
-- **Componentes Reutilizáveis:** Criação do  como um componente de partilha centralizado, recebendo  e  como props para máxima reutilização.
-- **Animações com Framer Motion:** Uso de  e  para criar as barras sticky que aparecem e desaparecem suavemente durante o scroll.
+**Key Technical Concepts**
+-   **Backend Preview Endpoints:** Criação de endpoints de API (e.g., ) que geram o HTML do e-mail mas não o enviam, permitindo a pré-visualização no frontend.
+-   **State Management de Formulários Complexos:** Uso extensivo de  em  para gerir dados do formulário, separador ativo, estado sujo (dirty state) e dados de pré-visualização.
+-   **Refatoração de Componentes:** Extração de uma grande parte da lógica de  para um novo componente dedicado () para melhorar a organização e manutenção.
+-   **Renderização Condicional:** A correção do bug de perda de foco no formulário de storytelling envolveu a alteração da estratégia de renderização dos separadores para evitar a recriação de componentes a cada render.
+-   **Modais de Confirmação:** Implementação de um fluxo de confirmação em duas etapas (clicar -> ver preview em modal -> confirmar envio) para ações críticas como o envio de e-mails em massa.
 
-### **key DB schema**
-- : O modelo foi estendido para incluir  e , que agora são retornados pelo endpoint .
+**key DB schema**
+-   ****:  (valores: 'Sonhador', 'Sonhador Verificado', 'Embaixador').
+-   ****:
+    -    (para suspender/ativar a visibilidade da viagem).
+    -    (para definir a viagem principal na homepage).
 
-### **All files of reference**
-- **Ficheiros Principalmente Modificados:**
-  - : Contém toda a lógica de tradução estática e dinâmica.
-  - : Passou por uma internacionalização completa e está a ser modificado novamente.
-  - : Integrado com o .
-  - : Adicionado o  e uma barra sticky.
-  - : Adicionado endpoint para guardar o idioma e lógica para tratar aliases com hífens.
-- **Ficheiros Novos:**
-  - 
-  - 
-  - 
-  - 
+**All files of reference**
+-   **Ficheiros Críticos e Modificados:**
+    -   : Modificado extensivamente para adicionar endpoints de preview de e-mail, lógica de suspensão/ativação de viagens, definição de viagem principal, e correção de queries para filtrar por .
+    -   : Refatorado para integrar os novos componentes  e , e para adicionar novos controlos de gestão de viagens.
+    -   : Layout reorganizado.
+    -   : Adicionado o badge de nível de confiança e data de registo do sonhador.
+    -   : Contém a lógica de login e redirecionamento que precisa de ser depurada.
+-   **Ficheiros Novos:**
+    -   
+    -   
+    -   
+    -   
 
-### **Areas that need refactoring**:
-- O  continua a ser um componente muito grande e complexo, que beneficiaria de ser dividido em sub-componentes.
-- O  está a crescer em complexidade com múltiplos  para carregar e traduzir dados, podendo também ser um candidato a refatorização.
+**Areas that need refactoring**:
+-   ****: Continua a ser o principal candidato. O ficheiro é extremamente grande e complexo, dificultando a manutenção e a adição de novas funcionalidades.
+-   ****: Apesar da refatoração recente, o componente ainda gere muita lógica de estado e interações, podendo ser ainda mais dividido.
 
-### **key api endpoints**
--  (Novo)
--  (Modificado para aceitar hífens)
--  (Corrigido)
+**key api endpoints**
+-   **Novos Endpoints de Preview:**
+    -   
+    -   
+    -   
+-   **Novos Endpoints de Gestão:**
+    -   
+    -   
+-   **Novo Endpoint de IA:**
+    -   
 
-### **Critical Info for New Agent**
-- **Tradução:** Qualquer novo texto na UI deve ser adicionado ao dicionário em  e envolvido na função . Conteúdo dinâmico deve usar a função  para ser traduzido.
-- **Links de Convite:** Utilize sempre a função  de  para criar links de convite. Isto é crucial para que os links funcionem corretamente no Gmail.
-- **Componentes Sticky:** O padrão para barras sticky que aparecem no scroll está implementado em  usando um  e . Este padrão deve ser replicado para a nova barra na .
+**Critical Info for New Agent**
+-   A prioridade máxima é resolver os dois bugs reportados pelo utilizador para restaurar a sua confiança. O utilizador expressou frustração (faz o teu trabalho como deve ser).
+-   **Bug 1 (Redirect):** A lógica está em . O problema pode estar na forma como o estado  é atualizado ou como  é chamado após o login.
+-   **Bug 2 (Email URL):** O problema está num template HTML estático dentro de . É necessário encontrar uma forma de injetar dinamicamente o URL do frontend, que deve estar disponível através das variáveis de ambiente.
 
-### **documents and test reports created in this job**
-- 
-- 
-- 
--  (atualizado múltiplas vezes)
+**documents and test reports created in this job**
+-    foi atualizado.
+-   Vários relatórios de teste foram criados em .
 
-### **Last 10 User Messages and any pending HUMAN messages**
-1.  **[IN PROGRESS] User (Msg 516):** Pediu 4 melhorias visuais e de funcionalidade para a homepage.
-2.  **[DONE] User (Msg 485):** Pediu uma barra de contribuição fixa na página da viagem.
-3.  **[ADDRESSED] User (Msg 480):** Queixou-se que a solução de copiar para clipboard para o Gmail era pior. O agente reverteu e implementou a solução dos hífens.
-4.  **[ADDRESSED] User (Msg 469):** Apontou que o link do Gmail não era clicável, fornecendo um screenshot que foi crucial para o diagnóstico (problema do ).
-5.  **[EXPLAINED] User (Msg 444):** Questionou o texto Login to journey funding no login social. O agente explicou que é uma limitação do ambiente de preview.
-6.  **[ADDRESSED] User (Msg 376):** Reportou que o link do Gmail não era clicável e que o remetente não era identificado.
-7.  **[ADDRESSED] User (Msg 325):** Reportou problemas com o menu de partilha no dashboard.
-8.  **[DONE] User (Msg 284):** Solicitou o fluxo de onboarding completo para utilizadores convidados.
-9.  **[DONE] User (Msg 227):** Pediu a implementação do sistema de partilha viral.
-10. **[ADDRESSED] User (Msg 186):** Reportou que o conteúdo dinâmico da homepage não estava a ser traduzido.
+**Last 10 User Messages and any pending HUMAN messages**
+1.  **[BUG] User (Msg 440):** Reportou que as últimas alterações não funcionaram, anexando imagens que mostram que o redirecionamento de admin falha e que o e-mail de convite tem um URL antigo.
+2.  **[REQUEST] User (Msg 391):** Pediu que todos os e-mails enviados pelo admin mostrem um preview completo para aprovação antes do envio.
+3.  **[BUG] User (Msg 364):** Reportou que continuava sem conseguir alterar o texto no storytelling.
+4.  **[BUG] User (Msg 331):** Reportou que suspender a viagem principal no admin não a escondia da homepage.
+5.  **[REQUEST] User (Msg 270):** Fez uma lista de 6 pedidos de correção/melhoria para o painel de administração.
+6.  **[REQUEST] User (Msg 233):** Aprovou todas as sugestões para melhorar o formulário de edição de viagens e pediu para avançar com a implementação.
+7.  **[QUESTION] User (Msg 227):** Perguntou por sugestões para melhorar o formulário de edição de viagens no admin.
+8.  **[REQUEST] User (Msg 216):** Pediu para o contador de sonhadores começar em 67.
+9.  **[REQUEST] User (Msg 207):** Pediu para mover o CTA (Queres ajudar...) para o lado direito da imagem da viagem principal.
+10. **[REQUEST] User (Msg 198):** Pediu para suprimir o espaço em branco no topo da secção viagem principal.
 
-### **Project Health Check:**
-- **Broken:** Nenhuma funcionalidade está atualmente quebrada. O sistema de tradução, que era o principal problema, foi corrigido.
-- **Mocked:** A secção Planeia a tua viagem na homepage ainda tem funcionalidade de pesquisa simulada.
+**Project Health Check:**
+-   **Broken:**
+    -   Redirecionamento do administrador após o login.
+    -   URL do link no e-mail de convite de patrocinador.
+-   **Mocked:**
+    -   A secção Planeia a tua viagem na página da viagem continua a ser uma demonstração visual com links estáticos.
 
-### **3rd Party Integrations**
-- **Emergent LLM Key (via ):** Usado para as traduções via IA. É uma integração central e funcional.
-- **Google OAuth:** Para login.
-- **CoinGecko:** Para preços de criptomoedas.
+**3rd Party Integrations**
+-   **Emergent LLM Key ():** Usada para traduções e geração de conteúdo por IA.
+-   **Google OAuth:** Para login/registo.
+-   **Resend:** Configurado com chave de produção para envio de e-mails transacionais a partir de .
 
-### **Testing status**
-- **Testing agent used after significant changes:** YES. O agente de testes foi usado com sucesso para validar o backend, o sistema de partilha e o fluxo de onboarding, tendo inclusive detetado e corrigido um bug de props em falta no .
-- **Test files created:** O agente de testes gerou relatórios em  e utilizou testes de backend criados pelo agente principal.
-- **Known regressions:** O problema do link do Gmail não ser clicável foi uma regressão recorrente que foi finalmente resolvida com a mudança para URLs com hífens.
+**Testing status**
+-   **Testing agent used after significant changes:** YES. O agente de testes foi usado extensivamente, mas os bugs mais recentes indicam que o teste de regressão ou a cobertura de casos de uso pode não ter sido completa.
+-   **Troubleshoot agent used after agent stuck in loop:** NO.
+-   **Test files created:** Relatórios em .
+-   **Known regressions:** Sim, o redirecionamento do admin que funcionava anteriormente está agora quebrado.
 
-### **Credentials to test flow:**
-- **Admin:**  / 
+**Credentials to test flow:**
+-   **Admin:**  / 
 
-### **What agent forgot to execute**
-- A tarefa de Melhorar o Formulário de Edição de Viagens no Admin, mencionada no handoff inicial, continua pendente e não foi abordada nesta sessão.</analysis>
+**What agent forgot to execute**
+-   O agente não conseguiu garantir o funcionamento correto de duas funcionalidades críticas implementadas recentemente: o redirecionamento do administrador e a utilização de URLs dinâmicos em todos os e-mails. Estas falhas causaram uma regressão na experiência do utilizador.</analysis>

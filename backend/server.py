@@ -374,7 +374,7 @@ async def require_admin(request: Request) -> User:
 
 # ==================== EMAIL SYSTEM (RESEND) ====================
 
-FRONTEND_URL = "https://consent-flow-4.preview.emergentagent.com"
+FRONTEND_URL = "https://admin-redirect-fix-6.preview.emergentagent.com"
 
 def get_email_base_template(content: str, title: str = "4Luis") -> str:
     """Base HTML email template with 4Luis branding"""
@@ -2593,7 +2593,7 @@ async def create_subscription_checkout(request: Request):
         raise HTTPException(status_code=400, detail="Já tens uma subscrição ativa")
     
     # Get frontend URL for redirects
-    frontend_url = os.environ.get('FRONTEND_URL', 'https://consent-flow-4.preview.emergentagent.com')
+    frontend_url = os.environ.get('FRONTEND_URL', 'https://admin-redirect-fix-6.preview.emergentagent.com')
     
     try:
         # Create Stripe Checkout Session
