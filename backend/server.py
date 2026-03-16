@@ -2505,6 +2505,66 @@ Sem explicações, apenas o JSON."""
         logger.error(f"AI description generation error: {e}")
         raise HTTPException(status_code=500, detail="Erro ao gerar descrições com IA")
 
+
+@api_router.post("/admin/generate-story-chapters")
+async def generate_story_chapters(request: Request):
+    """Generate 5 storytelling chapters using AI"""
+    user = await require_admin(request)
+    
+    body = await request.json()
+    journey_name = body.get("journey_name", "")
+    poetic_name = body.get("poetic_name", "")
+    description = body.get("description", "")
+    
+    if not journey_name:
+        raise HTTPException(status_code=400, detail="Nome da viagem é obrigatório")
+    
+    from emergentintegrations.llm.chat import LlmChat, UserMessage
+    
+    api_key = os.environ.get("EMERGENT_LLM_KEY")
+    if not api_key:
+        raise HTTPException(status_code=500, detail="Chave de IA não configurada")
+    
+    context = f"Destino: {journey_name}"
+    if poetic_name:
+        context += f" — {poetic_name}"
+    if description:
+        context += f". {description}"
+    
+    chat = LlmChat(
+        api_key=api_key,
+        session_id=f"story_gen_{uuid.uuid4().hex[:8]}",
+        system_message="""Gera 5 capítulos de storytelling para uma campanha de crowdfunding de viagens.
+Cada capítulo corresponde a um nível de financiamento:
+1: 0%-25% (O sonho nasce)
+2: 25%-50% (O sonho ganha forma)
+3: 50%-75% (O sonho aproxima-se)
+4: 75%-100% (O sonho quase real)
+5: 100%+ (O sonho realizado)
+
+Cada capítulo deve ter um título curto e 2-3 linhas de texto poético/emocional em português, relacionadas com o destino.
+Responde APENAS com JSON no formato:
+{"1": {"title": "...", "lines": ["linha1", "linha2"]}, "2": {...}, "3": {...}, "4": {...}, "5": {...}}
+Sem explicações, apenas o JSON."""
+    ).with_model("openai", "gpt-5.2")
+    
+    user_message = UserMessage(text=f"Gera 5 capítulos de storytelling para: {context}")
+    
+    try:
+        response = await chat.send_message(user_message)
+        clean_response = response.strip()
+        if clean_response.startswith("```"):
+            clean_response = clean_response.split("```")[1]
+            if clean_response.startswith("json"):
+                clean_response = clean_response[4:]
+        import json as json_mod
+        chapters = json_mod.loads(clean_response)
+        return {"chapters": chapters}
+    except Exception as e:
+        logger.error(f"AI story generation error: {e}")
+        raise HTTPException(status_code=500, detail="Erro ao gerar capítulos com IA")
+
+
 # ==================== STRIPE SUBSCRIPTIONS ====================
 
 @api_router.post("/subscription/create-checkout")
