@@ -63,27 +63,48 @@ const Admin = () => {
   const [generatingDescs, setGeneratingDescs] = useState(false);
   const [journeyFilter, setJourneyFilter] = useState('todas');
 
-  // Autosave: restore create form data from localStorage
+  // Autosave: restore create form data from localStorage or server
   const CREATE_AUTOSAVE_KEY = 'autosave_journey_create';
   const defaultFormData = { name: '', poetic_name: '', description: '', emotional_message: '', impact_description: '', image_url: '', goal_amount: 5000, target_date: '' };
-  const [formData, setFormData] = useState(() => {
-    try {
-      const raw = localStorage.getItem(CREATE_AUTOSAVE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (parsed._autosave_ts && Date.now() - parsed._autosave_ts < 86400000) {
-          const { _autosave_ts, ...data } = parsed;
-          return { ...defaultFormData, ...data };
-        }
-        localStorage.removeItem(CREATE_AUTOSAVE_KEY);
-      }
-    } catch { /* ignore */ }
-    return defaultFormData;
-  });
+  const [formData, setFormData] = useState(defaultFormData);
   const [createFormAutosaved, setCreateFormAutosaved] = useState(false);
+  const [createDraftLoaded, setCreateDraftLoaded] = useState(false);
   const createAutosaveTimer = useRef(null);
+  const createServerTimer = useRef(null);
 
-  // Autosave create form on changes
+  // Load create draft from server or localStorage on mount
+  useEffect(() => {
+    if (createDraftLoaded || !token) return;
+    setCreateDraftLoaded(true);
+    const loadCreateDraft = async () => {
+      // Try server first
+      try {
+        const res = await axios.get(`${API}/admin/drafts/journey_create/new`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.data?.data) {
+          setFormData(prev => ({ ...defaultFormData, ...res.data.data }));
+          return;
+        }
+      } catch { /* 404 */ }
+      // Fallback to localStorage
+      try {
+        const raw = localStorage.getItem(CREATE_AUTOSAVE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed._autosave_ts && Date.now() - parsed._autosave_ts < 86400000) {
+            const { _autosave_ts, ...data } = parsed;
+            setFormData({ ...defaultFormData, ...data });
+          } else {
+            localStorage.removeItem(CREATE_AUTOSAVE_KEY);
+          }
+        }
+      } catch { /* ignore */ }
+    };
+    loadCreateDraft();
+  }, [token, createDraftLoaded]);
+
+  // Autosave create form on changes (local + server)
   const isCreateFormDirty = JSON.stringify(formData) !== JSON.stringify(defaultFormData);
   useEffect(() => {
     if (!isCreateFormDirty || !showCreateForm) return;
@@ -91,16 +112,37 @@ const Admin = () => {
     createAutosaveTimer.current = setTimeout(() => {
       try {
         localStorage.setItem(CREATE_AUTOSAVE_KEY, JSON.stringify({ ...formData, _autosave_ts: Date.now() }));
-        setCreateFormAutosaved(true);
-        setTimeout(() => setCreateFormAutosaved(false), 3000);
       } catch { /* ignore */ }
+      // Sync to server
+      if (createServerTimer.current) clearTimeout(createServerTimer.current);
+      createServerTimer.current = setTimeout(async () => {
+        try {
+          await axios.put(`${API}/admin/drafts/journey_create/new`,
+            { data: formData },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          setCreateFormAutosaved(true);
+          setTimeout(() => setCreateFormAutosaved(false), 3000);
+        } catch {
+          setCreateFormAutosaved(true);
+          setTimeout(() => setCreateFormAutosaved(false), 3000);
+        }
+      }, 500);
     }, 2000);
-    return () => { if (createAutosaveTimer.current) clearTimeout(createAutosaveTimer.current); };
-  }, [formData, isCreateFormDirty, showCreateForm]);
+    return () => {
+      if (createAutosaveTimer.current) clearTimeout(createAutosaveTimer.current);
+      if (createServerTimer.current) clearTimeout(createServerTimer.current);
+    };
+  }, [formData, isCreateFormDirty, showCreateForm, token]);
 
-  const clearCreateAutosave = useCallback(() => {
+  const clearCreateAutosave = useCallback(async () => {
     localStorage.removeItem(CREATE_AUTOSAVE_KEY);
-  }, []);
+    try {
+      await axios.delete(`${API}/admin/drafts/journey_create/new`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+    } catch { /* ignore */ }
+  }, [token]);
 
   useEffect(() => {
     if (!authLoading && (!user || !user.is_admin)) {

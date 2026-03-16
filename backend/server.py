@@ -5494,6 +5494,61 @@ async def get_travel_resources(journey_id: str):
     
     return resources
 
+
+# ==================== DRAFTS / AUTOSAVE SYSTEM ====================
+
+@api_router.put("/admin/drafts/{draft_type}/{reference_id}")
+async def save_draft(draft_type: str, reference_id: str, request: Request):
+    """Save or update a draft (autosave to server)"""
+    user = await require_admin(request)
+    body = await request.json()
+    data = body.get("data", {})
+    
+    now = datetime.now(timezone.utc).isoformat()
+    await db.drafts.update_one(
+        {"user_id": user.user_id, "draft_type": draft_type, "reference_id": reference_id},
+        {"$set": {
+            "user_id": user.user_id,
+            "draft_type": draft_type,
+            "reference_id": reference_id,
+            "data": data,
+            "updated_at": now
+        }, "$setOnInsert": {"created_at": now}},
+        upsert=True
+    )
+    return {"status": "saved", "updated_at": now}
+
+@api_router.get("/admin/drafts/{draft_type}/{reference_id}")
+async def get_draft(draft_type: str, reference_id: str, request: Request):
+    """Get a specific draft"""
+    user = await require_admin(request)
+    draft = await db.drafts.find_one(
+        {"user_id": user.user_id, "draft_type": draft_type, "reference_id": reference_id},
+        {"_id": 0}
+    )
+    if not draft:
+        raise HTTPException(status_code=404, detail="Rascunho nao encontrado")
+    return draft
+
+@api_router.delete("/admin/drafts/{draft_type}/{reference_id}")
+async def delete_draft(draft_type: str, reference_id: str, request: Request):
+    """Delete a draft after successful save"""
+    user = await require_admin(request)
+    await db.drafts.delete_one(
+        {"user_id": user.user_id, "draft_type": draft_type, "reference_id": reference_id}
+    )
+    return {"status": "deleted"}
+
+@api_router.get("/admin/drafts")
+async def list_drafts(request: Request):
+    """List all drafts for current admin"""
+    user = await require_admin(request)
+    drafts = await db.drafts.find(
+        {"user_id": user.user_id},
+        {"_id": 0}
+    ).to_list(50)
+    return {"drafts": drafts}
+
 # ==================== SEED DATA ====================
 
 @api_router.post("/seed-journeys")

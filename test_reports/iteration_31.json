@@ -1,0 +1,90 @@
+{
+  "summary": "Tested server-side drafts/autosave system for crowdfunding platform 4Luis. All backend endpoints (PUT/GET/DELETE /api/admin/drafts/{type}/{ref_id} and GET /api/admin/drafts) and frontend integration working correctly. Server drafts allow admin to recover unsaved work across devices.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "passed_tests": [
+    "Backend: PUT /api/admin/drafts/journey_edit/{journey_id} - creates/updates draft, returns {status:'saved', updated_at:...}",
+    "Backend: GET /api/admin/drafts/journey_edit/{journey_id} - returns draft with data, draft_type, reference_id, user_id, timestamps",
+    "Backend: DELETE /api/admin/drafts/journey_edit/{journey_id} - deletes draft, returns {status:'deleted'}",
+    "Backend: GET /api/admin/drafts - lists all drafts for admin",
+    "Backend: GET /api/admin/drafts/journey_edit/nonexistent - returns 404",
+    "Backend: PUT /api/admin/drafts/journey_create/new - works for journey_create type",
+    "Backend: All draft endpoints return 401 without admin token",
+    "Backend: Draft timestamps (created_at, updated_at) included in responses",
+    "Frontend: Edit form changes trigger autosave - 'Alteracoes por guardar' indicator appears",
+    "Frontend: After 2.5s debounce, 'Sincronizado' indicator confirms server sync",
+    "Frontend: Server draft verified via API after autosave",
+    "Frontend: Cancel button clears server draft (verified 404 after cancel)",
+    "Frontend: Server draft recovery - banner shows 'Rascunho recuperado do servidor'",
+    "Frontend: Form populated with server draft data on load",
+    "Frontend: 'Descartar' button restores original journey data",
+    "Frontend: Create Form autosave - 'Rascunho guardado' indicator appears",
+    "Frontend: journey_create/new draft created on server after autosave",
+    "Frontend: Create form Cancel clears server draft"
+  ],
+  "test_report_links": [
+    "/app/backend/tests/test_server_drafts.py",
+    "/app/test_reports/pytest/server_drafts_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Server draft endpoints correctly use upsert pattern to handle create/update in single PUT",
+    "Draft endpoints properly exclude MongoDB _id from responses via projection",
+    "Frontend autosave uses dual-layer approach: localStorage (instant) + server (async 0.5s after)",
+    "Proper cleanup: clearAutosave() deletes both localStorage and server draft on cancel/save"
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_server_drafts.py"
+  ],
+  "success_rate": {
+    "backend": "100% (15/15 tests passed)",
+    "frontend": "100% (11/11 features verified via Playwright)"
+  },
+  "test_credentials": {
+    "admin_email": "admin@4luis.com",
+    "admin_password": "Admin1"
+  },
+  "seed_data_creation": "None - used existing journeys (journey_china001)",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Server-side drafts fully working. Key endpoints: PUT/GET/DELETE /api/admin/drafts/{draft_type}/{reference_id}, GET /api/admin/drafts. Draft types: 'journey_edit' (for editing existing journey), 'journey_create' (for new journey with ref_id='new'). Frontend uses debounced autosave: 2s to localStorage + 0.5s additional for server sync. Key data-testids: autosave-indicator (shows 'Sincronizado'), autosave-restore-banner (shows 'Rascunho recuperado do servidor'), autosave-keep-btn, autosave-discard-btn, edit-btn-journey_{id}, edit-cancel-btn, create-journey-btn, input-name.",
+  "features_verified": [
+    {
+      "feature": "Server Draft CRUD via API",
+      "status": "WORKING",
+      "details": "All CRUD operations work correctly with proper auth enforcement"
+    },
+    {
+      "feature": "Edit Form Server Autosave",
+      "status": "WORKING",
+      "details": "Changes sync to server with 'Sincronizado' indicator"
+    },
+    {
+      "feature": "Server Draft Recovery Banner",
+      "status": "WORKING",
+      "details": "Banner shows 'Rascunho recuperado do servidor' when server draft exists"
+    },
+    {
+      "feature": "Descartar Restore Original",
+      "status": "WORKING",
+      "details": "Clicking Descartar restores original journey data and deletes draft"
+    },
+    {
+      "feature": "Create Form Server Autosave",
+      "status": "WORKING",
+      "details": "New journey form syncs to journey_create/new draft on server"
+    },
+    {
+      "feature": "Cancel Clears Server Draft",
+      "status": "WORKING",
+      "details": "Both edit and create form cancel buttons delete server drafts"
+    }
+  ]
+}

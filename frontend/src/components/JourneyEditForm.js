@@ -21,53 +21,97 @@ const AUTOSAVE_DELAY = 2000;
 const getAutosaveKey = (journeyId) => `autosave_journey_${journeyId}`;
 
 const JourneyEditForm = ({ journey, onSave, onCancel, getAuthHeaders, token, onEmailPreview }) => {
-  // Check for autosaved data on mount
-  const savedData = useMemo(() => {
-    try {
-      const raw = localStorage.getItem(getAutosaveKey(journey.journey_id));
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        // Only use if saved within last 24h
-        if (parsed._autosave_ts && Date.now() - parsed._autosave_ts < 86400000) {
-          const { _autosave_ts, ...data } = parsed;
-          return data;
-        }
-        localStorage.removeItem(getAutosaveKey(journey.journey_id));
-      }
-    } catch { /* ignore */ }
-    return null;
-  }, [journey.journey_id]);
-
-  const [form, setForm] = useState(savedData || { ...journey });
+  const [form, setForm] = useState({ ...journey });
   const [tab, setTab] = useState('basico');
   const [saving, setSaving] = useState(false);
   const [generatingDescs, setGeneratingDescs] = useState(false);
   const [generatingStory, setGeneratingStory] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [errors, setErrors] = useState({});
-  const [autosaveStatus, setAutosaveStatus] = useState(savedData ? 'restored' : null);
-  const [showRestoreBanner, setShowRestoreBanner] = useState(!!savedData);
+  const [autosaveStatus, setAutosaveStatus] = useState(null);
+  const [showRestoreBanner, setShowRestoreBanner] = useState(false);
+  const [draftSource, setDraftSource] = useState(null); // 'server' or 'local'
   const autosaveTimer = useRef(null);
+  const serverSaveTimer = useRef(null);
+  const initialLoadDone = useRef(false);
 
   const originalJson = useMemo(() => JSON.stringify(journey), [journey]);
   const hasChanges = JSON.stringify(form) !== originalJson;
 
-  // Autosave to localStorage with debounce
+  // Load draft: try server first, then localStorage
+  useEffect(() => {
+    if (initialLoadDone.current) return;
+    initialLoadDone.current = true;
+
+    const loadDraft = async () => {
+      // Try server draft first
+      try {
+        const res = await axios.get(`${API}/admin/drafts/journey_edit/${journey.journey_id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.data?.data) {
+          setForm(prev => ({ ...journey, ...res.data.data }));
+          setShowRestoreBanner(true);
+          setDraftSource('server');
+          return;
+        }
+      } catch { /* 404 = no server draft */ }
+
+      // Fallback to localStorage
+      try {
+        const raw = localStorage.getItem(getAutosaveKey(journey.journey_id));
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed._autosave_ts && Date.now() - parsed._autosave_ts < 86400000) {
+            const { _autosave_ts, ...data } = parsed;
+            setForm(prev => ({ ...journey, ...data }));
+            setShowRestoreBanner(true);
+            setDraftSource('local');
+            return;
+          }
+          localStorage.removeItem(getAutosaveKey(journey.journey_id));
+        }
+      } catch { /* ignore */ }
+    };
+
+    loadDraft();
+  }, [journey, token]);
+
+  // Autosave to localStorage + server with debounce
   useEffect(() => {
     if (!hasChanges) return;
     if (autosaveTimer.current) clearTimeout(autosaveTimer.current);
     autosaveTimer.current = setTimeout(() => {
+      // Save to localStorage (instant backup)
       try {
         localStorage.setItem(
           getAutosaveKey(journey.journey_id),
           JSON.stringify({ ...form, _autosave_ts: Date.now() })
         );
-        setAutosaveStatus('saved');
-        setTimeout(() => setAutosaveStatus(null), 3000);
-      } catch { /* storage full - ignore */ }
+      } catch { /* storage full */ }
+
+      // Save to server (async, non-blocking)
+      if (serverSaveTimer.current) clearTimeout(serverSaveTimer.current);
+      serverSaveTimer.current = setTimeout(async () => {
+        try {
+          await axios.put(`${API}/admin/drafts/journey_edit/${journey.journey_id}`, 
+            { data: form },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          setAutosaveStatus('saved');
+          setTimeout(() => setAutosaveStatus(null), 3000);
+        } catch {
+          // Server save failed, localStorage is still there
+          setAutosaveStatus('saved-local');
+          setTimeout(() => setAutosaveStatus(null), 3000);
+        }
+      }, 500);
     }, AUTOSAVE_DELAY);
-    return () => { if (autosaveTimer.current) clearTimeout(autosaveTimer.current); };
-  }, [form, hasChanges, journey.journey_id]);
+    return () => {
+      if (autosaveTimer.current) clearTimeout(autosaveTimer.current);
+      if (serverSaveTimer.current) clearTimeout(serverSaveTimer.current);
+    };
+  }, [form, hasChanges, journey.journey_id, token]);
 
   // Warn before leaving with unsaved changes
   useEffect(() => {
@@ -78,15 +122,21 @@ const JourneyEditForm = ({ journey, onSave, onCancel, getAuthHeaders, token, onE
     return () => window.removeEventListener('beforeunload', handler);
   }, [hasChanges]);
 
-  const clearAutosave = useCallback(() => {
+  const clearAutosave = useCallback(async () => {
     localStorage.removeItem(getAutosaveKey(journey.journey_id));
-  }, [journey.journey_id]);
+    try {
+      await axios.delete(`${API}/admin/drafts/journey_edit/${journey.journey_id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+    } catch { /* ignore */ }
+  }, [journey.journey_id, token]);
 
   const discardRestore = () => {
     setForm({ ...journey });
     clearAutosave();
     setShowRestoreBanner(false);
     setAutosaveStatus(null);
+    setDraftSource(null);
   };
 
   const update = useCallback((field, value) => {
@@ -214,7 +264,11 @@ const JourneyEditForm = ({ journey, onSave, onCancel, getAuthHeaders, token, onE
             className="bg-blue-50 border-b border-blue-200 px-6 py-3 flex items-center justify-between" data-testid="autosave-restore-banner">
             <div className="flex items-center gap-2 text-sm text-blue-700">
               <Cloud className="w-4 h-4" />
-              <span>Dados recuperados de uma sessao anterior. Deseja mante-los?</span>
+              <span>
+                {draftSource === 'server' 
+                  ? 'Rascunho recuperado do servidor. Deseja mante-lo?' 
+                  : 'Dados recuperados de uma sessao anterior. Deseja mante-los?'}
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <button onClick={() => setShowRestoreBanner(false)}
@@ -245,10 +299,11 @@ const JourneyEditForm = ({ journey, onSave, onCancel, getAuthHeaders, token, onE
             )}
           </AnimatePresence>
           <AnimatePresence>
-            {autosaveStatus === 'saved' && (
+            {autosaveStatus && (
               <motion.span initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}
-                className="flex items-center gap-1 text-xs text-green-600" data-testid="autosave-indicator">
-                <Cloud className="w-3 h-3" /> Autosaved
+                className={`flex items-center gap-1 text-xs ${autosaveStatus === 'saved-local' ? 'text-amber-600' : 'text-green-600'}`} data-testid="autosave-indicator">
+                <Cloud className="w-3 h-3" /> 
+                {autosaveStatus === 'saved-local' ? 'Guardado localmente' : 'Sincronizado'}
               </motion.span>
             )}
           </AnimatePresence>
