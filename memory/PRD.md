@@ -14,6 +14,15 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 
 ## What's Been Implemented
 
+### Formulario de Edicao de Viagens no Admin (2026-03-09)
+- Novo componente JourneyEditForm.js com navegacao por 4 tabs (Basico/Conteudo/Storytelling/Configuracoes)
+- Preview em tempo real da viagem (toggle sidebar)
+- Indicador "Alteracoes por guardar" quando ha mudancas nao guardadas
+- Validacao inline (nome obrigatorio, objetivo minimo 100€, URL valido)
+- Geracao de storytelling com IA (5 capitulos) via novo endpoint /api/admin/generate-story-chapters
+- Geracao de descricoes de contribuicao com IA (ja existia, agora integrada no novo form)
+- Animacoes suaves na transicao entre tabs
+
 ### Sistema de Confianca (2026-03-09)
 - 3 niveis de confianca: Sonhador, Sonhador Verificado, Embaixador
 - Badge visual na pagina da viagem (peach/verde/dourado) com icones criativos
