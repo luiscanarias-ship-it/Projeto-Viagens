@@ -73,7 +73,15 @@ const Header = () => {
               {t('nav.home')}
             </Link>
             <Link 
-              to="/#journeys" 
+              to="/" 
+              onClick={(e) => {
+                e.preventDefault();
+                if (window.location.pathname === '/') {
+                  document.getElementById('journeys')?.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                  navigate('/?scrollTo=journeys');
+                }
+              }}
               className="text-[#2D2A26] hover:text-[#FFBE98] transition-colors font-medium"
               data-testid="nav-journeys"
             >

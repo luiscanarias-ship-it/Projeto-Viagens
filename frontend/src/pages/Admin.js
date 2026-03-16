@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit2, Trash2, Save, X, BarChart3, Settings, CheckCircle, XCircle, Mail, Users, Award, Gift, Crown, TrendingUp, UserPlus, ChevronRight, Star, FileText, Clock, MapPin, Target, Calendar, Eye, MessageSquare, AlertCircle, ExternalLink, History, Search, Heart, Sparkles, BookOpen } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, X, BarChart3, Settings, CheckCircle, XCircle, Mail, Users, Award, Gift, Crown, TrendingUp, UserPlus, ChevronRight, Star, FileText, Clock, MapPin, Target, Calendar, Eye, EyeOff, MessageSquare, AlertCircle, ExternalLink, History, Search, Heart, Sparkles, BookOpen } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -44,6 +44,8 @@ const Admin = () => {
   // Visibility state
   const [visibilityJourneys, setVisibilityJourneys] = useState([]);
   const [loadingVisibility, setLoadingVisibility] = useState(false);
+  // Email announce state
+  const [showAnnounceSelect, setShowAnnounceSelect] = useState(false);
   // Candidaturas state
   const [ambassadorApplications, setAmbassadorApplications] = useState(null);
   const [loadingApplications, setLoadingApplications] = useState(false);
@@ -166,6 +168,40 @@ const Admin = () => {
     } catch (error) {
       console.error('Error deleting journey:', error);
       alert('Erro ao eliminar viagem');
+    }
+  };
+
+  const handleToggleSuspend = async (journey) => {
+    const newActive = !journey.is_active;
+    const action = newActive ? 'reativar' : 'suspender';
+    if (!window.confirm(`Queres ${action} a viagem "${journey.name}"?`)) return;
+    try {
+      const headers = getAuthHeaders();
+      const response = await axios.put(`${API}/admin/journeys/${journey.journey_id}`, 
+        { ...journey, is_active: newActive }, { headers, withCredentials: true });
+      setJourneys(journeys.map(j => j.journey_id === journey.journey_id ? response.data : j));
+    } catch (error) {
+      alert('Erro ao alterar estado da viagem');
+    }
+  };
+
+  const handleSetMainTrip = async (journey) => {
+    if (!window.confirm(`Definir "${journey.name}" como viagem principal?`)) return;
+    try {
+      const headers = getAuthHeaders();
+      // First unset all as main
+      for (const j of journeys.filter(j => j.is_main_trip)) {
+        await axios.put(`${API}/admin/journeys/${j.journey_id}`, { ...j, is_main_trip: false }, { headers, withCredentials: true });
+      }
+      // Set the selected one as main
+      const response = await axios.put(`${API}/admin/journeys/${journey.journey_id}`, 
+        { ...journey, is_main_trip: true }, { headers, withCredentials: true });
+      setJourneys(journeys.map(j => {
+        if (j.journey_id === journey.journey_id) return response.data;
+        return { ...j, is_main_trip: false };
+      }));
+    } catch (error) {
+      alert('Erro ao definir viagem principal');
     }
   };
 
@@ -674,7 +710,7 @@ const Admin = () => {
             >
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold">{t('admin.journeys')}</h2>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 relative">
                   <button
                     onClick={async () => {
                       if (!window.confirm('Enviar resumo semanal para TODOS os utilizadores?')) return;
@@ -689,6 +725,44 @@ const Admin = () => {
                     <Mail className="w-3.5 h-3.5" />
                     Resumo Semanal
                   </button>
+                  <div className="relative">
+                    <button
+                      onClick={() => setShowAnnounceSelect(!showAnnounceSelect)}
+                      className="px-3 py-2 bg-blue-100 text-blue-700 rounded-xl font-medium text-xs hover:bg-blue-200 transition-colors flex items-center gap-1.5"
+                      data-testid="announce-dream-btn"
+                    >
+                      <Heart className="w-3.5 h-3.5" />
+                      Anunciar Novo Sonho
+                    </button>
+                    {showAnnounceSelect && (
+                      <div className="absolute right-0 top-full mt-2 bg-white border border-stone-200 rounded-xl shadow-xl p-3 z-50 w-72" data-testid="announce-select-dropdown">
+                        <p className="text-xs font-semibold text-[#6B6661] mb-2">Seleciona a viagem a anunciar:</p>
+                        <div className="space-y-1 max-h-48 overflow-y-auto">
+                          {journeys.filter(j => j.is_active && !j.announcement_email_sent).map(j => (
+                            <button key={j.journey_id}
+                              onClick={async () => {
+                                if (!window.confirm(`Anunciar "${j.name}" como novo sonho para TODOS os utilizadores?`)) return;
+                                try {
+                                  await axios.post(`${API}/admin/emails/new-journey/${j.journey_id}`, {}, { headers: { Authorization: `Bearer ${token}` } });
+                                  alert(`Email de novo sonho "${j.name}" enviado!`);
+                                  setShowAnnounceSelect(false);
+                                  fetchJourneys();
+                                } catch (err) { alert('Erro: ' + (err.response?.data?.detail || err.message)); }
+                              }}
+                              className="w-full text-left px-3 py-2 rounded-lg hover:bg-stone-50 transition-colors flex items-center gap-2 text-sm"
+                              data-testid={`announce-journey-${j.journey_id}`}
+                            >
+                              <span className="font-semibold text-[#2D2A26]">{j.name}</span>
+                              {j.is_main_trip && <Star className="w-3 h-3 text-[#F2C94C] fill-[#F2C94C]" />}
+                            </button>
+                          ))}
+                          {journeys.filter(j => j.is_active && !j.announcement_email_sent).length === 0 && (
+                            <p className="text-xs text-[#6B6661] py-2">Nenhuma viagem ativa por anunciar</p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                   <button
                     onClick={() => setShowCreateForm(true)}
                     className="btn-primary text-sm px-4 py-2 flex items-center gap-2"
@@ -901,15 +975,51 @@ const Admin = () => {
                           {journey.is_ambassador_journey ? (journey.ambassador_name || 'Embaixador') : 'Admin'}
                         </div>
                         <div className="flex gap-1">
+                          {journey.is_main_trip && (
+                            <span className="px-1.5 py-0.5 bg-[#F2C94C]/20 text-[#D4A017] rounded text-[10px] font-bold" data-testid={`main-badge-${journey.journey_id}`}>
+                              Principal
+                            </span>
+                          )}
+                          {!journey.is_active && (
+                            <span className="px-1.5 py-0.5 bg-red-100 text-red-600 rounded text-[10px] font-bold" data-testid={`suspended-badge-${journey.journey_id}`}>
+                              Suspensa
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex gap-1">
+                          <button
+                            onClick={() => handleSetMainTrip(journey)}
+                            className={`p-1.5 rounded-lg transition-colors ${journey.is_main_trip ? 'bg-[#F2C94C]/20' : 'hover:bg-stone-100'}`}
+                            title={journey.is_main_trip ? 'Viagem principal' : 'Definir como principal'}
+                            data-testid={`set-main-btn-${journey.journey_id}`}
+                          >
+                            <Star className={`w-3.5 h-3.5 ${journey.is_main_trip ? 'text-[#F2C94C] fill-[#F2C94C]' : 'text-[#6B6661]'}`} />
+                          </button>
+                          <button
+                            onClick={() => handleToggleSuspend(journey)}
+                            className="p-1.5 hover:bg-stone-100 rounded-lg transition-colors"
+                            title={journey.is_active ? 'Suspender viagem' : 'Reativar viagem'}
+                            data-testid={`suspend-btn-${journey.journey_id}`}
+                          >
+                            {journey.is_active ? (
+                              <EyeOff className="w-3.5 h-3.5 text-[#6B6661]" />
+                            ) : (
+                              <Eye className="w-3.5 h-3.5 text-green-600" />
+                            )}
+                          </button>
                           <button
                             onClick={() => setEditingJourney(journey)}
                             className="p-1.5 hover:bg-stone-100 rounded-lg transition-colors"
+                            title="Editar viagem"
+                            data-testid={`edit-btn-${journey.journey_id}`}
                           >
                             <Edit2 className="w-3.5 h-3.5 text-[#6B6661]" />
                           </button>
                           <button
                             onClick={() => handleDelete(journey.journey_id)}
                             className="p-1.5 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Eliminar viagem"
+                            data-testid={`delete-btn-${journey.journey_id}`}
                           >
                             <Trash2 className="w-3.5 h-3.5 text-red-500" />
                           </button>

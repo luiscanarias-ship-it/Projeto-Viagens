@@ -50,6 +50,18 @@ const Home = () => {
   const [expandedSection, setExpandedSection] = useState(null);
   const [loadingResources, setLoadingResources] = useState(false);
 
+  // Scroll to section if coming from another page with ?scrollTo=
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const scrollTo = params.get('scrollTo');
+    if (scrollTo) {
+      setTimeout(() => {
+        document.getElementById(scrollTo)?.scrollIntoView({ behavior: 'smooth' });
+        window.history.replaceState({}, '', '/');
+      }, 500);
+    }
+  }, []);
+
   // Sticky bar scroll listener
   useEffect(() => {
     const handleScroll = () => setShowStickyBar(window.scrollY > 600);
@@ -512,7 +524,7 @@ const Home = () => {
       </section>
 
       {/* ==================== 3. SONHOS EM FASE DE MATERIALIZAÇÃO ==================== */}
-      <section className="py-16 bg-[#FAFAF9]" data-testid="materializing-dreams-section">
+      <section id="journeys" className="py-16 bg-[#FAFAF9]" data-testid="materializing-dreams-section">
         <div className="max-w-6xl mx-auto px-6">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
             <span className="inline-block px-4 py-2 bg-[#E6F4F1] rounded-full text-[#2D2A26] font-medium text-sm mb-4">

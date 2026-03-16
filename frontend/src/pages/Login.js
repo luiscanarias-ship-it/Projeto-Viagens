@@ -41,8 +41,12 @@ const Login = () => {
           navigate('/onboarding');
         }
       } else {
-        await login(formData.email, formData.password);
-        navigate('/dashboard');
+        const userData = await login(formData.email, formData.password);
+        if (userData?.is_admin) {
+          navigate('/admin');
+        } else {
+          navigate('/dashboard');
+        }
       }
     } catch (err) {
       setError(err.response?.data?.detail || 'Erro ao autenticar');
