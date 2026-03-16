@@ -102,300 +102,6 @@ const JourneyEditForm = ({ journey, onSave, onCancel, getAuthHeaders, token }) =
       errors[field] ? 'border-red-300 focus:ring-red-300/50' : 'border-stone-200 focus:ring-[#FFBE98]/50'
     }`;
 
-  // Tab: Basico
-  const TabBasico = () => (
-    <div className="space-y-6">
-      <div>
-        <h4 className="font-semibold text-[#2D2A26] flex items-center gap-2 mb-4">
-          <MapPin className="w-4 h-4 text-[#FFBE98]" /> Informacoes Basicas
-        </h4>
-        <div className="grid md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-[#6B6661] mb-1">Nome do Destino *</label>
-            <input type="text" value={form.name || ''} onChange={e => update('name', e.target.value)}
-              placeholder="Ex: China, Japao, Brasil..." className={inputClass('name')} data-testid="edit-name" />
-            <FieldError field="name" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-[#6B6661] mb-1">Titulo Poetico</label>
-            <input type="text" value={form.poetic_name || ''} onChange={e => update('poetic_name', e.target.value)}
-              placeholder="Ex: Onde os Dragoes Dancam" className={inputClass('poetic_name')} data-testid="edit-poetic-name" />
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <h4 className="font-semibold text-[#2D2A26] flex items-center gap-2 mb-4">
-          <Target className="w-4 h-4 text-[#FFBE98]" /> Objetivos Financeiros
-        </h4>
-        <div className="grid md:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-[#6B6661] mb-1">Objetivo (€) *</label>
-            <input type="number" value={form.goal_amount || ''} onChange={e => update('goal_amount', parseFloat(e.target.value) || 0)}
-              min="100" className={inputClass('goal_amount')} data-testid="edit-goal" />
-            <FieldError field="goal_amount" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-[#6B6661] mb-1">Ja Angariado (€)</label>
-            <input type="number" value={form.current_amount || 0} disabled
-              className="w-full px-4 py-2.5 bg-stone-100 border border-stone-200 rounded-xl text-[#6B6661]" />
-            <p className="text-xs text-[#6B6661] mt-1">Calculado automaticamente</p>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-[#6B6661] mb-1">Data Objetivo</label>
-            <input type="date" value={form.target_date || ''} onChange={e => update('target_date', e.target.value)}
-              className={inputClass('target_date')} data-testid="edit-target-date" />
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <h4 className="font-semibold text-[#2D2A26] flex items-center gap-2 mb-4">
-          <Image className="w-4 h-4 text-[#FFBE98]" /> Imagem
-        </h4>
-        <div className="flex gap-4 items-start">
-          <div className="w-32 h-24 rounded-xl overflow-hidden border border-stone-200 bg-stone-100 flex-shrink-0">
-            {form.image_url ? (
-              <img src={form.image_url} alt="Preview" className="w-full h-full object-cover"
-                onError={e => { e.target.style.display = 'none'; }} />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-stone-400">
-                <Image className="w-8 h-8" />
-              </div>
-            )}
-          </div>
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-[#6B6661] mb-1">URL da Imagem</label>
-            <input type="url" value={form.image_url || ''} onChange={e => update('image_url', e.target.value)}
-              placeholder="https://..." className={inputClass('image_url')} data-testid="edit-image-url" />
-            <FieldError field="image_url" />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  // Tab: Conteudo
-  const TabConteudo = () => (
-    <div className="space-y-6">
-      <div>
-        <h4 className="font-semibold text-[#2D2A26] flex items-center gap-2 mb-4">
-          <FileText className="w-4 h-4 text-[#FFBE98]" /> Textos e Descricoes
-        </h4>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-[#6B6661] mb-1">Mensagem Emocional</label>
-            <textarea value={form.emotional_message || ''} onChange={e => update('emotional_message', e.target.value)}
-              placeholder="Mensagem que aparece em destaque na pagina da viagem..." rows={2}
-              className={`${inputClass('emotional_message')} resize-none`} data-testid="edit-emotional" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-[#6B6661] mb-1">Descricao do Impacto</label>
-            <textarea value={form.impact_description || ''} onChange={e => update('impact_description', e.target.value)}
-              placeholder="Descreva o impacto que esta viagem tera..." rows={2}
-              className={`${inputClass('impact_description')} resize-none`} data-testid="edit-impact" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-[#6B6661] mb-1">Descricao Completa</label>
-            <textarea value={form.description || ''} onChange={e => update('description', e.target.value)}
-              placeholder="Descricao detalhada da viagem..." rows={3}
-              className={`${inputClass('description')} resize-none`} data-testid="edit-description" />
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h4 className="font-semibold text-[#2D2A26] flex items-center gap-2">
-            <Heart className="w-4 h-4 text-[#FFBE98]" /> Descricoes de Contribuicao
-            <span className="text-xs font-normal text-[#6B6661]">(aparece no checkout)</span>
-          </h4>
-          <button type="button" onClick={generateDescriptions}
-            disabled={generatingDescs || !form.name}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-[#FFBE98] to-[#F2C94C] text-[#2D2A26] rounded-lg text-xs font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
-            data-testid="generate-ai-descriptions-btn">
-            {generatingDescs ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-            {generatingDescs ? 'A gerar...' : 'Gerar com IA'}
-          </button>
-        </div>
-        <div className="grid md:grid-cols-2 gap-3">
-          {[10, 20, 50, 100, 200, 500, 1000].map(amt => (
-            <div key={amt} className="flex items-center gap-2">
-              <span className="text-sm font-bold text-[#2D2A26] min-w-[50px]">€{amt}</span>
-              <input type="text"
-                value={(form.contribution_descriptions || {})[String(amt)] || ''}
-                onChange={e => {
-                  const descs = { ...(form.contribution_descriptions || {}) };
-                  if (e.target.value) descs[String(amt)] = e.target.value;
-                  else delete descs[String(amt)];
-                  update('contribution_descriptions', descs);
-                }}
-                placeholder="Ex: Uma experiencia especial..."
-                className="flex-1 px-3 py-2 bg-white border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FFBE98]/50"
-                data-testid={`contrib-desc-${amt}`} />
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-
-  // Tab: Storytelling
-  const TabStorytelling = () => {
-    const ranges = ['0% – 25%', '25% – 50%', '50% – 75%', '75% – 100%', '100%+'];
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h4 className="font-semibold text-[#2D2A26] flex items-center gap-2">
-            <BookOpen className="w-4 h-4 text-[#FFBE98]" /> Capitulos da Historia
-          </h4>
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-[#6B6661]">
-              Capitulo atual: <strong className="text-[#FFBE98]">{form.current_chapter || 1}</strong>
-            </span>
-            <label className="flex items-center gap-1.5 text-xs cursor-pointer">
-              <input type="checkbox"
-                checked={form.story_emails_enabled !== false}
-                onChange={e => update('story_emails_enabled', e.target.checked)}
-                className="rounded border-stone-300 text-[#FFBE98] focus:ring-[#FFBE98]/50" />
-              <span className="text-[#6B6661]">Emails automaticos</span>
-            </label>
-          </div>
-        </div>
-
-        <button type="button" onClick={generateStoryChapters}
-          disabled={generatingStory || !form.name}
-          className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-[#FFBE98]/10 to-[#F2C94C]/10 border border-[#FFBE98]/30 text-[#2D2A26] rounded-xl text-sm font-semibold hover:from-[#FFBE98]/20 hover:to-[#F2C94C]/20 transition-all disabled:opacity-50"
-          data-testid="generate-ai-story-btn">
-          {generatingStory ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4 text-[#FFBE98]" />}
-          {generatingStory ? 'A gerar 5 capitulos com IA...' : 'Gerar Storytelling com IA'}
-        </button>
-
-        <div className="space-y-3">
-          {[1, 2, 3, 4, 5].map(ch => {
-            const chapters = form.story_chapters || {};
-            const chapter = chapters[String(ch)] || {};
-            const isCurrent = (form.current_chapter || 1) === ch;
-            return (
-              <div key={ch} className={`border rounded-xl p-4 transition-colors ${isCurrent ? 'border-[#FFBE98] bg-[#FFBE98]/5' : 'border-stone-200 hover:border-stone-300'}`}>
-                <div className="flex items-center gap-2 mb-3">
-                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${isCurrent ? 'bg-[#FFBE98]/20 text-[#FFBE98]' : 'bg-stone-100 text-[#6B6661]'}`}>
-                    Cap. {ch}
-                  </span>
-                  <span className="text-xs text-[#6B6661]">{ranges[ch - 1]}</span>
-                  {isCurrent && <span className="text-xs text-[#FFBE98] font-semibold ml-auto">Ativo</span>}
-                </div>
-                <input type="text" value={chapter.title || ''}
-                  onChange={e => {
-                    const chs = { ...(form.story_chapters || {}) };
-                    chs[String(ch)] = { ...(chs[String(ch)] || {}), title: e.target.value };
-                    update('story_chapters', chs);
-                  }}
-                  placeholder="Titulo do capitulo" data-testid={`story-chapter-title-${ch}`}
-                  className="w-full px-3 py-2 bg-white border border-stone-200 rounded-lg text-sm font-semibold mb-2 focus:outline-none focus:ring-2 focus:ring-[#FFBE98]/50" />
-                <textarea value={(chapter.lines || []).join('\n')}
-                  onChange={e => {
-                    const chs = { ...(form.story_chapters || {}) };
-                    chs[String(ch)] = { ...(chs[String(ch)] || {}), lines: e.target.value.split('\n') };
-                    update('story_chapters', chs);
-                  }}
-                  placeholder="Texto do capitulo (uma linha por paragrafo)" rows={3}
-                  data-testid={`story-chapter-text-${ch}`}
-                  className="w-full px-3 py-2 bg-white border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FFBE98]/50 resize-none" />
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
-
-  // Tab: Config
-  const TabConfig = () => {
-    const pct = form.goal_amount > 0 ? (form.current_amount / form.goal_amount) * 100 : 0;
-    return (
-      <div className="space-y-6">
-        <div>
-          <h4 className="font-semibold text-[#2D2A26] flex items-center gap-2 mb-4">
-            <Mail className="w-4 h-4 text-[#FFBE98]" /> Emails
-          </h4>
-          <div className="bg-stone-50 rounded-xl p-4">
-            <div className="flex flex-wrap gap-2">
-              {journey.status !== 'financiada' && pct >= 100 && (
-                <button onClick={async () => {
-                  if (!window.confirm('Confirmas o envio do email "Sonho Financiado" para TODOS os utilizadores?')) return;
-                  try {
-                    await axios.post(`${API}/admin/emails/dream-funded/${journey.journey_id}`, {}, { headers: { Authorization: `Bearer ${token}` } });
-                    alert('Email de sonho financiado enviado!');
-                  } catch (err) { alert('Erro: ' + (err.response?.data?.detail || err.message)); }
-                }} className="px-3 py-2 bg-purple-100 text-purple-700 rounded-lg text-xs font-semibold hover:bg-purple-200 transition-colors flex items-center gap-1.5"
-                  data-testid={`send-funded-email-${journey.journey_id}`}>
-                  <Heart className="w-3.5 h-3.5" /> Anunciar Sonho Financiado
-                </button>
-              )}
-              {!journey.announcement_email_sent && (
-                <button onClick={async () => {
-                  if (!window.confirm('Confirmas o envio do email "Novo Sonho" para TODOS os utilizadores?')) return;
-                  try {
-                    await axios.post(`${API}/admin/emails/new-journey/${journey.journey_id}`, {}, { headers: { Authorization: `Bearer ${token}` } });
-                    alert('Email de novo sonho enviado!');
-                  } catch (err) { alert('Erro: ' + (err.response?.data?.detail || err.message)); }
-                }} className="px-3 py-2 bg-blue-100 text-blue-700 rounded-lg text-xs font-semibold hover:bg-blue-200 transition-colors flex items-center gap-1.5"
-                  data-testid={`send-new-journey-email-${journey.journey_id}`}>
-                  <Mail className="w-3.5 h-3.5" /> Anunciar Novo Sonho
-                </button>
-              )}
-              {journey.announcement_email_sent && (
-                <span className="px-3 py-2 bg-stone-100 text-stone-500 rounded-lg text-xs flex items-center gap-1.5">
-                  <CheckCircle className="w-3.5 h-3.5" /> Anuncio enviado
-                </span>
-              )}
-              {journey.funded_email_sent && (
-                <span className="px-3 py-2 bg-stone-100 text-stone-500 rounded-lg text-xs flex items-center gap-1.5">
-                  <CheckCircle className="w-3.5 h-3.5" /> Email financiado enviado
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <h4 className="font-semibold text-[#2D2A26] flex items-center gap-2 mb-4">
-            <Settings className="w-4 h-4 text-[#FFBE98]" /> Estado e Visibilidade
-          </h4>
-          <div className="grid md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-[#6B6661] mb-1">Estado</label>
-              <select value={form.is_active} onChange={e => update('is_active', e.target.value === 'true')}
-                className="w-full px-4 py-2.5 bg-white border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FFBE98]/50">
-                <option value="true">Ativa (visivel)</option>
-                <option value="false">Inativa (oculta)</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-[#6B6661] mb-1">Viagem Principal</label>
-              <select value={form.is_main_trip || false} onChange={e => update('is_main_trip', e.target.value === 'true')}
-                className="w-full px-4 py-2.5 bg-white border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FFBE98]/50">
-                <option value="true">Sim (destaque na homepage)</option>
-                <option value="false">Nao</option>
-              </select>
-            </div>
-            <div className="flex items-center gap-3 pt-6">
-              <input type="checkbox" id="show-goal"
-                checked={form.show_goal_amount || false}
-                onChange={e => update('show_goal_amount', e.target.checked)}
-                className="w-5 h-5 rounded border-stone-300 text-[#FFBE98] focus:ring-[#FFBE98]" />
-              <label htmlFor="show-goal" className="text-sm text-[#6B6661] cursor-pointer">
-                Mostrar valor € objetivo
-              </label>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  // Preview Panel
   const PreviewPanel = () => (
     <div className="bg-stone-900 rounded-xl overflow-hidden" data-testid="journey-preview">
       <div className="relative h-40">
@@ -436,13 +142,6 @@ const JourneyEditForm = ({ journey, onSave, onCancel, getAuthHeaders, token }) =
       </div>
     </div>
   );
-
-  const tabContent = {
-    basico: <TabBasico />,
-    conteudo: <TabConteudo />,
-    storytelling: <TabStorytelling />,
-    config: <TabConfig />,
-  };
 
   return (
     <div className="bg-white rounded-2xl border border-stone-200 shadow-lg overflow-hidden" data-testid="journey-edit-form">
@@ -489,12 +188,291 @@ const JourneyEditForm = ({ journey, onSave, onCancel, getAuthHeaders, token }) =
       {/* Body */}
       <div className="flex">
         <div className={`p-6 ${showPreview ? 'flex-1' : 'w-full'}`} data-testid="form-content">
-          <AnimatePresence mode="wait">
-            <motion.div key={tab} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }}
-              transition={{ duration: 0.15 }}>
-              {tabContent[tab]}
-            </motion.div>
-          </AnimatePresence>
+          <div style={{ display: tab === 'basico' ? 'block' : 'none' }}>
+            <div className="space-y-6">
+              <div>
+                <h4 className="font-semibold text-[#2D2A26] flex items-center gap-2 mb-4">
+                  <MapPin className="w-4 h-4 text-[#FFBE98]" /> Informacoes Basicas
+                </h4>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-[#6B6661] mb-1">Nome do Destino *</label>
+                    <input type="text" value={form.name || ''} onChange={e => update('name', e.target.value)}
+                      placeholder="Ex: China, Japao, Brasil..." className={inputClass('name')} data-testid="edit-name" />
+                    <FieldError field="name" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#6B6661] mb-1">Titulo Poetico</label>
+                    <input type="text" value={form.poetic_name || ''} onChange={e => update('poetic_name', e.target.value)}
+                      placeholder="Ex: Onde os Dragoes Dancam" className={inputClass('poetic_name')} data-testid="edit-poetic-name" />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="font-semibold text-[#2D2A26] flex items-center gap-2 mb-4">
+                  <Target className="w-4 h-4 text-[#FFBE98]" /> Objetivos Financeiros
+                </h4>
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-[#6B6661] mb-1">Objetivo (€) *</label>
+                    <input type="number" value={form.goal_amount || ''} onChange={e => update('goal_amount', parseFloat(e.target.value) || 0)}
+                      min="100" className={inputClass('goal_amount')} data-testid="edit-goal" />
+                    <FieldError field="goal_amount" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#6B6661] mb-1">Ja Angariado (€)</label>
+                    <input type="number" value={form.current_amount || 0} disabled
+                      className="w-full px-4 py-2.5 bg-stone-100 border border-stone-200 rounded-xl text-[#6B6661]" />
+                    <p className="text-xs text-[#6B6661] mt-1">Calculado automaticamente</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#6B6661] mb-1">Data Objetivo</label>
+                    <input type="date" value={form.target_date || ''} onChange={e => update('target_date', e.target.value)}
+                      className={inputClass('target_date')} data-testid="edit-target-date" />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="font-semibold text-[#2D2A26] flex items-center gap-2 mb-4">
+                  <Image className="w-4 h-4 text-[#FFBE98]" /> Imagem
+                </h4>
+                <div className="flex gap-4 items-start">
+                  <div className="w-32 h-24 rounded-xl overflow-hidden border border-stone-200 bg-stone-100 flex-shrink-0">
+                    {form.image_url ? (
+                      <img src={form.image_url} alt="Preview" className="w-full h-full object-cover"
+                        onError={e => { e.target.style.display = 'none'; }} />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-stone-400">
+                        <Image className="w-8 h-8" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium text-[#6B6661] mb-1">URL da Imagem</label>
+                    <input type="url" value={form.image_url || ''} onChange={e => update('image_url', e.target.value)}
+                      placeholder="https://..." className={inputClass('image_url')} data-testid="edit-image-url" />
+                    <FieldError field="image_url" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: tab === 'conteudo' ? 'block' : 'none' }}>
+            <div className="space-y-6">
+              <div>
+                <h4 className="font-semibold text-[#2D2A26] flex items-center gap-2 mb-4">
+                  <FileText className="w-4 h-4 text-[#FFBE98]" /> Textos e Descricoes
+                </h4>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-[#6B6661] mb-1">Mensagem Emocional</label>
+                    <textarea value={form.emotional_message || ''} onChange={e => update('emotional_message', e.target.value)}
+                      placeholder="Mensagem que aparece em destaque na pagina da viagem..." rows={2}
+                      className={`${inputClass('emotional_message')} resize-none`} data-testid="edit-emotional" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#6B6661] mb-1">Descricao do Impacto</label>
+                    <textarea value={form.impact_description || ''} onChange={e => update('impact_description', e.target.value)}
+                      placeholder="Descreva o impacto que esta viagem tera..." rows={2}
+                      className={`${inputClass('impact_description')} resize-none`} data-testid="edit-impact" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#6B6661] mb-1">Descricao Completa</label>
+                    <textarea value={form.description || ''} onChange={e => update('description', e.target.value)}
+                      placeholder="Descricao detalhada da viagem..." rows={3}
+                      className={`${inputClass('description')} resize-none`} data-testid="edit-description" />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="font-semibold text-[#2D2A26] flex items-center gap-2">
+                    <Heart className="w-4 h-4 text-[#FFBE98]" /> Descricoes de Contribuicao
+                    <span className="text-xs font-normal text-[#6B6661]">(aparece no checkout)</span>
+                  </h4>
+                  <button type="button" onClick={generateDescriptions}
+                    disabled={generatingDescs || !form.name}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-[#FFBE98] to-[#F2C94C] text-[#2D2A26] rounded-lg text-xs font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
+                    data-testid="generate-ai-descriptions-btn">
+                    {generatingDescs ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                    {generatingDescs ? 'A gerar...' : 'Gerar com IA'}
+                  </button>
+                </div>
+                <div className="grid md:grid-cols-2 gap-3">
+                  {[10, 20, 50, 100, 200, 500, 1000].map(amt => (
+                    <div key={amt} className="flex items-center gap-2">
+                      <span className="text-sm font-bold text-[#2D2A26] min-w-[50px]">€{amt}</span>
+                      <input type="text"
+                        value={(form.contribution_descriptions || {})[String(amt)] || ''}
+                        onChange={e => {
+                          const descs = { ...(form.contribution_descriptions || {}) };
+                          if (e.target.value) descs[String(amt)] = e.target.value;
+                          else delete descs[String(amt)];
+                          update('contribution_descriptions', descs);
+                        }}
+                        placeholder="Ex: Uma experiencia especial..."
+                        className="flex-1 px-3 py-2 bg-white border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FFBE98]/50"
+                        data-testid={`contrib-desc-${amt}`} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: tab === 'storytelling' ? 'block' : 'none' }}>
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h4 className="font-semibold text-[#2D2A26] flex items-center gap-2">
+                  <BookOpen className="w-4 h-4 text-[#FFBE98]" /> Capitulos da Historia
+                </h4>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-[#6B6661]">
+                    Capitulo atual: <strong className="text-[#FFBE98]">{form.current_chapter || 1}</strong>
+                  </span>
+                  <label className="flex items-center gap-1.5 text-xs cursor-pointer">
+                    <input type="checkbox"
+                      checked={form.story_emails_enabled !== false}
+                      onChange={e => update('story_emails_enabled', e.target.checked)}
+                      className="rounded border-stone-300 text-[#FFBE98] focus:ring-[#FFBE98]/50" />
+                    <span className="text-[#6B6661]">Emails automaticos</span>
+                  </label>
+                </div>
+              </div>
+
+              <button type="button" onClick={generateStoryChapters}
+                disabled={generatingStory || !form.name}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-[#FFBE98]/10 to-[#F2C94C]/10 border border-[#FFBE98]/30 text-[#2D2A26] rounded-xl text-sm font-semibold hover:from-[#FFBE98]/20 hover:to-[#F2C94C]/20 transition-all disabled:opacity-50"
+                data-testid="generate-ai-story-btn">
+                {generatingStory ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4 text-[#FFBE98]" />}
+                {generatingStory ? 'A gerar 5 capitulos com IA...' : 'Gerar Storytelling com IA'}
+              </button>
+
+              <div className="space-y-3">
+                {[1, 2, 3, 4, 5].map(ch => {
+                  const chapters = form.story_chapters || {};
+                  const chapter = chapters[String(ch)] || {};
+                  const isCurrent = (form.current_chapter || 1) === ch;
+                  const ranges = ['0% – 25%', '25% – 50%', '50% – 75%', '75% – 100%', '100%+'];
+                  return (
+                    <div key={ch} className={`border rounded-xl p-4 transition-colors ${isCurrent ? 'border-[#FFBE98] bg-[#FFBE98]/5' : 'border-stone-200 hover:border-stone-300'}`}>
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${isCurrent ? 'bg-[#FFBE98]/20 text-[#FFBE98]' : 'bg-stone-100 text-[#6B6661]'}`}>
+                          Cap. {ch}
+                        </span>
+                        <span className="text-xs text-[#6B6661]">{ranges[ch - 1]}</span>
+                        {isCurrent && <span className="text-xs text-[#FFBE98] font-semibold ml-auto">Ativo</span>}
+                      </div>
+                      <input type="text" value={chapter.title || ''}
+                        onChange={e => {
+                          const chs = JSON.parse(JSON.stringify(form.story_chapters || {}));
+                          if (!chs[String(ch)]) chs[String(ch)] = {};
+                          chs[String(ch)].title = e.target.value;
+                          update('story_chapters', chs);
+                        }}
+                        placeholder="Titulo do capitulo" data-testid={`story-chapter-title-${ch}`}
+                        className="w-full px-3 py-2 bg-white border border-stone-200 rounded-lg text-sm font-semibold mb-2 focus:outline-none focus:ring-2 focus:ring-[#FFBE98]/50" />
+                      <textarea value={(chapter.lines || []).join('\n')}
+                        onChange={e => {
+                          const chs = JSON.parse(JSON.stringify(form.story_chapters || {}));
+                          if (!chs[String(ch)]) chs[String(ch)] = {};
+                          chs[String(ch)].lines = e.target.value.split('\n');
+                          update('story_chapters', chs);
+                        }}
+                        placeholder="Texto do capitulo (uma linha por paragrafo)" rows={3}
+                        data-testid={`story-chapter-text-${ch}`}
+                        className="w-full px-3 py-2 bg-white border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FFBE98]/50 resize-none" />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: tab === 'config' ? 'block' : 'none' }}>
+            <div className="space-y-6">
+              <div>
+                <h4 className="font-semibold text-[#2D2A26] flex items-center gap-2 mb-4">
+                  <Mail className="w-4 h-4 text-[#FFBE98]" /> Emails
+                </h4>
+                <div className="bg-stone-50 rounded-xl p-4">
+                  <div className="flex flex-wrap gap-2">
+                    {journey.status !== 'financiada' && form.goal_amount > 0 && (form.current_amount || 0) / form.goal_amount * 100 >= 100 && (
+                      <button onClick={async () => {
+                        if (!window.confirm('Confirmas o envio do email "Sonho Financiado" para TODOS os utilizadores?')) return;
+                        try {
+                          await axios.post(`${API}/admin/emails/dream-funded/${journey.journey_id}`, {}, { headers: { Authorization: `Bearer ${token}` } });
+                          alert('Email de sonho financiado enviado!');
+                        } catch (err) { alert('Erro: ' + (err.response?.data?.detail || err.message)); }
+                      }} className="px-3 py-2 bg-purple-100 text-purple-700 rounded-lg text-xs font-semibold hover:bg-purple-200 transition-colors flex items-center gap-1.5"
+                        data-testid={`send-funded-email-${journey.journey_id}`}>
+                        <Heart className="w-3.5 h-3.5" /> Anunciar Sonho Financiado
+                      </button>
+                    )}
+                    {!journey.announcement_email_sent && (
+                      <button onClick={async () => {
+                        if (!window.confirm('Confirmas o envio do email "Novo Sonho" para TODOS os utilizadores?')) return;
+                        try {
+                          await axios.post(`${API}/admin/emails/new-journey/${journey.journey_id}`, {}, { headers: { Authorization: `Bearer ${token}` } });
+                          alert('Email de novo sonho enviado!');
+                        } catch (err) { alert('Erro: ' + (err.response?.data?.detail || err.message)); }
+                      }} className="px-3 py-2 bg-blue-100 text-blue-700 rounded-lg text-xs font-semibold hover:bg-blue-200 transition-colors flex items-center gap-1.5"
+                        data-testid={`send-new-journey-email-${journey.journey_id}`}>
+                        <Mail className="w-3.5 h-3.5" /> Anunciar Novo Sonho
+                      </button>
+                    )}
+                    {journey.announcement_email_sent && (
+                      <span className="px-3 py-2 bg-stone-100 text-stone-500 rounded-lg text-xs flex items-center gap-1.5">
+                        <CheckCircle className="w-3.5 h-3.5" /> Anuncio enviado
+                      </span>
+                    )}
+                    {journey.funded_email_sent && (
+                      <span className="px-3 py-2 bg-stone-100 text-stone-500 rounded-lg text-xs flex items-center gap-1.5">
+                        <CheckCircle className="w-3.5 h-3.5" /> Email financiado enviado
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="font-semibold text-[#2D2A26] flex items-center gap-2 mb-4">
+                  <Settings className="w-4 h-4 text-[#FFBE98]" /> Estado e Visibilidade
+                </h4>
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-[#6B6661] mb-1">Estado</label>
+                    <select value={form.is_active} onChange={e => update('is_active', e.target.value === 'true')}
+                      className="w-full px-4 py-2.5 bg-white border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FFBE98]/50">
+                      <option value="true">Ativa (visivel)</option>
+                      <option value="false">Inativa (oculta)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#6B6661] mb-1">Viagem Principal</label>
+                    <select value={form.is_main_trip || false} onChange={e => update('is_main_trip', e.target.value === 'true')}
+                      className="w-full px-4 py-2.5 bg-white border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FFBE98]/50">
+                      <option value="true">Sim (destaque na homepage)</option>
+                      <option value="false">Nao</option>
+                    </select>
+                  </div>
+                  <div className="flex items-center gap-3 pt-6">
+                    <input type="checkbox" id="show-goal"
+                      checked={form.show_goal_amount || false}
+                      onChange={e => update('show_goal_amount', e.target.checked)}
+                      className="w-5 h-5 rounded border-stone-300 text-[#FFBE98] focus:ring-[#FFBE98]" />
+                    <label htmlFor="show-goal" className="text-sm text-[#6B6661] cursor-pointer">
+                      Mostrar valor € objetivo
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Preview Sidebar */}
