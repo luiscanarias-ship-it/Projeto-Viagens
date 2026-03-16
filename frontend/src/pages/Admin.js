@@ -6,6 +6,7 @@ import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import JourneyEditForm from '../components/JourneyEditForm';
+import EmailPreviewModal from '../components/EmailPreviewModal';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -46,6 +47,7 @@ const Admin = () => {
   const [loadingVisibility, setLoadingVisibility] = useState(false);
   // Email announce state
   const [showAnnounceSelect, setShowAnnounceSelect] = useState(false);
+  const [emailPreview, setEmailPreview] = useState(null); // { previewUrl, sendUrl, title }
   // Candidaturas state
   const [ambassadorApplications, setAmbassadorApplications] = useState(null);
   const [loadingApplications, setLoadingApplications] = useState(false);
@@ -712,13 +714,11 @@ const Admin = () => {
                 <h2 className="text-xl font-bold">{t('admin.journeys')}</h2>
                 <div className="flex items-center gap-2 relative">
                   <button
-                    onClick={async () => {
-                      if (!window.confirm('Enviar resumo semanal para TODOS os utilizadores?')) return;
-                      try {
-                        const res = await axios.post(`${API}/admin/emails/weekly-summary`, {}, { headers: { Authorization: `Bearer ${token}` } });
-                        alert(`Resumo semanal enviado para ${res.data.sent} utilizadores!`);
-                      } catch (err) { alert('Erro: ' + (err.response?.data?.detail || err.message)); }
-                    }}
+                    onClick={() => setEmailPreview({
+                      previewUrl: '/admin/emails/preview/weekly-summary',
+                      sendUrl: '/admin/emails/weekly-summary',
+                      title: 'Preview: Resumo Semanal'
+                    })}
                     className="px-3 py-2 bg-stone-100 text-[#2D2A26] rounded-xl font-medium text-xs hover:bg-stone-200 transition-colors flex items-center gap-1.5"
                     data-testid="send-weekly-summary-btn"
                   >
@@ -740,14 +740,13 @@ const Admin = () => {
                         <div className="space-y-1 max-h-48 overflow-y-auto">
                           {journeys.filter(j => j.is_active && !j.announcement_email_sent).map(j => (
                             <button key={j.journey_id}
-                              onClick={async () => {
-                                if (!window.confirm(`Anunciar "${j.name}" como novo sonho para TODOS os utilizadores?`)) return;
-                                try {
-                                  await axios.post(`${API}/admin/emails/new-journey/${j.journey_id}`, {}, { headers: { Authorization: `Bearer ${token}` } });
-                                  alert(`Email de novo sonho "${j.name}" enviado!`);
-                                  setShowAnnounceSelect(false);
-                                  fetchJourneys();
-                                } catch (err) { alert('Erro: ' + (err.response?.data?.detail || err.message)); }
+                              onClick={() => {
+                                setShowAnnounceSelect(false);
+                                setEmailPreview({
+                                  previewUrl: `/admin/emails/preview/new-journey/${j.journey_id}`,
+                                  sendUrl: `/admin/emails/new-journey/${j.journey_id}`,
+                                  title: `Preview: Anunciar "${j.name}"`
+                                });
                               }}
                               className="w-full text-left px-3 py-2 rounded-lg hover:bg-stone-50 transition-colors flex items-center gap-2 text-sm"
                               data-testid={`announce-journey-${j.journey_id}`}
@@ -927,6 +926,7 @@ const Admin = () => {
                         onCancel={() => setEditingJourney(null)}
                         getAuthHeaders={getAuthHeaders}
                         token={token}
+                        onEmailPreview={(preview) => setEmailPreview(preview)}
                       />
                     ) : (
                       <div className="grid grid-cols-[1fr_100px_120px_130px_60px] gap-3 items-center p-4" data-testid={`journey-row-${journey.journey_id}`}>
@@ -2742,6 +2742,28 @@ const Admin = () => {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Email Preview Modal */}
+        {emailPreview && (
+          <EmailPreviewModal
+            previewUrl={emailPreview.previewUrl}
+            sendUrl={emailPreview.sendUrl}
+            title={emailPreview.title}
+            token={token}
+            onClose={() => setEmailPreview(null)}
+            onSent={async (data) => {
+              alert(`Email enviado com sucesso para ${data.sent || data.recipient_count || '?'} destinatarios!`);
+              // Reload journeys list
+              try {
+                const headers = getAuthHeaders();
+                const response = await axios.get(`${API}/admin/journeys`, { headers, withCredentials: true });
+                setJourneys(Array.isArray(response.data) ? response.data : []);
+              } catch (e) {
+                console.error('Error reloading journeys:', e);
+              }
+            }}
+          />
+        )}
       </div>
     </div>
   );

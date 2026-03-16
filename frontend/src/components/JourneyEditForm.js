@@ -17,7 +17,7 @@ const TABS = [
 
 const REQUIRED_FIELDS = ['name', 'goal_amount'];
 
-const JourneyEditForm = ({ journey, onSave, onCancel, getAuthHeaders, token }) => {
+const JourneyEditForm = ({ journey, onSave, onCancel, getAuthHeaders, token, onEmailPreview }) => {
   const [form, setForm] = useState({ ...journey });
   const [tab, setTab] = useState('basico');
   const [saving, setSaving] = useState(false);
@@ -402,25 +402,21 @@ const JourneyEditForm = ({ journey, onSave, onCancel, getAuthHeaders, token }) =
                 <div className="bg-stone-50 rounded-xl p-4">
                   <div className="flex flex-wrap gap-2">
                     {journey.status !== 'financiada' && form.goal_amount > 0 && (form.current_amount || 0) / form.goal_amount * 100 >= 100 && (
-                      <button onClick={async () => {
-                        if (!window.confirm('Confirmas o envio do email "Sonho Financiado" para TODOS os utilizadores?')) return;
-                        try {
-                          await axios.post(`${API}/admin/emails/dream-funded/${journey.journey_id}`, {}, { headers: { Authorization: `Bearer ${token}` } });
-                          alert('Email de sonho financiado enviado!');
-                        } catch (err) { alert('Erro: ' + (err.response?.data?.detail || err.message)); }
-                      }} className="px-3 py-2 bg-purple-100 text-purple-700 rounded-lg text-xs font-semibold hover:bg-purple-200 transition-colors flex items-center gap-1.5"
+                      <button onClick={() => onEmailPreview && onEmailPreview({
+                        previewUrl: `/admin/emails/preview/dream-funded/${journey.journey_id}`,
+                        sendUrl: `/admin/emails/dream-funded/${journey.journey_id}`,
+                        title: `Preview: Sonho Financiado — ${journey.name}`
+                      })} className="px-3 py-2 bg-purple-100 text-purple-700 rounded-lg text-xs font-semibold hover:bg-purple-200 transition-colors flex items-center gap-1.5"
                         data-testid={`send-funded-email-${journey.journey_id}`}>
                         <Heart className="w-3.5 h-3.5" /> Anunciar Sonho Financiado
                       </button>
                     )}
                     {!journey.announcement_email_sent && (
-                      <button onClick={async () => {
-                        if (!window.confirm('Confirmas o envio do email "Novo Sonho" para TODOS os utilizadores?')) return;
-                        try {
-                          await axios.post(`${API}/admin/emails/new-journey/${journey.journey_id}`, {}, { headers: { Authorization: `Bearer ${token}` } });
-                          alert('Email de novo sonho enviado!');
-                        } catch (err) { alert('Erro: ' + (err.response?.data?.detail || err.message)); }
-                      }} className="px-3 py-2 bg-blue-100 text-blue-700 rounded-lg text-xs font-semibold hover:bg-blue-200 transition-colors flex items-center gap-1.5"
+                      <button onClick={() => onEmailPreview && onEmailPreview({
+                        previewUrl: `/admin/emails/preview/new-journey/${journey.journey_id}`,
+                        sendUrl: `/admin/emails/new-journey/${journey.journey_id}`,
+                        title: `Preview: Anunciar — ${journey.name}`
+                      })} className="px-3 py-2 bg-blue-100 text-blue-700 rounded-lg text-xs font-semibold hover:bg-blue-200 transition-colors flex items-center gap-1.5"
                         data-testid={`send-new-journey-email-${journey.journey_id}`}>
                         <Mail className="w-3.5 h-3.5" /> Anunciar Novo Sonho
                       </button>

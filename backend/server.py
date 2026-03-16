@@ -4292,6 +4292,114 @@ async def trigger_weekly_summary(request: Request):
     result = await send_weekly_summary_emails()
     return {"message": "Resumo semanal enviado", **result}
 
+@api_router.get("/admin/emails/preview/weekly-summary")
+async def preview_weekly_summary(request: Request):
+    """Preview weekly summary email without sending"""
+    await require_admin(request)
+    
+    active_journeys = await db.journeys.find(
+        {"status": "ativa", "is_active": True}, {"_id": 0}
+    ).to_list(50)
+    
+    journeys_html = ""
+    for j in active_journeys:
+        pct = round((j.get("current_amount", 0) / j.get("goal_amount", 1)) * 100, 1) if j.get("goal_amount", 0) > 0 else 0
+        pct_int = int(min(pct, 100))
+        journey_url = f"{FRONTEND_URL}/journey/{j['journey_id']}"
+        journeys_html += f"""
+        <div style="background: #FFF8F3; border-radius: 12px; padding: 20px; margin-bottom: 16px;">
+            <p style="color: #2D2A26; font-size: 18px; font-weight: bold; margin: 0 0 4px 0;">{j.get('name', '')}</p>
+            <p style="color: #FFBE98; font-style: italic; font-size: 14px; margin: 0 0 12px 0;">{j.get('poetic_name', '')}</p>
+            <div style="background: #E7E5E4; border-radius: 8px; height: 10px; overflow: hidden; margin-bottom: 8px;">
+                <div style="background: linear-gradient(90deg, #FFBE98, #F2C94C); height: 100%; width: {pct_int}%; border-radius: 8px;"></div>
+            </div>
+            <p style="color: #2D2A26; font-size: 14px; font-weight: bold; margin: 0 0 12px 0;">{pct}% financiado</p>
+            <a href="{journey_url}" style="color: #FFBE98; font-size: 14px; font-weight: bold; text-decoration: none;">Ver este sonho &rarr;</a>
+        </div>
+        """
+    
+    body = f"""
+    <div style="text-align: center; padding: 20px 0;">
+        <h1 style="margin: 0 0 16px 0; color: #2D2A26; font-size: 24px;">Resumo Semanal dos Sonhos</h1>
+        <p style="color: #6B6661; font-size: 16px; line-height: 1.8; margin-bottom: 24px;">
+            Aqui esta o progresso dos sonhos que estamos a construir juntos esta semana.
+        </p>
+        {journeys_html}
+        {_build_email_cta_button(FRONTEND_URL, "Explorar todos os sonhos")}
+    </div>
+    """
+    html = get_email_base_template(body, "Resumo Semanal - 4Luis")
+    
+    users = await db.users.find({"email": {"$exists": True, "$ne": ""}}, {"_id": 0, "email": 1}).to_list(500)
+    recipient_count = sum(1 for u in users if u.get("email") and "@" in u["email"] and not u["email"].endswith("@test.com"))
+    
+    return {"subject": "Resumo semanal dos sonhos - 4Luis", "html": html, "recipient_count": recipient_count}
+
+@api_router.get("/admin/emails/preview/dream-funded/{journey_id}")
+async def preview_dream_funded(journey_id: str, request: Request):
+    """Preview dream funded email without sending"""
+    await require_admin(request)
+    journey = await db.journeys.find_one({"journey_id": journey_id}, {"_id": 0})
+    if not journey:
+        raise HTTPException(status_code=404, detail="Viagem nao encontrada")
+    
+    journey_name = journey.get("name", "")
+    poetic_name = journey.get("poetic_name", "")
+    current_amount = journey.get("current_amount", 0)
+    goal_amount = journey.get("goal_amount", 1)
+    percentage = round((current_amount / goal_amount) * 100, 1) if goal_amount > 0 else 100
+    journey_url = f"{FRONTEND_URL}/journey/{journey_id}"
+    contributors = await db.contributions.find({"journey_id": journey_id, "status": "completed"}, {"_id": 0}).to_list(500)
+    
+    body = _build_standard_email(
+        title="Este sonho tornou-se realidade!",
+        narrative=f"""A viagem &ldquo;<strong>{poetic_name or journey_name}</strong>&rdquo; acaba de ser totalmente financiada.<br><br>
+        Gracas a <strong>{len(contributors)} sonhadores</strong> que acreditaram, este sonho vai acontecer.<br>
+        Obrigado a todos os que ajudaram a transformar este sonho em realidade.""",
+        percentage=percentage,
+        cta_url=journey_url,
+        cta_text="Ver este sonho realizado"
+    )
+    html = get_email_base_template(body, f"Sonho Realizado: {journey_name} - 4Luis")
+    
+    users = await db.users.find({"email": {"$exists": True, "$ne": ""}}, {"_id": 0, "email": 1}).to_list(500)
+    recipient_count = sum(1 for u in users if u.get("email") and "@" in u["email"] and not u["email"].endswith("@test.com"))
+    
+    return {"subject": f"O sonho da {journey_name} tornou-se realidade!", "html": html, "recipient_count": recipient_count}
+
+@api_router.get("/admin/emails/preview/new-journey/{journey_id}")
+async def preview_new_journey(journey_id: str, request: Request):
+    """Preview new journey announcement email without sending"""
+    await require_admin(request)
+    journey = await db.journeys.find_one({"journey_id": journey_id}, {"_id": 0})
+    if not journey:
+        raise HTTPException(status_code=404, detail="Viagem nao encontrada")
+    
+    journey_name = journey.get("name", "")
+    poetic_name = journey.get("poetic_name", "")
+    description = journey.get("description", "")
+    ambassador_name = journey.get("ambassador_name", "")
+    journey_url = f"{FRONTEND_URL}/journey/{journey_id}"
+    ambassador_line = f"<br>Sonho de <strong>{ambassador_name}</strong>" if ambassador_name else ""
+    
+    body = _build_standard_email(
+        title=f"Novo sonho: {journey_name}",
+        narrative=f"""Um novo sonho acabou de chegar a plataforma 4Luis.<br><br>
+        &ldquo;<em>{poetic_name or description}</em>&rdquo;{ambassador_line}<br><br>
+        Cada sonho comeca com um primeiro passo. Sera que este vai ser o teu?""",
+        percentage=0,
+        cta_url=journey_url,
+        cta_text="Descobrir este sonho"
+    )
+    html = get_email_base_template(body, f"Novo Sonho: {journey_name} - 4Luis")
+    
+    users = await db.users.find({"email": {"$exists": True, "$ne": ""}}, {"_id": 0, "email": 1}).to_list(500)
+    recipient_count = sum(1 for u in users if u.get("email") and "@" in u["email"] and not u["email"].endswith("@test.com"))
+    
+    return {"subject": f"Novo sonho na 4Luis: {journey_name}", "html": html, "recipient_count": recipient_count}
+
+
+
 @api_router.post("/admin/emails/dream-funded/{journey_id}")
 async def trigger_dream_funded_email(journey_id: str, request: Request):
     """Admin: Send dream funded announcement email to all users"""
