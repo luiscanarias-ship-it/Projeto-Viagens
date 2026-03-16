@@ -14,15 +14,17 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 
 ## What's Been Implemented
 
-### Autosave Automatico (2026-03-16)
-- JourneyEditForm: autosave com debounce de 2s para localStorage
-- Banner de recuperacao ao reabrir formulario com dados salvos (Manter/Descartar)
-- Indicador visual "Autosaved" no header do formulario
-- Create Journey Form: autosave identico com chave autosave_journey_create
-- Indicador "Rascunho guardado" no formulario de criacao
-- Limpeza automatica do autosave apos guardar ou cancelar
+### Autosave com Sincronizacao no Servidor (2026-03-16)
+- Dual-layer: localStorage (backup instantaneo) + servidor MongoDB (sync async)
+- JourneyEditForm: autosave com debounce 2s local + 0.5s servidor
+- Create Journey Form: mesmo mecanismo com chave journey_create/new
+- Recuperacao de rascunhos do servidor (multi-dispositivo)
+- Banner "Rascunho recuperado do servidor" com opcoes Manter/Descartar
+- Indicador "Sincronizado" (verde) ou "Guardado localmente" (amber se server falhar)
+- Limpeza automatica do draft apos guardar ou cancelar (local + servidor)
 - Warning beforeunload quando ha alteracoes por guardar
-- Dados expiram apos 24h
+- Dados expiram apos 24h (localStorage), servidor sem expiracao
+- Backend endpoints: PUT/GET/DELETE /api/admin/drafts/{type}/{ref_id}, GET /api/admin/drafts
 
 ### Correcao FRONTEND_URL (2026-03-16)
 - FRONTEND_URL no backend agora le de variavel de ambiente (nao hardcoded)
@@ -33,79 +35,32 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - Modal de preview mostra: HTML completo do email, assunto, numero de destinatarios
 - Botoes "Cancelar" e "Confirmar e Enviar"
 - 3 endpoints de preview: resumo semanal, novo sonho, sonho financiado
-- Aplica-se a todos os emails: resumo semanal, anunciar novo sonho (com selector de viagem), sonho financiado
-
-### Correcoes Admin e Navegacao (2026-03-09)
-- Fix: Link "Viagens" no header agora faz scroll ate a seccao de viagens
-- Fix: Login como admin redireciona para /admin automaticamente
-- Novo: Botao "Suspender/Reativar" viagem (toggle visibilidade sem apagar)
-- Novo: Botao estrela para definir viagem principal diretamente na lista
-- Novo: "Anunciar Novo Sonho" com dropdown para selecionar qual viagem anunciar
-- Storytelling editavel apos geracao IA (ja funcionava, confirmado)
 
 ### Formulario de Edicao de Viagens no Admin (2026-03-09)
-- Novo componente JourneyEditForm.js com navegacao por 4 tabs (Basico/Conteudo/Storytelling/Configuracoes)
-- Preview em tempo real da viagem (toggle sidebar)
-- Indicador "Alteracoes por guardar" quando ha mudancas nao guardadas
-- Validacao inline (nome obrigatorio, objetivo minimo 100EUR, URL valido)
-- Geracao de storytelling com IA (5 capitulos) via novo endpoint /api/admin/generate-story-chapters
-- Geracao de descricoes de contribuicao com IA (ja existia, agora integrada no novo form)
-- Animacoes suaves na transicao entre tabs
+- JourneyEditForm.js com 4 tabs (Basico/Conteudo/Storytelling/Configuracoes)
+- Preview em tempo real, validacao inline, geracao IA de storytelling
 
 ### Sistema de Confianca (2026-03-09)
-- 3 niveis de confianca: Sonhador, Sonhador Verificado, Embaixador
-- Badge visual na pagina da viagem (peach/verde/dourado) com icones criativos
-- "Membro da 4Luis desde dd/mm/aaaa" junto ao nome do sonhador
-- Admin pode alterar nivel via painel de utilizadores
-- Botao discreto "Reportar problema" (mailto:mail@4luis.com) no final da pagina da viagem
-
-### Disclaimer de Contribuicoes (2026-03-09)
-- Disclaimer subtil na pagina da viagem (sidebar, abaixo do botao "Apoiar esta Viagem")
-- Disclaimer subtil no checkout modal (step 1, abaixo do botao "Continuar")
-- Texto sobre natureza voluntaria das contribuicoes e limitacao de responsabilidade
+- 3 niveis: Sonhador, Sonhador Verificado, Embaixador
+- Badge visual na pagina da viagem
 
 ### Paginas Legais (2026-03-09)
-- Pagina de Privacidade (/privacy) com 8 seccoes e email luis@4luis.com
-- Pagina de Termos e Condicoes (/terms) com 7 seccoes
-- Pagina de Politica de Cookies (/cookies e /politica-cookies) com 4 seccoes e 3 tipos de cookies
-- Links no footer: Privacy, Terms, Cookies
-- Todas as paginas com design consistente e link "Voltar ao inicio"
-
-### Banner de Cookies RGPD (2026-03-09)
-- Banner amigavel aparece 15 segundos apos aceder ao site
-- Imagem de bolacha a sonhar gerada por IA
-- Botoes "Aceitar" e "Nao, obrigado"
-- Preferencias guardadas em localStorage com validade de 6 meses
+- Privacidade, Termos, Cookies com design consistente
 
 ### Sistema de Emails (5 tipos - COMPLETO)
-1. Mudanca de capitulo — Automatico nos marcos 25/50/75/100%
-2. Resumo semanal — Botao no admin
-3. Contribuicao via referral — Automatico
-4. Sonho financiado — Botao no admin (>= 100%), marca viagem como financiada
-5. Novo sonho — Botao no admin para anunciar nova viagem
-
-### Homepage
-- Hero CrowdDreaming, Storytelling Progressivo, Barra sticky
-- MilestoneProgress, MilestoneCelebration
-- Seccao "Sonhos em Materializacao" com 4 cartoes visuais
-
-### Checkout Modal
-- Badge "Mais popular" 20EUR, 3 passos, ecra de agradecimento
-
-### Admin
-- Gestao viagens/utilizadores/contribuicoes
-- Botoes de email (Novo Sonho, Sonho Financiado, Resumo Semanal)
-- Storytelling com 5 editores de capitulos
+1. Mudanca de capitulo (automatico nos marcos 25/50/75/100%)
+2. Resumo semanal (botao admin)
+3. Contribuicao via referral (automatico)
+4. Sonho financiado (botao admin >= 100%)
+5. Novo sonho (botao admin com selector)
 
 ## Key Files
-- frontend/src/components/JourneyEditForm.js (autosave integrado)
+- frontend/src/components/JourneyEditForm.js (autosave dual-layer)
 - frontend/src/components/EmailPreviewModal.js
 - frontend/src/pages/Admin.js (autosave create form)
 - frontend/src/pages/Home.js
 - frontend/src/pages/JourneyDetail.js
-- frontend/src/pages/Login.js
-- frontend/src/contexts/AuthContext.js
-- backend/server.py
+- backend/server.py (drafts endpoints)
 
 ## Prioritized Backlog
 
