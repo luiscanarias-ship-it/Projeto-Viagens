@@ -1322,7 +1322,17 @@ async def create_journey(journey_data: JourneyCreate, request: Request):
 async def update_journey(journey_id: str, update_data: JourneyUpdate, request: Request):
     await require_admin(request)
     
-    updates = {k: v for k, v in update_data.model_dump().items() if v is not None}
+    updates = {}
+    for k, v in update_data.model_dump().items():
+        if v is not None:
+            updates[k] = v
+        elif isinstance(v, bool):
+            updates[k] = v
+    # Explicitly handle boolean fields that can be False
+    raw = update_data.model_dump()
+    for bool_field in ['is_active', 'is_main_trip', 'show_goal_amount', 'story_emails_enabled']:
+        if bool_field in raw and raw[bool_field] is not None:
+            updates[bool_field] = raw[bool_field]
     updates["updated_at"] = datetime.now(timezone.utc).isoformat()
     
     result = await db.journeys.update_one({"journey_id": journey_id}, {"$set": updates})
@@ -2277,7 +2287,7 @@ async def get_ambassador_public_profile(user_id: str):
     
     # Check if contributed to main journey
     main_journey = await db.journeys.find_one(
-        {"$or": [{"is_main_trip": True}, {"is_active": True, "status": "ativa"}]},
+        {"is_active": True, "$or": [{"is_main_trip": True}, {"status": "ativa"}]},
         {"_id": 0, "journey_id": 1}
     )
     contributed_to_main = False
@@ -3111,7 +3121,7 @@ async def confirm_contribution(contribution_id: str, request: Request):
         # Marcar que o utilizador contribuiu para a viagem principal
         # (consideramos a primeira viagem ativa como "principal" ou is_main_trip=True)
         main_journey = await db.journeys.find_one(
-            {"$or": [{"is_main_trip": True}, {"is_active": True, "status": "ativa"}]}, 
+            {"is_active": True, "$or": [{"is_main_trip": True}, {"status": "ativa"}]}, 
             {"_id": 0}
         )
         is_main_trip = main_journey and contribution["journey_id"] == main_journey.get("journey_id")
@@ -3504,7 +3514,7 @@ async def validate_contribution(contribution_id: str, request: Request):
             if user:
                 # Mark contributed to main trip
                 main_journey = await db.journeys.find_one(
-                    {"$or": [{"is_main_trip": True}, {"is_active": True, "status": "ativa"}]}, 
+                    {"is_active": True, "$or": [{"is_main_trip": True}, {"status": "ativa"}]}, 
                     {"_id": 0}
                 )
                 is_main = main_journey and contribution["journey_id"] == main_journey.get("journey_id")
@@ -5471,10 +5481,10 @@ async def seed_journeys():
 @api_router.get("/homepage/main-journey")
 async def get_main_journey_details():
     """Get the main journey with full details for homepage"""
-    # Find the main journey (is_main_trip=True or first active one)
+    # Find the main journey (is_main_trip=True or first active one) — must be active
     journey = await db.journeys.find_one(
-        {"$or": [{"is_main_trip": True}, {"is_active": True, "status": "ativa"}]},
-        {"_id": 0, "admin_notes": 0}  # Keep goal_amount, we'll filter it based on show_goal_amount
+        {"is_active": True, "$or": [{"is_main_trip": True}, {"status": "ativa"}]},
+        {"_id": 0, "admin_notes": 0}
     )
     
     if not journey:
