@@ -318,53 +318,58 @@ const Home = () => {
                   <p className="font-handwritten text-3xl md:text-4xl text-[#FFBE98] mb-6">
                     {d('main.poetic', mainJourney.journey.poetic_name)}
                   </p>
-                  
-                  {/* Story Chapter */}
-                  <div className="max-w-lg mb-8">
-                    <StoryChapter
-                      percentage={mainJourney.progress?.percentage || 0}
-                      customChapters={mainJourney.journey.story_chapters}
-                      variant="dark"
-                    />
-                  </div>
 
-                  {/* Progress Bar */}
-                  {mainJourney.progress && (
-                    <div className="max-w-md mb-8">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-white/70 text-sm">{t('home.progress')}</span>
-                        <span className="text-white font-bold text-lg">{mainJourney.progress.percentage}% <span className="text-white/60 text-sm font-normal">{t('home.funded')}</span></span>
-                      </div>
-                      <div className="h-2.5 bg-white/15 rounded-full overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          whileInView={{ width: `${Math.min(mainJourney.progress.percentage, 100)}%` }}
-                          viewport={{ once: true }}
-                          transition={{ duration: 1.5, ease: "easeOut" }}
-                          className={`h-full rounded-full ${mainJourney.progress.is_funded ? 'bg-green-400' : 'bg-gradient-to-r from-[#FFBE98] to-[#F2C94C]'}`}
+                  <div className="flex flex-col md:flex-row gap-8 md:items-start">
+                    {/* Left: Chapter + Progress */}
+                    <div className="flex-1">
+                      <div className="max-w-lg mb-8">
+                        <StoryChapter
+                          percentage={mainJourney.progress?.percentage || 0}
+                          customChapters={mainJourney.journey.story_chapters}
+                          variant="dark"
                         />
                       </div>
-                      {mainJourney.progress.is_funded && (
-                        <p className="text-green-400 text-sm mt-2 flex items-center gap-2">
-                          <Sparkles className="w-4 h-4" /> {t('home.goal_reached')}
-                        </p>
-                      )}
-                      {!mainJourney.progress.is_funded && (
-                        <MilestoneProgress progressPercentage={mainJourney.progress.percentage} variant="dark" />
+
+                      {mainJourney.progress && (
+                        <div className="max-w-md">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-white/70 text-sm">{t('home.progress')}</span>
+                            <span className="text-white font-bold text-lg">{mainJourney.progress.percentage}% <span className="text-white/60 text-sm font-normal">{t('home.funded')}</span></span>
+                          </div>
+                          <div className="h-2.5 bg-white/15 rounded-full overflow-hidden">
+                            <motion.div
+                              initial={{ width: 0 }}
+                              whileInView={{ width: `${Math.min(mainJourney.progress.percentage, 100)}%` }}
+                              viewport={{ once: true }}
+                              transition={{ duration: 1.5, ease: "easeOut" }}
+                              className={`h-full rounded-full ${mainJourney.progress.is_funded ? 'bg-green-400' : 'bg-gradient-to-r from-[#FFBE98] to-[#F2C94C]'}`}
+                            />
+                          </div>
+                          {mainJourney.progress.is_funded && (
+                            <p className="text-green-400 text-sm mt-2 flex items-center gap-2">
+                              <Sparkles className="w-4 h-4" /> {t('home.goal_reached')}
+                            </p>
+                          )}
+                          {!mainJourney.progress.is_funded && (
+                            <MilestoneProgress progressPercentage={mainJourney.progress.percentage} variant="dark" />
+                          )}
+                        </div>
                       )}
                     </div>
-                  )}
 
-                  <p className="text-white/70 text-sm italic mb-4" data-testid="micro-question">
-                    Queres ajudar este sonho a dar o próximo passo?
-                  </p>
-
-                  <button
-                    onClick={() => setShowCheckout(true)}
-                    className="inline-flex items-center gap-2 px-8 py-4 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-bold text-lg hover:bg-[#FFAB7D] transition-colors"
-                    data-testid="contribute-main-btn">
-                    <Heart className="w-5 h-5" /> {t('home.contribute_dream')}
-                  </button>
+                    {/* Right: CTA aligned with chapter */}
+                    <div className="md:w-72 flex flex-col items-start md:items-center justify-start md:pt-4">
+                      <p className="text-white/70 text-sm italic mb-4 text-center" data-testid="micro-question">
+                        Queres ajudar este sonho a dar o próximo passo?
+                      </p>
+                      <button
+                        onClick={() => setShowCheckout(true)}
+                        className="inline-flex items-center gap-2 px-8 py-4 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-bold text-lg hover:bg-[#FFAB7D] transition-colors"
+                        data-testid="contribute-main-btn">
+                        <Heart className="w-5 h-5" /> {t('home.contribute_dream')}
+                      </button>
+                    </div>
+                  </div>
                 </motion.div>
               </div>
             </div>
