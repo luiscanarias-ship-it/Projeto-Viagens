@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Edit2, Trash2, Save, X, BarChart3, Settings, CheckCircle, XCircle, Mail, Users, Award, Gift, Crown, TrendingUp, UserPlus, ChevronRight, Star, FileText, Clock, MapPin, Target, Calendar, Eye, EyeOff, MessageSquare, AlertCircle, ExternalLink, History, Search, Heart, Sparkles, BookOpen } from 'lucide-react';
@@ -62,16 +62,45 @@ const Admin = () => {
   const [adjustmentJourneyId, setAdjustmentJourneyId] = useState(null);
   const [generatingDescs, setGeneratingDescs] = useState(false);
   const [journeyFilter, setJourneyFilter] = useState('todas');
-  const [formData, setFormData] = useState({
-    name: '',
-    poetic_name: '',
-    description: '',
-    emotional_message: '',
-    impact_description: '',
-    image_url: '',
-    goal_amount: 5000,
-    target_date: ''
+
+  // Autosave: restore create form data from localStorage
+  const CREATE_AUTOSAVE_KEY = 'autosave_journey_create';
+  const defaultFormData = { name: '', poetic_name: '', description: '', emotional_message: '', impact_description: '', image_url: '', goal_amount: 5000, target_date: '' };
+  const [formData, setFormData] = useState(() => {
+    try {
+      const raw = localStorage.getItem(CREATE_AUTOSAVE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed._autosave_ts && Date.now() - parsed._autosave_ts < 86400000) {
+          const { _autosave_ts, ...data } = parsed;
+          return { ...defaultFormData, ...data };
+        }
+        localStorage.removeItem(CREATE_AUTOSAVE_KEY);
+      }
+    } catch { /* ignore */ }
+    return defaultFormData;
   });
+  const [createFormAutosaved, setCreateFormAutosaved] = useState(false);
+  const createAutosaveTimer = useRef(null);
+
+  // Autosave create form on changes
+  const isCreateFormDirty = JSON.stringify(formData) !== JSON.stringify(defaultFormData);
+  useEffect(() => {
+    if (!isCreateFormDirty || !showCreateForm) return;
+    if (createAutosaveTimer.current) clearTimeout(createAutosaveTimer.current);
+    createAutosaveTimer.current = setTimeout(() => {
+      try {
+        localStorage.setItem(CREATE_AUTOSAVE_KEY, JSON.stringify({ ...formData, _autosave_ts: Date.now() }));
+        setCreateFormAutosaved(true);
+        setTimeout(() => setCreateFormAutosaved(false), 3000);
+      } catch { /* ignore */ }
+    }, 2000);
+    return () => { if (createAutosaveTimer.current) clearTimeout(createAutosaveTimer.current); };
+  }, [formData, isCreateFormDirty, showCreateForm]);
+
+  const clearCreateAutosave = useCallback(() => {
+    localStorage.removeItem(CREATE_AUTOSAVE_KEY);
+  }, []);
 
   useEffect(() => {
     if (!authLoading && (!user || !user.is_admin)) {
@@ -126,6 +155,7 @@ const Admin = () => {
       });
       setJourneys([...journeys, response.data]);
       setShowCreateForm(false);
+      clearCreateAutosave();
       setFormData({
         name: '',
         poetic_name: '',
@@ -780,7 +810,14 @@ const Admin = () => {
                   animate={{ opacity: 1, height: 'auto' }}
                   className="mb-6 p-6 bg-stone-50 rounded-2xl"
                 >
-                  <h3 className="font-semibold mb-4">Nova Viagem</h3>
+                  <h3 className="font-semibold mb-4 flex items-center gap-3">
+                    Nova Viagem
+                    {createFormAutosaved && (
+                      <span className="text-xs text-green-600 font-normal flex items-center gap-1">
+                        <CheckCircle className="w-3 h-3" /> Rascunho guardado
+                      </span>
+                    )}
+                  </h3>
                   <div className="grid md:grid-cols-2 gap-4">
                     <input
                       type="text"
@@ -851,7 +888,7 @@ const Admin = () => {
                       {t('admin.save')}
                     </button>
                     <button
-                      onClick={() => setShowCreateForm(false)}
+                      onClick={() => { clearCreateAutosave(); setShowCreateForm(false); setFormData(defaultFormData); }}
                       className="btn-secondary text-sm px-4 py-2"
                     >
                       Cancelar
