@@ -2886,6 +2886,8 @@ async def get_dreamers_stats():
     ]
     result = await db.contributions.aggregate(pipeline).to_list(1)
     total_dreamers = result[0]["total"] if result else 0
+    # Base offset: platform started with 67 dreamers before tracking
+    total_dreamers += 67
     
     # Get top dreamer by POINTS (not monetary contribution)
     top_pipeline = [
