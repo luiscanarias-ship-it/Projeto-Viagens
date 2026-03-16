@@ -230,6 +230,63 @@ const Home = () => {
         </div>
       </section>
 
+      {/* ==================== COMO FUNCIONA + PROVA SOCIAL ==================== */}
+      <section className="py-16 bg-[#FAFAF9]" data-testid="how-it-works-section">
+        <div className="max-w-5xl mx-auto px-6">
+          {/* How it Works */}
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+            className="text-center mb-10">
+            <h2 className="text-3xl font-bold text-[#2D2A26]">Como funciona o <span className="text-[#FFBE98]">CrowdDreaming</span></h2>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.1 }}
+              className="bg-white rounded-2xl p-6 shadow-sm border border-stone-100 text-center">
+              <div className="w-14 h-14 bg-[#FFBE98]/15 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Heart className="w-7 h-7 text-[#FFBE98]" />
+              </div>
+              <div className="w-8 h-8 bg-[#2D2A26] rounded-full flex items-center justify-center mx-auto mb-3 text-white text-sm font-bold">1</div>
+              <p className="text-base font-semibold text-[#2D2A26]">{t('home.step1_title')}</p>
+              <p className="text-sm text-[#6B6661] mt-2">{t('home.step1_desc')}</p>
+            </motion.div>
+
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.2 }}
+              className="bg-white rounded-2xl p-6 shadow-sm border border-stone-100 text-center">
+              <div className="w-14 h-14 bg-[#E6F4F1] rounded-full flex items-center justify-center mx-auto mb-4">
+                <Users className="w-7 h-7 text-[#2D2A26]" />
+              </div>
+              <div className="w-8 h-8 bg-[#2D2A26] rounded-full flex items-center justify-center mx-auto mb-3 text-white text-sm font-bold">2</div>
+              <p className="text-base font-semibold text-[#2D2A26]">{t('home.step2_title')}</p>
+              <p className="text-sm text-[#6B6661] mt-2">{t('home.step2_desc')}</p>
+            </motion.div>
+
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.3 }}
+              className="bg-white rounded-2xl p-6 shadow-sm border border-stone-100 text-center">
+              <div className="w-14 h-14 bg-[#F2C94C]/15 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Star className="w-7 h-7 text-[#F2C94C]" />
+              </div>
+              <div className="w-8 h-8 bg-[#2D2A26] rounded-full flex items-center justify-center mx-auto mb-3 text-white text-sm font-bold">3</div>
+              <p className="text-base font-semibold text-[#2D2A26]">{t('home.step3_title')}</p>
+              <p className="text-sm text-[#6B6661] mt-2">{t('home.step3_desc')}</p>
+            </motion.div>
+          </div>
+
+          {/* CTA Button - direct to main journey checkout */}
+          {mainJourney?.journey && (
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.4 }}
+              className="text-center mt-10">
+              <Link to={`/journey/${mainJourney.journey.journey_id}?pay=true`}
+                className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#2D2A26] text-white rounded-xl font-semibold hover:bg-[#4A4640] transition-colors text-base"
+                data-testid="howit-works-cta"
+              >
+                <Heart className="w-5 h-5" />
+                {t('home.support_dream')}
+              </Link>
+            </motion.div>
+          )}
+        </div>
+      </section>
+
       {/* ==================== 1. VIAGEM PRINCIPAL ==================== */}
       <section id="main-journey" className="relative" data-testid="main-journey-section">
         {mainJourney?.journey ? (
@@ -361,97 +418,6 @@ const Home = () => {
               <p className="text-[#6B6661]">{t('home.no_main_journey')}</p>
             </div>
           )}
-      </section>
-
-      {/* Community Stats */}
-      <section className="py-12 bg-gradient-to-r from-[#2D2A26] to-[#4A4640]" data-testid="community-section">
-        <div className="max-w-4xl mx-auto px-6">
-          <div className="flex flex-wrap items-center justify-center gap-12 text-white">
-            <div className="text-center">
-              <Users className="w-8 h-8 mx-auto mb-2 text-[#FFBE98]" />
-              <p className="text-3xl font-bold">{dreamersStats?.total_dreamers || 0}</p>
-              <p className="text-white/70">{t('home.dreamers')}</p>
-            </div>
-            {dreamersStats?.top_dreamer && (
-              <>
-                <div className="w-px h-16 bg-white/20" />
-                <div className="text-center">
-                  <Star className="w-8 h-8 mx-auto mb-2 text-[#F2C94C]" />
-                  <p className="text-xl font-bold">{dreamersStats.top_dreamer.name}</p>
-                  <p className="text-white/70">{t('home.top_dreamer')}</p>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* ==================== COMO FUNCIONA + PROVA SOCIAL ==================== */}
-      <section className="py-16 bg-[#FAFAF9]" data-testid="how-it-works-section">
-        <div className="max-w-5xl mx-auto px-6">
-          {/* Social Proof */}
-          {platformStats && platformStats.total_dreamers > 0 && (
-            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-              className="flex items-center justify-center gap-2 mb-10">
-              <Users className="w-5 h-5 text-[#FFBE98]" />
-              <p className="text-lg text-[#6B6661]">
-                <strong className="text-[#2D2A26] text-xl">{platformStats.total_dreamers}</strong> {t('home.social_proof')}
-              </p>
-            </motion.div>
-          )}
-
-          {/* How it Works */}
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-            className="text-center mb-10">
-            <h2 className="text-3xl font-bold text-[#2D2A26]">Como funciona o <span className="text-[#FFBE98]">CrowdDreaming</span></h2>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.1 }}
-              className="bg-white rounded-2xl p-6 shadow-sm border border-stone-100 text-center">
-              <div className="w-14 h-14 bg-[#FFBE98]/15 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Heart className="w-7 h-7 text-[#FFBE98]" />
-              </div>
-              <div className="w-8 h-8 bg-[#2D2A26] rounded-full flex items-center justify-center mx-auto mb-3 text-white text-sm font-bold">1</div>
-              <p className="text-base font-semibold text-[#2D2A26]">{t('home.step1_title')}</p>
-              <p className="text-sm text-[#6B6661] mt-2">{t('home.step1_desc')}</p>
-            </motion.div>
-
-            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.2 }}
-              className="bg-white rounded-2xl p-6 shadow-sm border border-stone-100 text-center">
-              <div className="w-14 h-14 bg-[#E6F4F1] rounded-full flex items-center justify-center mx-auto mb-4">
-                <Users className="w-7 h-7 text-[#2D2A26]" />
-              </div>
-              <div className="w-8 h-8 bg-[#2D2A26] rounded-full flex items-center justify-center mx-auto mb-3 text-white text-sm font-bold">2</div>
-              <p className="text-base font-semibold text-[#2D2A26]">{t('home.step2_title')}</p>
-              <p className="text-sm text-[#6B6661] mt-2">{t('home.step2_desc')}</p>
-            </motion.div>
-
-            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.3 }}
-              className="bg-white rounded-2xl p-6 shadow-sm border border-stone-100 text-center">
-              <div className="w-14 h-14 bg-[#F2C94C]/15 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Star className="w-7 h-7 text-[#F2C94C]" />
-              </div>
-              <div className="w-8 h-8 bg-[#2D2A26] rounded-full flex items-center justify-center mx-auto mb-3 text-white text-sm font-bold">3</div>
-              <p className="text-base font-semibold text-[#2D2A26]">{t('home.step3_title')}</p>
-              <p className="text-sm text-[#6B6661] mt-2">{t('home.step3_desc')}</p>
-            </motion.div>
-          </div>
-
-          {/* CTA Button - direct to main journey checkout */}
-          {mainJourney?.journey && (
-            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.4 }}
-              className="text-center mt-10">
-              <Link to={`/journey/${mainJourney.journey.journey_id}?pay=true`}
-                className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#2D2A26] text-white rounded-xl font-semibold hover:bg-[#4A4640] transition-colors text-base"
-                data-testid="howit-works-cta"
-              >
-                <Heart className="w-5 h-5" />
-                {t('home.support_dream')}
-              </Link>
-            </motion.div>
-          )}
-        </div>
       </section>
 
       {/* ==================== 2. PLANEIA A TUA VIAGEM ==================== */}
@@ -752,6 +718,29 @@ const Home = () => {
               <p className="text-sm text-[#6B6661] mt-2">{t('home.be_first')}</p>
             </div>
           )}
+        </div>
+      </section>
+
+      {/* Community Stats */}
+      <section className="py-12 bg-gradient-to-r from-[#2D2A26] to-[#4A4640]" data-testid="community-section">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="flex flex-wrap items-center justify-center gap-12 text-white">
+            <div className="text-center">
+              <Users className="w-8 h-8 mx-auto mb-2 text-[#FFBE98]" />
+              <p className="text-3xl font-bold">{dreamersStats?.total_dreamers || 0}</p>
+              <p className="text-white/70">{t('home.dreamers')}</p>
+            </div>
+            {dreamersStats?.top_dreamer && (
+              <>
+                <div className="w-px h-16 bg-white/20" />
+                <div className="text-center">
+                  <Star className="w-8 h-8 mx-auto mb-2 text-[#F2C94C]" />
+                  <p className="text-xl font-bold">{dreamersStats.top_dreamer.name}</p>
+                  <p className="text-white/70">{t('home.top_dreamer')}</p>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </section>
 
