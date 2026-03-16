@@ -10,6 +10,7 @@ import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import JourneyApplicationModal from '../components/JourneyApplicationModal';
 import ShareMenu, { buildInviteLink } from '../components/ShareMenu';
+import SupportDashboard from '../components/SupportDashboard';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -880,6 +881,12 @@ const Dashboard = () => {
           )}
         </motion.div>
       </div>
+      
+      {/* Support Section */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
+        className="mt-8">
+        <SupportDashboard />
+      </motion.div>
       
       {/* Journey Application Modal */}
       <JourneyApplicationModal

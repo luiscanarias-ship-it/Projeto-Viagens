@@ -5549,6 +5549,546 @@ async def list_drafts(request: Request):
     ).to_list(50)
     return {"drafts": drafts}
 
+
+# ==================== OBJECT STORAGE ====================
+import requests as sync_requests
+
+STORAGE_URL = "https://integrations.emergentagent.com/objstore/api/v1/storage"
+EMERGENT_KEY = os.environ.get("EMERGENT_LLM_KEY")
+APP_NAME = "4luis"
+_storage_key = None
+
+def init_storage():
+    global _storage_key
+    if _storage_key:
+        return _storage_key
+    resp = sync_requests.post(f"{STORAGE_URL}/init", json={"emergent_key": EMERGENT_KEY}, timeout=30)
+    resp.raise_for_status()
+    _storage_key = resp.json()["storage_key"]
+    return _storage_key
+
+def put_object(path: str, data: bytes, content_type: str) -> dict:
+    key = init_storage()
+    resp = sync_requests.put(
+        f"{STORAGE_URL}/objects/{path}",
+        headers={"X-Storage-Key": key, "Content-Type": content_type},
+        data=data, timeout=120
+    )
+    resp.raise_for_status()
+    return resp.json()
+
+def get_object(path: str):
+    key = init_storage()
+    resp = sync_requests.get(
+        f"{STORAGE_URL}/objects/{path}",
+        headers={"X-Storage-Key": key}, timeout=60
+    )
+    resp.raise_for_status()
+    return resp.content, resp.headers.get("Content-Type", "application/octet-stream")
+
+# ==================== SUPPORT TICKET SYSTEM ====================
+
+TICKET_TYPES = [
+    "Problema tecnico", "Pagamento", "Conta e acesso",
+    "Convites e referrals", "Viagens e sonhos",
+    "Reclamacao", "Sugestao", "Outro"
+]
+TICKET_STATUSES = ["Aberto", "Em analise", "A aguardar resposta", "Resolvido", "Fechado"]
+TICKET_PRIORITIES = ["Baixa", "Media", "Alta", "Urgente"]
+
+PRIORITY_RULES = {
+    "Pagamento": "Alta",
+    "Problema tecnico": "Media",
+    "Conta e acesso": "Media",
+    "Reclamacao": "Alta",
+    "Sugestao": "Baixa",
+    "Convites e referrals": "Media",
+    "Viagens e sonhos": "Media",
+    "Outro": "Media"
+}
+
+async def generate_ticket_id():
+    year = datetime.now(timezone.utc).year
+    count = await db.support_tickets.count_documents({})
+    return f"SUP-{year}-{str(count + 1).zfill(5)}"
+
+# ---- Support Email Templates ----
+
+def get_support_email_html(content: str, title: str = "Suporte 4Luis") -> str:
+    return get_email_base_template(content, title)
+
+def get_ticket_confirmation_email(name: str, ticket_id: str, ticket_type: str, subject: str) -> str:
+    content = f"""
+        <h2 style="color: #2D2A26; font-size: 20px; margin: 0 0 16px;">Recebemos o teu pedido</h2>
+        <p style="color: #6B6661; font-size: 15px; line-height: 1.6;">
+            Ola, {name}<br><br>
+            Recebemos o teu pedido de suporte com sucesso.
+        </p>
+        <div style="background: #F5F0EB; border-radius: 12px; padding: 20px; margin: 20px 0;">
+            <p style="margin: 0; font-size: 14px; color: #6B6661;">
+                <strong>Referencia do pedido:</strong> {ticket_id}<br>
+                <strong>Tipo:</strong> {ticket_type}<br>
+                <strong>Assunto:</strong> {subject}
+            </p>
+        </div>
+        <p style="color: #6B6661; font-size: 15px; line-height: 1.6;">
+            A nossa equipa ira analisar o teu pedido e atualizar-te assim que houver novidades.<br><br>
+            Podes acompanhar o estado do pedido na tua area de Ajuda e Suporte.
+        </p>
+        <div style="text-align: center; margin: 24px 0;">
+            <a href="{FRONTEND_URL}/support/{ticket_id}" style="display: inline-block; padding: 12px 32px; background: #FFBE98; color: #2D2A26; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 15px;">Ver pedido</a>
+        </div>
+        <p style="color: #6B6661; font-size: 14px; font-style: italic; text-align: center; margin-top: 24px;">
+            4Luis<br>Clube de Sonhadores<br>Sonha connosco
+        </p>
+    """
+    return get_support_email_html(content)
+
+def get_admin_reply_email(name: str, ticket_id: str, status: str, reply_excerpt: str) -> str:
+    content = f"""
+        <h2 style="color: #2D2A26; font-size: 20px; margin: 0 0 16px;">Nova resposta ao teu pedido</h2>
+        <p style="color: #6B6661; font-size: 15px; line-height: 1.6;">
+            Ola, {name}<br><br>
+            A equipa 4Luis respondeu ao teu pedido de suporte.
+        </p>
+        <div style="background: #F5F0EB; border-radius: 12px; padding: 20px; margin: 20px 0;">
+            <p style="margin: 0; font-size: 14px; color: #6B6661;">
+                <strong>Referencia do pedido:</strong> {ticket_id}<br>
+                <strong>Estado atual:</strong> {status}
+            </p>
+        </div>
+        <div style="background: #FAFAF9; border-left: 3px solid #FFBE98; padding: 16px; margin: 16px 0; border-radius: 0 8px 8px 0;">
+            <p style="margin: 0; font-size: 14px; color: #2D2A26; font-style: italic;">
+                {reply_excerpt}
+            </p>
+        </div>
+        <p style="color: #6B6661; font-size: 15px; line-height: 1.6;">
+            Podes continuar a conversa e acompanhar o estado do pedido na tua area de Ajuda e Suporte.
+        </p>
+        <div style="text-align: center; margin: 24px 0;">
+            <a href="{FRONTEND_URL}/support/{ticket_id}" style="display: inline-block; padding: 12px 32px; background: #FFBE98; color: #2D2A26; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 15px;">Ver pedido</a>
+        </div>
+        <p style="color: #6B6661; font-size: 14px; font-style: italic; text-align: center; margin-top: 24px;">
+            4Luis<br>Clube de Sonhadores<br>Sonha connosco
+        </p>
+    """
+    return get_support_email_html(content)
+
+def get_status_change_email(name: str, ticket_id: str, status: str) -> str:
+    content = f"""
+        <h2 style="color: #2D2A26; font-size: 20px; margin: 0 0 16px;">Estado do pedido atualizado</h2>
+        <p style="color: #6B6661; font-size: 15px; line-height: 1.6;">
+            Ola, {name}<br><br>
+            O estado do teu pedido de suporte foi atualizado.
+        </p>
+        <div style="background: #F5F0EB; border-radius: 12px; padding: 20px; margin: 20px 0;">
+            <p style="margin: 0; font-size: 14px; color: #6B6661;">
+                <strong>Referencia do pedido:</strong> {ticket_id}<br>
+                <strong>Novo estado:</strong> {status}
+            </p>
+        </div>
+        <p style="color: #6B6661; font-size: 15px; line-height: 1.6;">
+            Podes consultar todos os detalhes na tua area de Ajuda e Suporte.
+        </p>
+        <div style="text-align: center; margin: 24px 0;">
+            <a href="{FRONTEND_URL}/support/{ticket_id}" style="display: inline-block; padding: 12px 32px; background: #FFBE98; color: #2D2A26; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 15px;">Ver pedido</a>
+        </div>
+        <p style="color: #6B6661; font-size: 14px; font-style: italic; text-align: center; margin-top: 24px;">
+            4Luis<br>Clube de Sonhadores<br>Sonha connosco
+        </p>
+    """
+    return get_support_email_html(content)
+
+def get_ticket_resolved_email(name: str, ticket_id: str) -> str:
+    content = f"""
+        <h2 style="color: #2D2A26; font-size: 20px; margin: 0 0 16px;">Pedido resolvido</h2>
+        <p style="color: #6B6661; font-size: 15px; line-height: 1.6;">
+            Ola, {name}<br><br>
+            O teu pedido de suporte foi marcado como resolvido.
+        </p>
+        <div style="background: #F5F0EB; border-radius: 12px; padding: 20px; margin: 20px 0;">
+            <p style="margin: 0; font-size: 14px; color: #6B6661;">
+                <strong>Referencia do pedido:</strong> {ticket_id}
+            </p>
+        </div>
+        <p style="color: #6B6661; font-size: 15px; line-height: 1.6;">
+            Se precisares, podes responder ao pedido caso a questao persista.<br>
+            Se estiver tudo bem, o pedido podera ser fechado.
+        </p>
+        <div style="text-align: center; margin: 24px 0;">
+            <a href="{FRONTEND_URL}/support/{ticket_id}" style="display: inline-block; padding: 12px 32px; background: #FFBE98; color: #2D2A26; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 15px;">Ver pedido</a>
+        </div>
+        <p style="color: #6B6661; font-size: 14px; font-style: italic; text-align: center; margin-top: 24px;">
+            4Luis<br>Clube de Sonhadores<br>Sonha connosco
+        </p>
+    """
+    return get_support_email_html(content)
+
+def get_ticket_closed_email(name: str, ticket_id: str) -> str:
+    content = f"""
+        <h2 style="color: #2D2A26; font-size: 20px; margin: 0 0 16px;">Pedido fechado</h2>
+        <p style="color: #6B6661; font-size: 15px; line-height: 1.6;">
+            Ola, {name}<br><br>
+            O teu pedido de suporte foi fechado.
+        </p>
+        <div style="background: #F5F0EB; border-radius: 12px; padding: 20px; margin: 20px 0;">
+            <p style="margin: 0; font-size: 14px; color: #6B6661;">
+                <strong>Referencia do pedido:</strong> {ticket_id}
+            </p>
+        </div>
+        <p style="color: #6B6661; font-size: 15px; line-height: 1.6;">
+            Obrigado por entrares em contacto connosco.
+        </p>
+        <p style="color: #6B6661; font-size: 14px; font-style: italic; text-align: center; margin-top: 24px;">
+            4Luis<br>Clube de Sonhadores<br>Sonha connosco
+        </p>
+    """
+    return get_support_email_html(content)
+
+def get_admin_notification_email(name: str, ticket_id: str, ticket_type: str, status: str) -> str:
+    content = f"""
+        <h2 style="color: #2D2A26; font-size: 20px; margin: 0 0 16px;">Nova resposta do utilizador</h2>
+        <p style="color: #6B6661; font-size: 15px; line-height: 1.6;">
+            O utilizador {name} adicionou uma nova resposta ao pedido {ticket_id}.
+        </p>
+        <div style="background: #F5F0EB; border-radius: 12px; padding: 20px; margin: 20px 0;">
+            <p style="margin: 0; font-size: 14px; color: #6B6661;">
+                <strong>Tipo:</strong> {ticket_type}<br>
+                <strong>Estado atual:</strong> {status}
+            </p>
+        </div>
+        <div style="text-align: center; margin: 24px 0;">
+            <a href="{FRONTEND_URL}/admin" style="display: inline-block; padding: 12px 32px; background: #FFBE98; color: #2D2A26; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 15px;">Abrir pedido no admin</a>
+        </div>
+    """
+    return get_support_email_html(content)
+
+# ---- Support File Upload ----
+
+ALLOWED_SUPPORT_TYPES = {"image/png", "image/jpeg", "image/webp", "application/pdf"}
+MAX_SUPPORT_FILE_SIZE = 5 * 1024 * 1024  # 5MB
+
+from fastapi import UploadFile, File, Form, Query, Header
+
+@api_router.post("/support/upload")
+async def upload_support_file(request: Request, file: UploadFile = File(...)):
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Autenticacao necessaria")
+    
+    if file.content_type not in ALLOWED_SUPPORT_TYPES:
+        raise HTTPException(status_code=400, detail="Tipo de ficheiro nao suportado. Use png, jpg, jpeg, webp ou pdf.")
+    
+    data = await file.read()
+    if len(data) > MAX_SUPPORT_FILE_SIZE:
+        raise HTTPException(status_code=400, detail="Ficheiro excede 5MB")
+    
+    ext = file.filename.split(".")[-1] if "." in file.filename else "bin"
+    path = f"{APP_NAME}/support/{user.user_id}/{uuid.uuid4()}.{ext}"
+    
+    result = await asyncio.to_thread(put_object, path, data, file.content_type or "application/octet-stream")
+    
+    return {
+        "storage_path": result["path"],
+        "original_filename": file.filename,
+        "content_type": file.content_type,
+        "size": result.get("size", len(data))
+    }
+
+@api_router.get("/support/files/{path:path}")
+async def download_support_file(path: str, auth: str = Query(None), authorization: str = Header(None)):
+    token_str = None
+    if authorization and authorization.startswith("Bearer "):
+        token_str = authorization[7:]
+    elif auth:
+        token_str = auth
+    if not token_str:
+        raise HTTPException(status_code=401, detail="Autenticacao necessaria")
+    try:
+        payload = jwt.decode(token_str, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+    except Exception:
+        raise HTTPException(status_code=401, detail="Token invalido")
+    
+    data, content_type = await asyncio.to_thread(get_object, path)
+    return Response(content=data, media_type=content_type)
+
+# ---- Support Ticket Endpoints (User) ----
+
+@api_router.post("/support/tickets")
+async def create_support_ticket(request: Request):
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Autenticacao necessaria")
+    
+    body = await request.json()
+    ticket_type = body.get("ticket_type", "")
+    subject = body.get("subject", "")
+    description = body.get("description", "")
+    attachment = body.get("attachment")  # {storage_path, original_filename, content_type, size}
+    
+    if ticket_type not in TICKET_TYPES:
+        raise HTTPException(status_code=400, detail="Tipo de pedido invalido")
+    if not subject or not description:
+        raise HTTPException(status_code=400, detail="Assunto e descricao sao obrigatorios")
+    
+    ticket_id = await generate_ticket_id()
+    now = datetime.now(timezone.utc).isoformat()
+    priority = PRIORITY_RULES.get(ticket_type, "Media")
+    
+    ticket = {
+        "ticket_id": ticket_id,
+        "user_id": user.user_id,
+        "user_name": user.name,
+        "user_email": user.email,
+        "ticket_type": ticket_type,
+        "subject": subject,
+        "description": description,
+        "status": "Aberto",
+        "priority": priority,
+        "attachment": attachment,
+        "messages": [],
+        "internal_notes": [],
+        "created_at": now,
+        "updated_at": now
+    }
+    
+    await db.support_tickets.insert_one(ticket)
+    
+    # Send confirmation email
+    try:
+        html = get_ticket_confirmation_email(user.name, ticket_id, ticket_type, subject)
+        await send_email_resend(user.email, f"Recebemos o teu pedido de suporte — {ticket_id}", html)
+    except Exception as e:
+        logger.error(f"Failed to send ticket confirmation email: {e}")
+    
+    # Notify admin
+    try:
+        admin_html = get_admin_notification_email(user.name, ticket_id, ticket_type, "Aberto")
+        await send_email_resend(ADMIN_EMAIL, f"Novo pedido de suporte — {ticket_id}", admin_html)
+    except Exception as e:
+        logger.error(f"Failed to send admin notification: {e}")
+    
+    del ticket["_id"]
+    return ticket
+
+@api_router.get("/support/tickets")
+async def list_user_tickets(request: Request):
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Autenticacao necessaria")
+    
+    tickets = await db.support_tickets.find(
+        {"user_id": user.user_id},
+        {"_id": 0, "internal_notes": 0}
+    ).sort("created_at", -1).to_list(100)
+    
+    return {"tickets": tickets}
+
+@api_router.get("/support/tickets/{ticket_id}")
+async def get_user_ticket(ticket_id: str, request: Request):
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Autenticacao necessaria")
+    
+    ticket = await db.support_tickets.find_one(
+        {"ticket_id": ticket_id, "user_id": user.user_id},
+        {"_id": 0, "internal_notes": 0}
+    )
+    if not ticket:
+        raise HTTPException(status_code=404, detail="Pedido nao encontrado")
+    return ticket
+
+@api_router.post("/support/tickets/{ticket_id}/reply")
+async def user_reply_ticket(ticket_id: str, request: Request):
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Autenticacao necessaria")
+    
+    body = await request.json()
+    message = body.get("message", "").strip()
+    attachment = body.get("attachment")
+    if not message:
+        raise HTTPException(status_code=400, detail="Mensagem e obrigatoria")
+    
+    ticket = await db.support_tickets.find_one({"ticket_id": ticket_id, "user_id": user.user_id})
+    if not ticket:
+        raise HTTPException(status_code=404, detail="Pedido nao encontrado")
+    
+    now = datetime.now(timezone.utc).isoformat()
+    new_message = {
+        "message_id": f"msg_{uuid.uuid4().hex[:8]}",
+        "sender": "user",
+        "sender_name": user.name,
+        "message": message,
+        "attachment": attachment,
+        "created_at": now
+    }
+    
+    # If resolved ticket gets a reply, reopen
+    new_status = ticket["status"]
+    if ticket["status"] in ("Resolvido", "Aberto", "A aguardar resposta"):
+        new_status = "Em analise"
+    
+    await db.support_tickets.update_one(
+        {"ticket_id": ticket_id},
+        {"$push": {"messages": new_message}, "$set": {"status": new_status, "updated_at": now}}
+    )
+    
+    # Notify admin
+    try:
+        admin_html = get_admin_notification_email(user.name, ticket_id, ticket["ticket_type"], new_status)
+        await send_email_resend(ADMIN_EMAIL, f"Nova resposta do utilizador — {ticket_id}", admin_html)
+    except Exception as e:
+        logger.error(f"Failed to send admin notification: {e}")
+    
+    return {"status": "ok", "message": new_message, "new_status": new_status}
+
+# ---- Support Ticket Endpoints (Admin) ----
+
+@api_router.get("/admin/support/tickets")
+async def admin_list_tickets(request: Request, status: str = None, ticket_type: str = None, priority: str = None, search: str = None):
+    await require_admin(request)
+    
+    query = {}
+    if status:
+        query["status"] = status
+    if ticket_type:
+        query["ticket_type"] = ticket_type
+    if priority:
+        query["priority"] = priority
+    if search:
+        query["$or"] = [
+            {"ticket_id": {"$regex": search, "$options": "i"}},
+            {"user_email": {"$regex": search, "$options": "i"}},
+            {"subject": {"$regex": search, "$options": "i"}}
+        ]
+    
+    tickets = await db.support_tickets.find(query, {"_id": 0}).sort("updated_at", -1).to_list(200)
+    
+    # Stats
+    total = await db.support_tickets.count_documents({})
+    open_count = await db.support_tickets.count_documents({"status": {"$in": ["Aberto", "Em analise", "A aguardar resposta"]}})
+    
+    return {"tickets": tickets, "total": total, "open_count": open_count}
+
+@api_router.get("/admin/support/tickets/{ticket_id}")
+async def admin_get_ticket(ticket_id: str, request: Request):
+    await require_admin(request)
+    ticket = await db.support_tickets.find_one({"ticket_id": ticket_id}, {"_id": 0})
+    if not ticket:
+        raise HTTPException(status_code=404, detail="Pedido nao encontrado")
+    return ticket
+
+@api_router.post("/admin/support/tickets/{ticket_id}/reply")
+async def admin_reply_ticket(ticket_id: str, request: Request):
+    await require_admin(request)
+    body = await request.json()
+    message = body.get("message", "").strip()
+    if not message:
+        raise HTTPException(status_code=400, detail="Mensagem e obrigatoria")
+    
+    ticket = await db.support_tickets.find_one({"ticket_id": ticket_id})
+    if not ticket:
+        raise HTTPException(status_code=404, detail="Pedido nao encontrado")
+    
+    now = datetime.now(timezone.utc).isoformat()
+    new_message = {
+        "message_id": f"msg_{uuid.uuid4().hex[:8]}",
+        "sender": "admin",
+        "sender_name": "Equipa 4Luis",
+        "message": message,
+        "attachment": None,
+        "created_at": now
+    }
+    
+    await db.support_tickets.update_one(
+        {"ticket_id": ticket_id},
+        {"$push": {"messages": new_message}, "$set": {"updated_at": now}}
+    )
+    
+    # Send email to user
+    try:
+        excerpt = message[:200] + ("..." if len(message) > 200 else "")
+        html = get_admin_reply_email(ticket["user_name"], ticket_id, ticket["status"], excerpt)
+        await send_email_resend(ticket["user_email"], f"Nova resposta ao teu pedido — {ticket_id}", html)
+    except Exception as e:
+        logger.error(f"Failed to send reply email: {e}")
+    
+    return {"status": "ok", "message": new_message}
+
+@api_router.put("/admin/support/tickets/{ticket_id}/status")
+async def admin_update_ticket_status(ticket_id: str, request: Request):
+    await require_admin(request)
+    body = await request.json()
+    new_status = body.get("status", "")
+    
+    if new_status not in TICKET_STATUSES:
+        raise HTTPException(status_code=400, detail="Estado invalido")
+    
+    ticket = await db.support_tickets.find_one({"ticket_id": ticket_id})
+    if not ticket:
+        raise HTTPException(status_code=404, detail="Pedido nao encontrado")
+    
+    old_status = ticket["status"]
+    now = datetime.now(timezone.utc).isoformat()
+    
+    await db.support_tickets.update_one(
+        {"ticket_id": ticket_id},
+        {"$set": {"status": new_status, "updated_at": now}}
+    )
+    
+    # Send appropriate email
+    try:
+        if new_status == "Resolvido":
+            html = get_ticket_resolved_email(ticket["user_name"], ticket_id)
+            await send_email_resend(ticket["user_email"], f"O teu pedido foi resolvido — {ticket_id}", html)
+        elif new_status == "Fechado":
+            html = get_ticket_closed_email(ticket["user_name"], ticket_id)
+            await send_email_resend(ticket["user_email"], f"O teu pedido foi fechado — {ticket_id}", html)
+        elif new_status != old_status:
+            html = get_status_change_email(ticket["user_name"], ticket_id, new_status)
+            await send_email_resend(ticket["user_email"], f"O estado do teu pedido foi atualizado — {ticket_id}", html)
+    except Exception as e:
+        logger.error(f"Failed to send status change email: {e}")
+    
+    return {"status": "ok", "new_status": new_status}
+
+@api_router.put("/admin/support/tickets/{ticket_id}/priority")
+async def admin_update_ticket_priority(ticket_id: str, request: Request):
+    await require_admin(request)
+    body = await request.json()
+    new_priority = body.get("priority", "")
+    
+    if new_priority not in TICKET_PRIORITIES:
+        raise HTTPException(status_code=400, detail="Prioridade invalida")
+    
+    await db.support_tickets.update_one(
+        {"ticket_id": ticket_id},
+        {"$set": {"priority": new_priority, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    return {"status": "ok", "new_priority": new_priority}
+
+@api_router.post("/admin/support/tickets/{ticket_id}/note")
+async def admin_add_internal_note(ticket_id: str, request: Request):
+    await require_admin(request)
+    body = await request.json()
+    note = body.get("note", "").strip()
+    if not note:
+        raise HTTPException(status_code=400, detail="Nota e obrigatoria")
+    
+    now = datetime.now(timezone.utc).isoformat()
+    new_note = {
+        "note_id": f"note_{uuid.uuid4().hex[:8]}",
+        "note": note,
+        "created_at": now
+    }
+    
+    await db.support_tickets.update_one(
+        {"ticket_id": ticket_id},
+        {"$push": {"internal_notes": new_note}, "$set": {"updated_at": now}}
+    )
+    return {"status": "ok", "note": new_note}
+
 # ==================== SEED DATA ====================
 
 @api_router.post("/seed-journeys")

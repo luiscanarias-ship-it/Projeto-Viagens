@@ -7,6 +7,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import JourneyEditForm from '../components/JourneyEditForm';
 import EmailPreviewModal from '../components/EmailPreviewModal';
+import AdminSupportSection from '../components/AdminSupportSection';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -749,6 +750,7 @@ const Admin = () => {
             { id: 'users', label: 'Utilizadores', icon: usersDashboard?.metrics?.premium_users || null },
             { id: 'raffles', label: 'Sorteios', icon: rafflesReady?.length || null },
             { id: 'sponsors', label: 'Sponsors', icon: sponsorsReport?.total_qualified_sponsors || null },
+            { id: 'support', label: 'Suporte', icon: null },
             { id: 'settings', label: 'Configurações', icon: null }
           ].map(tab => (
             <button
@@ -2478,6 +2480,20 @@ const Admin = () => {
               )}
             </motion.div>
           )}
+
+          {/* Support Tab */}
+          {activeTab === 'support' && (
+            <motion.div
+              key="support"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+            >
+              <h2 className="text-xl font-bold mb-6">Pedidos de Suporte</h2>
+              <AdminSupportSection token={token} API={API} />
+            </motion.div>
+          )}
+
 
           {/* Settings Tab */}
           {activeTab === 'settings' && (

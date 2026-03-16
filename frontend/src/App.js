@@ -22,6 +22,8 @@ import CookieConsent from "./components/CookieConsent";
 import CookiePolicy from "./pages/CookiePolicy";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import SupportNewTicket from "./pages/SupportNewTicket";
+import SupportTicketDetail from "./pages/SupportTicketDetail";
 
 // Syncs user's preferred language on login
 const LanguageSync = () => {
@@ -79,6 +81,8 @@ const AppRouter = () => {
           <Route path="/cookies" element={<CookiePolicy />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
+          <Route path="/support/new" element={<SupportNewTicket />} />
+          <Route path="/support/:ticketId" element={<SupportTicketDetail />} />
         </Routes>
       </main>
       <Footer />
