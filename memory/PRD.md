@@ -14,6 +14,14 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 
 ## What's Been Implemented
 
+### Correcoes Admin e Navegacao (2026-03-09)
+- Fix: Link "Viagens" no header agora faz scroll ate a seccao de viagens
+- Fix: Login como admin redireciona para /admin automaticamente
+- Novo: Botao "Suspender/Reativar" viagem (toggle visibilidade sem apagar)
+- Novo: Botao estrela para definir viagem principal diretamente na lista
+- Novo: "Anunciar Novo Sonho" com dropdown para selecionar qual viagem anunciar
+- Storytelling editavel apos geracao IA (ja funcionava, confirmado)
+
 ### Formulario de Edicao de Viagens no Admin (2026-03-09)
 - Novo componente JourneyEditForm.js com navegacao por 4 tabs (Basico/Conteudo/Storytelling/Configuracoes)
 - Preview em tempo real da viagem (toggle sidebar)
