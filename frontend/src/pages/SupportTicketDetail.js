@@ -97,7 +97,8 @@ const SupportTicketDetail = () => {
   const [replyAttachment, setReplyAttachment] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [sending, setSending] = useState(false);
-  const prevMsgCount = useRef(null);
+
+  const hasLoadedOnce = useRef(false);
 
   const fetchTicket = async () => {
     try {
@@ -105,6 +106,10 @@ const SupportTicketDetail = () => {
         headers: getAuthHeaders(), withCredentials: true
       });
       setTicket(res.data);
+      if (!hasLoadedOnce.current) {
+        hasLoadedOnce.current = true;
+        setTimeout(() => window.scrollTo(0, 0), 50);
+      }
     } catch {
       navigate('/dashboard');
     }
@@ -113,19 +118,9 @@ const SupportTicketDetail = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    hasLoadedOnce.current = false;
     fetchTicket();
   }, [ticketId]);
-
-  useEffect(() => {
-    const msgCount = ticket?.messages?.length ?? 0;
-    // Only scroll to bottom when a NEW message is added after data was already loaded
-    if (prevMsgCount.current > 0 && msgCount > prevMsgCount.current) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }
-    if (msgCount > 0) {
-      prevMsgCount.current = msgCount;
-    }
-  }, [ticket?.messages]);
 
   const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -165,6 +160,7 @@ const SupportTicketDetail = () => {
       setReply('');
       setReplyAttachment(null);
       await fetchTicket();
+      setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
     } catch { /* ignore */ }
     setSending(false);
   };
