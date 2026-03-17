@@ -443,7 +443,7 @@ const CheckoutModal = ({
                         key={amt}
                         onClick={() => setSelectedAmount(amt)}
                         data-testid={`amount-btn-${amt}`}
-                        className={`py-2.5 px-3 rounded-xl font-semibold transition-all text-left flex items-center justify-between ${
+                        className={`py-2.5 px-3 rounded-xl font-semibold transition-all text-left relative ${
                           selectedAmount === amt
                             ? 'bg-[#FFBE98] text-white shadow-md ring-2 ring-[#FFBE98]/30'
                             : amt === 20
@@ -451,27 +451,26 @@ const CheckoutModal = ({
                               : 'bg-stone-100 text-[#2D2A26] hover:bg-stone-200'
                         }`}
                       >
-                        <div className="flex items-center gap-2">
-                          <span className="text-base font-bold min-w-[45px]">€{amt}</span>
+                        <div className="flex items-center justify-between">
+                          <span className="text-base font-bold">€{amt}</span>
+                          {selectedAmount === amt && (
+                            <Check className="w-4 h-4 flex-shrink-0" />
+                          )}
                           {amt === 20 && selectedAmount !== amt && (
                             <span 
-                              className="text-[10px] font-bold text-white bg-gradient-to-r from-[#FFBE98] to-[#E6A07C] px-2 py-0.5 rounded-full shadow-sm animate-pulse-subtle ring-1 ring-[#FFBE98]/50" 
+                              className="text-[9px] font-bold text-white bg-gradient-to-r from-[#FFBE98] to-[#E6A07C] px-1.5 py-0.5 rounded-full"
                               data-testid="most-popular-badge"
-                              style={{ animationDuration: '2.5s' }}
                             >
-                              Mais popular
-                            </span>
-                          )}}
-                          {contributionDescriptions?.[String(amt)] && (
-                            <span className={`text-sm font-normal ${
-                              selectedAmount === amt ? 'text-white/85' : 'text-[#6B6661]'
-                            }`}>
-                              {contributionDescriptions[String(amt)]}
+                              Popular
                             </span>
                           )}
                         </div>
-                        {selectedAmount === amt && (
-                          <Check className="w-5 h-5 flex-shrink-0" />
+                        {contributionDescriptions?.[String(amt)] && (
+                          <p className={`text-[11px] font-normal mt-1 leading-tight truncate ${
+                            selectedAmount === amt ? 'text-white/80' : 'text-[#6B6661]'
+                          }`}>
+                            {contributionDescriptions[String(amt)]}
+                          </p>
                         )}
                       </button>
                     ))}
