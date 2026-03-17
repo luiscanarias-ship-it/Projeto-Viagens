@@ -532,7 +532,7 @@ const Home = () => {
       </section>
 
       {/* ==================== 3. SONHOS EM FASE DE MATERIALIZAÇÃO ==================== */}
-      <section id="journeys" className="py-16 bg-[#FAFAF9] scroll-mt-16" data-testid="materializing-dreams-section">
+      <section id="journeys" className="py-16 bg-[#FAFAF9] scroll-mt-8" data-testid="materializing-dreams-section">
         <div className="max-w-6xl mx-auto px-6">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
             <span className="inline-block px-4 py-2 bg-[#E6F4F1] rounded-full text-[#2D2A26] font-medium text-sm mb-4">
