@@ -37,7 +37,7 @@
     "frontend": "100% (11/11 tests passed)"
   },
   "test_credentials": {
-    "app_url": "https://main-trip-boost.preview.emergentagent.com",
+    "app_url": "https://travel-celebrate.preview.emergentagent.com",
     "test_journey": "/journey/journey_china001"
   },
   "seed_data_creation": "None",

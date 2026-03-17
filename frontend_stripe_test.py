@@ -17,7 +17,7 @@ import time
 
 class FrontendStripeTest:
     def __init__(self):
-        self.frontend_url = "https://main-trip-boost.preview.emergentagent.com"
+        self.frontend_url = "https://travel-celebrate.preview.emergentagent.com"
         self.api_url = f"{self.frontend_url}/api"
         self.session = requests.Session()
         
