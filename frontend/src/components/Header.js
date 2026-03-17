@@ -64,7 +64,7 @@ const Header = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden md:flex items-center gap-6">
             <Link 
               to="/" 
               className="text-[#2D2A26] hover:text-[#FFBE98] transition-colors font-medium"
@@ -77,15 +77,30 @@ const Header = () => {
               onClick={(e) => {
                 e.preventDefault();
                 if (window.location.pathname === '/') {
+                  document.getElementById('main-journey')?.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                  navigate('/');
+                }
+              }}
+              className="px-4 py-1.5 bg-[#FFBE98]/15 text-[#2D2A26] hover:bg-[#FFBE98]/25 transition-colors font-semibold rounded-full text-sm border border-[#FFBE98]/30"
+              data-testid="nav-main-journey"
+            >
+              Viagem Principal
+            </Link>
+            <Link 
+              to="/" 
+              onClick={(e) => {
+                e.preventDefault();
+                if (window.location.pathname === '/') {
                   document.getElementById('journeys')?.scrollIntoView({ behavior: 'smooth' });
                 } else {
                   navigate('/?scrollTo=journeys');
                 }
               }}
-              className="text-[#2D2A26] hover:text-[#FFBE98] transition-colors font-medium"
+              className="text-[#2D2A26] hover:text-[#FFBE98] transition-colors font-medium text-center leading-tight text-sm"
               data-testid="nav-journeys"
             >
-              {t('nav.journeys')}
+              Viagens dos outros<br />sonhadores
             </Link>
             
             {user && (
@@ -253,11 +268,26 @@ const Header = () => {
                 {t('nav.home')}
               </Link>
               <Link
+                to="/"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setMobileMenuOpen(false);
+                  if (window.location.pathname === '/') {
+                    document.getElementById('main-journey')?.scrollIntoView({ behavior: 'smooth' });
+                  } else {
+                    navigate('/');
+                  }
+                }}
+                className="block py-3 text-[#FFBE98] font-semibold"
+              >
+                Viagem Principal
+              </Link>
+              <Link
                 to="/#journeys"
                 onClick={() => setMobileMenuOpen(false)}
                 className="block py-3 text-[#2D2A26] font-medium"
               >
-                {t('nav.journeys')}
+                Viagens dos outros sonhadores
               </Link>
               {user && (
                 <Link
