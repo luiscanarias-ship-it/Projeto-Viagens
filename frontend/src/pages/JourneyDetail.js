@@ -14,6 +14,7 @@ import CheckoutModal from '../components/CheckoutModal';
 import ShareMenu, { buildInviteLink } from '../components/ShareMenu';
 import StoryChapter from '../components/StoryChapter';
 import MilestoneProgress from '../components/MilestoneProgress';
+import TestimonialsSection from '../components/TestimonialsSection';
 import MilestoneCelebration from '../components/MilestoneCelebration';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -807,6 +808,14 @@ const JourneyDetail = () => {
                 </p>
               </div>
             </motion.div>
+
+            {/* Testimonials (compact) */}
+            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 }}
+              className="bg-white/60 backdrop-blur-sm rounded-3xl p-5 shadow-sm border border-stone-100">
+              <h4 className="text-xs font-semibold text-[#6B6661] uppercase mb-3">Sonhadores dizem</h4>
+              <TestimonialsSection variant="compact" />
+            </motion.div>
+
 
             {/* Contributions Feed */}
             {contributions.length > 0 && (

@@ -10,6 +10,7 @@ import axios from 'axios';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import CheckoutModal from '../components/CheckoutModal';
+import TestimonialsSection from '../components/TestimonialsSection';
 import StoryChapter from '../components/StoryChapter';
 import MilestoneProgress from '../components/MilestoneProgress';
 import MilestoneCelebration from '../components/MilestoneCelebration';
@@ -745,6 +746,9 @@ const Home = () => {
           )}
         </div>
       </section>
+
+      {/* Testimonials */}
+      <TestimonialsSection />
 
       {/* Community Stats */}
       <section className="py-12 bg-gradient-to-r from-[#2D2A26] to-[#4A4640]" data-testid="community-section">

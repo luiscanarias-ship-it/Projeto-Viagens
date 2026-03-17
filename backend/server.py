@@ -1,5 +1,5 @@
 from fastapi import FastAPI, APIRouter, HTTPException, Request, Response, Depends
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -6140,6 +6140,182 @@ async def admin_add_internal_note(ticket_id: str, request: Request):
         {"$push": {"internal_notes": new_note}, "$set": {"updated_at": now}}
     )
     return {"status": "ok", "note": new_note}
+
+# ==================== TESTIMONIAL SYSTEM ====================
+
+def get_testimonial_auth_email(name: str, testimonial_text: str, auth_token: str) -> str:
+    authorize_url = f"{FRONTEND_URL}/testimonial/authorize/{auth_token}"
+    reject_url = f"{FRONTEND_URL}/testimonial/reject/{auth_token}"
+    content = f"""
+        <h2 style="color: #2D2A26; font-size: 20px; margin: 0 0 16px;">A tua experiencia pode inspirar outros</h2>
+        <p style="color: #6B6661; font-size: 15px; line-height: 1.6;">
+            Ola, {name}<br><br>
+            Gostariamos de partilhar a tua experiencia para ajudar outros utilizadores a confiar na plataforma.
+        </p>
+        <div style="background: #FFF8F3; border-left: 3px solid #FFBE98; padding: 20px; margin: 24px 0; border-radius: 0 12px 12px 0;">
+            <p style="margin: 0; font-size: 15px; color: #2D2A26; font-style: italic; line-height: 1.6;">
+                &ldquo;{testimonial_text}&rdquo;
+            </p>
+            <p style="margin: 8px 0 0; font-size: 13px; color: #6B6661;">— {name}</p>
+        </div>
+        <p style="color: #6B6661; font-size: 15px; line-height: 1.6;">
+            Autorizas a publicacao deste testemunho na plataforma 4Luis?
+        </p>
+        <div style="text-align: center; margin: 28px 0;">
+            <a href="{authorize_url}" style="display: inline-block; padding: 12px 32px; background: #FFBE98; color: #2D2A26; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 15px; margin-right: 12px;">Autorizar</a>
+            <a href="{reject_url}" style="display: inline-block; padding: 12px 32px; background: #F5F0EB; color: #6B6661; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 15px;">Nao autorizar</a>
+        </div>
+        <p style="color: #6B6661; font-size: 14px; font-style: italic; text-align: center; margin-top: 24px;">
+            4Luis<br>Clube de Sonhadores<br>Sonha connosco
+        </p>
+    """
+    return get_support_email_html(content, "Testemunho 4Luis")
+
+@api_router.post("/admin/support/tickets/{ticket_id}/testimonial")
+async def create_testimonial_from_ticket(ticket_id: str, request: Request):
+    """Mark ticket as potential testimonial and create draft"""
+    await require_admin(request)
+    body = await request.json()
+    text = body.get("text", "").strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="Texto do testemunho e obrigatorio")
+    
+    ticket = await db.support_tickets.find_one({"ticket_id": ticket_id}, {"_id": 0})
+    if not ticket:
+        raise HTTPException(status_code=404, detail="Pedido nao encontrado")
+    
+    auth_token = uuid.uuid4().hex
+    now = datetime.now(timezone.utc).isoformat()
+    
+    user = await db.users.find_one({"user_id": ticket["user_id"]}, {"_id": 0})
+    trust_level = user.get("trust_level", "Sonhador") if user else "Sonhador"
+    
+    testimonial = {
+        "testimonial_id": f"test_{uuid.uuid4().hex[:8]}",
+        "ticket_id": ticket_id,
+        "user_id": ticket["user_id"],
+        "user_name": ticket["user_name"],
+        "user_email": ticket["user_email"],
+        "text": text,
+        "badge": trust_level,
+        "status": "draft",  # draft -> pending_auth -> authorized -> published | rejected
+        "auth_token": auth_token,
+        "created_at": now,
+        "updated_at": now
+    }
+    
+    await db.testimonials.insert_one(testimonial)
+    
+    # Mark ticket
+    await db.support_tickets.update_one(
+        {"ticket_id": ticket_id},
+        {"$set": {"has_testimonial": True, "updated_at": now}}
+    )
+    
+    del testimonial["_id"]
+    return testimonial
+
+@api_router.put("/admin/testimonials/{testimonial_id}")
+async def update_testimonial(testimonial_id: str, request: Request):
+    """Update testimonial draft text"""
+    await require_admin(request)
+    body = await request.json()
+    text = body.get("text", "").strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="Texto e obrigatorio")
+    
+    await db.testimonials.update_one(
+        {"testimonial_id": testimonial_id},
+        {"$set": {"text": text, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    return {"status": "ok"}
+
+@api_router.post("/admin/testimonials/{testimonial_id}/request-auth")
+async def request_testimonial_auth(testimonial_id: str, request: Request):
+    """Send authorization email to user"""
+    await require_admin(request)
+    testimonial = await db.testimonials.find_one({"testimonial_id": testimonial_id}, {"_id": 0})
+    if not testimonial:
+        raise HTTPException(status_code=404, detail="Testemunho nao encontrado")
+    
+    # Send email
+    html = get_testimonial_auth_email(testimonial["user_name"], testimonial["text"], testimonial["auth_token"])
+    await send_email_resend(
+        testimonial["user_email"],
+        "A tua experiencia pode inspirar outros — 4Luis",
+        html
+    )
+    
+    await db.testimonials.update_one(
+        {"testimonial_id": testimonial_id},
+        {"$set": {"status": "pending_auth", "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    return {"status": "ok"}
+
+@api_router.get("/testimonials/authorize/{auth_token}")
+async def authorize_testimonial(auth_token: str):
+    """Public endpoint - user authorizes testimonial via email link"""
+    testimonial = await db.testimonials.find_one({"auth_token": auth_token})
+    if not testimonial:
+        raise HTTPException(status_code=404, detail="Testemunho nao encontrado")
+    
+    await db.testimonials.update_one(
+        {"auth_token": auth_token},
+        {"$set": {"status": "authorized", "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    return RedirectResponse(url=f"{FRONTEND_URL}/testimonial/result?action=authorized")
+
+@api_router.get("/testimonials/reject/{auth_token}")
+async def reject_testimonial(auth_token: str):
+    """Public endpoint - user rejects testimonial via email link"""
+    testimonial = await db.testimonials.find_one({"auth_token": auth_token})
+    if not testimonial:
+        raise HTTPException(status_code=404, detail="Testemunho nao encontrado")
+    
+    await db.testimonials.update_one(
+        {"auth_token": auth_token},
+        {"$set": {"status": "rejected", "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    return RedirectResponse(url=f"{FRONTEND_URL}/testimonial/result?action=rejected")
+
+@api_router.post("/admin/testimonials/{testimonial_id}/publish")
+async def publish_testimonial(testimonial_id: str, request: Request):
+    """Publish an authorized testimonial"""
+    await require_admin(request)
+    testimonial = await db.testimonials.find_one({"testimonial_id": testimonial_id}, {"_id": 0})
+    if not testimonial:
+        raise HTTPException(status_code=404, detail="Testemunho nao encontrado")
+    if testimonial["status"] != "authorized":
+        raise HTTPException(status_code=400, detail="Testemunho nao autorizado")
+    
+    await db.testimonials.update_one(
+        {"testimonial_id": testimonial_id},
+        {"$set": {"status": "published", "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    return {"status": "ok"}
+
+@api_router.delete("/admin/testimonials/{testimonial_id}")
+async def delete_testimonial(testimonial_id: str, request: Request):
+    await require_admin(request)
+    await db.testimonials.delete_one({"testimonial_id": testimonial_id})
+    return {"status": "ok"}
+
+@api_router.get("/admin/testimonials")
+async def admin_list_testimonials(request: Request):
+    """List all testimonials for admin"""
+    await require_admin(request)
+    testimonials = await db.testimonials.find({}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    return {"testimonials": testimonials}
+
+@api_router.get("/testimonials/published")
+async def get_published_testimonials():
+    """Public endpoint - get published testimonials for homepage/journey"""
+    testimonials = await db.testimonials.find(
+        {"status": "published"},
+        {"_id": 0, "auth_token": 0, "user_email": 0, "user_id": 0}
+    ).sort("created_at", -1).to_list(20)
+    return {"testimonials": testimonials}
+
 
 # ==================== SEED DATA ====================
 

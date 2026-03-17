@@ -50,6 +50,12 @@ const AdminSupportSection = ({ token, API }) => {
   const [loading, setLoading] = useState(true);
   const [selectedTicket, setSelectedTicket] = useState(null);
 
+  // Testimonial state
+  const [showTestimonialForm, setShowTestimonialForm] = useState(false);
+  const [testimonialText, setTestimonialText] = useState('');
+  const [testimonials, setTestimonials] = useState([]);
+  const [savingTestimonial, setSavingTestimonial] = useState(false);
+
   // Filters
   const [filterStatus, setFilterStatus] = useState('');
   const [filterType, setFilterType] = useState('');
@@ -148,6 +154,50 @@ const AdminSupportSection = ({ token, API }) => {
       await openTicket(selectedTicket.ticket_id);
     } catch { /* ignore */ }
   };
+
+  const fetchTestimonials = async () => {
+    try {
+      const res = await axios.get(`${API}/admin/testimonials`, { headers });
+      setTestimonials(res.data.testimonials || []);
+    } catch { /* ignore */ }
+  };
+
+  const createTestimonial = async () => {
+    if (!testimonialText.trim() || !selectedTicket) return;
+    setSavingTestimonial(true);
+    try {
+      await axios.post(`${API}/admin/support/tickets/${selectedTicket.ticket_id}/testimonial`,
+        { text: testimonialText }, { headers });
+      setShowTestimonialForm(false);
+      setTestimonialText('');
+      await openTicket(selectedTicket.ticket_id);
+      await fetchTestimonials();
+    } catch { /* ignore */ }
+    setSavingTestimonial(false);
+  };
+
+  const requestTestimonialAuth = async (testimonialId) => {
+    try {
+      await axios.post(`${API}/admin/testimonials/${testimonialId}/request-auth`, {}, { headers });
+      await fetchTestimonials();
+    } catch { /* ignore */ }
+  };
+
+  const publishTestimonial = async (testimonialId) => {
+    try {
+      await axios.post(`${API}/admin/testimonials/${testimonialId}/publish`, {}, { headers });
+      await fetchTestimonials();
+    } catch { /* ignore */ }
+  };
+
+  const deleteTestimonial = async (testimonialId) => {
+    try {
+      await axios.delete(`${API}/admin/testimonials/${testimonialId}`, { headers });
+      await fetchTestimonials();
+    } catch { /* ignore */ }
+  };
+
+  useEffect(() => { fetchTestimonials(); }, []);
 
   const downloadAttachment = async (attachment) => {
     if (!attachment?.storage_path) return;
@@ -304,6 +354,65 @@ const AdminSupportSection = ({ token, API }) => {
             </table>
           )}
         </div>
+
+        {/* Testimonials Management */}
+        {testimonials.length > 0 && (
+          <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden" data-testid="testimonials-section">
+            <div className="px-6 py-4 border-b border-stone-100">
+              <h3 className="text-sm font-semibold text-[#2D2A26]">Testemunhos ({testimonials.length})</h3>
+            </div>
+            <div className="divide-y divide-stone-50">
+              {testimonials.map(t => {
+                const statusColors = {
+                  draft: 'bg-stone-100 text-stone-600',
+                  pending_auth: 'bg-amber-100 text-amber-700',
+                  authorized: 'bg-green-100 text-green-700',
+                  published: 'bg-blue-100 text-blue-700',
+                  rejected: 'bg-red-100 text-red-600',
+                };
+                const statusLabels = {
+                  draft: 'Rascunho', pending_auth: 'Aguarda autorizacao',
+                  authorized: 'Autorizado', published: 'Publicado', rejected: 'Rejeitado',
+                };
+                return (
+                  <div key={t.testimonial_id} className="px-6 py-4 flex items-start gap-4" data-testid={`testimonial-${t.testimonial_id}`}>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-[#2D2A26] italic">&ldquo;{t.text}&rdquo;</p>
+                      <p className="text-xs text-[#6B6661] mt-1">— {t.user_name}, {t.badge}</p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${statusColors[t.status] || ''}`}>
+                          {statusLabels[t.status] || t.status}
+                        </span>
+                        <span className="text-xs text-stone-400">Ticket: {t.ticket_id}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                      {t.status === 'draft' && (
+                        <button onClick={() => requestTestimonialAuth(t.testimonial_id)}
+                          className="px-3 py-1.5 bg-amber-50 text-amber-700 rounded-lg text-xs font-semibold hover:bg-amber-100 transition-colors"
+                          data-testid={`request-auth-${t.testimonial_id}`}>
+                          Pedir autorizacao
+                        </button>
+                      )}
+                      {t.status === 'authorized' && (
+                        <button onClick={() => publishTestimonial(t.testimonial_id)}
+                          className="px-3 py-1.5 bg-green-50 text-green-700 rounded-lg text-xs font-semibold hover:bg-green-100 transition-colors"
+                          data-testid={`publish-${t.testimonial_id}`}>
+                          Publicar
+                        </button>
+                      )}
+                      <button onClick={() => deleteTestimonial(t.testimonial_id)}
+                        className="p-1.5 text-stone-400 hover:text-red-500 rounded-lg hover:bg-red-50 transition-colors"
+                        data-testid={`delete-testimonial-${t.testimonial_id}`}>
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -512,6 +621,50 @@ const AdminSupportSection = ({ token, API }) => {
               </button>
             </div>
           </div>
+
+          {/* Testimonial */}
+          {(selectedTicket.status === 'Resolvido' || selectedTicket.status === 'Fechado') && !selectedTicket.has_testimonial && (
+            <div className="bg-white rounded-2xl border border-stone-200 p-5">
+              {!showTestimonialForm ? (
+                <button onClick={() => {
+                  setShowTestimonialForm(true);
+                  setTestimonialText(selectedTicket.description.length > 100
+                    ? selectedTicket.description.substring(0, 100) + '...'
+                    : selectedTicket.description);
+                }}
+                  className="w-full px-4 py-2.5 bg-[#FFBE98]/10 text-[#FFBE98] border border-[#FFBE98]/30 rounded-xl text-sm font-semibold hover:bg-[#FFBE98]/20 transition-colors"
+                  data-testid="create-testimonial-btn">
+                  Marcar como potencial testemunho
+                </button>
+              ) : (
+                <div className="space-y-3" data-testid="testimonial-form">
+                  <h4 className="text-sm font-semibold text-[#2D2A26]">Criar testemunho</h4>
+                  <textarea value={testimonialText} onChange={e => setTestimonialText(e.target.value)}
+                    rows={3} placeholder="Texto curto do testemunho (1-2 frases)..."
+                    className="w-full px-3 py-2 border border-stone-200 rounded-xl text-sm resize-none focus:ring-2 focus:ring-[#FFBE98] focus:border-transparent"
+                    data-testid="testimonial-text-input" />
+                  <div className="flex gap-2">
+                    <button onClick={createTestimonial} disabled={!testimonialText.trim() || savingTestimonial}
+                      className="flex-1 px-3 py-2 bg-[#FFBE98] text-[#2D2A26] rounded-xl text-xs font-semibold hover:bg-[#f0a878] transition-colors disabled:opacity-40"
+                      data-testid="save-testimonial-btn">
+                      {savingTestimonial ? 'A guardar...' : 'Guardar rascunho'}
+                    </button>
+                    <button onClick={() => setShowTestimonialForm(false)}
+                      className="px-3 py-2 bg-stone-100 text-stone-600 rounded-xl text-xs font-semibold hover:bg-stone-200 transition-colors">
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {selectedTicket.has_testimonial && (
+            <div className="bg-[#FFBE98]/5 rounded-2xl border border-[#FFBE98]/20 p-5 text-center">
+              <p className="text-xs text-[#FFBE98] font-semibold">Testemunho criado</p>
+              <p className="text-xs text-[#6B6661] mt-1">Gere os testemunhos na seccao abaixo da lista.</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
