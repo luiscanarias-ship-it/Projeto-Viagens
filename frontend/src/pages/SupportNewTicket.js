@@ -106,12 +106,13 @@ const SupportNewTicket = () => {
             <CheckCircle className="w-8 h-8 text-green-600" />
           </div>
           <h2 className="text-2xl font-bold text-[#2D2A26] mb-2">Pedido enviado com sucesso!</h2>
-          <p className="text-[#6B6661] mb-4">
+          <p className="text-[#6B6661] mb-2">
             Referencia: <span className="font-mono font-semibold">{submitted.ticket_id}</span>
           </p>
-          <p className="text-sm text-[#6B6661] mb-8">
-            A nossa equipa ira analisar o teu pedido e responder o mais rapidamente possivel.
-            Recebes um email de confirmacao em breve.
+          <p className="text-sm text-[#6B6661] leading-relaxed mb-8">
+            A nossa equipa ja esta a analisar.<br />
+            Normalmente respondemos em poucas horas.<br /><br />
+            Receberas tambem um email com a referencia do pedido.
           </p>
           <div className="flex gap-3 justify-center">
             <button onClick={() => navigate(`/support/${submitted.ticket_id}`)}
@@ -193,7 +194,7 @@ const SupportNewTicket = () => {
             {/* Description */}
             <div>
               <label className="block text-sm font-medium text-[#2D2A26] mb-1.5">Descricao *</label>
-              <textarea value={form.description} rows={5} placeholder="Explica em detalhe o que aconteceu..."
+              <textarea value={form.description} rows={5} placeholder={"Explica-nos o que aconteceu.\nSe possivel, indica o passo onde ocorreu o problema (por exemplo pagamento, convite, dashboard, etc.).\n\nTambem podes anexar uma screenshot para nos ajudar a compreender melhor."}
                 onChange={e => { setForm(p => ({ ...p, description: e.target.value })); setErrors(p => { const n = { ...p }; delete n.description; return n; }); }}
                 className={`w-full px-4 py-2.5 border rounded-xl text-sm resize-none ${errors.description ? 'border-red-300' : 'border-stone-200'} focus:ring-2 focus:ring-[#FFBE98] focus:border-transparent`}
                 data-testid="input-description" />

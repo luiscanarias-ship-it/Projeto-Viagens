@@ -5614,6 +5614,28 @@ async def generate_ticket_id():
 
 # ---- Support Email Templates ----
 
+async def get_support_cta_block():
+    """Get CTA block for support emails linking to main journey"""
+    main_journey = await db.journeys.find_one(
+        {"is_active": True, "is_main_trip": True},
+        {"journey_id": 1, "name": 1, "_id": 0}
+    )
+    if not main_journey:
+        return ""
+    journey_url = f"{FRONTEND_URL}/journey/{main_journey['journey_id']}"
+    journey_name = main_journey.get('name', 'esta viagem')
+    return f"""
+        <div style="background: linear-gradient(135deg, #FFF8F3 0%, #FFF0E6 100%); border-radius: 16px; padding: 28px; margin: 32px 0 0; text-align: center; border: 1px solid #FFDFCA;">
+            <p style="color: #6B6661; font-size: 13px; margin: 0 0 8px; text-transform: uppercase; letter-spacing: 1px;">Antes de partires...</p>
+            <p style="color: #2D2A26; font-size: 16px; line-height: 1.6; margin: 0 0 16px;">
+                O sonho da viagem pela <strong>{journey_name}</strong> ja comecou.<br>
+                Nao fiques fora do sonho,<br>
+                <em>sonha connosco.</em>
+            </p>
+            <a href="{journey_url}" style="display: inline-block; padding: 12px 28px; background: #FFBE98; color: #2D2A26; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 14px;">Contribuir para este sonho</a>
+        </div>
+    """
+
 def get_support_email_html(content: str, title: str = "Suporte 4Luis") -> str:
     return get_email_base_template(content, title)
 
@@ -5644,7 +5666,8 @@ def get_ticket_confirmation_email(name: str, ticket_id: str, ticket_type: str, s
     """
     return get_support_email_html(content)
 
-def get_admin_reply_email(name: str, ticket_id: str, status: str, reply_excerpt: str) -> str:
+async def get_admin_reply_email(name: str, ticket_id: str, status: str, reply_excerpt: str) -> str:
+    cta = await get_support_cta_block()
     content = f"""
         <h2 style="color: #2D2A26; font-size: 20px; margin: 0 0 16px;">Nova resposta ao teu pedido</h2>
         <p style="color: #6B6661; font-size: 15px; line-height: 1.6;">
@@ -5671,10 +5694,12 @@ def get_admin_reply_email(name: str, ticket_id: str, status: str, reply_excerpt:
         <p style="color: #6B6661; font-size: 14px; font-style: italic; text-align: center; margin-top: 24px;">
             4Luis<br>Clube de Sonhadores<br>Sonha connosco
         </p>
+        {cta}
     """
     return get_support_email_html(content)
 
-def get_status_change_email(name: str, ticket_id: str, status: str) -> str:
+async def get_status_change_email(name: str, ticket_id: str, status: str) -> str:
+    cta = await get_support_cta_block()
     content = f"""
         <h2 style="color: #2D2A26; font-size: 20px; margin: 0 0 16px;">Estado do pedido atualizado</h2>
         <p style="color: #6B6661; font-size: 15px; line-height: 1.6;">
@@ -5696,10 +5721,12 @@ def get_status_change_email(name: str, ticket_id: str, status: str) -> str:
         <p style="color: #6B6661; font-size: 14px; font-style: italic; text-align: center; margin-top: 24px;">
             4Luis<br>Clube de Sonhadores<br>Sonha connosco
         </p>
+        {cta}
     """
     return get_support_email_html(content)
 
-def get_ticket_resolved_email(name: str, ticket_id: str) -> str:
+async def get_ticket_resolved_email(name: str, ticket_id: str) -> str:
+    cta = await get_support_cta_block()
     content = f"""
         <h2 style="color: #2D2A26; font-size: 20px; margin: 0 0 16px;">Pedido resolvido</h2>
         <p style="color: #6B6661; font-size: 15px; line-height: 1.6;">
@@ -5721,10 +5748,12 @@ def get_ticket_resolved_email(name: str, ticket_id: str) -> str:
         <p style="color: #6B6661; font-size: 14px; font-style: italic; text-align: center; margin-top: 24px;">
             4Luis<br>Clube de Sonhadores<br>Sonha connosco
         </p>
+        {cta}
     """
     return get_support_email_html(content)
 
-def get_ticket_closed_email(name: str, ticket_id: str) -> str:
+async def get_ticket_closed_email(name: str, ticket_id: str) -> str:
+    cta = await get_support_cta_block()
     content = f"""
         <h2 style="color: #2D2A26; font-size: 20px; margin: 0 0 16px;">Pedido fechado</h2>
         <p style="color: #6B6661; font-size: 15px; line-height: 1.6;">
@@ -5742,6 +5771,7 @@ def get_ticket_closed_email(name: str, ticket_id: str) -> str:
         <p style="color: #6B6661; font-size: 14px; font-style: italic; text-align: center; margin-top: 24px;">
             4Luis<br>Clube de Sonhadores<br>Sonha connosco
         </p>
+        {cta}
     """
     return get_support_email_html(content)
 
@@ -5969,7 +5999,29 @@ async def admin_list_tickets(request: Request, status: str = None, ticket_type: 
     total = await db.support_tickets.count_documents({})
     open_count = await db.support_tickets.count_documents({"status": {"$in": ["Aberto", "Em analise", "A aguardar resposta"]}})
     
-    return {"tickets": tickets, "total": total, "open_count": open_count}
+    # Detailed stats for admin dashboard
+    today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0).isoformat()
+    today_count = await db.support_tickets.count_documents({"created_at": {"$gte": today_start}})
+    in_analysis = await db.support_tickets.count_documents({"status": "Em analise"})
+    awaiting_reply = await db.support_tickets.count_documents({"status": "A aguardar resposta"})
+    urgent_count = await db.support_tickets.count_documents({"priority": "Urgente", "status": {"$nin": ["Resolvido", "Fechado"]}})
+    
+    # Stats by type (last 7 days)
+    week_ago = (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()
+    type_pipeline = [
+        {"$match": {"created_at": {"$gte": week_ago}}},
+        {"$group": {"_id": "$ticket_type", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}}
+    ]
+    type_stats = await db.support_tickets.aggregate(type_pipeline).to_list(20)
+    types_breakdown = {t["_id"]: t["count"] for t in type_stats}
+    
+    return {
+        "tickets": tickets, "total": total, "open_count": open_count,
+        "today_count": today_count, "in_analysis": in_analysis,
+        "awaiting_reply": awaiting_reply, "urgent_count": urgent_count,
+        "types_breakdown": types_breakdown
+    }
 
 @api_router.get("/admin/support/tickets/{ticket_id}")
 async def admin_get_ticket(ticket_id: str, request: Request):
@@ -6009,7 +6061,7 @@ async def admin_reply_ticket(ticket_id: str, request: Request):
     # Send email to user
     try:
         excerpt = message[:200] + ("..." if len(message) > 200 else "")
-        html = get_admin_reply_email(ticket["user_name"], ticket_id, ticket["status"], excerpt)
+        html = await get_admin_reply_email(ticket["user_name"], ticket_id, ticket["status"], excerpt)
         await send_email_resend(ticket["user_email"], f"Nova resposta ao teu pedido — {ticket_id}", html)
     except Exception as e:
         logger.error(f"Failed to send reply email: {e}")
@@ -6040,13 +6092,13 @@ async def admin_update_ticket_status(ticket_id: str, request: Request):
     # Send appropriate email
     try:
         if new_status == "Resolvido":
-            html = get_ticket_resolved_email(ticket["user_name"], ticket_id)
+            html = await get_ticket_resolved_email(ticket["user_name"], ticket_id)
             await send_email_resend(ticket["user_email"], f"O teu pedido foi resolvido — {ticket_id}", html)
         elif new_status == "Fechado":
-            html = get_ticket_closed_email(ticket["user_name"], ticket_id)
+            html = await get_ticket_closed_email(ticket["user_name"], ticket_id)
             await send_email_resend(ticket["user_email"], f"O teu pedido foi fechado — {ticket_id}", html)
         elif new_status != old_status:
-            html = get_status_change_email(ticket["user_name"], ticket_id, new_status)
+            html = await get_status_change_email(ticket["user_name"], ticket_id, new_status)
             await send_email_resend(ticket["user_email"], f"O estado do teu pedido foi atualizado — {ticket_id}", html)
     except Exception as e:
         logger.error(f"Failed to send status change email: {e}")

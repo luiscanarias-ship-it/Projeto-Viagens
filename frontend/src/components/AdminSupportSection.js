@@ -46,7 +46,7 @@ const AdminSupportSection = ({ token, API }) => {
   const headers = { Authorization: `Bearer ${token}` };
 
   const [tickets, setTickets] = useState([]);
-  const [stats, setStats] = useState({ total: 0, open_count: 0 });
+  const [stats, setStats] = useState({ total: 0, open_count: 0, today_count: 0, in_analysis: 0, awaiting_reply: 0, urgent_count: 0, types_breakdown: {} });
   const [loading, setLoading] = useState(true);
   const [selectedTicket, setSelectedTicket] = useState(null);
 
@@ -60,7 +60,15 @@ const AdminSupportSection = ({ token, API }) => {
   const [adminReply, setAdminReply] = useState('');
   const [internalNote, setInternalNote] = useState('');
   const [sending, setSending] = useState(false);
+  const [showTemplates, setShowTemplates] = useState(false);
   const messagesEndRef = useRef(null);
+
+  const QUICK_TEMPLATES = [
+    { label: 'Em analise', text: 'Recebemos o teu pedido e estamos a analisar.' },
+    { label: 'Pedir detalhes', text: 'Podes enviar mais detalhes ou uma screenshot do problema?' },
+    { label: 'Resolvido?', text: 'O problema foi resolvido. Podes confirmar se ja esta tudo a funcionar?' },
+    { label: 'Sugestao registada', text: 'Obrigado pelo teu feedback. A tua sugestao foi registada.' },
+  ];
 
   const fetchTickets = async () => {
     setLoading(true);
@@ -73,7 +81,12 @@ const AdminSupportSection = ({ token, API }) => {
       
       const res = await axios.get(`${API}/admin/support/tickets?${params}`, { headers });
       setTickets(res.data.tickets || []);
-      setStats({ total: res.data.total, open_count: res.data.open_count });
+      setStats({
+        total: res.data.total, open_count: res.data.open_count,
+        today_count: res.data.today_count || 0, in_analysis: res.data.in_analysis || 0,
+        awaiting_reply: res.data.awaiting_reply || 0, urgent_count: res.data.urgent_count || 0,
+        types_breakdown: res.data.types_breakdown || {}
+      });
     } catch { /* ignore */ }
     setLoading(false);
   };
@@ -155,7 +168,42 @@ const AdminSupportSection = ({ token, API }) => {
   if (!selectedTicket) {
     return (
       <div className="space-y-4" data-testid="admin-support-section">
-        {/* Stats */}
+        {/* Quick Stats Dashboard */}
+        <div className="grid grid-cols-4 gap-3" data-testid="support-stats-dashboard">
+          <div className="bg-white rounded-xl border border-stone-200 p-4">
+            <p className="text-xs text-[#6B6661] font-medium">Pedidos hoje</p>
+            <p className="text-2xl font-bold text-[#2D2A26] mt-1">{stats.today_count}</p>
+          </div>
+          <div className="bg-white rounded-xl border border-stone-200 p-4">
+            <p className="text-xs text-amber-600 font-medium">Em analise</p>
+            <p className="text-2xl font-bold text-amber-700 mt-1">{stats.in_analysis}</p>
+          </div>
+          <div className="bg-white rounded-xl border border-stone-200 p-4">
+            <p className="text-xs text-purple-600 font-medium">A aguardar resposta</p>
+            <p className="text-2xl font-bold text-purple-700 mt-1">{stats.awaiting_reply}</p>
+          </div>
+          <div className="bg-white rounded-xl border border-stone-200 p-4">
+            <p className="text-xs text-red-600 font-medium">Urgentes</p>
+            <p className="text-2xl font-bold text-red-700 mt-1">{stats.urgent_count}</p>
+          </div>
+        </div>
+
+        {/* Types Breakdown (last 7 days) */}
+        {Object.keys(stats.types_breakdown).length > 0 && (
+          <div className="bg-white rounded-xl border border-stone-200 p-4" data-testid="types-breakdown">
+            <h4 className="text-xs font-semibold text-[#6B6661] uppercase mb-3">Pedidos por tipo (ultimos 7 dias)</h4>
+            <div className="flex flex-wrap gap-3">
+              {Object.entries(stats.types_breakdown).sort((a, b) => b[1] - a[1]).map(([type, count]) => (
+                <div key={type} className="flex items-center gap-2 px-3 py-1.5 bg-stone-50 rounded-lg">
+                  <span className="text-xs text-[#6B6661]">{type}</span>
+                  <span className="text-xs font-bold text-[#2D2A26] bg-stone-200 px-1.5 py-0.5 rounded">{count}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Summary + Filters */}
         <div className="flex items-center gap-4 mb-2">
           <div className="bg-blue-50 px-4 py-2 rounded-xl">
             <span className="text-xs text-blue-600 font-semibold">{stats.open_count} Abertos</span>
@@ -337,6 +385,30 @@ const AdminSupportSection = ({ token, API }) => {
 
             {/* Admin Reply */}
             <div className="border-t border-stone-100 px-5 py-3">
+              {/* Quick Templates */}
+              <div className="mb-2 relative">
+                <button onClick={() => setShowTemplates(!showTemplates)}
+                  className="text-xs text-[#FFBE98] hover:text-[#e0956a] font-semibold transition-colors"
+                  data-testid="quick-templates-btn">
+                  Inserir resposta rapida
+                </button>
+                <AnimatePresence>
+                  {showTemplates && (
+                    <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}
+                      className="absolute left-0 bottom-full mb-1 bg-white border border-stone-200 rounded-xl shadow-lg p-2 z-10 w-[360px]"
+                      data-testid="quick-templates-menu">
+                      {QUICK_TEMPLATES.map((t, i) => (
+                        <button key={i} onClick={() => { setAdminReply(t.text); setShowTemplates(false); }}
+                          className="w-full text-left px-3 py-2 text-sm text-[#2D2A26] hover:bg-stone-50 rounded-lg transition-colors"
+                          data-testid={`template-${i}`}>
+                          <span className="text-xs text-[#FFBE98] font-semibold">{t.label}</span>
+                          <p className="text-xs text-[#6B6661] mt-0.5">{t.text}</p>
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
               <div className="flex items-end gap-2">
                 <textarea value={adminReply} onChange={e => setAdminReply(e.target.value)}
                   rows={2} placeholder="Responder ao utilizador..."
