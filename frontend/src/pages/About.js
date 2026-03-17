@@ -133,6 +133,13 @@ const About = () => {
               <p>
                 A primeira viagem a ser financiada é a viagem do <span className="font-semibold text-[#2D2A26]">Luis</span>, o fundador.
               </p>
+              <div className="flex items-center gap-3 py-2">
+                <div className="w-10 h-10 rounded-full bg-[#FFBE98]/20 flex items-center justify-center text-[#FFBE98] font-bold text-sm">L</div>
+                <div>
+                  <p className="text-sm font-semibold text-[#2D2A26]">Luis</p>
+                  <p className="text-xs text-[#6B6661]">Membro desde 2026 · Criador da 4Luis</p>
+                </div>
+              </div>
               <p>Mas este é apenas o começo.</p>
               <p>
                 O objetivo é criar uma comunidade de sonhadores<br />
