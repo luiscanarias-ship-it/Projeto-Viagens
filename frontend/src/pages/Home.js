@@ -706,10 +706,10 @@ const Home = () => {
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {data.journeys.map((journey) => (
-                      <div key={journey.journey_id} className="bg-[#FAFAF9] rounded-2xl overflow-hidden group">
+                      <Link to={`/journey/${journey.journey_id}`} key={journey.journey_id} className="bg-[#FAFAF9] rounded-2xl overflow-hidden group hover:shadow-lg transition-all duration-300 cursor-pointer">
                         <div className="relative h-48 overflow-hidden">
                           <img src={journey.image_url} alt={journey.name}
-                            className="w-full h-full object-cover" />
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                           <div className="absolute bottom-4 left-4 right-4">
                             <p className="text-white font-bold">{journey.name}</p>
@@ -738,7 +738,7 @@ const Home = () => {
                             )}
                           </div>
                         )}
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 </motion.div>
