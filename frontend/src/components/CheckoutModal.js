@@ -443,7 +443,7 @@ const CheckoutModal = ({
                         key={amt}
                         onClick={() => setSelectedAmount(amt)}
                         data-testid={`amount-btn-${amt}`}
-                        className={`py-2.5 px-3 rounded-xl font-semibold transition-all text-left relative ${
+                        className={`py-2.5 px-3 rounded-xl font-semibold transition-all text-left ${
                           selectedAmount === amt
                             ? 'bg-[#FFBE98] text-white shadow-md ring-2 ring-[#FFBE98]/30'
                             : amt === 20
@@ -451,27 +451,28 @@ const CheckoutModal = ({
                               : 'bg-stone-100 text-[#2D2A26] hover:bg-stone-200'
                         }`}
                       >
-                        <div className="flex items-center justify-between">
-                          <span className="text-base font-bold">€{amt}</span>
+                        <div className="flex items-start gap-2">
+                          <span className="text-base font-bold shrink-0 leading-tight mt-0.5">€{amt}</span>
+                          <div className="min-w-0 flex-1">
+                            {amt === 20 && selectedAmount !== amt ? (
+                              <span 
+                                className="text-[9px] font-bold text-white bg-gradient-to-r from-[#FFBE98] to-[#E6A07C] px-1.5 py-0.5 rounded-full inline-block"
+                                data-testid="most-popular-badge"
+                              >
+                                Popular
+                              </span>
+                            ) : contributionDescriptions?.[String(amt)] ? (
+                              <p className={`text-[10px] font-normal leading-snug line-clamp-2 ${
+                                selectedAmount === amt ? 'text-white/80' : 'text-[#6B6661]'
+                              }`}>
+                                {contributionDescriptions[String(amt)]}
+                              </p>
+                            ) : null}
+                          </div>
                           {selectedAmount === amt && (
-                            <Check className="w-4 h-4 flex-shrink-0" />
-                          )}
-                          {amt === 20 && selectedAmount !== amt && (
-                            <span 
-                              className="text-[9px] font-bold text-white bg-gradient-to-r from-[#FFBE98] to-[#E6A07C] px-1.5 py-0.5 rounded-full"
-                              data-testid="most-popular-badge"
-                            >
-                              Popular
-                            </span>
+                            <Check className="w-4 h-4 shrink-0 mt-0.5" />
                           )}
                         </div>
-                        {contributionDescriptions?.[String(amt)] && (
-                          <p className={`text-[11px] font-normal mt-1 leading-tight truncate ${
-                            selectedAmount === amt ? 'text-white/80' : 'text-[#6B6661]'
-                          }`}>
-                            {contributionDescriptions[String(amt)]}
-                          </p>
-                        )}
                       </button>
                     ))}
                   </div>
