@@ -437,13 +437,13 @@ const CheckoutModal = ({
                 >
                   <p className="text-sm text-[#6B6661]">Escolhe o valor da tua contribuição:</p>
                   
-                  <div className="grid grid-cols-1 gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-1 gap-2">
                     {amounts.map((amt) => (
                       <button
                         key={amt}
                         onClick={() => setSelectedAmount(amt)}
                         data-testid={`amount-btn-${amt}`}
-                        className={`py-3 px-4 rounded-xl font-semibold transition-all text-left flex items-center justify-between ${
+                        className={`py-2.5 px-3 rounded-xl font-semibold transition-all text-left flex items-center justify-between ${
                           selectedAmount === amt
                             ? 'bg-[#FFBE98] text-white shadow-md ring-2 ring-[#FFBE98]/30'
                             : amt === 20
@@ -451,17 +451,17 @@ const CheckoutModal = ({
                               : 'bg-stone-100 text-[#2D2A26] hover:bg-stone-200'
                         }`}
                       >
-                        <div className="flex items-center gap-3">
-                          <span className="text-lg font-bold min-w-[60px]">€{amt}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-base font-bold min-w-[45px]">€{amt}</span>
                           {amt === 20 && selectedAmount !== amt && (
                             <span 
-                              className="text-xs font-bold text-white bg-gradient-to-r from-[#FFBE98] to-[#E6A07C] px-3 py-1 rounded-full shadow-sm animate-pulse-subtle ring-1 ring-[#FFBE98]/50" 
+                              className="text-[10px] font-bold text-white bg-gradient-to-r from-[#FFBE98] to-[#E6A07C] px-2 py-0.5 rounded-full shadow-sm animate-pulse-subtle ring-1 ring-[#FFBE98]/50" 
                               data-testid="most-popular-badge"
                               style={{ animationDuration: '2.5s' }}
                             >
-                              ⭐ Mais popular
+                              Mais popular
                             </span>
-                          )}
+                          )}}
                           {contributionDescriptions?.[String(amt)] && (
                             <span className={`text-sm font-normal ${
                               selectedAmount === amt ? 'text-white/85' : 'text-[#6B6661]'
@@ -487,19 +487,6 @@ const CheckoutModal = ({
                     </p>
                   )}
 
-                  <button
-                    onClick={() => setStep(2)}
-                    className="w-full mt-4 bg-[#2D2A26] text-white py-3 px-6 rounded-xl font-medium hover:bg-[#4A4640] transition-all flex items-center justify-center gap-2"
-                  >
-                    Continuar
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-
-                  <div className="mt-3 pt-3 border-t border-stone-100" data-testid="checkout-disclaimer">
-                    <p className="text-[10px] leading-relaxed text-[#6B6661]/70 text-center">
-                      As contribuições feitas na plataforma 4Luis são voluntárias e destinam-se a apoiar sonhos de viagem. A 4Luis funciona como uma plataforma de CrowdDreaming que liga sonhadores e apoiantes. Dependendo do método de pagamento escolhido, os valores podem ser enviados diretamente ao sonhador responsável pela viagem. A 4Luis não garante a realização das viagens nem assume responsabilidade pela utilização dos fundos.
-                    </p>
-                  </div>
                 </motion.div>
               )}
 
@@ -936,6 +923,23 @@ const CheckoutModal = ({
 
             </AnimatePresence>
           </div>
+
+          {/* Sticky footer for step 1 */}
+          {step === 1 && !showConfirmation && selectedAmount && (
+            <div className="px-4 pb-3 pt-2 border-t border-stone-100 bg-white">
+              <button
+                onClick={() => setStep(2)}
+                className="w-full bg-[#2D2A26] text-white py-3 px-6 rounded-xl font-medium hover:bg-[#4A4640] transition-all flex items-center justify-center gap-2"
+                data-testid="step1-continue-btn"
+              >
+                Continuar com €{selectedAmount}
+                <ArrowRight className="w-4 h-4" />
+              </button>
+              <p className="text-[10px] leading-relaxed text-[#6B6661]/70 text-center mt-2">
+                As contribuições são voluntárias e destinam-se a apoiar sonhos de viagem.
+              </p>
+            </div>
+          )}
         </motion.div>
       </div>
     </AnimatePresence>
