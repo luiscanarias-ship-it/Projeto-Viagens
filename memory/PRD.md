@@ -81,6 +81,11 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - Emails: Bloco CTA emocional "Nunca deixes de sonhar, sonha connosco" + botão no footer de todos os emails
 - Backend: Endpoints /homepage/main-journey e /journeys/{id}/progress incluem contributor_count e journey_contributor_count
 
+### Página Sobre (2026-03-17)
+- Página /about com estrutura narrativa: origem, o que é, como funciona, confiança, CTA
+- Bloco leve "Sobre a 4Luis" na homepage entre testemunhos e stats
+- Link "Sobre a 4Luis" adicionado ao footer
+
 ## Prioritized Backlog
 
 ### P1

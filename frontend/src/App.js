@@ -25,6 +25,7 @@ import Terms from "./pages/Terms";
 import SupportNewTicket from "./pages/SupportNewTicket";
 import SupportTicketDetail from "./pages/SupportTicketDetail";
 import TestimonialResult from "./pages/TestimonialResult";
+import About from "./pages/About";
 
 // Syncs user's preferred language on login
 const LanguageSync = () => {
@@ -94,6 +95,7 @@ const AppRouter = () => {
           <Route path="/support/new" element={<SupportNewTicket />} />
           <Route path="/support/:ticketId" element={<SupportTicketDetail />} />
           <Route path="/testimonial/result" element={<TestimonialResult />} />
+          <Route path="/about" element={<About />} />
         </Routes>
       </main>
       <Footer />

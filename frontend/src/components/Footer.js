@@ -46,6 +46,9 @@ const Footer = () => {
             <Link to="/#journeys" className="text-[#6B6661] hover:text-[#2D2A26] text-sm transition-colors">
               {t('nav.journeys')}
             </Link>
+            <Link to="/about" className="text-[#6B6661] hover:text-[#2D2A26] text-sm transition-colors" data-testid="footer-about-link">
+              Sobre a 4Luis
+            </Link>
             <Link to="/login" className="text-[#6B6661] hover:text-[#2D2A26] text-sm transition-colors">
               {t('nav.login')}
             </Link>

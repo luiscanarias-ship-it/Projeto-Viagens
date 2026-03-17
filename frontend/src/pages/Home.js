@@ -757,6 +757,21 @@ const Home = () => {
       {/* Testimonials */}
       <TestimonialsSection />
 
+      {/* About 4Luis - lightweight block */}
+      <section className="py-10 bg-white" data-testid="about-block">
+        <div className="max-w-2xl mx-auto px-6 text-center">
+          <h3 className="text-lg font-bold text-[#2D2A26] mb-3">Sobre a 4Luis</h3>
+          <p className="text-sm text-[#6B6661] leading-relaxed mb-4">
+            A 4Luis nasceu de uma ideia simples:<br />
+            E se fosse possível criar uma comunidade<br />
+            onde as pessoas ajudam outras a realizar os seus sonhos?
+          </p>
+          <Link to="/about" className="text-sm text-[#FFBE98] hover:text-[#E6A07C] font-medium transition-colors" data-testid="about-link">
+            Saber mais →
+          </Link>
+        </div>
+      </section>
+
       {/* Community Stats */}
       <section className="py-12 bg-gradient-to-r from-[#2D2A26] to-[#4A4640]" data-testid="community-section">
         <div className="max-w-4xl mx-auto px-6">
