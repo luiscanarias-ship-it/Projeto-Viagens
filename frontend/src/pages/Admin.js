@@ -51,6 +51,7 @@ const Admin = () => {
   const [emailPreview, setEmailPreview] = useState(null); // { previewUrl, sendUrl, title }
   // Candidaturas state
   const [ambassadorApplications, setAmbassadorApplications] = useState(null);
+  const [openSupportCount, setOpenSupportCount] = useState(0);
   const [loadingApplications, setLoadingApplications] = useState(false);
   const [applicationStatusFilter, setApplicationStatusFilter] = useState('candidatura');
   // Candidatura detail modal state
@@ -154,7 +155,7 @@ const Admin = () => {
     const fetchData = async () => {
       try {
         const headers = getAuthHeaders();
-        const [journeysRes, statsRes, settingsRes, contributionsRes, sponsorsRes, rafflesRes, usersRes, applicationsRes] = await Promise.all([
+        const [journeysRes, statsRes, settingsRes, contributionsRes, sponsorsRes, rafflesRes, usersRes, applicationsRes, supportRes] = await Promise.all([
           axios.get(`${API}/admin/journeys`, { headers, withCredentials: true }).catch(e => ({ data: [] })),
           axios.get(`${API}/admin/stats`, { headers, withCredentials: true }).catch(e => ({ data: {} })),
           axios.get(`${API}/admin/settings`, { headers, withCredentials: true }).catch(e => ({ data: {} })),
@@ -162,7 +163,8 @@ const Admin = () => {
           axios.get(`${API}/admin/sponsors-report`, { headers, withCredentials: true }).catch(e => ({ data: {} })),
           axios.get(`${API}/admin/journeys-ready-for-raffle`, { headers, withCredentials: true }).catch(e => ({ data: { ready_journeys: [] } })),
           axios.get(`${API}/admin/users/dashboard`, { headers, withCredentials: true }).catch(e => ({ data: null })),
-          axios.get(`${API}/admin/ambassador-journeys?status=candidatura`, { headers, withCredentials: true }).catch(() => ({ data: { journeys: [] } }))
+          axios.get(`${API}/admin/ambassador-journeys?status=candidatura`, { headers, withCredentials: true }).catch(() => ({ data: { journeys: [] } })),
+          axios.get(`${API}/admin/support/tickets?status=Aberto`, { headers, withCredentials: true }).catch(() => ({ data: { open_count: 0 } }))
         ]);
         
         // Validate data before setting state
@@ -177,6 +179,7 @@ const Admin = () => {
         if (applicationsRes.data?.journeys?.length > 0) {
           setAmbassadorApplications(applicationsRes.data);
         }
+        setOpenSupportCount(supportRes.data?.open_count || 0);
       } catch (error) {
         console.error('Error fetching admin data:', error);
       } finally {
@@ -750,7 +753,7 @@ const Admin = () => {
             { id: 'users', label: 'Utilizadores', icon: usersDashboard?.metrics?.premium_users || null },
             { id: 'raffles', label: 'Sorteios', icon: rafflesReady?.length || null },
             { id: 'sponsors', label: 'Sponsors', icon: sponsorsReport?.total_qualified_sponsors || null },
-            { id: 'support', label: 'Suporte', icon: null },
+            { id: 'support', label: 'Suporte', icon: openSupportCount > 0 ? openSupportCount : null },
             { id: 'settings', label: 'Configurações', icon: null }
           ].map(tab => (
             <button

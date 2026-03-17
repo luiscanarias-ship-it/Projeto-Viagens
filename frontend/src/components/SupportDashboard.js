@@ -62,6 +62,8 @@ const SupportDashboard = () => {
     return d.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric' });
   };
 
+  const openCount = tickets.filter(t => ['Aberto', 'Em analise', 'A aguardar resposta'].includes(t.status)).length;
+
   return (
     <div className="space-y-6" data-testid="support-dashboard">
       {/* Header */}
@@ -70,6 +72,11 @@ const SupportDashboard = () => {
           <h2 className="text-2xl font-bold text-[#2D2A26] flex items-center gap-2">
             <HelpCircle className="w-6 h-6 text-[#FFBE98]" />
             Ajuda e Suporte
+            {openCount > 0 && (
+              <span className="ml-1 px-2.5 py-0.5 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full" data-testid="open-tickets-count">
+                {openCount} {openCount === 1 ? 'aberto' : 'abertos'}
+              </span>
+            )}
           </h2>
           <p className="text-[#6B6661] text-sm mt-1">
             Precisas de ajuda? Abre um pedido e a nossa equipa ira responder-te o mais rapidamente possivel.
