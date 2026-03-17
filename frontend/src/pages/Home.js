@@ -800,29 +800,31 @@ const Home = () => {
                 <p className="text-sm font-bold text-[#2D2A26] truncate">
                   {mainJourney.journey.name} — <span className="font-handwritten text-[#FFBE98]">{d('main.poetic', mainJourney.journey.poetic_name)}</span>
                 </p>
-                {mainJourney.progress && (
-                  <div className="flex items-center gap-2 mt-1">
-                    <div className="flex-1 h-1.5 bg-stone-100 rounded-full overflow-hidden max-w-[180px]">
-                      <div className="h-full bg-gradient-to-r from-[#FFBE98] to-[#F2C94C] rounded-full" style={{ width: `${Math.min(100, mainJourney.progress.percentage)}%` }} />
+                <div className="flex items-center gap-3 mt-1">
+                  {mainJourney.progress && (
+                    <div className="flex items-center gap-2">
+                      <div className="h-1.5 bg-stone-100 rounded-full overflow-hidden w-[140px]">
+                        <div className="h-full bg-gradient-to-r from-[#FFBE98] to-[#F2C94C] rounded-full" style={{ width: `${Math.min(100, mainJourney.progress.percentage)}%` }} />
+                      </div>
+                      <span className="text-xs font-semibold text-[#6B6661]">{mainJourney.progress.percentage}%</span>
                     </div>
-                    <span className="text-xs font-semibold text-[#6B6661]">{mainJourney.progress.percentage}%</span>
-                  </div>
-                )}
+                  )}
+                  {dreamersStats?.total_dreamers > 0 && (
+                    <span className="hidden md:flex items-center gap-1.5 text-xs text-[#6B6661]" data-testid="sticky-dreamers-count">
+                      <Users className="w-3 h-3 text-[#FFBE98]" />
+                      <span className="font-semibold text-[#2D2A26]">{dreamersStats.total_dreamers}</span> sonhadores
+                    </span>
+                  )}
+                </div>
               </div>
-              {dreamersStats?.total_dreamers > 0 && (
-                <span className="hidden md:flex items-center gap-1.5 text-xs text-[#6B6661]" data-testid="sticky-dreamers-count">
-                  <Users className="w-3.5 h-3.5 text-[#FFBE98]" />
-                  <span className="font-semibold text-[#2D2A26]">{dreamersStats.total_dreamers}</span> sonhadores
-                </span>
-              )}
               <button
-                  onClick={() => setShowCheckout(true)}
-                  className="w-full sm:w-auto py-3 px-6 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-[#FFAB7D] transition-colors"
-                  data-testid="home-sticky-contribute-btn"
-                >
-                  <Heart className="w-4 h-4" />
-                  {t('home.contribute_dream')}
-                </button>
+                onClick={() => setShowCheckout(true)}
+                className="w-full sm:w-auto py-3 px-6 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-[#FFAB7D] transition-colors"
+                data-testid="home-sticky-contribute-btn"
+              >
+                <Heart className="w-4 h-4" />
+                {t('home.contribute_dream')}
+              </button>
             </div>
           </motion.div>
         )}
