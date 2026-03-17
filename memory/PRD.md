@@ -86,6 +86,24 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - Bloco leve "Sobre a 4Luis" na homepage entre testemunhos e stats
 - Link "Sobre a 4Luis" adicionado ao footer
 
+### Refatoração Backend (2026-03-17)
+- Extraídos módulos: config.py (DB, constantes), models.py (Pydantic), auth.py (JWT/auth), email_service.py (templates/envio)
+- server.py reduzido de 6785 para 5725 linhas
+- Sem alteração de funcionalidades — apenas reorganização
+
+### SEO e Meta Tags (2026-03-17)
+- Componente SEO com document.title dinâmico + Open Graph + Twitter Cards
+- Meta tags em Homepage, JourneyDetail, About
+
+### Botão de Partilha (2026-03-17)
+- ShareButton com Web Share API (nativo mobile) + fallback clipboard
+- Integrado na página da viagem junto ao botão Contribuir
+
+### Notificações In-App (2026-03-17)
+- Endpoints: GET /api/notifications, PUT /api/notifications/read-all, PUT /api/notifications/{id}/read
+- NotificationBell no header com dropdown, badge de não lidas, polling 30s
+- Triggers: confirmação de contribuição, resposta admin ao suporte
+
 ## Prioritized Backlog
 
 ### P1
@@ -93,8 +111,7 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 
 ### P2
 - Sistema de pontos e sorteios
-- Notificacoes in-app
-- Refactoring: Dividir backend/server.py em modulos
+- Notificacoes push/email (extensão das in-app)
 
 ## Credentials
 - **Admin**: admin@4luis.com / Admin1
