@@ -6,7 +6,7 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 ## Architecture & Tech Stack
 - **Frontend**: React 18 + Tailwind CSS + Framer Motion
 - **Backend**: FastAPI (Python 3.11)
-- **Database**: MongoDB
+- **Database**: MongoDB (collections: users, journeys, contributions, support_tickets, testimonials, drafts)
 - **Payments**: Crypto, MBWay, PayPal, Revolut, Wise
 - **Email**: Resend (mail@4luis.com)
 - **Auth**: JWT + Google OAuth
@@ -15,38 +15,59 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 
 ## What's Been Implemented
 
+### Sistema de Testemunhos (2026-03-17)
+- Admin marca tickets resolvidos como potenciais testemunhos
+- Editor inline de texto curto no detalhe do ticket
+- Email de autorizacao ao utilizador com botoes Autorizar/Nao autorizar
+- Pagina de resultado da autorizacao (/testimonial/result)
+- Fluxo completo: draft -> pending_auth -> authorized -> published
+- Gestao na lista de suporte (Pedir autorizacao, Publicar, Apagar)
+- Seccao "Sonhadores dizem" na homepage (cards com quote, nome, badge)
+- Testemunhos compactos na sidebar da pagina da viagem
+- Endpoint publico /api/testimonials/published (sem dados sensiveis)
+
 ### Melhorias Suporte V2 (2026-03-17)
-1. CTA emocional nos emails de suporte (link para viagem principal ativa)
-2. Stats dashboard no admin: 4 cards (Pedidos hoje, Em analise, A aguardar, Urgentes)
-3. Templates de resposta rapida (4 templates predefinidos)
-4. Estatisticas por tipo (ultimos 7 dias) com breakdown visual
-5. Placeholder melhorado no formulario com orientacoes
-6. Mensagem confirmacao mais humana apos envio
+- CTA emocional nos emails (link viagem principal)
+- Stats dashboard admin (4 cards: hoje, em analise, aguardar, urgentes)
+- Templates resposta rapida (4 predefinidos)
+- Estatisticas por tipo (ultimos 7 dias)
+- Placeholder melhorado no formulario
+- Mensagem confirmacao mais humana
 
-### Contador Tickets Abertos (2026-03-17)
-- Badge na tab Suporte do admin + badge no dashboard do utilizador
-
-### Sistema de Suporte Completo (2026-03-16)
-- Area do utilizador: dashboard, criar pedido, detalhe com conversa
-- Area do admin: lista com filtros, detalhe com acoes, notas internas
+### Contador Tickets + Sistema Suporte Completo (2026-03-16/17)
+- Suporte completo com area utilizador e admin
+- 8 tipos de pedido, 5 estados, 4 prioridades
 - 6 tipos de emails automaticos
-- Upload de ficheiros via object storage
+- Upload ficheiros via object storage
 - IDs automaticos SUP-2026-XXXXX
 
 ### Autosave (2026-03-16)
 - Dual-layer: localStorage + servidor MongoDB
 
-### Funcionalidades Anteriores (2026-03-09)
-- Preview de emails, formulario edicao viagens, sistema confianca, paginas legais
+### Anteriores (2026-03-09)
+- Preview emails, formulario edicao viagens, sistema confianca, paginas legais
 
 ## Key Files
-- frontend/src/components/AdminSupportSection.js
-- frontend/src/components/SupportDashboard.js
+- frontend/src/components/TestimonialsSection.js (publico)
+- frontend/src/components/AdminSupportSection.js (admin + testemunhos)
+- frontend/src/pages/TestimonialResult.js
 - frontend/src/pages/SupportNewTicket.js
 - frontend/src/pages/SupportTicketDetail.js
+- frontend/src/pages/Home.js
+- frontend/src/pages/JourneyDetail.js
 - frontend/src/pages/Admin.js
-- frontend/src/pages/Dashboard.js
 - backend/server.py
+
+## Key API Endpoints (Testimonials)
+- POST /api/admin/support/tickets/{id}/testimonial — criar draft
+- PUT /api/admin/testimonials/{id} — editar texto
+- POST /api/admin/testimonials/{id}/request-auth — pedir autorizacao
+- GET /api/testimonials/authorize/{token} — autorizar (publico)
+- GET /api/testimonials/reject/{token} — rejeitar (publico)
+- POST /api/admin/testimonials/{id}/publish — publicar
+- GET /api/testimonials/published — listar publicados (publico)
+- GET /api/admin/testimonials — listar todos (admin)
+- DELETE /api/admin/testimonials/{id} — apagar
 
 ## Prioritized Backlog
 
