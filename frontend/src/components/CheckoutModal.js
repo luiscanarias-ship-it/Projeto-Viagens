@@ -451,28 +451,23 @@ const CheckoutModal = ({
                               : 'bg-stone-100 text-[#2D2A26] hover:bg-stone-200'
                         }`}
                       >
-                        <div className="flex items-start gap-2">
-                          <span className="text-base font-bold shrink-0 leading-tight mt-0.5">€{amt}</span>
-                          <div className="min-w-0 flex-1">
-                            {amt === 20 && selectedAmount !== amt ? (
-                              <span 
-                                className="text-[9px] font-bold text-white bg-gradient-to-r from-[#FFBE98] to-[#E6A07C] px-1.5 py-0.5 rounded-full inline-block"
-                                data-testid="most-popular-badge"
-                              >
-                                Popular
-                              </span>
-                            ) : contributionDescriptions?.[String(amt)] ? (
-                              <p className={`text-[10px] font-normal leading-snug line-clamp-2 ${
-                                selectedAmount === amt ? 'text-white/80' : 'text-[#6B6661]'
-                              }`}>
-                                {contributionDescriptions[String(amt)]}
-                              </p>
-                            ) : null}
-                          </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-base font-bold">€{amt}</span>
                           {selectedAmount === amt && (
-                            <Check className="w-4 h-4 shrink-0 mt-0.5" />
+                            <Check className="w-4 h-4 shrink-0" />
                           )}
                         </div>
+                        {amt === 20 && selectedAmount !== amt ? (
+                          <p className="text-[10px] font-bold text-[#E6A07C] mt-1">
+                            * Mais popular
+                          </p>
+                        ) : contributionDescriptions?.[String(amt)] ? (
+                          <p className={`text-[10px] font-normal leading-snug mt-1 ${
+                            selectedAmount === amt ? 'text-white/80' : 'text-[#6B6661]'
+                          }`}>
+                            {contributionDescriptions[String(amt)]}
+                          </p>
+                        ) : null}
                       </button>
                     ))}
                   </div>
