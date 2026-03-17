@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, Check, Copy, Bitcoin, Smartphone, ExternalLink,
-  Wallet, CreditCard, ArrowRight, QrCode, Heart
+  Wallet, CreditCard, ArrowRight, QrCode, Heart, Sparkles
 } from 'lucide-react';
 import QRCode from 'qrcode';
 import axios from 'axios';
@@ -458,9 +458,16 @@ const CheckoutModal = ({
                           )}
                         </div>
                         {amt === 20 && selectedAmount !== amt ? (
-                          <p className="text-[10px] font-bold text-[#E6A07C] mt-1">
-                            * Mais popular
-                          </p>
+                          <div className="mt-1">
+                            <span 
+                              className="text-[10px] font-bold text-white bg-gradient-to-r from-[#FFBE98] to-[#E6A07C] px-2 py-0.5 rounded-full inline-flex items-center gap-1 animate-pulse shadow-sm"
+                              data-testid="most-popular-badge"
+                              style={{ animationDuration: '2.5s' }}
+                            >
+                              <Sparkles className="w-3 h-3" />
+                              Mais popular
+                            </span>
+                          </div>
                         ) : contributionDescriptions?.[String(amt)] ? (
                           <p className={`text-[10px] font-normal leading-snug mt-1 ${
                             selectedAmount === amt ? 'text-white/80' : 'text-[#6B6661]'
