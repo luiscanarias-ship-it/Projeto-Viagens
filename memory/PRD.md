@@ -15,6 +15,11 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 
 ## What's Been Implemented
 
+### Bug Fix: Scroll do Ticket de Suporte (2026-03-17)
+- Corrigido scroll que levava ao final da conversa ao abrir ticket
+- Agora a pagina abre no topo, mostrando header e inicio da conversa
+- Scroll automatico para o fundo so ativa quando novas mensagens sao adicionadas
+
 ### Sistema de Testemunhos (2026-03-17)
 - Admin marca tickets resolvidos como potenciais testemunhos
 - Editor inline de texto curto no detalhe do ticket
@@ -47,62 +52,32 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 ### Anteriores (2026-03-09)
 - Preview emails, formulario edicao viagens, sistema confianca, paginas legais
 
-## Key Files
-- frontend/src/components/TestimonialsSection.js (publico)
-- frontend/src/components/AdminSupportSection.js (admin + testemunhos)
-- frontend/src/pages/TestimonialResult.js
-- frontend/src/pages/SupportNewTicket.js
-- frontend/src/pages/SupportTicketDetail.js
-- frontend/src/pages/Home.js
-- frontend/src/pages/JourneyDetail.js
-- frontend/src/pages/Admin.js
-- backend/server.py
-
-## Key API Endpoints (Testimonials)
-- POST /api/admin/support/tickets/{id}/testimonial — criar draft
-- PUT /api/admin/testimonials/{id} — editar texto
-- POST /api/admin/testimonials/{id}/request-auth — pedir autorizacao
-- GET /api/testimonials/authorize/{token} — autorizar (publico)
-- GET /api/testimonials/reject/{token} — rejeitar (publico)
-- POST /api/admin/testimonials/{id}/publish — publicar
-- GET /api/testimonials/published — listar publicados (publico)
-- GET /api/admin/testimonials — listar todos (admin)
-- DELETE /api/admin/testimonials/{id} — apagar
-
-### Destaque Botao Viagem Principal (2026-03-17)
-- Botao "Viagem Principal" na homepage redesenhado com maior destaque visual
-- Tamanho aumentado, texto uppercase, borda dourada, glow exterior, hover com escala
-
 ### Momentos de Prova Social (2026-03-17)
-- Homepage: Linha discreta "Mais de X sonhadores já contribuíram" abaixo do botão Contribuir (contador = contribuidores reais + 57)
-- Página da viagem: Contexto social "Este sonho já está a ganhar forma" junto à barra de progresso com contador
-- Checkout: Micro-testemunho "Contribuí em menos de 1 minuto — João" no passo de pagamento
-- Pós-contribuição: Mensagem melhorada "Acabaste de ajudar este sonho a ganhar forma" + CTA partilha
-- Emails: Bloco CTA emocional "Nunca deixes de sonhar, sonha connosco" + botão no footer de todos os emails
-- Backend: Endpoints /homepage/main-journey e /journeys/{id}/progress incluem contributor_count e journey_contributor_count
+- Homepage, pagina viagem, checkout, emails
 
-### Página Sobre (2026-03-17)
-- Página /about com estrutura narrativa: origem, o que é, como funciona, confiança, CTA
-- Bloco leve "Sobre a 4Luis" na homepage entre testemunhos e stats
-- Link "Sobre a 4Luis" adicionado ao footer
+### Pagina Sobre (2026-03-17)
+- /about com estrutura narrativa
 
-### Refatoração Backend (2026-03-17)
-- Extraídos módulos: config.py (DB, constantes), models.py (Pydantic), auth.py (JWT/auth), email_service.py (templates/envio)
-- server.py reduzido de 6785 para 5725 linhas
-- Sem alteração de funcionalidades — apenas reorganização
+### Refatoracao Backend Parcial (2026-03-17)
+- config.py, models.py, auth.py, email_service.py extraidos de server.py
 
 ### SEO e Meta Tags (2026-03-17)
-- Componente SEO com document.title dinâmico + Open Graph + Twitter Cards
-- Meta tags em Homepage, JourneyDetail, About
+- document.title dinamico + Open Graph
 
-### Botão de Partilha (2026-03-17)
-- ShareButton com Web Share API (nativo mobile) + fallback clipboard
-- Integrado na página da viagem junto ao botão Contribuir
+### Botao de Partilha (2026-03-17)
+- Web Share API + fallback clipboard
 
-### Notificações In-App (2026-03-17)
-- Endpoints: GET /api/notifications, PUT /api/notifications/read-all, PUT /api/notifications/{id}/read
-- NotificationBell no header com dropdown, badge de não lidas, polling 30s
-- Triggers: confirmação de contribuição, resposta admin ao suporte
+### Notificacoes In-App (2026-03-17)
+- GET /api/notifications, bell no header, polling 30s
+
+## Key Files
+- frontend/src/pages/SupportTicketDetail.js (corrigido scroll)
+- frontend/src/components/SupportDashboard.js
+- frontend/src/pages/Dashboard.js
+- frontend/src/pages/Home.js
+- frontend/src/components/Header.js
+- backend/server.py
+- backend/config.py, models.py, auth.py, email_service.py
 
 ## Prioritized Backlog
 
@@ -110,8 +85,9 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - Celebracao especial quando viagem atinge 100%
 
 ### P2
+- Completar refatoracao do backend (mover endpoints para APIRouters em backend/routes/)
 - Sistema de pontos e sorteios
-- Notificacoes push/email (extensão das in-app)
+- Notificacoes push/email (extensao das in-app)
 
 ## Credentials
 - **Admin**: admin@4luis.com / Admin1

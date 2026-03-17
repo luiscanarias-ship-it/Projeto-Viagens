@@ -97,6 +97,7 @@ const SupportTicketDetail = () => {
   const [replyAttachment, setReplyAttachment] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [sending, setSending] = useState(false);
+  const prevMsgCount = useRef(null);
 
   const fetchTicket = async () => {
     try {
@@ -110,10 +111,20 @@ const SupportTicketDetail = () => {
     setLoading(false);
   };
 
-  useEffect(() => { fetchTicket(); }, [ticketId]);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    fetchTicket();
+  }, [ticketId]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const msgCount = ticket?.messages?.length ?? 0;
+    // Only scroll to bottom when a NEW message is added after data was already loaded
+    if (prevMsgCount.current > 0 && msgCount > prevMsgCount.current) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+    if (msgCount > 0) {
+      prevMsgCount.current = msgCount;
+    }
   }, [ticket?.messages]);
 
   const handleFileUpload = async (e) => {
