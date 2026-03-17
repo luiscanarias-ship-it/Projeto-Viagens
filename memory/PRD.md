@@ -73,6 +73,14 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - Botao "Viagem Principal" na homepage redesenhado com maior destaque visual
 - Tamanho aumentado, texto uppercase, borda dourada, glow exterior, hover com escala
 
+### Momentos de Prova Social (2026-03-17)
+- Homepage: Linha discreta "Mais de X sonhadores já contribuíram" abaixo do botão Contribuir (contador = contribuidores reais + 57)
+- Página da viagem: Contexto social "Este sonho já está a ganhar forma" junto à barra de progresso com contador
+- Checkout: Micro-testemunho "Contribuí em menos de 1 minuto — João" no passo de pagamento
+- Pós-contribuição: Mensagem melhorada "Acabaste de ajudar este sonho a ganhar forma" + CTA partilha
+- Emails: Bloco CTA emocional "Nunca deixes de sonhar, sonha connosco" + botão no footer de todos os emails
+- Backend: Endpoints /homepage/main-journey e /journeys/{id}/progress incluem contributor_count e journey_contributor_count
+
 ## Prioritized Backlog
 
 ### P1
