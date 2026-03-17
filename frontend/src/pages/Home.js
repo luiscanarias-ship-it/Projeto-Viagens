@@ -772,29 +772,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Community Stats */}
-      <section className="py-12 bg-gradient-to-r from-[#2D2A26] to-[#4A4640]" data-testid="community-section">
-        <div className="max-w-4xl mx-auto px-6">
-          <div className="flex flex-wrap items-center justify-center gap-12 text-white">
-            <div className="text-center">
-              <Users className="w-8 h-8 mx-auto mb-2 text-[#FFBE98]" />
-              <p className="text-3xl font-bold">{dreamersStats?.total_dreamers || 0}</p>
-              <p className="text-white/70">{t('home.dreamers')}</p>
-            </div>
-            {dreamersStats?.top_dreamer && (
-              <>
-                <div className="w-px h-16 bg-white/20" />
-                <div className="text-center">
-                  <Star className="w-8 h-8 mx-auto mb-2 text-[#F2C94C]" />
-                  <p className="text-xl font-bold">{dreamersStats.top_dreamer.name}</p>
-                  <p className="text-white/70">{t('home.top_dreamer')}</p>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      </section>
-
       {/* Emotional Quote */}
       <section className="py-16 bg-gradient-to-b from-[#FAFAF9] to-[#E6F4F1]/30">
         <div className="max-w-4xl mx-auto px-6 text-center">
@@ -832,8 +809,13 @@ const Home = () => {
                   </div>
                 )}
               </div>
-              <div className="flex-1 flex justify-center sm:justify-end sm:pr-[180px]">
-                <button
+              {dreamersStats?.total_dreamers > 0 && (
+                <span className="hidden md:flex items-center gap-1.5 text-xs text-[#6B6661]" data-testid="sticky-dreamers-count">
+                  <Users className="w-3.5 h-3.5 text-[#FFBE98]" />
+                  <span className="font-semibold text-[#2D2A26]">{dreamersStats.total_dreamers}</span> sonhadores
+                </span>
+              )}
+              <button
                   onClick={() => setShowCheckout(true)}
                   className="w-full sm:w-auto py-3 px-6 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-[#FFAB7D] transition-colors"
                   data-testid="home-sticky-contribute-btn"
@@ -841,7 +823,6 @@ const Home = () => {
                   <Heart className="w-4 h-4" />
                   {t('home.contribute_dream')}
                 </button>
-              </div>
             </div>
           </motion.div>
         )}
