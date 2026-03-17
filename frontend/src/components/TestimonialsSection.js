@@ -46,7 +46,7 @@ const TestimonialsSection = ({ variant = 'default' }) => {
     <section className="py-16 px-4" data-testid="testimonials-section">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-10">
-          <h2 className="text-2xl sm:text-3xl font-bold text-[#2D2A26]">Sonhadores dizem</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold text-[#2D2A26]">O que os Sonhadores dizem</h2>
           <p className="text-[#6B6661] text-sm mt-2">Experiencias reais de quem confia na 4Luis</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
