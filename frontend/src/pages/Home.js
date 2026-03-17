@@ -206,7 +206,7 @@ const Home = () => {
           <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#E6F4F1]/40 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
         </div>
 
-        <div className="relative max-w-4xl mx-auto px-6 text-center pt-20">
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 text-center pt-20">
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1 }}
             className="text-sm md:text-base text-[#6B6661]/70 italic mb-6" data-testid="opening-question">
             E se os sonhos pudessem ser financiados por todos?
@@ -214,13 +214,13 @@ const Home = () => {
 
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }}>
             <h1 className="tracking-tight mb-6">
-              <span className="font-handwritten text-6xl md:text-8xl text-[#FFBE98] block mb-4">4Luis</span>
-              <span className="font-handwritten text-4xl md:text-6xl text-[#FFBE98] whitespace-nowrap" style={{ fontWeight: 700 }}>{t('hero.tagline')}</span>
+              <span className="font-handwritten text-5xl md:text-8xl text-[#FFBE98] block mb-4">4Luis</span>
+              <span className="font-handwritten text-3xl md:text-6xl text-[#FFBE98]" style={{ fontWeight: 700 }}>{t('hero.tagline')}</span>
             </h1>
           </motion.div>
 
           <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-xl md:text-2xl text-[#6B6661] mb-12 max-w-2xl mx-auto leading-relaxed">
+            className="text-base sm:text-xl md:text-2xl text-[#6B6661] mb-12 max-w-2xl mx-auto leading-relaxed">
             A plataforma de <span className="font-bold text-[#FFBE98]">CrowdDreaming</span> para quem acredita que as viagens de sonho se podem concretizar.
           </motion.p>
 
@@ -250,7 +250,7 @@ const Home = () => {
 
       {/* ==================== COMO FUNCIONA + PROVA SOCIAL ==================== */}
       <section className="py-16 bg-[#FAFAF9]" data-testid="how-it-works-section">
-        <div className="max-w-5xl mx-auto px-6">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
           {/* How it Works */}
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
             className="text-center mb-10">
@@ -315,11 +315,11 @@ const Home = () => {
                 className="absolute inset-0 w-full h-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10" />
               
-              <div className="relative z-10 w-full max-w-5xl mx-auto px-6 pb-8 pt-10">
+              <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 pb-8 pt-10">
                 <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
                   <div className="flex justify-center mb-4">
                     <Link to={`/journey/${mainJourney.journey.journey_id}`}
-                      className="group relative inline-flex items-center gap-3 px-8 py-3.5 rounded-full font-bold text-lg text-white border-2 border-[#FFBE98]/60 hover:border-[#FFBE98] transition-all duration-500 overflow-hidden shadow-[0_0_25px_rgba(255,190,152,0.3)] hover:shadow-[0_0_40px_rgba(255,190,152,0.5)] hover:scale-105"
+                      className="group relative inline-flex items-center gap-2 sm:gap-3 px-5 sm:px-8 py-2.5 sm:py-3.5 rounded-full font-bold text-sm sm:text-lg text-white border-2 border-[#FFBE98]/60 hover:border-[#FFBE98] transition-all duration-500 overflow-hidden shadow-[0_0_25px_rgba(255,190,152,0.3)] hover:shadow-[0_0_40px_rgba(255,190,152,0.5)] hover:scale-105"
                       data-testid="main-journey-label"
                     >
                       <span className="absolute inset-0 bg-gradient-to-r from-[#FFBE98]/30 via-[#F2C94C]/20 to-[#FFBE98]/30 backdrop-blur-md" />
@@ -331,10 +331,10 @@ const Home = () => {
                     </Link>
                   </div>
                   
-                  <h2 className="text-5xl md:text-7xl font-bold text-white mb-2">
+                  <h2 className="text-3xl sm:text-5xl md:text-7xl font-bold text-white mb-2">
                     {mainJourney.journey.name}
                   </h2>
-                  <p className="font-handwritten text-3xl md:text-4xl text-[#FFBE98] mb-4">
+                  <p className="font-handwritten text-2xl sm:text-3xl md:text-4xl text-[#FFBE98] mb-4">
                     {d('main.poetic', mainJourney.journey.poetic_name)}
                   </p>
 
@@ -400,14 +400,14 @@ const Home = () => {
             </div>
 
             {/* Milestone Celebration Banner */}
-            <div className="max-w-5xl mx-auto px-6 pt-8">
+            <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-8">
               <MilestoneCelebration journey={mainJourney.journey} customChapters={mainJourney.journey?.story_chapters} />
             </div>
 
             {/* Contributions Feed */}
             {mainJourney.contributions?.length > 0 && (
               <div className="bg-white py-12">
-                <div className="max-w-6xl mx-auto px-6">
+                <div className="max-w-6xl mx-auto px-4 sm:px-6">
                 <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
                   className="bg-[#FAFAF9] rounded-2xl p-6 md:p-8">
                   <h3 className="text-xl font-bold text-[#2D2A26] mb-6 flex items-center gap-2">
@@ -460,7 +460,7 @@ const Home = () => {
 
       {/* ==================== 2. PLANEIA A TUA VIAGEM ==================== */}
       <section className="py-16 bg-white" data-testid="plan-trip-section">
-        <div className="max-w-5xl mx-auto px-6">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-8">
             <div className="flex items-center justify-center gap-2 mb-4">
               <Map className="w-6 h-6 text-[#FFBE98]" />
@@ -538,7 +538,7 @@ const Home = () => {
 
       {/* ==================== 3. SONHOS EM FASE DE MATERIALIZAÇÃO ==================== */}
       <section id="journeys" className="py-16 bg-[#FAFAF9] scroll-mt-8" data-testid="materializing-dreams-section">
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
             <span className="inline-block px-4 py-2 bg-[#E6F4F1] rounded-full text-[#2D2A26] font-medium text-sm mb-4">
               <Sparkles className="w-4 h-4 inline mr-2" />
@@ -654,7 +654,7 @@ const Home = () => {
 
       {/* ==================== 4. SONHOS REALIZADOS ==================== */}
       <section className="py-16 bg-white" data-testid="realized-dreams-section">
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
             <span className="inline-block px-4 py-2 bg-green-100 rounded-full text-green-700 font-medium text-sm mb-4">
               <Camera className="w-4 h-4 inline mr-2" />
@@ -764,7 +764,7 @@ const Home = () => {
 
       {/* About 4Luis - lightweight block */}
       <section className="py-10 bg-white" data-testid="about-block">
-        <div className="max-w-2xl mx-auto px-6 text-center">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 text-center">
           <h3 className="text-lg font-bold text-[#2D2A26] mb-3">Sobre a 4Luis</h3>
           <p className="text-sm text-[#6B6661] leading-relaxed mb-4">
             A 4Luis nasceu de uma ideia simples:<br />
@@ -779,7 +779,7 @@ const Home = () => {
 
       {/* Emotional Quote */}
       <section className="py-16 bg-gradient-to-b from-[#FAFAF9] to-[#E6F4F1]/30">
-        <div className="max-w-4xl mx-auto px-6 text-center">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
             <p className="font-handwritten text-3xl md:text-4xl text-[#6B6661] leading-relaxed">
               "{t('home.quote1')}<br /><br />
