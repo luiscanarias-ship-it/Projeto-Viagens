@@ -817,14 +817,16 @@ const Home = () => {
                   )}
                 </div>
               </div>
-              <button
-                onClick={() => setShowCheckout(true)}
-                className="w-full sm:w-auto py-3 px-6 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-[#FFAB7D] transition-colors"
-                data-testid="home-sticky-contribute-btn"
-              >
-                <Heart className="w-4 h-4" />
-                {t('home.contribute_dream')}
-              </button>
+              <div className="flex-1 flex justify-center sm:justify-end sm:pr-[180px]">
+                <button
+                  onClick={() => setShowCheckout(true)}
+                  className="w-full sm:w-auto py-3 px-6 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-[#FFAB7D] transition-colors"
+                  data-testid="home-sticky-contribute-btn"
+                >
+                  <Heart className="w-4 h-4" />
+                  {t('home.contribute_dream')}
+                </button>
+              </div>
             </div>
           </motion.div>
         )}
