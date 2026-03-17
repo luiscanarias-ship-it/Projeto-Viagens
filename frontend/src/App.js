@@ -43,6 +43,15 @@ const LanguageSync = () => {
   return null;
 };
 
+// Scroll to top on route change
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+};
+
 // Router wrapper to handle auth callback
 const AppRouter = () => {
   const location = useLocation();
@@ -98,6 +107,7 @@ function App() {
       <AuthProvider>
         <LanguageProvider>
           <BrowserRouter>
+            <ScrollToTop />
             <LanguageSync />
             <AppRouter />
             <CookieConsent />
