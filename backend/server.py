@@ -404,6 +404,19 @@ def get_email_base_template(content: str, title: str = "4Luis") -> str:
                             {content}
                         </td>
                     </tr>
+                    <!-- Emotional CTA Block -->
+                    <tr>
+                        <td style="padding: 0 40px 24px 40px;">
+                            <div style="border-top: 1px solid #E6F4F1; padding-top: 24px; text-align: center;">
+                                <p style="margin: 0 0 4px 0; color: #6B6661; font-size: 13px; font-style: italic;">Antes de partires...</p>
+                                <p style="margin: 0 0 4px 0; color: #2D2A26; font-size: 15px; font-weight: 600;">Nunca deixes de sonhar,</p>
+                                <p style="margin: 0 0 16px 0; color: #FFBE98; font-size: 15px; font-style: italic;">sonha connosco.</p>
+                                <a href="{FRONTEND_URL}" style="display: inline-block; padding: 12px 28px; background-color: #FFBE98; color: #2D2A26; text-decoration: none; border-radius: 10px; font-weight: bold; font-size: 14px;">
+                                    Contribuir para este sonho
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
                     <!-- Footer -->
                     <tr>
                         <td style="padding: 24px 40px; background-color: #FAFAF9; border-radius: 0 0 16px 16px;">
@@ -451,7 +464,7 @@ def get_contribution_email_html(contributor_name: str, amount: float, journey_na
     
     <p style="margin: 0 0 24px 0; color: #6B6661; font-size: 16px; line-height: 1.6;">
         Graças a ti, este sonho está mais perto de se tornar realidade. 
-        Cada contribuição é um gesto fraternal que faz a diferença.
+        Cada contribuição aproxima este sonho da realidade.
     </p>
     
     <div style="text-align: center;">
@@ -1601,6 +1614,12 @@ async def get_journey_progress(journey_id: str, request: Request):
     except:
         pass
     
+    # Count unique contributors for this journey
+    journey_contributor_count = len(await db.contributions.distinct("contributor_email", {"journey_id": journey_id, "status": {"$in": ["confirmed", "completed"]}}))
+    # Platform-wide count + seed offset
+    platform_contributor_count = len(await db.contributions.distinct("contributor_email", {"status": {"$in": ["confirmed", "completed"]}}))
+    contributor_display_count = platform_contributor_count + 57
+    
     response = {
         "journey_id": journey_id,
         "current_amount": current_amount,
@@ -1608,7 +1627,9 @@ async def get_journey_progress(journey_id: str, request: Request):
         "is_funded": is_funded,
         "status": journey.get("status", "active"),
         "target_date": journey.get("target_date"),
-        "closing_message": "Financiamento total quase a fechar." if is_funded else None
+        "closing_message": "Financiamento total quase a fechar." if is_funded else None,
+        "contributor_count": contributor_display_count,
+        "journey_contributor_count": journey_contributor_count
     }
     
     # Only include goal_amount for admins
@@ -6470,11 +6491,20 @@ async def get_main_journey_details():
     # Get journey updates (future feature - for now return empty)
     updates = []
     
+    # Count unique contributors across the platform + seed offset
+    platform_contributor_count = len(await db.contributions.distinct("contributor_email", {"status": {"$in": ["confirmed", "completed"]}}))
+    contributor_display_count = platform_contributor_count + 57
+    
+    # Count unique contributors for this specific journey
+    journey_contributor_count = len(await db.contributions.distinct("contributor_email", {"journey_id": journey_id, "status": {"$in": ["confirmed", "completed"]}}))
+    
     return {
         "journey": journey,
         "progress": progress,
         "contributions": public_contributions,
-        "updates": updates
+        "updates": updates,
+        "contributor_count": contributor_display_count,
+        "journey_contributor_count": journey_contributor_count
     }
 
 @api_router.get("/homepage/ambassador-journeys")

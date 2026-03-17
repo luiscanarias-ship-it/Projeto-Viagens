@@ -382,6 +382,12 @@ const Home = () => {
                         data-testid="contribute-main-btn">
                         <Heart className="w-5 h-5" /> {t('home.contribute_dream')}
                       </button>
+                      {mainJourney.contributor_count > 0 && (
+                        <p className="text-white/50 text-xs mt-3 text-center" data-testid="social-proof-line">
+                          <Sparkles className="w-3 h-3 inline mr-1 opacity-70" />
+                          Mais de {mainJourney.contributor_count} sonhadores já contribuíram para este sonho
+                        </p>
+                      )}
                     </div>
                   </div>
                 </motion.div>

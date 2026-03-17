@@ -530,6 +530,15 @@ const CheckoutModal = ({
                     Mesmo uma pequena contribuição<br />ajuda este sonho a ganhar forma.
                   </p>
 
+                  {/* Micro-testimonial - social proof at critical moment */}
+                  <div className="flex items-start gap-2.5 bg-stone-50/80 rounded-xl p-3 border border-stone-100" data-testid="micro-testimonial">
+                    <span className="text-[#FFBE98] text-lg leading-none mt-0.5">"</span>
+                    <div>
+                      <p className="text-xs text-[#2D2A26] italic leading-relaxed">Contribuí em menos de 1 minuto</p>
+                      <p className="text-[10px] text-[#6B6661] mt-1">— João</p>
+                    </div>
+                  </div>
+
                   <p className="text-sm text-[#6B6661]">Escolhe o método de pagamento:</p>
 
                   {/* Payment methods */}
@@ -860,11 +869,14 @@ const CheckoutModal = ({
                   
                   <div>
                     <h3 className="text-xl font-bold text-[#2D2A26]" data-testid="thank-you-title">
-                      Obrigado por ajudares este sonho.
+                      Acabaste de ajudar este sonho a ganhar forma.
                     </h3>
                     <p className="text-sm text-[#6B6661] mt-2">
-                      A tua contribuição foi registada.<br />
-                      Será confirmada assim que o pagamento for recebido.
+                      Obrigado. A tua contribuição foi registada<br />
+                      e será confirmada assim que o pagamento for recebido.
+                    </p>
+                    <p className="text-xs text-[#FFBE98] mt-3 italic" data-testid="post-contrib-proof">
+                      Cada contribuição aproxima este sonho da realidade.
                     </p>
                   </div>
 
@@ -878,7 +890,7 @@ const CheckoutModal = ({
                   {user?.anonymous_alias && (
                     <div className="border-t border-stone-100 pt-4 space-y-2">
                       <p className="text-sm text-[#6B6661]">
-                        Convida amigos e ajuda este sonho a crescer:
+                        Convida amigos a fazer parte deste sonho
                       </p>
                       <div className="flex justify-center" data-testid="thank-you-share">
                         <ShareMenu

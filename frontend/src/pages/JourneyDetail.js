@@ -367,6 +367,22 @@ const JourneyDetail = () => {
               </p>
             )}
           </div>
+          
+          {/* Social context */}
+          <div className="text-center mt-4 space-y-1" data-testid="journey-social-context">
+            <p className="text-[#6B6661] text-sm italic">
+              Este sonho já está a ganhar forma graças à vossa contribuição
+            </p>
+            {progress?.contributor_count > 0 && (
+              <p className="text-[#FFBE98] text-xs font-medium">
+                {progress.journey_contributor_count > 0 
+                  ? `${progress.journey_contributor_count} sonhadores já contribuíram para esta viagem`
+                  : `${progress.contributor_count} sonhadores já contribuíram na plataforma`
+                }
+              </p>
+            )}
+          </div>
+
           <MilestoneProgress progressPercentage={progressPercent} />
         </div>
 
