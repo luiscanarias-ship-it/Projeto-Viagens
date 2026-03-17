@@ -59,7 +59,7 @@
     "frontend": "100% (16/16 tests passed after fixes)"
   },
   "test_credentials": {
-    "app_url": "https://admin-redirect-fix-6.preview.emergentagent.com",
+    "app_url": "https://main-trip-boost.preview.emergentagent.com",
     "localStorage_key": "4luis_cookie_consent"
   },
   "seed_data_creation": "None - used localStorage.removeItem() to simulate first visit",

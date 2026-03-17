@@ -69,6 +69,10 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - GET /api/admin/testimonials — listar todos (admin)
 - DELETE /api/admin/testimonials/{id} — apagar
 
+### Destaque Botao Viagem Principal (2026-03-17)
+- Botao "Viagem Principal" na homepage redesenhado com maior destaque visual
+- Tamanho aumentado, texto uppercase, borda dourada, glow exterior, hover com escala
+
 ## Prioritized Backlog
 
 ### P1

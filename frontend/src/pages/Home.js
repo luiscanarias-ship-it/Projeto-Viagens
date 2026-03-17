@@ -314,14 +314,15 @@ const Home = () => {
                 <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
                   <div className="flex justify-center mb-8">
                     <Link to={`/journey/${mainJourney.journey.journey_id}`}
-                      className="group relative inline-flex items-center gap-2.5 px-6 py-2.5 rounded-full font-semibold text-base text-white border border-white/25 hover:border-white/40 transition-all duration-500 overflow-hidden"
+                      className="group relative inline-flex items-center gap-3 px-8 py-3.5 rounded-full font-bold text-lg text-white border-2 border-[#FFBE98]/60 hover:border-[#FFBE98] transition-all duration-500 overflow-hidden shadow-[0_0_25px_rgba(255,190,152,0.3)] hover:shadow-[0_0_40px_rgba(255,190,152,0.5)] hover:scale-105"
                       data-testid="main-journey-label"
                     >
-                      <span className="absolute inset-0 bg-white/10 backdrop-blur-md" />
-                      <span className="absolute inset-0 bg-gradient-to-r from-[#FFBE98]/20 via-transparent to-[#F2C94C]/20 animate-pulse" style={{ animationDuration: '3s' }} />
-                      <Sparkles className="w-4 h-4 text-[#FFBE98] relative z-10 group-hover:rotate-12 transition-transform duration-300" />
-                      <span className="relative z-10 tracking-wide">{t('home.main_journey')}</span>
-                      <span className="relative z-10 w-1.5 h-1.5 rounded-full bg-[#FFBE98] animate-pulse" />
+                      <span className="absolute inset-0 bg-gradient-to-r from-[#FFBE98]/30 via-[#F2C94C]/20 to-[#FFBE98]/30 backdrop-blur-md" />
+                      <span className="absolute inset-0 bg-gradient-to-r from-[#FFBE98]/40 via-transparent to-[#F2C94C]/40 animate-pulse" style={{ animationDuration: '2s' }} />
+                      <span className="absolute -inset-1 bg-gradient-to-r from-[#FFBE98] to-[#F2C94C] rounded-full opacity-20 blur-lg group-hover:opacity-40 transition-opacity duration-500" />
+                      <Sparkles className="w-5 h-5 text-[#FFBE98] relative z-10 group-hover:rotate-12 group-hover:scale-110 transition-all duration-300 drop-shadow-[0_0_6px_rgba(255,190,152,0.8)]" />
+                      <span className="relative z-10 tracking-wider uppercase text-shadow">{t('home.main_journey')}</span>
+                      <span className="relative z-10 w-2 h-2 rounded-full bg-[#FFBE98] animate-pulse shadow-[0_0_8px_rgba(255,190,152,0.8)]" />
                     </Link>
                   </div>
                   
