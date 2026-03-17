@@ -301,7 +301,7 @@ const Home = () => {
       </section>
 
       {/* ==================== 1. VIAGEM PRINCIPAL ==================== */}
-      <section id="main-journey" className="relative" data-testid="main-journey-section">
+      <section id="main-journey" className="relative scroll-mt-16" data-testid="main-journey-section">
         {mainJourney?.journey ? (
           <>
             {/* Immersive Hero Card */}

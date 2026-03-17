@@ -273,7 +273,7 @@ const Header = () => {
                   e.preventDefault();
                   setMobileMenuOpen(false);
                   if (window.location.pathname === '/') {
-                    document.getElementById('main-journey')?.scrollIntoView({ behavior: 'smooth' });
+                    document.getElementById('main-journey')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                   } else {
                     navigate('/');
                   }
