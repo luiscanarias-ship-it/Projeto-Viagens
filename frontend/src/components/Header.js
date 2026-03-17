@@ -271,28 +271,42 @@ const Header = () => {
               >
                 {t('nav.home')}
               </Link>
-              <Link
-                to="/"
-                onClick={(e) => {
-                  e.preventDefault();
+              <button
+                onClick={() => {
                   setMobileMenuOpen(false);
                   if (window.location.pathname === '/') {
-                    document.getElementById('main-journey')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    setTimeout(() => {
+                      document.getElementById('main-journey')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 350);
                   } else {
                     navigate('/');
+                    setTimeout(() => {
+                      document.getElementById('main-journey')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 800);
                   }
                 }}
-                className="block py-3 text-[#FFBE98] font-semibold"
+                className="block py-3 text-[#FFBE98] font-semibold w-full text-left"
               >
                 Viagem Principal
-              </Link>
-              <Link
-                to="/#journeys"
-                onClick={() => setMobileMenuOpen(false)}
-                className="block py-3 text-[#2D2A26] font-medium"
+              </button>
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  if (window.location.pathname === '/') {
+                    setTimeout(() => {
+                      document.getElementById('journeys')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 350);
+                  } else {
+                    navigate('/');
+                    setTimeout(() => {
+                      document.getElementById('journeys')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 800);
+                  }
+                }}
+                className="block py-3 text-[#2D2A26] font-medium w-full text-left"
               >
                 Viagens dos outros sonhadores
-              </Link>
+              </button>
               {user && (
                 <Link
                   to="/dashboard"
