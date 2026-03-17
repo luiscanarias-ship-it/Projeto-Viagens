@@ -5,6 +5,7 @@ import { Globe, Menu, X, User, LogOut, Settings, Heart, Mail } from 'lucide-reac
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import NotificationBell from './NotificationBell';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -168,6 +169,9 @@ const Header = () => {
                 )}
               </AnimatePresence>
             </div>
+
+            {/* Notification Bell */}
+            {user && <NotificationBell />}
 
             {/* User Menu / Login */}
             {user ? (

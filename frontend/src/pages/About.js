@@ -2,12 +2,17 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Heart, Users, Eye, Sparkles, ArrowRight } from 'lucide-react';
+import SEO from '../components/SEO';
 
 const fadeUp = { hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0 } };
 
 const About = () => {
   return (
     <div className="min-h-screen pt-20" data-testid="about-page">
+      <SEO 
+        title="Sobre a 4Luis"
+        description="A 4Luis nasceu de um sonho simples: viajar mais, conhecer o mundo e viver experiências reais. Descobre como funciona a nossa plataforma de CrowdDreaming."
+      />
       {/* Hero */}
       <section className="py-16 md:py-24 bg-gradient-to-b from-[#FAFAF9] to-white">
         <div className="max-w-3xl mx-auto px-6 text-center">

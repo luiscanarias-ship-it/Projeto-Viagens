@@ -16,6 +16,8 @@ import StoryChapter from '../components/StoryChapter';
 import MilestoneProgress from '../components/MilestoneProgress';
 import TestimonialsSection from '../components/TestimonialsSection';
 import MilestoneCelebration from '../components/MilestoneCelebration';
+import ShareButton from '../components/ShareButton';
+import SEO from '../components/SEO';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -266,6 +268,12 @@ const JourneyDetail = () => {
 
   return (
     <div className="min-h-screen pt-20" data-testid="journey-detail">
+      <SEO 
+        title={journey?.name}
+        description={journey?.poetic_name || journey?.description}
+        image={journey?.image_url}
+        url={window.location.href}
+      />
       {/* Sticky Bottom Bar */}
       <AnimatePresence>
         {showStickyBtn && !showCheckout && (
@@ -804,12 +812,18 @@ const JourneyDetail = () => {
             >
               <button
                 onClick={handleSupport}
-                className="w-full btn-primary flex items-center justify-center gap-2 mb-4"
+                className="w-full btn-primary flex items-center justify-center gap-2 mb-3"
                 data-testid="support-btn"
               >
                 <Heart className="w-5 h-5" />
                 {t('journey.support_btn')}
               </button>
+              
+              <ShareButton 
+                url={window.location.href}
+                text={`Ajuda o sonho "${journey?.name}" a tornar-se realidade na 4Luis!`}
+                className="w-full justify-center mb-4"
+              />
               
               <div className="bg-gradient-to-r from-[#E6F4F1]/50 to-[#E6F4F1]/30 rounded-2xl p-4">
                 <p className="text-sm text-[#2D2A26] flex items-start gap-2">

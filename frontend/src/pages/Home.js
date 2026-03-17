@@ -14,6 +14,7 @@ import TestimonialsSection from '../components/TestimonialsSection';
 import StoryChapter from '../components/StoryChapter';
 import MilestoneProgress from '../components/MilestoneProgress';
 import MilestoneCelebration from '../components/MilestoneCelebration';
+import SEO from '../components/SEO';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -194,6 +195,10 @@ const Home = () => {
 
   return (
     <div className="min-h-screen" data-testid="home-page">
+      <SEO 
+        title="CrowdDreaming para viagens de sonho"
+        description="A plataforma de CrowdDreaming para quem acredita que as viagens de sonho se podem concretizar. Contribui e ajuda sonhos a ganhar forma."
+      />
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center dream-mesh">
         <div className="absolute inset-0 overflow-hidden">
