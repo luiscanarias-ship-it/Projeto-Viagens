@@ -20,7 +20,8 @@ from config import (
 from models import (
     UserBase, UserCreate, UserLogin, User, Journey, JourneyCreate, JourneyUpdate,
     AmbassadorJourneyApplication, Contribution, ContributionCreate, SponsorLink,
-    Point, TranslationRequest, generate_anonymous_alias, generate_anonymous_avatar,
+    Point, TranslationRequest, Offer, OfferCreate,
+    generate_anonymous_alias, generate_anonymous_avatar,
     generate_payment_reference
 )
 from auth import (
@@ -82,6 +83,7 @@ async def register(user_data: UserCreate):
         "level": "sonhador",  # sonhador | embaixador (visitante = não registado)
         "contributed_to_main_trip": False,  # Tem contribuição confirmada na viagem principal
         "valid_referrals_count": 0,  # Referências que confirmaram contribuição
+        "total_contributed": 0,  # Soma de todas as contribuições confirmadas
         "registered_at": datetime.now(timezone.utc).isoformat(),
         "embaixador_unlocked_at": None,
         "created_at": datetime.now(timezone.utc).isoformat()
@@ -694,6 +696,13 @@ async def stripe_webhook(request: Request):
                     {"journey_id": journey_id},
                     {"$inc": {"current_amount": amount}}
                 )
+                
+                # Update user total_contributed
+                if user_id:
+                    await db.users.update_one(
+                        {"user_id": user_id},
+                        {"$inc": {"total_contributed": amount}}
+                    )
                 
                 # Check if journey is now funded
                 await check_and_update_journey_funding_status(journey_id)
@@ -2070,6 +2079,13 @@ async def confirm_contribution(contribution_id: str, request: Request):
         {"$inc": {"current_amount": contribution["amount"]}}
     )
     
+    # Update user total_contributed
+    if contribution.get("user_id"):
+        await db.users.update_one(
+            {"user_id": contribution["user_id"]},
+            {"$inc": {"total_contributed": contribution["amount"]}}
+        )
+    
     # Check if journey reached goal - update status automatically
     await check_and_update_journey_funding_status(contribution["journey_id"])
     
@@ -2475,6 +2491,13 @@ async def validate_contribution(contribution_id: str, request: Request):
             {"journey_id": contribution["journey_id"]},
             {"$inc": {"current_amount": contribution["amount"]}}
         )
+        
+        # Update user total_contributed
+        if contribution.get("user_id"):
+            await db.users.update_one(
+                {"user_id": contribution["user_id"]},
+                {"$inc": {"total_contributed": contribution["amount"]}}
+            )
         
         # Check if journey reached goal - use helper function
         await check_and_update_journey_funding_status(contribution["journey_id"])
@@ -5778,6 +5801,80 @@ async def get_invite_page(alias: str):
         "sponsor_link_id": sponsor_link.get("link_id") if sponsor_link else None
     }
 
+
+
+# ==================== OFFERS SYSTEM (ADMIN ONLY) ====================
+
+@api_router.get("/admin/offers")
+async def list_offers(request: Request, status: Optional[str] = None, user_id: Optional[str] = None):
+    """List offers - Admin only"""
+    await require_admin(request)
+    query = {}
+    if status:
+        query["status"] = status
+    if user_id:
+        query["user_id"] = user_id
+    offers = await db.offers.find(query, {"_id": 0}).sort("created_at", -1).to_list(500)
+    return offers
+
+@api_router.post("/admin/offers")
+async def create_offer(request: Request):
+    """Create a new offer - Admin only"""
+    await require_admin(request)
+    data = await request.json()
+    
+    user_id = data.get("user_id")
+    offer_type = data.get("type")
+    description = data.get("description")
+    
+    if not all([user_id, offer_type, description]):
+        raise HTTPException(status_code=400, detail="user_id, type e description são obrigatórios")
+    if offer_type not in ["voucher", "parceiro"]:
+        raise HTTPException(status_code=400, detail="Tipo deve ser 'voucher' ou 'parceiro'")
+    
+    user = await db.users.find_one({"user_id": user_id}, {"_id": 0, "user_id": 1})
+    if not user:
+        raise HTTPException(status_code=404, detail="Utilizador não encontrado")
+    
+    offer_doc = {
+        "offer_id": f"offer_{uuid.uuid4().hex[:12]}",
+        "user_id": user_id,
+        "type": offer_type,
+        "description": description,
+        "status": "pending",
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.offers.insert_one(offer_doc)
+    offer_doc.pop("_id", None)
+    return offer_doc
+
+@api_router.patch("/admin/offers/{offer_id}")
+async def update_offer_status(offer_id: str, request: Request):
+    """Update offer status - Admin only"""
+    await require_admin(request)
+    data = await request.json()
+    new_status = data.get("status")
+    
+    if new_status not in ["pending", "sent"]:
+        raise HTTPException(status_code=400, detail="Status deve ser 'pending' ou 'sent'")
+    
+    result = await db.offers.update_one(
+        {"offer_id": offer_id},
+        {"$set": {"status": new_status, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Oferta não encontrada")
+    
+    return {"message": f"Oferta atualizada para {new_status}", "offer_id": offer_id}
+
+@api_router.delete("/admin/offers/{offer_id}")
+async def delete_offer(offer_id: str, request: Request):
+    """Delete an offer - Admin only"""
+    await require_admin(request)
+    result = await db.offers.delete_one({"offer_id": offer_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Oferta não encontrada")
+    return {"message": "Oferta eliminada"}
 
 
 # Include router

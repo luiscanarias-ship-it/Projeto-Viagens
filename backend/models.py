@@ -48,6 +48,7 @@ class User(UserBase):
     picture: Optional[str] = None
     preferred_language: Optional[str] = None
     anonymous_alias: Optional[str] = None
+    total_contributed: float = 0
 
 
 class Journey(BaseModel):
@@ -207,3 +208,18 @@ class Point(BaseModel):
 class TranslationRequest(BaseModel):
     texts: Dict[str, str]
     target_language: str
+
+
+class Offer(BaseModel):
+    offer_id: str = Field(default_factory=lambda: f"offer_{uuid.uuid4().hex[:12]}")
+    user_id: str
+    type: str  # "voucher" or "parceiro"
+    description: str
+    status: str = "pending"  # "pending" or "sent"
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class OfferCreate(BaseModel):
+    user_id: str
+    type: str
+    description: str
