@@ -76,7 +76,7 @@ export default function CookieConsent() {
                 Ola... Nos somos as cookies!
               </p>
               <p className="text-[#6B6661] text-sm leading-relaxed">
-                Este site utiliza cookies para melhorar a experiencia e para fins de analise e parcerias.
+                Este site utiliza cookies para melhorar a experiencia do utilizador, bem como para analise e parcerias com servicos externos. Pode aceitar ou configurar as suas preferencias.
               </p>
               <p className="text-[#2D2A26] font-semibold text-base">
                 Autorizas-nos?
@@ -100,7 +100,7 @@ export default function CookieConsent() {
                 className="flex-1 py-2.5 text-[#6B6661] border border-stone-200 rounded-xl text-sm font-medium hover:bg-stone-50 transition-colors"
                 data-testid="cookie-decline-btn"
               >
-                Nao, obrigado
+                Rejeitar
               </button>
               <button
                 onClick={handleAccept}

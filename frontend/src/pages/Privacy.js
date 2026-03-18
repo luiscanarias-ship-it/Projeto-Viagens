@@ -68,17 +68,20 @@ export default function Privacy() {
               <li><strong>Servicos de analise de utilizacao</strong> — para melhorar a experiencia do utilizador</li>
             </ul>
             <p className="mt-3">
-              A 4Luis nao partilha dados bancarios ou financeiros com terceiros, para alem do processador de pagamentos (PayPal).
+              A 4Luis nao armazena nem tem acesso a dados bancarios ou de cartao de credito dos utilizadores. Todos os pagamentos sao processados diretamente pelo PayPal em ambiente seguro.
             </p>
           </section>
 
           <section>
-            <h2 className="text-lg font-bold text-[#2D2A26] mb-3">5. Sistema de afiliados e cookies</h2>
+            <h2 className="text-lg font-bold text-[#2D2A26] mb-3">5. Afiliados e parcerias</h2>
             <p>
-              A 4Luis utiliza um sistema de patrocinadores (afiliados) que permite aos utilizadores convidar novos membros atraves de links personalizados. Estes links podem conter identificadores que associam novos registos ao patrocinador.
+              A plataforma pode conter links para parceiros externos, nomeadamente plataformas de viagens e servicos relacionados. Estes links podem utilizar mecanismos de tracking para fins de parceria, permitindo identificar a origem da visita.
             </p>
             <p className="mt-2">
-              Os cookies de afiliados e de analise so sao ativados apos o consentimento do utilizador atraves do banner de cookies apresentado na primeira visita.
+              A 4Luis utiliza tambem um sistema de patrocinadores que permite aos utilizadores convidar novos membros atraves de links personalizados. Estes links podem conter identificadores que associam novos registos ao patrocinador, possibilitando o acesso a ofertas ocasionais ou beneficios exclusivos.
+            </p>
+            <p className="mt-2">
+              Os cookies de parceiros e de analise so sao ativados apos o consentimento explicito do utilizador atraves do banner de cookies apresentado na primeira visita ao site.
             </p>
           </section>
 
