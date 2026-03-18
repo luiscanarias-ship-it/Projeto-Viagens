@@ -142,37 +142,40 @@ const PlanTrip = () => {
       </div>
 
       <div className="max-w-4xl mx-auto px-6 pb-20">
-        {/* AI Planner Integration - full width */}
+        {/* AI Planner Hero — main feature */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative overflow-hidden rounded-2xl border border-[#FFBE98]/25 bg-gradient-to-br from-[#FFBE98]/8 via-white to-[#E6A07C]/5 mb-5"
+          className="relative overflow-hidden rounded-2xl border border-[#FFBE98]/35 bg-gradient-to-br from-[#FFBE98]/14 via-[#FFF5EE] to-[#E6A07C]/8 shadow-[0_2px_16px_rgba(255,190,152,0.12)] mb-8"
           data-testid="ai-planner-cta"
         >
-          <div className="absolute top-0 right-0 w-40 h-40 bg-[#FFBE98]/5 rounded-full -translate-y-1/2 translate-x-1/2" />
-          <div className="relative p-5 sm:p-6">
+          <div className="absolute top-0 right-0 w-48 h-48 bg-[#FFBE98]/6 rounded-full -translate-y-1/2 translate-x-1/3" />
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-[#E6A07C]/5 rounded-full translate-y-1/2 -translate-x-1/4" />
+          <div className="relative p-6 sm:p-8">
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 bg-[#FFBE98]/12 rounded-xl flex items-center justify-center shrink-0">
-                <Sparkles className="w-5 h-5 text-[#FFBE98]" />
+              <div className="w-12 h-12 bg-white/80 rounded-xl flex items-center justify-center shrink-0 shadow-sm border border-[#FFBE98]/15">
+                <Sparkles className="w-5.5 h-5.5 text-[#FFBE98]" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1.5">
-                  <span className="text-[10px] font-bold text-[#FFBE98] bg-[#FFBE98]/10 px-2 py-0.5 rounded-full uppercase tracking-wide">Novo</span>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-[10px] font-semibold text-[#FFBE98] bg-white/70 backdrop-blur-sm px-2.5 py-0.5 rounded-full tracking-wide border border-[#FFBE98]/15">
+                    Planeamento inteligente
+                  </span>
                 </div>
-                <h2 className="text-lg font-bold text-[#2D2A26] mb-1" data-testid="ai-planner-cta-title">
-                  Planeie a sua viagem automaticamente com IA
+                <h2 className="text-xl sm:text-2xl font-bold text-[#2D2A26] mb-1.5" data-testid="ai-planner-cta-title">
+                  Planeie a sua viagem com IA
                 </h2>
-                <p className="text-sm text-[#6B6661] leading-relaxed mb-4">
+                <p className="text-sm text-[#6B6661] leading-relaxed mb-5">
                   Receba um roteiro completo, dicas locais e sugestões de reserva — tudo personalizado para o seu destino e datas.
                 </p>
                 <button
                   onClick={() => navigate('/travel-planner')}
-                  className="inline-flex items-center gap-2 bg-[#FFBE98] text-white text-sm font-semibold px-5 py-2.5 rounded-full hover:bg-[#E6A07C] transition-colors shadow-sm"
+                  className="inline-flex items-center gap-2 bg-[#FFBE98] text-white font-semibold px-6 py-3 rounded-full hover:bg-[#E6A07C] transition-all shadow-[0_2px_8px_rgba(255,190,152,0.35)] hover:shadow-[0_4px_14px_rgba(255,190,152,0.45)]"
                   data-testid="ai-planner-cta-btn"
                 >
-                  <Sparkles className="w-3.5 h-3.5" />
+                  <Sparkles className="w-4 h-4" />
                   Gerar plano de viagem
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -187,7 +190,7 @@ const PlanTrip = () => {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: (idx + 1) * 0.04 }}
-              className="bg-white rounded-2xl border border-stone-200/60 overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.07)]"
+              className="bg-white rounded-2xl border border-stone-200/60 overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.04)] transition-all duration-250 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-stone-300/60"
               data-testid={`section-${section.id}`}
             >
             <div className="p-5">
