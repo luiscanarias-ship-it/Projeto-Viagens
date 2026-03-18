@@ -440,13 +440,13 @@ const CheckoutModal = ({
                 >
                   <p className="text-sm text-[#6B6661]">Escolhe o valor da tua contribuição:</p>
                   
-                  <div className="grid grid-cols-2 sm:grid-cols-1 gap-2">
+                  <div className="grid grid-cols-3 gap-1.5">
                     {amounts.map((amt) => (
                       <button
                         key={amt}
                         onClick={() => setSelectedAmount(amt)}
                         data-testid={`amount-btn-${amt}`}
-                        className={`py-2.5 px-3 rounded-xl font-semibold transition-all text-left ${
+                        className={`py-2 px-2.5 rounded-xl font-semibold transition-all text-center relative ${
                           selectedAmount === amt
                             ? 'bg-[#FFBE98] text-white shadow-md ring-2 ring-[#FFBE98]/30'
                             : amt === 20
@@ -454,41 +454,39 @@ const CheckoutModal = ({
                               : 'bg-stone-100 text-[#2D2A26] hover:bg-stone-200'
                         }`}
                       >
-                        <div className="flex items-center justify-between">
-                          <span className="text-base font-bold">€{amt}</span>
-                          {selectedAmount === amt && (
-                            <Check className="w-4 h-4 shrink-0" />
-                          )}
-                        </div>
-                        {amt === 20 && selectedAmount !== amt ? (
-                          <div className="mt-1">
+                        <span className="text-base font-bold">€{amt}</span>
+                        {selectedAmount === amt && (
+                          <Check className="w-3.5 h-3.5 absolute top-1.5 right-1.5" />
+                        )}
+                        {amt === 20 && selectedAmount !== amt && (
+                          <div className="mt-0.5">
                             <span 
-                              className="text-[10px] font-bold text-white bg-gradient-to-r from-[#FFBE98] to-[#E6A07C] px-2 py-0.5 rounded-full inline-flex items-center gap-1 animate-pulse shadow-sm"
+                              className="text-[9px] font-bold text-white bg-gradient-to-r from-[#FFBE98] to-[#E6A07C] px-1.5 py-0.5 rounded-full inline-flex items-center gap-0.5 animate-pulse shadow-sm"
                               data-testid="most-popular-badge"
                               style={{ animationDuration: '2.5s' }}
                             >
-                              <Sparkles className="w-3 h-3" />
-                              Mais popular
+                              <Sparkles className="w-2.5 h-2.5" />
+                              Popular
                             </span>
                           </div>
-                        ) : contributionDescriptions?.[String(amt)] ? (
-                          <p className={`text-[10px] font-normal leading-snug mt-1 ${
-                            selectedAmount === amt ? 'text-white/80' : 'text-[#6B6661]'
-                          }`}>
-                            {contributionDescriptions[String(amt)]}
-                          </p>
-                        ) : null}
+                        )}
                       </button>
                     ))}
                   </div>
 
+                  {selectedAmount && contributionDescriptions?.[String(selectedAmount)] && (
+                    <p className="text-center text-xs text-[#6B6661] italic" data-testid="impact-message">
+                      {contributionDescriptions[String(selectedAmount)]}
+                    </p>
+                  )}
+
                   {selectedAmount && (
-                    <p className="text-center text-sm text-[#6B6661] italic mt-2" data-testid="impact-message">
+                    <p className="text-center text-xs text-[#6B6661]/70 italic">
                       {selectedAmount >= 50
-                        ? 'Com este apoio estás a aproximar muito este sonho da realidade.'
+                        ? 'Com este apoio estas a aproximar muito este sonho da realidade.'
                         : selectedAmount >= 20
-                          ? 'A tua contribuição ajuda este sonho a dar um grande passo.'
-                          : 'A tua contribuição ajuda este sonho a ganhar forma.'}
+                          ? 'A tua contribuicao ajuda este sonho a dar um grande passo.'
+                          : 'A tua contribuicao ajuda este sonho a ganhar forma.'}
                     </p>
                   )}
 
