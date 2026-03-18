@@ -1,39 +1,70 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Mail, Lock, User, Heart } from 'lucide-react';
+import { Mail, Lock, User, Heart, Eye, EyeOff, Check, X, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
+
+const getPasswordStrength = (password) => {
+  if (!password) return { level: 0, label: '', color: '' };
+  let score = 0;
+  if (password.length >= 8) score++;
+  if (password.length >= 12) score++;
+  if (/[A-Z]/.test(password)) score++;
+  if (/[0-9]/.test(password)) score++;
+  if (/[^A-Za-z0-9]/.test(password)) score++;
+
+  if (score <= 1) return { level: 1, label: 'Fraca', color: 'bg-red-400' };
+  if (score <= 3) return { level: 2, label: 'Media', color: 'bg-amber-400' };
+  return { level: 3, label: 'Forte', color: 'bg-green-500' };
+};
 
 const Login = () => {
   const { login, register, loginWithGoogle } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-  
+  useEffect(() => { window.scrollTo(0, 0); }, []);
+
   const [isRegister, setIsRegister] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
+    confirmPassword: '',
     name: '',
     surname: ''
   });
+
+  const strength = useMemo(() => getPasswordStrength(formData.password), [formData.password]);
+  const passwordTooShort = formData.password.length > 0 && formData.password.length < 8;
+  const passwordsMatch = formData.confirmPassword.length === 0 || formData.password === formData.confirmPassword;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
+    if (isRegister) {
+      if (formData.password.length < 8) {
+        setError('A senha deve ter pelo menos 8 caracteres.');
+        setLoading(false);
+        return;
+      }
+      if (formData.password !== formData.confirmPassword) {
+        setError('As senhas nao coincidem.');
+        setLoading(false);
+        return;
+      }
+    }
+
     try {
       if (isRegister) {
         await register(formData.email, formData.password, formData.name, formData.surname);
-        // Redirect to invite onboarding if coming from invite link
         const inviteAlias = localStorage.getItem('invite_alias');
         if (inviteAlias) {
           navigate('/onboarding/invite');
@@ -55,9 +86,9 @@ const Login = () => {
     }
   };
 
-  const handleGoogleLogin = () => {
-    loginWithGoogle();
-  };
+  const handleGoogleLogin = () => { loginWithGoogle(); };
+
+  const update = (field, value) => setFormData(prev => ({ ...prev, [field]: value }));
 
   return (
     <div className="min-h-screen flex items-center justify-center dream-mesh px-6 py-20" data-testid="login-page">
@@ -105,29 +136,37 @@ const Login = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             {isRegister && (
               <>
+                {/* Name */}
                 <div>
-                  <label className="block text-sm font-medium mb-2">{t('user.name')}</label>
+                  <label className="block text-sm font-medium mb-2 flex items-center gap-1.5">
+                    <User className="w-4 h-4 text-[#FFBE98]" />
+                    {t('user.name')}
+                  </label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6B6661]" />
                     <input
                       type="text"
                       value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full pl-10 pr-4 py-3 input-warm"
+                      onChange={(e) => update('name', e.target.value)}
+                      placeholder="O teu primeiro nome"
+                      className="w-full px-4 py-3 input-warm"
                       required
                       data-testid="name-input"
                     />
                   </div>
                 </div>
+                {/* Surname */}
                 <div>
-                  <label className="block text-sm font-medium mb-2">{t('user.surname')}</label>
+                  <label className="block text-sm font-medium mb-2 flex items-center gap-1.5">
+                    <User className="w-4 h-4 text-[#E0C097]" />
+                    {t('user.surname')}
+                  </label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6B6661]" />
                     <input
                       type="text"
                       value={formData.surname}
-                      onChange={(e) => setFormData({ ...formData, surname: e.target.value })}
-                      className="w-full pl-10 pr-4 py-3 input-warm"
+                      onChange={(e) => update('surname', e.target.value)}
+                      placeholder="O teu apelido"
+                      className="w-full px-4 py-3 input-warm"
                       data-testid="surname-input"
                     />
                   </div>
@@ -135,35 +174,138 @@ const Login = () => {
               </>
             )}
 
+            {/* Email */}
             <div>
-              <label className="block text-sm font-medium mb-2">{t('auth.email')}</label>
+              <label className="block text-sm font-medium mb-2 flex items-center gap-1.5">
+                <Mail className="w-4 h-4 text-[#FFBE98]" />
+                {t('auth.email')}
+              </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6B6661]" />
                 <input
                   type="email"
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full pl-10 pr-4 py-3 input-warm"
+                  onChange={(e) => update('email', e.target.value)}
+                  placeholder="o-teu-email@exemplo.com"
+                  className="w-full px-4 py-3 input-warm"
                   required
                   data-testid="email-input"
                 />
               </div>
             </div>
 
+            {/* Password */}
             <div>
-              <label className="block text-sm font-medium mb-2">{t('auth.password')}</label>
+              <label className="block text-sm font-medium mb-2 flex items-center gap-1.5">
+                <Lock className="w-4 h-4 text-[#FFBE98]" />
+                {t('auth.password')}
+              </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6B6661]" />
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full pl-10 pr-4 py-3 input-warm"
+                  onChange={(e) => update('password', e.target.value)}
+                  placeholder={isRegister ? 'Minimo 8 caracteres' : ''}
+                  className="w-full px-4 py-3 pr-11 input-warm"
                   required
                   data-testid="password-input"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B6661] hover:text-[#2D2A26] transition-colors p-0.5"
+                  tabIndex={-1}
+                  data-testid="toggle-password-visibility"
+                >
+                  {showPassword ? <EyeOff className="w-4.5 h-4.5" /> : <Eye className="w-4.5 h-4.5" />}
+                </button>
               </div>
+
+              {/* Strength indicator + micro-copy (only on register) */}
+              {isRegister && formData.password.length > 0 && (
+                <div className="mt-2 space-y-1.5">
+                  {/* Strength bar */}
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 flex gap-1">
+                      {[1, 2, 3].map(i => (
+                        <div
+                          key={i}
+                          className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
+                            i <= strength.level ? strength.color : 'bg-stone-200'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <span className={`text-xs font-medium ${
+                      strength.level === 1 ? 'text-red-500' :
+                      strength.level === 2 ? 'text-amber-500' : 'text-green-600'
+                    }`} data-testid="password-strength-label">
+                      {strength.label}
+                    </span>
+                  </div>
+                  {/* Min length feedback */}
+                  {passwordTooShort && (
+                    <p className="text-xs text-red-400 flex items-center gap-1" data-testid="password-too-short">
+                      <X className="w-3 h-3" /> Minimo 8 caracteres
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Micro-copy */}
+              {isRegister && formData.password.length === 0 && (
+                <p className="text-xs text-[#6B6661]/70 mt-1.5 leading-relaxed">
+                  Usa pelo menos 8 caracteres.<br/>
+                  Podes misturar letras e numeros para maior seguranca.
+                </p>
+              )}
             </div>
+
+            {/* Confirm Password (register only) */}
+            {isRegister && (
+              <div>
+                <label className="block text-sm font-medium mb-2 flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-[#FFBE98]" />
+                  Confirmar senha
+                </label>
+                <div className="relative">
+                  <input
+                    type={showConfirm ? 'text' : 'password'}
+                    value={formData.confirmPassword}
+                    onChange={(e) => update('confirmPassword', e.target.value)}
+                    placeholder="Repete a tua senha"
+                    className={`w-full px-4 py-3 pr-11 input-warm transition-colors ${
+                      formData.confirmPassword.length > 0 && !passwordsMatch
+                        ? 'border-red-300 focus:ring-red-300'
+                        : formData.confirmPassword.length > 0 && passwordsMatch
+                          ? 'border-green-300 focus:ring-green-300'
+                          : ''
+                    }`}
+                    required
+                    data-testid="confirm-password-input"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirm(!showConfirm)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B6661] hover:text-[#2D2A26] transition-colors p-0.5"
+                    tabIndex={-1}
+                    data-testid="toggle-confirm-visibility"
+                  >
+                    {showConfirm ? <EyeOff className="w-4.5 h-4.5" /> : <Eye className="w-4.5 h-4.5" />}
+                  </button>
+                </div>
+                {/* Match feedback */}
+                {formData.confirmPassword.length > 0 && (
+                  <p className={`text-xs mt-1.5 flex items-center gap-1 ${
+                    passwordsMatch ? 'text-green-600' : 'text-red-400'
+                  }`} data-testid="password-match-feedback">
+                    {passwordsMatch
+                      ? <><Check className="w-3 h-3" /> As senhas coincidem</>
+                      : <><X className="w-3 h-3" /> As senhas nao coincidem</>
+                    }
+                  </p>
+                )}
+              </div>
+            )}
 
             {error && (
               <p className="text-red-500 text-sm text-center" data-testid="error-message">{error}</p>
@@ -171,8 +313,8 @@ const Login = () => {
 
             <button
               type="submit"
-              disabled={loading}
-              className="w-full btn-primary"
+              disabled={loading || (isRegister && (passwordTooShort || !passwordsMatch))}
+              className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
               data-testid="submit-btn"
             >
               {loading ? (
@@ -186,7 +328,7 @@ const Login = () => {
           <p className="text-center text-sm text-[#6B6661] mt-6">
             {isRegister ? t('auth.has_account') : t('auth.no_account')}{' '}
             <button
-              onClick={() => setIsRegister(!isRegister)}
+              onClick={() => { setIsRegister(!isRegister); setError(''); }}
               className="text-[#FFBE98] font-medium hover:underline"
               data-testid="toggle-auth-btn"
             >
