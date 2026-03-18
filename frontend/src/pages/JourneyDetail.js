@@ -500,7 +500,7 @@ const JourneyDetail = () => {
             >
               <h2 className="text-2xl font-bold mb-6 text-[#2D2A26] flex items-center gap-3">
                 <Plane className="w-7 h-7 text-[#FFBE98]" />
-                Planeia a Tua Viagem para {journey.name}
+                Planeie a Sua Viagem para {journey.name}
               </h2>
 
               {travelResources && (

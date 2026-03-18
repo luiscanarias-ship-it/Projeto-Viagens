@@ -14,9 +14,9 @@ const TRIP_TYPES = [
   { id: 'cultural', label: 'Cultural' },
   { id: 'aventura', label: 'Aventura' },
   { id: 'relaxamento', label: 'Relaxamento' },
-  { id: 'gastronomica', label: 'Gastronomica' },
-  { id: 'romantica', label: 'Romantica' },
-  { id: 'familia', label: 'Familia' }
+  { id: 'gastronomica', label: 'Gastronómica' },
+  { id: 'romantica', label: 'Romântica' },
+  { id: 'familia', label: 'Família' }
 ];
 
 /* ── Collapsible Section ── */
@@ -54,7 +54,7 @@ const Section = ({ icon: Icon, title, children, defaultOpen = false, color = 'te
   );
 };
 
-/* ── Contextual CTA Block (inserted between sections) ── */
+/* ── Contextual CTA Block ── */
 const ContextualCTA = ({ icon: Icon, text, label, sublabel, link, platform, onTrack }) => (
   <motion.div
     initial={{ opacity: 0, y: 8 }}
@@ -85,9 +85,9 @@ const ContextualCTA = ({ icon: Icon, text, label, sublabel, link, platform, onTr
 /* ── Enhanced Booking Section ── */
 const BookingSection = ({ links, onTrack }) => {
   const items = [
-    { id: 'booking', icon: Hotel, label: 'Reservar alojamento', desc: 'Cancelamento flexivel na maioria', tag: 'Recomendado pela 4Luis', primary: true },
-    { id: 'skyscanner', icon: Plane, label: 'Pesquisar voos', desc: 'Compare centenas de opcoes', tag: 'Melhores precos', primary: true },
-    { id: 'getyourguide', icon: Ticket, label: 'Reservar atividades', desc: 'Tours e experiencias unicas', tag: 'Recomendado pela 4Luis', primary: false },
+    { id: 'booking', icon: Hotel, label: 'Reservar alojamento', desc: 'Cancelamento flexível na maioria', tag: 'Recomendado pela 4Luis', primary: true },
+    { id: 'skyscanner', icon: Plane, label: 'Pesquisar voos', desc: 'Compare centenas de opções', tag: 'Melhores preços', primary: true },
+    { id: 'getyourguide', icon: Ticket, label: 'Reservar atividades', desc: 'Tours e experiências únicas', tag: 'Recomendado pela 4Luis', primary: false },
     { id: 'airalo', icon: Wifi, label: 'Obter eSIM', desc: 'Internet sem roaming', tag: null, primary: false },
   ];
 
@@ -146,7 +146,7 @@ const BookingSection = ({ links, onTrack }) => {
 /* ── Sticky Booking Bar ── */
 const StickyBar = ({ links, onTrack, visible }) => {
   const items = [
-    { id: 'booking', icon: Hotel, label: 'Hoteis' },
+    { id: 'booking', icon: Hotel, label: 'Hotéis' },
     { id: 'skyscanner', icon: Plane, label: 'Voos' },
     { id: 'getyourguide', icon: Ticket, label: 'Atividades' },
   ];
@@ -290,7 +290,7 @@ const TravelPlanner = () => {
 
   const handleShare = async () => {
     if (!plan) return;
-    const text = `Plano de viagem para ${plan.destination} (${plan.dates}) - Gerado por 4Luis AI Travel Planner`;
+    const text = `Plano de viagem para ${plan.destination} (${plan.dates}) — Gerado por 4Luis AI Travel Planner`;
     if (navigator.share) {
       try { await navigator.share({ title: `Viagem: ${plan.destination}`, text, url: window.location.href }); } catch {}
     } else {
@@ -337,7 +337,7 @@ const TravelPlanner = () => {
                 type="text"
                 value={destination}
                 onChange={(e) => setDestination(e.target.value)}
-                placeholder="Ex: Toquio, Japao"
+                placeholder="Ex: Tóquio, Japão"
                 className="w-full px-4 py-2.5 input-warm"
                 required
                 data-testid="input-destination"
@@ -348,7 +348,7 @@ const TravelPlanner = () => {
               <div>
                 <label className="block text-sm font-medium mb-1.5 flex items-center gap-1.5">
                   <Calendar className="w-4 h-4 text-[#FFBE98]" />
-                  Inicio
+                  Início
                 </label>
                 <input
                   type="date"
@@ -427,7 +427,7 @@ const TravelPlanner = () => {
           >
             <Loader2 className="w-8 h-8 animate-spin text-[#FFBE98] mx-auto mb-4" />
             <p className="text-sm font-semibold text-[#2D2A26]">A gerar o teu plano...</p>
-            <p className="text-xs text-[#6B6661] mt-1">Isto pode demorar ate 30 segundos</p>
+            <p className="text-xs text-[#6B6661] mt-1">Isto pode demorar até 30 segundos</p>
           </motion.div>
         )}
 
@@ -475,7 +475,7 @@ const TravelPlanner = () => {
               </div>
             </div>
 
-            {/* ── 1. ITINERARY (most important, always open) ── */}
+            {/* ── 1. ITINERARY ── */}
             <Section icon={Calendar} title="Roteiro dia a dia" defaultOpen={true} color="text-sky-500" testId="section-itinerary">
               <div className="space-y-3">
                 {plan.itinerary?.map((day, i) => (
@@ -497,15 +497,15 @@ const TravelPlanner = () => {
             {/* CTA: After itinerary → accommodation */}
             <ContextualCTA
               icon={Hotel}
-              text="Encontre alojamento para esta viagem"
-              label="Ver hoteis"
-              sublabel="Cancelamento flexivel na maioria das opcoes"
+              text="Ver alojamento recomendado"
+              label="Ver hotéis"
+              sublabel="Cancelamento flexível na maioria das opções"
               link={affiliateLinks.booking?.url}
               platform="booking"
               onTrack={trackClick}
             />
 
-            {/* ── 2. BOOKING SECTION (enhanced) ── */}
+            {/* ── 2. BOOKING SECTION ── */}
             <BookingSection links={affiliateLinks} onTrack={trackClick} />
 
             {/* ── 3. WEATHER ── */}
@@ -516,9 +516,9 @@ const TravelPlanner = () => {
             {/* CTA: After weather → flights */}
             <ContextualCTA
               icon={Plane}
-              text="Verifique voos para as suas datas"
+              text="Ver voos disponíveis"
               label="Ver voos"
-              sublabel="Compare precos de centenas de companhias"
+              sublabel="Compare preços de centenas de companhias"
               link={affiliateLinks.skyscanner?.url}
               platform="skyscanner"
               onTrack={trackClick}
@@ -573,7 +573,7 @@ const TravelPlanner = () => {
             {/* CTA: After checklist → eSIM */}
             <ContextualCTA
               icon={Wifi}
-              text="Dados moveis em viagem (eSIM)"
+              text="Comprar eSIM para a viagem"
               label="Ver eSIM"
               sublabel="Evite custos de roaming"
               link={affiliateLinks.airalo?.url}
@@ -596,7 +596,7 @@ const TravelPlanner = () => {
             {/* CTA: After tips → activities */}
             <ContextualCTA
               icon={Compass}
-              text="Reserve atividades e experiencias"
+              text="Reservar atividades e experiências"
               label="Descobrir"
               sublabel="Tours, visitas guiadas e muito mais"
               link={affiliateLinks.getyourguide?.url}
@@ -606,8 +606,8 @@ const TravelPlanner = () => {
 
             {/* Footer disclaimer */}
             <p className="text-center text-xs text-[#6B6661]/60 pt-2">
-              Alguns dos links nesta pagina sao de parceiros. Ao usar estes links,<br/>
-              ajudas a 4Luis a continuar a apoiar viagens de sonho.
+              Alguns dos links nesta página são de parceiros. Ao usar estes links,<br/>
+              ajuda a 4Luis a continuar a apoiar viagens de sonho.
             </p>
           </motion.div>
         )}
