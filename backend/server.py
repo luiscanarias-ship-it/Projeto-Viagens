@@ -6069,7 +6069,11 @@ async def generate_travel_plan(request: Request):
     destination = data.get("destination", "").strip()
     start_date = data.get("start_date", "").strip()
     end_date = data.get("end_date", "").strip()
-    trip_type = data.get("trip_type", "").strip()
+    trip_type = data.get("trip_type", "")
+    if isinstance(trip_type, list):
+        trip_type = ", ".join(trip_type)
+    else:
+        trip_type = str(trip_type).strip()
     
     if not destination or not start_date or not end_date:
         raise HTTPException(status_code=400, detail="Destino, data de inicio e data de fim sao obrigatorios")
@@ -6186,7 +6190,11 @@ async def refine_travel_plan(request: Request):
     destination = data.get("destination", "").strip()
     start_date = data.get("start_date", "").strip()
     end_date = data.get("end_date", "").strip()
-    trip_type = data.get("trip_type", "").strip()
+    trip_type = data.get("trip_type", "")
+    if isinstance(trip_type, list):
+        trip_type = ", ".join(trip_type)
+    else:
+        trip_type = str(trip_type).strip()
     previous_plan = data.get("previous_plan")
     refinement = data.get("refinement", "").strip()
 
