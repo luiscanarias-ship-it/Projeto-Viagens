@@ -3,8 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   MapPin, Calendar, Compass, Sparkles, Loader2, ChevronDown, ChevronUp,
   Sun, Shirt, ClipboardList, Lightbulb, Hotel, Plane, Wifi,
-  ExternalLink, Star, RefreshCw, Copy, Share2, Check,
-  Globe, Ticket
+  ExternalLink, Star, Copy, Share2, Check,
+  Globe, Ticket, Send, SlidersHorizontal, CheckCircle2
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -19,48 +19,9 @@ const TRIP_TYPES = [
   { id: 'familia', label: 'Família' }
 ];
 
-/* ── Collapsible Section ── */
-const Section = ({ icon: Icon, title, children, defaultOpen = false, color = 'text-[#FFBE98]', testId }) => {
-  const [open, setOpen] = useState(defaultOpen);
-  return (
-    <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden shadow-sm">
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between p-4 text-left"
-        data-testid={testId || `section-toggle-${title.toLowerCase().replace(/\s/g, '-')}`}
-      >
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-stone-50 rounded-xl flex items-center justify-center">
-            <Icon className={`w-4.5 h-4.5 ${color}`} />
-          </div>
-          <h3 className="font-bold text-[#2D2A26]">{title}</h3>
-        </div>
-        {open ? <ChevronUp className="w-4 h-4 text-[#6B6661]" /> : <ChevronDown className="w-4 h-4 text-[#6B6661]" />}
-      </button>
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden"
-          >
-            <div className="px-4 pb-4">{children}</div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-};
-
 /* ── Contextual CTA Block ── */
 const ContextualCTA = ({ icon: Icon, text, label, sublabel, link, platform, onTrack }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 8 }}
-    animate={{ opacity: 1, y: 0 }}
-    className="bg-gradient-to-r from-[#FFBE98]/8 to-[#E6A07C]/6 rounded-xl border border-[#FFBE98]/15 p-3.5 flex items-center gap-3"
-  >
+  <div className="bg-gradient-to-r from-[#FFBE98]/8 to-[#E6A07C]/5 rounded-xl border border-[#FFBE98]/15 p-3.5 flex items-center gap-3">
     <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center shadow-sm shrink-0">
       <Icon className="w-4 h-4 text-[#FFBE98]" />
     </div>
@@ -79,7 +40,7 @@ const ContextualCTA = ({ icon: Icon, text, label, sublabel, link, platform, onTr
       {label}
       <ExternalLink className="w-3 h-3" />
     </a>
-  </motion.div>
+  </div>
 );
 
 /* ── Enhanced Booking Section ── */
@@ -185,6 +146,78 @@ const StickyBar = ({ links, onTrack, visible }) => {
   );
 };
 
+/* ── Refine Panel ── */
+const RefinePanel = ({ onSubmit, loading }) => {
+  const [open, setOpen] = useState(false);
+  const [text, setText] = useState('');
+  const inputRef = useRef(null);
+
+  const handleOpen = () => {
+    setOpen(true);
+    setTimeout(() => inputRef.current?.focus(), 100);
+  };
+
+  const handleSubmit = () => {
+    if (!text.trim() || loading) return;
+    onSubmit(text.trim());
+    setText('');
+    setOpen(false);
+  };
+
+  return (
+    <div data-testid="refine-panel">
+      {!open ? (
+        <button
+          onClick={handleOpen}
+          className="flex items-center gap-1.5 text-xs font-semibold text-[#6B6661] bg-stone-100 hover:bg-stone-200 px-3 py-2 rounded-lg transition-colors"
+          data-testid="refine-btn"
+        >
+          <SlidersHorizontal className="w-3.5 h-3.5" />
+          Ajustar plano
+        </button>
+      ) : (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          className="overflow-hidden"
+        >
+          <div className="flex gap-2 items-end">
+            <div className="flex-1">
+              <label className="text-xs font-medium text-[#6B6661] mb-1 block">Quer acrescentar algo ao plano?</label>
+              <input
+                ref={inputRef}
+                type="text"
+                value={text}
+                onChange={e => setText(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleSubmit()}
+                placeholder="Ex: Adicionar mais restaurantes, evitar museus..."
+                className="w-full px-3 py-2 text-sm rounded-lg border border-stone-200 focus:border-[#FFBE98] focus:ring-1 focus:ring-[#FFBE98]/30 outline-none transition-all"
+                disabled={loading}
+                data-testid="refine-input"
+              />
+            </div>
+            <button
+              onClick={handleSubmit}
+              disabled={!text.trim() || loading}
+              className="flex items-center gap-1.5 bg-[#FFBE98] text-white text-xs font-semibold px-4 py-2.5 rounded-lg hover:bg-[#E6A07C] transition-colors disabled:opacity-50"
+              data-testid="refine-submit"
+            >
+              {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+              Ajustar
+            </button>
+            <button
+              onClick={() => { setOpen(false); setText(''); }}
+              className="text-xs text-[#6B6661] hover:text-[#2D2A26] px-2 py-2.5"
+            >
+              Cancelar
+            </button>
+          </div>
+        </motion.div>
+      )}
+    </div>
+  );
+};
+
 /* ── Main Component ── */
 const TravelPlanner = () => {
   const [destination, setDestination] = useState('');
@@ -192,6 +225,7 @@ const TravelPlanner = () => {
   const [endDate, setEndDate] = useState('');
   const [tripType, setTripType] = useState('');
   const [loading, setLoading] = useState(false);
+  const [refining, setRefining] = useState(false);
   const [error, setError] = useState('');
   const [plan, setPlan] = useState(null);
   const [affiliateLinks, setAffiliateLinks] = useState({});
@@ -205,7 +239,6 @@ const TravelPlanner = () => {
     axios.get(`${API}/affiliate-links`).then(r => setAffiliateLinks(r.data)).catch(() => {});
   }, []);
 
-  // Show sticky bar when scrolled past results header
   useEffect(() => {
     if (!plan) { setShowStickyBar(false); return; }
     const onScroll = () => {
@@ -234,7 +267,6 @@ const TravelPlanner = () => {
     setLoading(true);
     setError('');
     setPlan(null);
-
     try {
       const token = localStorage.getItem('token');
       const res = await axios.post(`${API}/ai/travel-plan`, {
@@ -251,38 +283,57 @@ const TravelPlanner = () => {
     }
   };
 
-  const handleRegenerate = () => {
-    setPlan(null);
-    setShowStickyBar(false);
-    setTimeout(() => {
-      handleSubmit({ preventDefault: () => {} });
-    }, 100);
+  const handleRefine = async (refinement) => {
+    if (!plan) return;
+    setRefining(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.post(`${API}/ai/travel-plan/refine`, {
+        destination, start_date: startDate, end_date: endDate, trip_type: tripType,
+        previous_plan: plan, refinement
+      }, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        timeout: 60000
+      });
+      setPlan(res.data.plan);
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Erro ao ajustar plano. Tente novamente.');
+    } finally {
+      setRefining(false);
+    }
   };
 
-  const handleCopy = () => {
-    if (!plan) return;
+  const buildPlanText = () => {
+    if (!plan) return '';
     const lines = [];
-    lines.push(`Plano de viagem: ${plan.destination}`);
+    lines.push(`O SEU GUIA DE VIAGEM: ${plan.destination}`);
     lines.push(`Datas: ${plan.dates}`);
     if (plan.summary) lines.push(`\n${plan.summary}`);
+    if (plan.weather) { lines.push(`\nClima: ${plan.weather}`); }
+    if (plan.packing) {
+      lines.push('\nO que levar:');
+      plan.packing.clothing?.forEach(i => lines.push(`  - ${i}`));
+      plan.packing.essentials?.forEach(i => lines.push(`  - ${i}`));
+    }
     lines.push('\n--- ROTEIRO ---');
     plan.itinerary?.forEach(day => {
       lines.push(`\nDia ${day.day}: ${day.title}`);
       day.activities?.forEach(a => lines.push(`  - ${a}`));
     });
-    if (plan.weather) { lines.push('\n--- CLIMA ---'); lines.push(plan.weather); }
-    if (plan.packing) {
-      lines.push('\n--- O QUE LEVAR ---');
-      plan.packing.clothing?.forEach(i => lines.push(`  Roupa: ${i}`));
-      plan.packing.essentials?.forEach(i => lines.push(`  Essencial: ${i}`));
+    if (plan.checklist) {
+      lines.push('\n--- CHECKLIST ---');
+      Object.values(plan.checklist).flat().forEach(i => lines.push(`  - ${i}`));
     }
     if (plan.local_tips) {
       lines.push('\n--- DICAS LOCAIS ---');
       plan.local_tips.forEach(t => lines.push(`  - ${t}`));
     }
     lines.push('\n\nGerado por 4Luis AI Travel Planner');
+    return lines.join('\n');
+  };
 
-    navigator.clipboard.writeText(lines.join('\n')).then(() => {
+  const handleCopy = () => {
+    navigator.clipboard.writeText(buildPlanText()).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
@@ -290,9 +341,8 @@ const TravelPlanner = () => {
 
   const handleShare = async () => {
     if (!plan) return;
-    const text = `Plano de viagem para ${plan.destination} (${plan.dates}) — Gerado por 4Luis AI Travel Planner`;
     if (navigator.share) {
-      try { await navigator.share({ title: `Viagem: ${plan.destination}`, text, url: window.location.href }); } catch {}
+      try { await navigator.share({ title: `Viagem: ${plan.destination}`, text: `Plano de viagem para ${plan.destination} (${plan.dates})`, url: window.location.href }); } catch {}
     } else {
       handleCopy();
     }
@@ -343,43 +393,27 @@ const TravelPlanner = () => {
                 data-testid="input-destination"
               />
             </div>
-
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-sm font-medium mb-1.5 flex items-center gap-1.5">
                   <Calendar className="w-4 h-4 text-[#FFBE98]" />
                   Início
                 </label>
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full px-4 py-2.5 input-warm"
-                  required
-                  data-testid="input-start-date"
-                />
+                <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}
+                  className="w-full px-4 py-2.5 input-warm" required data-testid="input-start-date" />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1.5 flex items-center gap-1.5">
                   <Calendar className="w-4 h-4 text-[#FFBE98]" />
                   Fim
                 </label>
-                <input
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  min={startDate}
-                  className="w-full px-4 py-2.5 input-warm"
-                  required
-                  data-testid="input-end-date"
-                />
+                <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)}
+                  min={startDate} className="w-full px-4 py-2.5 input-warm" required data-testid="input-end-date" />
               </div>
             </div>
-
             {numDays > 0 && (
               <p className="text-xs text-[#6B6661] text-center">{numDays} {numDays === 1 ? 'dia' : 'dias'} de viagem</p>
             )}
-
             <div>
               <label className="block text-sm font-medium mb-1.5 flex items-center gap-1.5">
                 <Compass className="w-4 h-4 text-[#FFBE98]" />
@@ -387,28 +421,18 @@ const TravelPlanner = () => {
               </label>
               <div className="flex flex-wrap gap-1.5">
                 {TRIP_TYPES.map(t => (
-                  <button
-                    key={t.id}
-                    type="button"
+                  <button key={t.id} type="button"
                     onClick={() => setTripType(tripType === t.id ? '' : t.id)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                      tripType === t.id
-                        ? 'bg-[#FFBE98] text-white'
-                        : 'bg-stone-100 text-[#6B6661] hover:bg-stone-200'
+                      tripType === t.id ? 'bg-[#FFBE98] text-white' : 'bg-stone-100 text-[#6B6661] hover:bg-stone-200'
                     }`}
                     data-testid={`trip-type-${t.id}`}
-                  >
-                    {t.label}
-                  </button>
+                  >{t.label}</button>
                 ))}
               </div>
             </div>
-
             {error && <p className="text-sm text-red-500 text-center" data-testid="planner-error">{error}</p>}
-
-            <button
-              type="submit"
-              disabled={loading || !destination || !startDate || !endDate}
+            <button type="submit" disabled={loading || !destination || !startDate || !endDate}
               className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               data-testid="generate-btn"
             >
@@ -418,66 +442,101 @@ const TravelPlanner = () => {
           </motion.form>
         )}
 
-        {/* Loading State */}
+        {/* Loading */}
         {loading && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="bg-white rounded-2xl border border-stone-100 p-10 shadow-sm text-center"
-          >
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            className="bg-white rounded-2xl border border-stone-100 p-10 shadow-sm text-center">
             <Loader2 className="w-8 h-8 animate-spin text-[#FFBE98] mx-auto mb-4" />
-            <p className="text-sm font-semibold text-[#2D2A26]">A gerar o teu plano...</p>
+            <p className="text-sm font-semibold text-[#2D2A26]">A gerar o seu guia de viagem...</p>
             <p className="text-xs text-[#6B6661] mt-1">Isto pode demorar até 30 segundos</p>
           </motion.div>
         )}
 
-        {/* Results */}
+        {/* ════════ UNIFIED TRAVEL GUIDE ════════ */}
         {plan && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="space-y-3"
-            ref={resultsRef}
-          >
-            {/* Summary header */}
-            <div className="bg-white rounded-2xl border border-stone-100 p-5 shadow-sm">
-              <div className="text-center">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3" ref={resultsRef}>
+
+            {/* Refining overlay */}
+            {refining && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                className="bg-[#FFBE98]/5 border border-[#FFBE98]/20 rounded-xl p-4 flex items-center gap-3">
+                <Loader2 className="w-5 h-5 animate-spin text-[#FFBE98]" />
+                <div>
+                  <p className="text-sm font-semibold text-[#2D2A26]">A ajustar o seu plano...</p>
+                  <p className="text-xs text-[#6B6661]">O plano atual permanece visível</p>
+                </div>
+              </motion.div>
+            )}
+
+            {/* ── Guide Header ── */}
+            <div className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden">
+              <div className="bg-gradient-to-r from-[#FFBE98]/10 to-[#E6A07C]/5 px-5 py-4 border-b border-stone-100/50">
+                <p className="text-[10px] font-semibold text-[#FFBE98] uppercase tracking-wider mb-1">O seu guia de viagem</p>
                 <h2 className="text-xl font-bold text-[#2D2A26]" data-testid="plan-destination">{plan.destination}</h2>
-                <p className="text-sm text-[#6B6661] mt-1">{plan.dates}</p>
-                {plan.summary && <p className="text-sm text-[#2D2A26] mt-2 italic">{plan.summary}</p>}
+                <p className="text-sm text-[#6B6661] mt-0.5">{plan.dates}</p>
               </div>
-              {/* Action buttons */}
-              <div className="flex items-center justify-center gap-2 mt-4">
-                <button
-                  onClick={handleRegenerate}
-                  className="flex items-center gap-1.5 text-xs font-semibold text-[#6B6661] bg-stone-100 hover:bg-stone-200 px-3 py-2 rounded-lg transition-colors"
-                  data-testid="regenerate-btn"
-                >
-                  <RefreshCw className="w-3.5 h-3.5" />
-                  Gerar novo plano
-                </button>
-                <button
-                  onClick={handleCopy}
-                  className="flex items-center gap-1.5 text-xs font-semibold text-[#6B6661] bg-stone-100 hover:bg-stone-200 px-3 py-2 rounded-lg transition-colors"
-                  data-testid="copy-btn"
-                >
+              <div className="p-5 space-y-4">
+                {plan.summary && <p className="text-sm text-[#2D2A26] italic">{plan.summary}</p>}
+
+                {/* Weather overview */}
+                {plan.weather && (
+                  <div className="flex items-start gap-3 bg-amber-50/50 rounded-xl p-3">
+                    <Sun className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-xs font-bold text-[#2D2A26] mb-0.5">Clima esperado</p>
+                      <p className="text-xs text-[#6B6661] leading-relaxed">{plan.weather}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Packing summary */}
+                {plan.packing && (
+                  <div className="flex items-start gap-3 bg-violet-50/50 rounded-xl p-3">
+                    <Shirt className="w-4 h-4 text-violet-500 mt-0.5 shrink-0" />
+                    <div className="flex-1">
+                      <p className="text-xs font-bold text-[#2D2A26] mb-1.5">O que levar</p>
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-0.5">
+                        {plan.packing.clothing?.map((item, i) => (
+                          <p key={`c-${i}`} className="text-xs text-[#6B6661] flex items-center gap-1.5">
+                            <span className="w-1 h-1 bg-violet-400 rounded-full shrink-0" />{item}
+                          </p>
+                        ))}
+                        {plan.packing.essentials?.map((item, i) => (
+                          <p key={`e-${i}`} className="text-xs text-[#6B6661] flex items-center gap-1.5">
+                            <span className="w-1 h-1 bg-[#FFBE98] rounded-full shrink-0" />{item}
+                          </p>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Actions */}
+              <div className="px-5 pb-4 flex flex-wrap items-center gap-2">
+                <RefinePanel onSubmit={handleRefine} loading={refining} />
+                <button onClick={handleCopy} data-testid="copy-btn"
+                  className="flex items-center gap-1.5 text-xs font-semibold text-[#6B6661] bg-stone-100 hover:bg-stone-200 px-3 py-2 rounded-lg transition-colors">
                   {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
                   {copied ? 'Copiado!' : 'Copiar'}
                 </button>
-                <button
-                  onClick={handleShare}
-                  className="flex items-center gap-1.5 text-xs font-semibold text-[#6B6661] bg-stone-100 hover:bg-stone-200 px-3 py-2 rounded-lg transition-colors"
-                  data-testid="share-btn"
-                >
+                <button onClick={handleShare} data-testid="share-btn"
+                  className="flex items-center gap-1.5 text-xs font-semibold text-[#6B6661] bg-stone-100 hover:bg-stone-200 px-3 py-2 rounded-lg transition-colors">
                   <Share2 className="w-3.5 h-3.5" />
                   Partilhar
                 </button>
               </div>
             </div>
 
-            {/* ── 1. ITINERARY ── */}
-            <Section icon={Calendar} title="Roteiro dia a dia" defaultOpen={true} color="text-sky-500" testId="section-itinerary">
-              <div className="space-y-3">
+            {/* ── Day-by-day Itinerary ── */}
+            <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-5" data-testid="section-itinerary">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-9 h-9 bg-sky-50 rounded-xl flex items-center justify-center">
+                  <Calendar className="w-4.5 h-4.5 text-sky-500" />
+                </div>
+                <h3 className="font-bold text-[#2D2A26]">Roteiro dia a dia</h3>
+              </div>
+              <div className="space-y-4">
                 {plan.itinerary?.map((day, i) => (
                   <div key={i} className="border-l-2 border-[#FFBE98]/40 pl-3">
                     <p className="text-xs font-bold text-[#FFBE98]">Dia {day.day}</p>
@@ -492,119 +551,78 @@ const TravelPlanner = () => {
                   </div>
                 ))}
               </div>
-            </Section>
+            </div>
 
-            {/* CTA: After itinerary → accommodation */}
-            <ContextualCTA
-              icon={Hotel}
-              text="Ver alojamento recomendado"
-              label="Ver hotéis"
+            {/* CTA: After itinerary */}
+            <ContextualCTA icon={Hotel} text="Ver alojamento recomendado" label="Ver hotéis"
               sublabel="Cancelamento flexível na maioria das opções"
-              link={affiliateLinks.booking?.url}
-              platform="booking"
-              onTrack={trackClick}
-            />
+              link={affiliateLinks.booking?.url} platform="booking" onTrack={trackClick} />
 
-            {/* ── 2. BOOKING SECTION ── */}
+            {/* ── Booking Section ── */}
             <BookingSection links={affiliateLinks} onTrack={trackClick} />
 
-            {/* ── 3. WEATHER ── */}
-            <Section icon={Sun} title="Clima esperado" color="text-amber-500" testId="section-weather">
-              <p className="text-sm text-[#6B6661] leading-relaxed">{plan.weather}</p>
-            </Section>
-
-            {/* CTA: After weather → flights */}
-            <ContextualCTA
-              icon={Plane}
-              text="Ver voos disponíveis"
-              label="Ver voos"
+            {/* CTA: Flights */}
+            <ContextualCTA icon={Plane} text="Ver voos disponíveis" label="Ver voos"
               sublabel="Compare preços de centenas de companhias"
-              link={affiliateLinks.skyscanner?.url}
-              platform="skyscanner"
-              onTrack={trackClick}
-            />
+              link={affiliateLinks.skyscanner?.url} platform="skyscanner" onTrack={trackClick} />
 
-            {/* ── 4. PACKING ── */}
-            <Section icon={Shirt} title="O que levar" color="text-violet-500" testId="section-packing">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <p className="text-xs font-bold text-[#2D2A26] mb-1.5">Roupa</p>
-                  <ul className="space-y-1">
-                    {plan.packing?.clothing?.map((item, i) => (
-                      <li key={i} className="text-xs text-[#6B6661] flex items-center gap-1.5">
-                        <span className="w-1 h-1 bg-[#FFBE98] rounded-full" /> {item}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-[#2D2A26] mb-1.5">Essenciais</p>
-                  <ul className="space-y-1">
-                    {plan.packing?.essentials?.map((item, i) => (
-                      <li key={i} className="text-xs text-[#6B6661] flex items-center gap-1.5">
-                        <span className="w-1 h-1 bg-[#FFBE98] rounded-full" /> {item}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </Section>
-
-            {/* ── 5. CHECKLIST ── */}
-            <Section icon={ClipboardList} title="Checklist de viagem" color="text-emerald-500" testId="section-checklist">
-              <div className="space-y-3">
-                {plan.checklist && Object.entries(plan.checklist).map(([key, items]) => (
-                  <div key={key}>
-                    <p className="text-xs font-bold text-[#2D2A26] mb-1 capitalize">
-                      {key === 'documents' ? 'Documentos' : key === 'hygiene' ? 'Higiene' : 'Tecnologia'}
-                    </p>
-                    <ul className="space-y-0.5">
-                      {items?.map((item, i) => (
-                        <li key={i} className="text-xs text-[#6B6661] flex items-center gap-1.5">
-                          <span className="w-1 h-1 bg-emerald-400 rounded-full" /> {item}
-                        </li>
-                      ))}
-                    </ul>
+            {/* ── Checklist ── */}
+            {plan.checklist && (
+              <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-5" data-testid="section-checklist">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-9 h-9 bg-emerald-50 rounded-xl flex items-center justify-center">
+                    <ClipboardList className="w-4.5 h-4.5 text-emerald-500" />
                   </div>
-                ))}
+                  <h3 className="font-bold text-[#2D2A26]">Checklist de viagem</h3>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {Object.entries(plan.checklist).map(([key, items]) => (
+                    <div key={key} className="bg-stone-50/50 rounded-lg p-2.5">
+                      <p className="text-[10px] font-bold text-[#2D2A26] uppercase tracking-wide mb-1.5">
+                        {key === 'documents' ? 'Documentos' : key === 'hygiene' ? 'Higiene' : 'Tecnologia'}
+                      </p>
+                      {items?.map((item, i) => (
+                        <p key={i} className="text-xs text-[#6B6661] flex items-center gap-1.5 py-0.5">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-400 shrink-0" />{item}
+                        </p>
+                      ))}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </Section>
+            )}
 
-            {/* CTA: After checklist → eSIM */}
-            <ContextualCTA
-              icon={Wifi}
-              text="Comprar eSIM para a viagem"
-              label="Ver eSIM"
+            {/* CTA: eSIM */}
+            <ContextualCTA icon={Wifi} text="Comprar eSIM para a viagem" label="Ver eSIM"
               sublabel="Evite custos de roaming"
-              link={affiliateLinks.airalo?.url}
-              platform="airalo"
-              onTrack={trackClick}
-            />
+              link={affiliateLinks.airalo?.url} platform="airalo" onTrack={trackClick} />
 
-            {/* ── 6. LOCAL TIPS ── */}
-            <Section icon={Lightbulb} title="Dicas locais" color="text-teal-500" testId="section-local-tips">
-              <ul className="space-y-2">
-                {plan.local_tips?.map((tip, i) => (
-                  <li key={i} className="text-sm text-[#6B6661] flex items-start gap-2">
-                    <Lightbulb className="w-3.5 h-3.5 text-teal-400 mt-0.5 shrink-0" />
-                    {tip}
-                  </li>
-                ))}
-              </ul>
-            </Section>
+            {/* ── Local Tips ── */}
+            {plan.local_tips && plan.local_tips.length > 0 && (
+              <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-5" data-testid="section-local-tips">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-9 h-9 bg-teal-50 rounded-xl flex items-center justify-center">
+                    <Lightbulb className="w-4.5 h-4.5 text-teal-500" />
+                  </div>
+                  <h3 className="font-bold text-[#2D2A26]">Dicas locais</h3>
+                </div>
+                <ul className="space-y-2">
+                  {plan.local_tips.map((tip, i) => (
+                    <li key={i} className="text-sm text-[#6B6661] flex items-start gap-2">
+                      <Lightbulb className="w-3.5 h-3.5 text-teal-400 mt-0.5 shrink-0" />
+                      {tip}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
-            {/* CTA: After tips → activities */}
-            <ContextualCTA
-              icon={Compass}
-              text="Reservar atividades e experiências"
-              label="Descobrir"
+            {/* CTA: Activities */}
+            <ContextualCTA icon={Compass} text="Reservar atividades e experiências" label="Descobrir"
               sublabel="Tours, visitas guiadas e muito mais"
-              link={affiliateLinks.getyourguide?.url}
-              platform="getyourguide"
-              onTrack={trackClick}
-            />
+              link={affiliateLinks.getyourguide?.url} platform="getyourguide" onTrack={trackClick} />
 
-            {/* Footer disclaimer */}
+            {/* Footer */}
             <p className="text-center text-xs text-[#6B6661]/60 pt-2">
               Alguns dos links nesta página são de parceiros. Ao usar estes links,<br/>
               ajuda a 4Luis a continuar a apoiar viagens de sonho.
@@ -613,7 +631,6 @@ const TravelPlanner = () => {
         )}
       </div>
 
-      {/* Sticky Booking Bar */}
       <StickyBar links={affiliateLinks} onTrack={trackClick} visible={showStickyBar} />
     </div>
   );

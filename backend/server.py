@@ -6173,6 +6173,121 @@ Responde APENAS com um JSON valido com esta estrutura exata (sem markdown, sem `
         raise HTTPException(status_code=500, detail="Erro ao gerar plano de viagem")
 
 
+@api_router.post("/ai/travel-plan/refine")
+async def refine_travel_plan(request: Request):
+    """Refine an existing AI travel plan with additional user instructions"""
+    from emergentintegrations.llm.chat import LlmChat, UserMessage
+
+    api_key = os.environ.get("EMERGENT_LLM_KEY")
+    if not api_key:
+        raise HTTPException(status_code=500, detail="Chave de IA nao configurada")
+
+    data = await request.json()
+    destination = data.get("destination", "").strip()
+    start_date = data.get("start_date", "").strip()
+    end_date = data.get("end_date", "").strip()
+    trip_type = data.get("trip_type", "").strip()
+    previous_plan = data.get("previous_plan")
+    refinement = data.get("refinement", "").strip()
+
+    if not destination or not start_date or not end_date:
+        raise HTTPException(status_code=400, detail="Destino e datas sao obrigatorios")
+    if not previous_plan:
+        raise HTTPException(status_code=400, detail="Plano anterior e obrigatorio")
+    if not refinement:
+        raise HTTPException(status_code=400, detail="Instrucoes de ajuste sao obrigatorias")
+
+    # Rate limiting
+    user = None
+    try:
+        user = await get_current_user(request)
+    except Exception:
+        pass
+
+    user_key = user.user_id if user else request.client.host
+    now = datetime.now(timezone.utc)
+
+    if user_key in ai_travel_plan_cache:
+        requests_list = ai_travel_plan_cache[user_key]
+        requests_list = [t for t in requests_list if (now - datetime.fromisoformat(t)).total_seconds() < 3600]
+        ai_travel_plan_cache[user_key] = requests_list
+        if len(requests_list) >= 5:
+            raise HTTPException(status_code=429, detail="Limite de pedidos atingido. Tenta novamente dentro de 1 hora.")
+
+    trip_type_text = f"Tipo de viagem: {trip_type}. " if trip_type else ""
+    previous_plan_json = json.dumps(previous_plan, ensure_ascii=False)
+
+    prompt = f"""Tens um plano de viagem existente que o utilizador quer ajustar.
+
+Dados da viagem:
+Destino: {destination}
+Datas: {start_date} a {end_date}
+{trip_type_text}
+
+Plano atual:
+{previous_plan_json}
+
+O utilizador pediu o seguinte ajuste:
+"{refinement}"
+
+Gera uma versao melhorada do plano incorporando o pedido do utilizador. Mantém a mesma estrutura JSON.
+Responde APENAS com um JSON valido com esta estrutura exata (sem markdown, sem ```):
+{{
+  "destination": "{destination}",
+  "dates": "{start_date} a {end_date}",
+  "summary": "Resumo curto da viagem (1-2 frases)",
+  "itinerary": [
+    {{
+      "day": 1,
+      "title": "Titulo do dia",
+      "activities": ["Atividade 1", "Atividade 2", "Atividade 3"]
+    }}
+  ],
+  "weather": "Descricao do clima esperado durante as datas",
+  "packing": {{
+    "clothing": ["item1", "item2", "item3"],
+    "essentials": ["item1", "item2", "item3"]
+  }},
+  "checklist": {{
+    "documents": ["item1", "item2"],
+    "hygiene": ["item1", "item2"],
+    "tech": ["item1", "item2"]
+  }},
+  "local_tips": ["Dica 1", "Dica 2", "Dica 3", "Dica 4"]
+}}"""
+
+    chat = LlmChat(
+        api_key=api_key,
+        session_id=f"travel_refine_{uuid.uuid4().hex[:8]}",
+        system_message="Es um agente de viagens especialista. Ajusta planos de viagem com base no feedback do utilizador. Responde APENAS com JSON valido, sem markdown."
+    ).with_model("openai", "gpt-5.2")
+
+    try:
+        response = await chat.send_message(UserMessage(text=prompt))
+        clean = response.strip()
+        if clean.startswith("```"):
+            clean = clean.split("```")[1]
+            if clean.startswith("json"):
+                clean = clean[4:]
+            clean = clean.strip()
+
+        plan = json.loads(clean)
+
+        # Track rate limit
+        if user_key not in ai_travel_plan_cache:
+            ai_travel_plan_cache[user_key] = []
+        ai_travel_plan_cache[user_key].append(now.isoformat())
+
+        return {"plan": plan, "refined": True}
+    except json.JSONDecodeError:
+        logger.error(f"AI travel refine JSON parse error: {response[:500]}")
+        raise HTTPException(status_code=500, detail="Erro ao processar resposta da IA. Tente novamente.")
+    except Exception as e:
+        logger.error(f"AI travel refine error: {e}")
+        raise HTTPException(status_code=500, detail="Erro ao ajustar plano de viagem")
+
+
+
 # ==================== AFFILIATE SYSTEM ====================
 
 # Centralized affiliate links config — update URLs here when ready
