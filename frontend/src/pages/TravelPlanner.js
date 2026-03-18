@@ -298,39 +298,56 @@ const TravelPlanner = () => {
     const l = [`GUIA DE VIAGEM: ${plan.destination}`, `Datas: ${plan.dates}`];
     if (plan.summary) l.push(`\n${plan.summary}`);
     if (plan.weather) l.push(`\nClima: ${plan.weather}`);
-    if (plan.packing) { l.push('\nO que levar:'); plan.packing.clothing?.forEach(i => l.push(`  - ${i}`)); plan.packing.essentials?.forEach(i => l.push(`  - ${i}`)); }
+    if (plan.packing) {
+      l.push('\nO que levar:');
+      if (plan.packing.clothing?.length) { l.push('  Roupa:'); plan.packing.clothing.forEach(i => l.push(`    - ${i}`)); }
+      if (plan.packing.essentials?.length) { l.push('  Essenciais:'); plan.packing.essentials.forEach(i => l.push(`    - ${i}`)); }
+    }
     l.push('\n--- ROTEIRO ---');
     plan.itinerary?.forEach(d => { l.push(`\nDia ${d.day}: ${d.title}`); d.activities?.forEach(a => l.push(`  - ${a}`)); });
-    if (plan.checklist) { l.push('\n--- CHECKLIST ---'); Object.values(plan.checklist).flat().forEach(i => l.push(`  - ${i}`)); }
-    if (plan.local_tips) { l.push('\n--- DICAS ---'); plan.local_tips.forEach(t => l.push(`  - ${t}`)); }
-    l.push('\n\nGerado por 4Luis AI Travel Planner\nSonha connosco ✈️');
+    if (plan.checklist) {
+      l.push('\n--- CHECKLIST ---');
+      Object.entries(plan.checklist).forEach(([key, items]) => {
+        const label = key === 'documents' ? 'Documentos' : key === 'hygiene' ? 'Higiene' : 'Tecnologia';
+        l.push(`  ${label}:`);
+        items?.forEach(i => l.push(`    - ${i}`));
+      });
+    }
+    if (plan.local_tips?.length) { l.push('\n--- DICAS LOCAIS ---'); plan.local_tips.forEach(t => l.push(`  - ${t}`)); }
+    l.push('\n\nGerado por 4Luis AI Travel Planner\nSonho connosco ✈️');
     return l.join('\n');
   };
 
-  const buildShareText = () => {
-    if (!plan) return '';
-    const lines = [`Plano de viagem: ${plan.destination} (${plan.dates})`];
-    if (plan.summary) lines.push(plan.summary);
-    lines.push('');
-    plan.itinerary?.slice(0, 3).forEach(d => {
-      lines.push(`Dia ${d.day}: ${d.title}`);
-    });
-    if (plan.itinerary?.length > 3) lines.push(`...e mais ${plan.itinerary.length - 3} dias`);
-    lines.push('\nGerado por 4Luis AI Travel Planner\nSonha connosco ✈️');
-    return lines.join('\n');
+  const handleCopy = async () => {
+    const text = buildPlanText();
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+    } catch {
+      // Fallback for browsers without clipboard permission
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      setCopied(true);
+    }
+    setTimeout(() => setCopied(false), 2000);
   };
-
-  const handleCopy = () => { navigator.clipboard.writeText(buildPlanText()).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); }); };
   const handleShare = async () => {
     if (!plan) return;
-    const shareText = buildShareText();
+    const fullText = buildPlanText();
     if (navigator.share) {
       try {
-        await navigator.share({ title: `Viagem: ${plan.destination}`, text: shareText });
+        await navigator.share({ title: `Viagem: ${plan.destination}`, text: fullText });
+        return;
       } catch {}
-    } else {
-      navigator.clipboard.writeText(shareText).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
     }
+    // Fallback: copy to clipboard
+    await handleCopy();
   };
 
   return (

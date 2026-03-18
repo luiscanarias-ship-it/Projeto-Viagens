@@ -6056,6 +6056,14 @@ async def get_invite_page(alias: str):
 # Rate limiting: track requests per user
 ai_travel_plan_cache = {}
 
+
+@api_router.post("/ai/travel-plan/reset-limit")
+async def reset_travel_plan_limit():
+    """Reset rate limit cache (dev only)"""
+    ai_travel_plan_cache.clear()
+    return {"status": "cleared"}
+
+
 @api_router.post("/ai/travel-plan")
 async def generate_travel_plan(request: Request):
     """Generate an AI-powered travel plan"""
