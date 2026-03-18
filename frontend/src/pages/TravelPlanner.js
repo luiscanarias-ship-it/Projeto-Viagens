@@ -112,37 +112,60 @@ const StickyBar = ({ links, onTrack, visible }) => {
 };
 
 /* ── Refine Panel ── */
-const RefinePanel = ({ onSubmit, loading }) => {
+const RefinePanel = ({ onSubmit, loading, success }) => {
   const [open, setOpen] = useState(false);
   const [text, setText] = useState('');
   const inputRef = useRef(null);
   const handleOpen = () => { setOpen(true); setTimeout(() => inputRef.current?.focus(), 100); };
-  const handleSubmit = () => { if (!text.trim() || loading) return; onSubmit(text.trim()); setText(''); setOpen(false); };
+  const handleSubmit = () => {
+    if (!text.trim() || loading) return;
+    onSubmit(text.trim());
+    setText('');
+  };
+
+  // Close panel after successful refine
+  useEffect(() => {
+    if (success) {
+      const t = setTimeout(() => setOpen(false), 2000);
+      return () => clearTimeout(t);
+    }
+  }, [success]);
 
   return (
-    <div data-testid="refine-panel">
+    <div data-testid="refine-panel" className="w-full">
       {!open ? (
         <button onClick={handleOpen} data-testid="refine-btn"
           className="flex items-center gap-1.5 text-xs font-semibold text-[#6B6661] bg-stone-100 hover:bg-stone-200 px-3 py-2 rounded-lg transition-colors">
           <SlidersHorizontal className="w-3.5 h-3.5" />Ajustar plano
         </button>
       ) : (
-        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="overflow-hidden">
-          <div className="flex gap-2 items-end">
-            <div className="flex-1">
-              <label className="text-xs font-medium text-[#6B6661] mb-1 block">Quer acrescentar algo ao plano?</label>
-              <input ref={inputRef} type="text" value={text} onChange={e => setText(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && handleSubmit()}
-                placeholder="Ex: Adicionar mais restaurantes, evitar museus..."
-                className="w-full px-3 py-2 text-sm rounded-lg border border-stone-200 focus:border-[#FFBE98] focus:ring-1 focus:ring-[#FFBE98]/30 outline-none transition-all"
-                disabled={loading} data-testid="refine-input" />
+        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="overflow-hidden w-full">
+          {success ? (
+            <div className="flex items-center gap-2 text-xs font-semibold text-emerald-600 bg-emerald-50 px-3 py-2.5 rounded-lg" data-testid="refine-success">
+              <Check className="w-4 h-4" />Plano atualizado com sucesso!
             </div>
-            <button onClick={handleSubmit} disabled={!text.trim() || loading} data-testid="refine-submit"
-              className="flex items-center gap-1.5 bg-[#FFBE98] text-white text-xs font-semibold px-4 py-2.5 rounded-lg hover:bg-[#E6A07C] transition-colors disabled:opacity-50">
-              {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}Ajustar
-            </button>
-            <button onClick={() => { setOpen(false); setText(''); }} className="text-xs text-[#6B6661] hover:text-[#2D2A26] px-2 py-2.5">Cancelar</button>
-          </div>
+          ) : (
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-[#6B6661] block">Quer acrescentar algo ao plano?</label>
+              <div className="flex gap-2 items-center">
+                <input ref={inputRef} type="text" value={text} onChange={e => setText(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleSubmit()}
+                  placeholder="Ex: Adicionar mais restaurantes, evitar museus..."
+                  className="flex-1 px-3 py-2 text-sm rounded-lg border border-stone-200 focus:border-[#FFBE98] focus:ring-1 focus:ring-[#FFBE98]/30 outline-none transition-all"
+                  disabled={loading} data-testid="refine-input" />
+                <button onClick={handleSubmit} disabled={!text.trim() || loading} data-testid="refine-submit"
+                  className="flex items-center gap-1.5 bg-[#FFBE98] text-white text-xs font-semibold px-4 py-2.5 rounded-lg hover:bg-[#E6A07C] transition-colors disabled:opacity-50 whitespace-nowrap">
+                  {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                  {loading ? 'A ajustar...' : 'Ajustar'}
+                </button>
+                <button onClick={() => { setOpen(false); setText(''); }}
+                  className="text-xs text-[#6B6661] hover:text-[#2D2A26] px-2 py-2.5 whitespace-nowrap">Cancelar</button>
+              </div>
+              {loading && (
+                <p className="text-[10px] text-[#FFBE98] animate-pulse">A IA está a ajustar o plano...</p>
+              )}
+            </div>
+          )}
         </motion.div>
       )}
     </div>
@@ -174,6 +197,7 @@ const TravelPlanner = () => {
   const [tripTypes, setTripTypes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [refining, setRefining] = useState(false);
+  const [refineSuccess, setRefineSuccess] = useState(false);
   const [error, setError] = useState('');
   const [plan, setPlan] = useState(null);
   const [affiliateLinks, setAffiliateLinks] = useState({});
@@ -244,6 +268,8 @@ const TravelPlanner = () => {
   const handleRefine = async (refinement) => {
     if (!plan) return;
     setRefining(true);
+    setRefineSuccess(false);
+    setError('');
     try {
       const token = localStorage.getItem('token');
       const res = await axios.post(`${API}/ai/travel-plan/refine`, {
@@ -252,6 +278,10 @@ const TravelPlanner = () => {
         previous_plan: plan, refinement
       }, { headers: token ? { Authorization: `Bearer ${token}` } : {}, timeout: 60000 });
       setPlan(res.data.plan);
+      setRefineSuccess(true);
+      // Scroll to top of document
+      resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setTimeout(() => setRefineSuccess(false), 3000);
     } catch (err) {
       setError(err.response?.data?.detail || 'Erro ao ajustar plano. Tente novamente.');
     } finally { setRefining(false); }
@@ -370,11 +400,11 @@ const TravelPlanner = () => {
             {/* Refining overlay */}
             {refining && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                className="bg-[#FFBE98]/5 border border-[#FFBE98]/20 rounded-xl p-4 flex items-center gap-3 mb-3">
+                className="bg-[#FFBE98]/8 border border-[#FFBE98]/25 rounded-xl p-4 flex items-center gap-3 mb-3 shadow-sm">
                 <Loader2 className="w-5 h-5 animate-spin text-[#FFBE98]" />
                 <div>
-                  <p className="text-sm font-semibold text-[#2D2A26]">A ajustar o seu plano...</p>
-                  <p className="text-xs text-[#6B6661]">O plano atual permanece visível</p>
+                  <p className="text-sm font-semibold text-[#2D2A26]">A ajustar o seu plano com IA...</p>
+                  <p className="text-xs text-[#6B6661]">Isto pode demorar até 30 segundos. O plano será atualizado automaticamente.</p>
                 </div>
               </motion.div>
             )}
@@ -544,7 +574,7 @@ const TravelPlanner = () => {
 
               {/* ── Actions Footer ── */}
               <div className="px-5 py-4 border-t border-stone-100 flex flex-wrap items-center gap-2 bg-stone-50/30">
-                <RefinePanel onSubmit={handleRefine} loading={refining} />
+                <RefinePanel onSubmit={handleRefine} loading={refining} success={refineSuccess} />
                 <button onClick={handleCopy} data-testid="copy-btn"
                   className="flex items-center gap-1.5 text-xs font-semibold text-[#6B6661] bg-stone-100 hover:bg-stone-200 px-3 py-2 rounded-lg transition-colors">
                   {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
