@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   MapPin, Calendar, Compass, Sparkles, Loader2, ChevronDown, ChevronUp,
   Sun, Shirt, ClipboardList, Lightbulb, Hotel, Plane, Wifi,
-  ExternalLink, Star
+  ExternalLink, Star, RefreshCw, Copy, Share2, Check,
+  Globe, Ticket
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -18,14 +19,15 @@ const TRIP_TYPES = [
   { id: 'familia', label: 'Familia' }
 ];
 
-const Section = ({ icon: Icon, title, children, defaultOpen = false, color = 'text-[#FFBE98]' }) => {
+/* ── Collapsible Section ── */
+const Section = ({ icon: Icon, title, children, defaultOpen = false, color = 'text-[#FFBE98]', testId }) => {
   const [open, setOpen] = useState(defaultOpen);
   return (
     <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden shadow-sm">
       <button
         onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between p-4 text-left"
-        data-testid={`section-toggle-${title.toLowerCase().replace(/\s/g, '-')}`}
+        data-testid={testId || `section-toggle-${title.toLowerCase().replace(/\s/g, '-')}`}
       >
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 bg-stone-50 rounded-xl flex items-center justify-center">
@@ -52,41 +54,88 @@ const Section = ({ icon: Icon, title, children, defaultOpen = false, color = 'te
   );
 };
 
-const AffiliateBar = ({ links }) => {
-  const trackClick = (platform) => {
-    const token = localStorage.getItem('token');
-    axios.post(`${API}/affiliate-click`, { platform }, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {}
-    }).catch(() => {});
-  };
+/* ── Contextual CTA Block (inserted between sections) ── */
+const ContextualCTA = ({ icon: Icon, text, label, sublabel, link, platform, onTrack }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 8 }}
+    animate={{ opacity: 1, y: 0 }}
+    className="bg-gradient-to-r from-[#FFBE98]/8 to-[#E6A07C]/6 rounded-xl border border-[#FFBE98]/15 p-3.5 flex items-center gap-3"
+  >
+    <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center shadow-sm shrink-0">
+      <Icon className="w-4 h-4 text-[#FFBE98]" />
+    </div>
+    <div className="flex-1 min-w-0">
+      <p className="text-xs font-semibold text-[#2D2A26]">{text}</p>
+      {sublabel && <p className="text-[10px] text-[#6B6661] mt-0.5">{sublabel}</p>}
+    </div>
+    <a
+      href={link || '#'}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={() => onTrack(platform)}
+      data-testid={`cta-contextual-${platform}`}
+      className="shrink-0 flex items-center gap-1.5 bg-[#2D2A26] text-white text-xs font-semibold px-3 py-2 rounded-lg hover:bg-[#1a1816] transition-colors"
+    >
+      {label}
+      <ExternalLink className="w-3 h-3" />
+    </a>
+  </motion.div>
+);
 
+/* ── Enhanced Booking Section ── */
+const BookingSection = ({ links, onTrack }) => {
   const items = [
-    { id: 'booking', icon: Hotel, label: 'Reservar hotel' },
-    { id: 'skyscanner', icon: Plane, label: 'Ver voos' },
-    { id: 'getyourguide', icon: Compass, label: 'Atividades' },
-    { id: 'airalo', icon: Wifi, label: 'Comprar eSIM' }
+    { id: 'booking', icon: Hotel, label: 'Reservar alojamento', desc: 'Cancelamento flexivel na maioria', tag: 'Recomendado pela 4Luis', primary: true },
+    { id: 'skyscanner', icon: Plane, label: 'Pesquisar voos', desc: 'Compare centenas de opcoes', tag: 'Melhores precos', primary: true },
+    { id: 'getyourguide', icon: Ticket, label: 'Reservar atividades', desc: 'Tours e experiencias unicas', tag: 'Recomendado pela 4Luis', primary: false },
+    { id: 'airalo', icon: Wifi, label: 'Obter eSIM', desc: 'Internet sem roaming', tag: null, primary: false },
   ];
 
   return (
-    <div className="bg-gradient-to-r from-[#FFBE98]/10 to-[#E6A07C]/10 rounded-2xl border border-[#FFBE98]/20 p-4">
-      <div className="flex items-center gap-2 mb-3">
-        <Star className="w-3.5 h-3.5 text-[#FFBE98] fill-[#FFBE98]" />
-        <span className="text-xs font-bold text-[#FFBE98]">Reserve ja para esta viagem</span>
+    <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden shadow-sm" data-testid="booking-section">
+      <div className="p-4 pb-1">
+        <div className="flex items-center gap-3 mb-1">
+          <div className="w-9 h-9 bg-[#FFBE98]/10 rounded-xl flex items-center justify-center">
+            <Globe className="w-4.5 h-4.5 text-[#FFBE98]" />
+          </div>
+          <div>
+            <h3 className="font-bold text-[#2D2A26]">Reservar esta viagem</h3>
+            <p className="text-xs text-[#6B6661]">Tudo o que precisa para concretizar o seu plano</p>
+          </div>
+        </div>
       </div>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="px-4 pb-4 space-y-2">
         {items.map(item => (
           <a
             key={item.id}
             href={links[item.id]?.url || '#'}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={() => trackClick(item.id)}
-            data-testid={`affiliate-${item.id}`}
-            className="flex items-center gap-2 bg-white py-2 px-3 rounded-xl text-xs font-semibold text-[#2D2A26] hover:bg-stone-50 transition-colors border border-stone-100"
+            onClick={() => onTrack(item.id)}
+            data-testid={`booking-cta-${item.id}`}
+            className={`flex items-center gap-3 p-3 rounded-xl border transition-all group ${
+              item.primary 
+                ? 'border-[#FFBE98]/20 bg-[#FFBE98]/5 hover:bg-[#FFBE98]/10' 
+                : 'border-stone-100 bg-white hover:bg-stone-50'
+            }`}
           >
-            <item.icon className="w-3.5 h-3.5 text-[#6B6661]" />
-            {item.label}
-            <ExternalLink className="w-3 h-3 text-[#6B6661] ml-auto" />
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+              item.primary ? 'bg-white shadow-sm' : 'bg-stone-50'
+            }`}>
+              <item.icon className={`w-4 h-4 ${item.primary ? 'text-[#FFBE98]' : 'text-[#6B6661]'}`} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold text-[#2D2A26]">{item.label}</span>
+                {item.tag && (
+                  <span className="text-[9px] font-medium text-[#FFBE98] bg-[#FFBE98]/10 px-1.5 py-0.5 rounded-full whitespace-nowrap">
+                    {item.tag}
+                  </span>
+                )}
+              </div>
+              <p className="text-[11px] text-[#6B6661]">{item.desc}</p>
+            </div>
+            <ExternalLink className="w-3.5 h-3.5 text-[#6B6661] group-hover:text-[#FFBE98] transition-colors shrink-0" />
           </a>
         ))}
       </div>
@@ -94,6 +143,49 @@ const AffiliateBar = ({ links }) => {
   );
 };
 
+/* ── Sticky Booking Bar ── */
+const StickyBar = ({ links, onTrack, visible }) => {
+  const items = [
+    { id: 'booking', icon: Hotel, label: 'Hoteis' },
+    { id: 'skyscanner', icon: Plane, label: 'Voos' },
+    { id: 'getyourguide', icon: Ticket, label: 'Atividades' },
+  ];
+
+  return (
+    <AnimatePresence>
+      {visible && (
+        <motion.div
+          initial={{ y: 80, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: 80, opacity: 0 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+          className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-stone-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
+          data-testid="sticky-booking-bar"
+        >
+          <div className="max-w-2xl mx-auto px-4 py-2.5 flex items-center gap-2">
+            <span className="text-xs font-semibold text-[#6B6661] hidden sm:block whitespace-nowrap mr-1">Reservar:</span>
+            {items.map(item => (
+              <a
+                key={item.id}
+                href={links[item.id]?.url || '#'}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => onTrack(item.id)}
+                data-testid={`sticky-cta-${item.id}`}
+                className="flex-1 flex items-center justify-center gap-1.5 bg-[#2D2A26] text-white text-xs font-semibold py-2.5 px-3 rounded-xl hover:bg-[#1a1816] transition-colors"
+              >
+                <item.icon className="w-3.5 h-3.5" />
+                <span>{item.label}</span>
+              </a>
+            ))}
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
+/* ── Main Component ── */
 const TravelPlanner = () => {
   const [destination, setDestination] = useState('');
   const [startDate, setStartDate] = useState('');
@@ -103,6 +195,9 @@ const TravelPlanner = () => {
   const [error, setError] = useState('');
   const [plan, setPlan] = useState(null);
   const [affiliateLinks, setAffiliateLinks] = useState({});
+  const [copied, setCopied] = useState(false);
+  const [showStickyBar, setShowStickyBar] = useState(false);
+  const resultsRef = useRef(null);
 
   useEffect(() => {
     document.title = '4Luis — AI Travel Planner';
@@ -110,9 +205,29 @@ const TravelPlanner = () => {
     axios.get(`${API}/affiliate-links`).then(r => setAffiliateLinks(r.data)).catch(() => {});
   }, []);
 
+  // Show sticky bar when scrolled past results header
+  useEffect(() => {
+    if (!plan) { setShowStickyBar(false); return; }
+    const onScroll = () => {
+      if (resultsRef.current) {
+        const rect = resultsRef.current.getBoundingClientRect();
+        setShowStickyBar(rect.top < -100);
+      }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [plan]);
+
   const numDays = startDate && endDate
     ? Math.max(1, Math.ceil((new Date(endDate) - new Date(startDate)) / 86400000) + 1)
     : 0;
+
+  const trackClick = (platform) => {
+    const token = localStorage.getItem('token');
+    axios.post(`${API}/affiliate-click`, { platform }, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    }).catch(() => {});
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -136,6 +251,53 @@ const TravelPlanner = () => {
     }
   };
 
+  const handleRegenerate = () => {
+    setPlan(null);
+    setShowStickyBar(false);
+    setTimeout(() => {
+      handleSubmit({ preventDefault: () => {} });
+    }, 100);
+  };
+
+  const handleCopy = () => {
+    if (!plan) return;
+    const lines = [];
+    lines.push(`Plano de viagem: ${plan.destination}`);
+    lines.push(`Datas: ${plan.dates}`);
+    if (plan.summary) lines.push(`\n${plan.summary}`);
+    lines.push('\n--- ROTEIRO ---');
+    plan.itinerary?.forEach(day => {
+      lines.push(`\nDia ${day.day}: ${day.title}`);
+      day.activities?.forEach(a => lines.push(`  - ${a}`));
+    });
+    if (plan.weather) { lines.push('\n--- CLIMA ---'); lines.push(plan.weather); }
+    if (plan.packing) {
+      lines.push('\n--- O QUE LEVAR ---');
+      plan.packing.clothing?.forEach(i => lines.push(`  Roupa: ${i}`));
+      plan.packing.essentials?.forEach(i => lines.push(`  Essencial: ${i}`));
+    }
+    if (plan.local_tips) {
+      lines.push('\n--- DICAS LOCAIS ---');
+      plan.local_tips.forEach(t => lines.push(`  - ${t}`));
+    }
+    lines.push('\n\nGerado por 4Luis AI Travel Planner');
+
+    navigator.clipboard.writeText(lines.join('\n')).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  const handleShare = async () => {
+    if (!plan) return;
+    const text = `Plano de viagem para ${plan.destination} (${plan.dates}) - Gerado por 4Luis AI Travel Planner`;
+    if (navigator.share) {
+      try { await navigator.share({ title: `Viagem: ${plan.destination}`, text, url: window.location.href }); } catch {}
+    } else {
+      handleCopy();
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#FAFAF9]">
       {/* Hero */}
@@ -156,9 +318,9 @@ const TravelPlanner = () => {
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto px-6 pb-20">
+      <div className="max-w-2xl mx-auto px-6 pb-24">
         {/* Form */}
-        {!plan && (
+        {!plan && !loading && (
           <motion.form
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -250,19 +412,23 @@ const TravelPlanner = () => {
               className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               data-testid="generate-btn"
             >
-              {loading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  A gerar o teu plano...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-4 h-4" />
-                  Gerar plano de viagem
-                </>
-              )}
+              <Sparkles className="w-4 h-4" />
+              Gerar plano de viagem
             </button>
           </motion.form>
+        )}
+
+        {/* Loading State */}
+        {loading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="bg-white rounded-2xl border border-stone-100 p-10 shadow-sm text-center"
+          >
+            <Loader2 className="w-8 h-8 animate-spin text-[#FFBE98] mx-auto mb-4" />
+            <p className="text-sm font-semibold text-[#2D2A26]">A gerar o teu plano...</p>
+            <p className="text-xs text-[#6B6661] mt-1">Isto pode demorar ate 30 segundos</p>
+          </motion.div>
         )}
 
         {/* Results */}
@@ -271,23 +437,46 @@ const TravelPlanner = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="space-y-3"
+            ref={resultsRef}
           >
             {/* Summary header */}
-            <div className="bg-white rounded-2xl border border-stone-100 p-5 shadow-sm text-center">
-              <h2 className="text-xl font-bold text-[#2D2A26]" data-testid="plan-destination">{plan.destination}</h2>
-              <p className="text-sm text-[#6B6661] mt-1">{plan.dates}</p>
-              {plan.summary && <p className="text-sm text-[#2D2A26] mt-2 italic">{plan.summary}</p>}
-              <button
-                onClick={() => setPlan(null)}
-                className="mt-3 text-xs text-[#FFBE98] hover:underline"
-                data-testid="new-plan-btn"
-              >
-                Gerar novo plano
-              </button>
+            <div className="bg-white rounded-2xl border border-stone-100 p-5 shadow-sm">
+              <div className="text-center">
+                <h2 className="text-xl font-bold text-[#2D2A26]" data-testid="plan-destination">{plan.destination}</h2>
+                <p className="text-sm text-[#6B6661] mt-1">{plan.dates}</p>
+                {plan.summary && <p className="text-sm text-[#2D2A26] mt-2 italic">{plan.summary}</p>}
+              </div>
+              {/* Action buttons */}
+              <div className="flex items-center justify-center gap-2 mt-4">
+                <button
+                  onClick={handleRegenerate}
+                  className="flex items-center gap-1.5 text-xs font-semibold text-[#6B6661] bg-stone-100 hover:bg-stone-200 px-3 py-2 rounded-lg transition-colors"
+                  data-testid="regenerate-btn"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  Gerar novo plano
+                </button>
+                <button
+                  onClick={handleCopy}
+                  className="flex items-center gap-1.5 text-xs font-semibold text-[#6B6661] bg-stone-100 hover:bg-stone-200 px-3 py-2 rounded-lg transition-colors"
+                  data-testid="copy-btn"
+                >
+                  {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copied ? 'Copiado!' : 'Copiar'}
+                </button>
+                <button
+                  onClick={handleShare}
+                  className="flex items-center gap-1.5 text-xs font-semibold text-[#6B6661] bg-stone-100 hover:bg-stone-200 px-3 py-2 rounded-lg transition-colors"
+                  data-testid="share-btn"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                  Partilhar
+                </button>
+              </div>
             </div>
 
-            {/* Itinerary */}
-            <Section icon={Calendar} title="Roteiro dia a dia" defaultOpen={true} color="text-sky-500">
+            {/* ── 1. ITINERARY (most important, always open) ── */}
+            <Section icon={Calendar} title="Roteiro dia a dia" defaultOpen={true} color="text-sky-500" testId="section-itinerary">
               <div className="space-y-3">
                 {plan.itinerary?.map((day, i) => (
                   <div key={i} className="border-l-2 border-[#FFBE98]/40 pl-3">
@@ -305,13 +494,38 @@ const TravelPlanner = () => {
               </div>
             </Section>
 
-            {/* Weather */}
-            <Section icon={Sun} title="Clima esperado" color="text-amber-500">
+            {/* CTA: After itinerary → accommodation */}
+            <ContextualCTA
+              icon={Hotel}
+              text="Encontre alojamento para esta viagem"
+              label="Ver hoteis"
+              sublabel="Cancelamento flexivel na maioria das opcoes"
+              link={affiliateLinks.booking?.url}
+              platform="booking"
+              onTrack={trackClick}
+            />
+
+            {/* ── 2. BOOKING SECTION (enhanced) ── */}
+            <BookingSection links={affiliateLinks} onTrack={trackClick} />
+
+            {/* ── 3. WEATHER ── */}
+            <Section icon={Sun} title="Clima esperado" color="text-amber-500" testId="section-weather">
               <p className="text-sm text-[#6B6661] leading-relaxed">{plan.weather}</p>
             </Section>
 
-            {/* Packing */}
-            <Section icon={Shirt} title="O que levar" color="text-violet-500">
+            {/* CTA: After weather → flights */}
+            <ContextualCTA
+              icon={Plane}
+              text="Verifique voos para as suas datas"
+              label="Ver voos"
+              sublabel="Compare precos de centenas de companhias"
+              link={affiliateLinks.skyscanner?.url}
+              platform="skyscanner"
+              onTrack={trackClick}
+            />
+
+            {/* ── 4. PACKING ── */}
+            <Section icon={Shirt} title="O que levar" color="text-violet-500" testId="section-packing">
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <p className="text-xs font-bold text-[#2D2A26] mb-1.5">Roupa</p>
@@ -336,8 +550,8 @@ const TravelPlanner = () => {
               </div>
             </Section>
 
-            {/* Checklist */}
-            <Section icon={ClipboardList} title="Checklist de viagem" color="text-emerald-500">
+            {/* ── 5. CHECKLIST ── */}
+            <Section icon={ClipboardList} title="Checklist de viagem" color="text-emerald-500" testId="section-checklist">
               <div className="space-y-3">
                 {plan.checklist && Object.entries(plan.checklist).map(([key, items]) => (
                   <div key={key}>
@@ -356,8 +570,19 @@ const TravelPlanner = () => {
               </div>
             </Section>
 
-            {/* Local tips */}
-            <Section icon={Lightbulb} title="Dicas locais" color="text-teal-500">
+            {/* CTA: After checklist → eSIM */}
+            <ContextualCTA
+              icon={Wifi}
+              text="Dados moveis em viagem (eSIM)"
+              label="Ver eSIM"
+              sublabel="Evite custos de roaming"
+              link={affiliateLinks.airalo?.url}
+              platform="airalo"
+              onTrack={trackClick}
+            />
+
+            {/* ── 6. LOCAL TIPS ── */}
+            <Section icon={Lightbulb} title="Dicas locais" color="text-teal-500" testId="section-local-tips">
               <ul className="space-y-2">
                 {plan.local_tips?.map((tip, i) => (
                   <li key={i} className="text-sm text-[#6B6661] flex items-start gap-2">
@@ -368,11 +593,28 @@ const TravelPlanner = () => {
               </ul>
             </Section>
 
-            {/* Affiliate reservations */}
-            <AffiliateBar links={affiliateLinks} />
+            {/* CTA: After tips → activities */}
+            <ContextualCTA
+              icon={Compass}
+              text="Reserve atividades e experiencias"
+              label="Descobrir"
+              sublabel="Tours, visitas guiadas e muito mais"
+              link={affiliateLinks.getyourguide?.url}
+              platform="getyourguide"
+              onTrack={trackClick}
+            />
+
+            {/* Footer disclaimer */}
+            <p className="text-center text-xs text-[#6B6661]/60 pt-2">
+              Alguns dos links nesta pagina sao de parceiros. Ao usar estes links,<br/>
+              ajudas a 4Luis a continuar a apoiar viagens de sonho.
+            </p>
           </motion.div>
         )}
       </div>
+
+      {/* Sticky Booking Bar */}
+      <StickyBar links={affiliateLinks} onTrack={trackClick} visible={showStickyBar} />
     </div>
   );
 };

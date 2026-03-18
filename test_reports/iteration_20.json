@@ -62,7 +62,7 @@
     "frontend": "100% (all 30 tests passed)"
   },
   "test_credentials": {
-    "app_url": "https://travel-celebrate.preview.emergentagent.com",
+    "app_url": "https://travel-planner-boost.preview.emergentagent.com",
     "admin_credentials": "admin@4luis.com / Admin1"
   },
   "seed_data_creation": "4 ambassador journeys created by main agent: journey_santorini001 (Costa Amalfitana, 42%), journey_bali001 (Bali, 15%), journey_pamukkale001 (Pamukkale, 60%), journey_halong001 (Ha Long Bay, 75%)",

@@ -1,148 +1,130 @@
 <analysis>**original_problem_statement**:
-O utilizador iniciou a sessão com um pedido para destacar um botão. Subsequentemente, solicitou uma nova funcionalidade de momentos de prova para aumentar a confiança do utilizador, que consistia em adicionar pequenos elementos de prova social em várias partes da aplicação (homepage, página da viagem, checkout, e-mails).
+O utilizador iniciou a sessão com um pedido para corrigir um bug de scroll na página de detalhes do ticket de suporte. Após várias tentativas, o agente implementou uma correção, mas a verificação do utilizador ficou pendente.
 
-Depois disso, o utilizador aprovou um plano de várias fases que incluía:
-1.  Refatoração do backend.
-2.  Implementação de meta tags de SEO.
-3.  Adição de um botão de partilha.
-4.  Criação de um sistema de notificações in-app.
-
-Após a implementação destas funcionalidades, o utilizador reportou e solicitou a correção de vários problemas de usabilidade e layout na versão mobile da aplicação, que foram abordados um a um. O último pedido foi uma verificação sobre a funcionalidade de autosave em dispositivos móveis.
+Subsequentemente, o utilizador solicitou e supervisionou a implementação de várias funcionalidades e melhorias, incluindo:
+1.  **Segurança no Registo:** Adição de um campo de confirmação de senha, indicador de força e outras melhorias de UX.
+2.  **Consolidação do Modelo de Dados:** Adição do campo  ao modelo  e criação de um sistema de  para uso interno do administrador.
+3.  **Sistema de Pagamentos Completo:** Integração do PayPal Checkout (automático, com credenciais de sandbox e depois de produção) e otimização dos métodos de pagamento manuais existentes.
+4.  **Melhorias de UI/UX no Checkout:** Correção de múltiplos bugs de layout em dispositivos móveis no modal de contribuição e adição de elementos de confiança para aumentar a conversão.
+5.  **Conformidade com RGPD:** Implementação de um checkbox de consentimento obrigatório no registo, atualização da política de privacidade e do banner de cookies.
+6.  **Canal de Monetização:** Criação de uma página dedicada Planear Viagem com links de afiliados configuráveis e um endpoint de tracking de cliques.
+7.  **AI Travel Planner:** Implementação de uma nova ferramenta que utiliza um LLM para gerar planos de viagem com base nas entradas do utilizador, incluindo cache e rate limiting.
+8.  **Melhorias no AI Travel Planner:** O último pedido do utilizador foi para melhorar a ferramenta de planeamento de viagens recém-criada, adicionando CTAs contextuais, uma barra de reserva sticky e outras funcionalidades para aumentar o engagement e a conversão.
 
 **PRODUCT REQUIREMENTS (Latest):**
-1.  **Verificar Autosave no Mobile (P0):** O utilizador pediu para verificar se a funcionalidade de autosave para a criação/edição de viagens funciona corretamente na versão mobile.
-2.  **Implementar Celebração de 100% (P1):** Criar uma vista especial para quando uma viagem atinge 100% do financiamento (requisito pendente do PRD).
-3.  **Concluir Refatoração do Backend (P2):** Continuar a refatoração do backend, movendo os endpoints do ficheiro monolítico  para múltiplos ficheiros  modulares.
+1.  **Melhorar o AI Travel Planner (P0):** Implementar CTAs contextuais, uma barra de reserva sticky, reordenar secções, melhorar a secção de reservas e adicionar botões de Regenerar e Partilhar/Copiar.
+2.  **Verificar Bug de Scroll (P0):** O bug de scroll na página  foi reportado duas vezes e corrigido duas vezes pelo agente anterior, mas nunca foi confirmado pelo utilizador. A sua resolução final precisa ser verificada.
+3.  **Implementar Celebração de 100% (P1):** Criar uma vista especial para quando uma viagem atinge 100% do financiamento (requisito pendente do PRD).
+4.  **Concluir Refatoração do Backend (P2):** Continuar a refatoração do backend, movendo os endpoints do ficheiro monolítico  para múltiplos ficheiros  modulares.
 
 **User's preferred language**:
 Português. O próximo agente DEVE comunicar exclusivamente em português.
 
 **what currently exists?**
-Uma aplicação full-stack (React/FastAPI/MongoDB) de crowdfunding de viagens. As funcionalidades principais incluem criação e gestão de viagens, um painel de administração, sistema de suporte, testemunhos e rascunhos com autosave.
-
-Nesta sessão, foram adicionadas as seguintes funcionalidades e melhorias:
-*   **Momentos de Prova (Social Proof):** Foram integrados pequenos textos e contadores em toda a jornada do utilizador (homepage, detalhe da viagem, checkout, e-mails) para aumentar a confiança e o engajamento.
-*   **Página Sobre:** Foi criada uma nova página com a história da plataforma, juntamente com um bloco na homepage e um link no footer.
-*   **Melhorias de UI/UX na Homepage:** O header foi redesenhado para incluir um botão de destaque para a Viagem Principal, e vários elementos de layout foram ajustados para melhorar a visibilidade e a navegação.
-*   **Refatoração Parcial do Backend:** O código partilhado (configuração, modelos Pydantic, helpers de autenticação e serviço de e-mail) foi extraído do  para módulos dedicados (, , , ), reduzindo o tamanho do ficheiro principal em mais de 1000 linhas.
-*   **SEO e Partilha:** Foram adicionados títulos dinâmicos às páginas principais para SEO e um botão de partilha na página da viagem.
-*   **Notificações In-App:** Foi implementado um sistema de notificações com um ícone de sino no header para alertar os utilizadores sobre novas contribuições ou respostas de suporte.
-*   **Correções de Responsividade Mobile:** Foram corrigidos múltiplos problemas de layout, overflow e funcionalidade na versão mobile da aplicação, incluindo o menu de navegação, o modal de contribuição e a sobreposição de elementos fixos.
+Uma aplicação full-stack (React/FastAPI/MongoDB) de crowdfunding de viagens. As funcionalidades principais incluem autenticação de utilizadores (com validação de senha robusta e conformidade RGPD), criação e gestão de viagens, um painel de administração, sistema de suporte e um sistema de pagamentos funcional com PayPal (LIVE) e métodos manuais. Existem também canais de monetização através de uma página de afiliados Planear Viagem e um AI Travel Planner que gera roteiros de viagem.
 
 **Last working item**:
--   **Last item agent was working:** O utilizador questionou se a funcionalidade de autosave, implementada para os formulários de criação/edição de viagens, funcionava corretamente em dispositivos móveis. O agente investigou o código (, ), confirmou que a implementação usa  e sincronização com o servidor, e concluiu que é independente do dispositivo e deveria funcionar no mobile.
--   **Status:** USER VERIFICATION PENDING
--   **Agent Testing Done:** N (Apenas revisão de código. Não foi realizado um teste prático no ambiente mobile.)
--   **Which testing method agent to use?** O utilizador deve testar manualmente no seu dispositivo móvel para confirmar.
+-   **Last item agent was working:** O utilizador solicitou melhorias significativas no recém-criado AI Travel Planner para aumentar o engagement e a conversão de afiliados. O agente anterior implementou a versão inicial da ferramenta, mas ainda não começou a trabalhar nestas melhorias.
+-   **Status:** NOT STARTED
+-   **Agent Testing Done:** N
+-   **Which testing method agent to use?** Frontend testing agent (para a UI/UX, barra sticky e CTAs) e backend testing agent (para garantir que os links de afiliados e a lógica de partilha funcionam corretamente).
 -   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
-N/A
+-   **Issue 1:** Bug de scroll na página de detalhes do ticket de suporte.
+    -   **Attempted fixes:** O agente anterior tentou várias abordagens com , incluindo rastrear a contagem de mensagens e . A última tentativa envolveu um  para forçar o scroll após o carregamento dos dados. O agente acreditava que estava corrigido, mas o utilizador queixou-se que o problema persistia após a primeira correção e não confirmou a segunda.
+    -   **Next debug checklist:**
+        1.  Pedir ao utilizador para testar a funcionalidade no seu dispositivo, solicitando uma limpeza de cache (refresh forçado).
+        2.  Se o problema persistir, usar a ferramenta de screenshot para verificar o  imediatamente após a navegação para  a partir do dashboard.
+        3.  Verificar o ficheiro  e a sua interação com o  em  para possíveis conflitos.
+    -   **Why fix this issue and what will be achieved with the fix?** Corrigir isto irá resolver uma grande frustração do utilizador (reportada várias vezes) e melhorar a usabilidade do sistema de suporte.
+    -   **Status:** USER VERIFICATION PENDING
+    -   **Is recurring issue?** Y
+    -   **Should Test frontend/backend/both after fix?** Frontend
+    -   **Blocked on other issue:** N/A
 
 **In progress Task List**:
 N/A
 
 **Upcoming and Future Tasks**
 -   **Upcoming Tasks:**
-    -   **Implementar Celebração de Sonho 100% Financiado (P1):** Criar uma vista ou animação especial para quando uma viagem atinge 100% do seu objetivo de financiamento. Isto estava no PRD e ainda não foi implementado.
-    -   **Concluir Refatoração do Backend (P2):** Completar a refatoração do  movendo os endpoints para ficheiros  separados dentro de um diretório . A refatoração atual foi apenas parcial.
+    -   **(P0) Melhorar o AI Travel Planner:** Implementar os requisitos do último pedido do utilizador (Msg 478) no ficheiro .
+        -   Inserir blocos de CTA contextuais (Booking, GetYourGuide, Skyscanner) entre as secções do plano gerado.
+        -   Adicionar uma barra de CTA sticky que aparece após os resultados serem carregados.
+        -   Reordenar as secções para dar prioridade ao itinerário.
+        -   Adicionar botões Regenerar plano e Copiar/Partilhar.
+    -   **(P1) Implementar Celebração de Sonho 100% Financiado:** Criar uma vista ou animação especial quando uma viagem atinge 100% do seu objetivo.
+    -   **(P2) Concluir Refatoração do Backend:** Completar a refatoração de  movendo os endpoints para ficheiros  separados em .
 -   **Future Tasks:**
-    -   **Sistema de Gamificação (Pontos e Sorteios) (Backlog):** Implementar um sistema de gamificação para incentivar a participação dos utilizadores, conforme mencionado no PRD.
+    -   **(Backlog) Sistema de Gamificação (Pontos e Sorteios):** Implementar um sistema de gamificação para incentivar a participação dos utilizadores.
 
 **Completed work in this session**
--   **Melhoria Visual:** Botão Viagem Principal na homepage foi destacado.
--   **Feature: Momentos de Prova:** Implementado em , ,  e .
--   **Feature: Página Sobre:** Criada a página  e adicionados um bloco em  e um link em .
--   **Feature: Notificações In-App:** Adicionados endpoints em  e componente  no .
--   **Feature: SEO e Partilha:** Adicionados títulos dinâmicos em , ,  e componente .
--   **Refatoração Backend (Parcial):** Criados os ficheiros , , ,  e  foi atualizado para os usar.
--   **Correções de Navegação e Scroll:** Implementado  e corrigidos os offsets de scroll para os links do header em  e .
--   **Correções de UI/UX:** Múltiplas alterações em , , , e  para melhorar o layout geral e a experiência mobile.
+-   **Feature: Segurança no Registo:** Implementado em  (confirmação de senha, indicador de força, UX melhorada).
+-   **Feature: Consolidação de Dados:** Adicionado  aos modelos  e atualizado em . Criado modelo  e endpoints de admin.
+-   **Feature: Pagamentos com PayPal:** Integração completa (sandbox e produção) no  e .
+-   **Bug Fix: Layout do Modal de Checkout:** Corrigidos múltiplos problemas de responsividade em  (botão cortado, valores não visíveis, layout dos métodos de pagamento).
+-   **Feature: Elementos de Confiança no Checkout:** Adicionados badges e textos para aumentar a confiança em .
+-   **Feature: Conformidade com RGPD:** Implementado checkbox de consentimento em , atualizados  e .
+-   **Feature: Página de Afiliados Planear Viagem:** Criada a página  e os endpoints de backend  e .
+-   **Feature: AI Travel Planner (V1):** Criada a página  e o endpoint  com cache e rate limiting.
+-   **Bug Fix (Tentativa):** Múltiplas tentativas de correção do bug de scroll em .
 
 **Earlier issues found/mentioned but not fixed**
-Nenhum.
+-   O bug de scroll na página de detalhes do ticket de suporte () foi corrigido pelo agente, mas o utilizador reportou que o problema persistia. Uma segunda correção foi implementada, mas nunca foi verificada pelo utilizador, tornando-o um problema não resolvido de alta prioridade.
 
 **Known issue recurrence from previous fork**
-Nenhum.
+-   Nenhuma de um fork anterior, mas o bug de scroll em  recorreu dentro desta sessão após a primeira tentativa de correção.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Refatoração Parcial de Backend:** Extração de lógica partilhada (config, modelos, auth, email) de um ficheiro monolítico para módulos Python dedicados para melhorar a organização e manutenibilidade do código.
--   **Client-Side Scrolling in SPA:** Utilização de  com  para contornar problemas de timing com animações de menu, e uso de  para compensar a altura de headers fixos.
--   **Web Share API com Fallback:** Implementação do  para uma experiência de partilha nativa, com um fallback para copiar para o clipboard em browsers não compatíveis.
--   **CSS para Responsividade Mobile:** Uso intensivo de classes utilitárias do Tailwind CSS, media queries em CSS puro (), e técnicas como ,  responsivos, e  para corrigir problemas de layout em ecrãs pequenos.
+-   **Integração de Pagamentos com PayPal:** Uso do  no frontend e criação de endpoints no backend para  e  com o SDK do PayPal, suportando ambientes sandbox e live.
+-   **Integração com LLM:** Uso da biblioteca  para interagir com um modelo de linguagem (GPT-5.2) para gerar conteúdo estruturado (planos de viagem em JSON).
+-   **Cache e Rate Limiting no Backend:** Implementação de um cache em memória simples e rate limiting por IP para o endpoint do AI Planner para gerir custos e performance.
+-   **Validação de Formulários no Frontend:** Lógica complexa em tempo real no  para validar a força da senha, correspondência e consentimento, desativando o botão de submissão condicionalmente.
+-   **CSS Flexbox e Grid para Responsividade:** Uso intensivo de  e  para corrigir problemas de layout em ecrãs pequenos, especialmente no .
 
 **key DB schema**
--   ****: 
--   ****: 
--   ****: 
+-   ****:  (Campo adicionado)
+-   ****:  (Status 'pending', 'completed', 'failed' e  validados)
 -   ****:  (Nova coleção)
+-   ****:  (Nova coleção)
+-   ****:  (Nova coleção para cache)
 
 **changes in tech stack**
--   Nenhuma. Uma tentativa de usar  foi revertida devido a problemas de compatibilidade, optando-se por uma solução mais simples com  e .
+-   Adicionado  ao frontend.
+-   A integração com LLMs foi formalizada através do endpoint do AI Planner.
 
 **All files of reference**
--   : Refatorado para usar os novos módulos, e modificado para adicionar endpoints de notificação e triggers.
--   , , , : Ficheiros novos criados durante a refatoração.
--   : Modificado extensivamente para layout, prova social, e correções de scroll/responsividade.
--   : Modificado para adicionar o novo botão Viagem Principal, o sino de notificações e corrigir a navegação no menu mobile.
--   : Modificado extensivamente para melhorar o layout e a usabilidade no mobile.
--   : Modificado para adicionar prova social, botão de partilha e SEO.
--   : Ficheiro novo para a página Sobre.
--   : Ficheiro novo para corrigir o comportamento de scroll na navegação.
--   : Modificado com CSS para ajustar o badge Made with Emergent em dispositivos móveis.
+-   : Adicionados múltiplos endpoints (PayPal, Offers, Affiliate, AI Planner).
+-   : Modificado para o novo sistema de registo.
+-   : Modificado extensivamente para a integração do PayPal e correções de UI/UX.
+-   : Ficheiro central do bug de scroll recorrente.
+-   : Novo ficheiro para a página de afiliados.
+-   : Novo ficheiro para o AI Travel Planner.
 
 **Areas that need refactoring**:
--   ****: A refatoração está incompleta. O ficheiro ainda contém todos os endpoints da API e tem mais de 5700 linhas. A próxima etapa crítica é mover os endpoints para s em um diretório .
--   ****: Este componente tornou-se muito grande e complexo, com lógica para múltiplos passos e muitos estilos condicionais. Poderia ser dividido em subcomponentes para cada passo do checkout para melhorar a legibilidade.
+-   ****: A refatoração continua a ser a principal dívida técnica. O ficheiro cresceu significativamente e precisa urgentemente de ser dividido em s.
+-   ****: Apesar das correções, este componente é extremamente grande e complexo, gerindo múltiplos passos, estados e lógicas de pagamento. Deveria ser dividido em subcomponentes.
 
 **key api endpoints**
--   **Notifications (Novos):**
-    -   : Obtém as notificações do utilizador.
-    -   : Marca as notificações como lidas.
--   **Outros:** Endpoints de rascunhos, suporte, testemunhos, etc., permanecem funcionais.
+-   : Cria uma ordem de pagamento no PayPal.
+-   : Captura um pagamento aprovado pelo utilizador.
+-   , , etc.: CRUD para o sistema de ofertas.
+-   : Obtém a lista de links de afiliados.
+-   : Rastreia um clique num link de afiliado.
+-   : Gera um plano de viagem com IA.
 
 **Critical Info for New Agent**
--   A principal dívida técnica é a refatoração incompleta do backend. Propor a conclusão desta tarefa (mover rotas para ) deve ser uma alta prioridade.
--   O utilizador é muito atento aos detalhes de UI/UX, especialmente na versão mobile, e é sensível ao custo (créditos). As soluções devem ser precisas e eficientes. Teste sempre as alterações visuais em viewports mobile.
--   O último pedido do utilizador foi uma pergunta sobre o funcionamento do autosave no mobile. O agente deve começar por confirmar se a explicação dada foi suficiente e se o utilizador conseguiu verificar o funcionamento.
+-   O utilizador é muito sensível ao uso de créditos e fica frustrado com bugs recorrentes. A resolução definitiva do bug de scroll deve ser uma prioridade para ganhar a confiança do utilizador.
+-   A integração com o PayPal está **em modo de produção (LIVE)**. Tenha cuidado ao testar.
+-   A tarefa mais imediata é implementar as melhorias no AI Travel Planner, conforme o último pedido do utilizador. Comece por aí.
+-   Não se esqueça das tarefas pendentes de longo prazo, como a refatoração do backend e a funcionalidade de celebração, e proponha-as quando apropriado.
 
 **documents and test reports created in this job**
--    (atualizado)
--    (último relatório, com 100% de sucesso nos testes de features).
+-    (atualizado consistentemente)
+-    (último relatório de teste, relacionado com a integração do PayPal).
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **Msg 540:** Pergunta se o autosave funciona na versão mobile. (Pendente de verificação pelo utilizador)
-2.  **Msg 525:** Pedido de ajuste de estilo no modal de contribuição (adicionar estrela a piscar e destacar Mais popular). (Concluído)
-3.  **Msg 520:** Reporta que o texto no modal de contribuição ainda está cortado ou incompleto. (Concluído)
-4.  **Msg 515:** Sugere layout de 2 linhas para as descrições no modal de contribuição. (Concluído)
-5.  **Msg 508:** Reporta que o texto nos botões de valor no modal de contribuição está a transbordar. (Concluído)
-6.  **Msg 489:** Reporta que o botão Continuar no modal de contribuição não é visível em ecrãs mobile. (Concluído)
-7.  **Msg 478:** Reclama que a correção para o badge Made with Emergent não funcionou. (Concluído)
-8.  **Msg 465:** Reporta que o badge Made with Emergent tapa a sticky bar no mobile. (Concluído)
-9.  **Msg 458:** Reporta que os links no menu mobile não estão a funcionar corretamente. (Concluído)
-10. **Msg 397:** Reporta que a homepage não está legível no mobile devido a problemas de proporção e texto cortado. (Concluído)
-
-**Project Health Check:**
--   **Broken:** Nenhum.
--   **Mocked:** A secção Planeia a tua viagem na página de detalhe da viagem continua com dados estáticos.
-
-**3rd Party Integrations**
--   **Emergent LLM Key ():** Usada para geração de conteúdo por IA.
--   **Google OAuth:** Para login/registo de utilizadores.
--   **Resend:** Para envio de e-mails transacionais.
--   **Emergent Object Storage:** Usado para upload de anexos nos tickets de suporte.
-
-**Testing status**
--   **Testing agent used after significant changes:** YES. Foi executado com sucesso após a implementação em lote da refatoração, SEO, partilha e notificações.
--   **Troubleshoot agent used after agent stuck in loop:** NO.
--   **Test files created:** Relatórios de teste em , sendo  o mais recente.
--   **Known regressions:** Nenhuma.
-
-**Credentials to test flow:**
--   **Admin:**  / 
-
-**What agent forgot to execute**
--   A refatoração do backend foi apenas parcial. O plano original de mover os endpoints para s não foi totalmente executado, sendo uma tarefa importante pendente.</analysis>
+1.  **Msg 478 (PENDING):** Pedido de melhorias para o AI Travel Planner (CTAs contextuais, barra sticky, regener</analysis>
