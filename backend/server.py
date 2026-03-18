@@ -6049,6 +6049,70 @@ async def get_invite_page(alias: str):
 
 
 
+# ==================== AFFILIATE SYSTEM ====================
+
+# Centralized affiliate links config — update URLs here when ready
+AFFILIATE_LINKS = {
+    "skyscanner":   {"name": "Skyscanner",      "url": "https://www.skyscanner.pt", "category": "flights"},
+    "booking":      {"name": "Booking.com",      "url": "https://www.booking.com",   "category": "hotels"},
+    "hotels":       {"name": "Hotels.com",       "url": "https://www.hotels.com",    "category": "hotels"},
+    "getyourguide": {"name": "GetYourGuide",     "url": "https://www.getyourguide.com", "category": "activities"},
+    "cars":         {"name": "DiscoverCars",     "url": "https://www.discovercars.com", "category": "transport"},
+    "airalo":       {"name": "Airalo",           "url": "https://www.airalo.com",    "category": "esim"},
+    "holafly":      {"name": "Holafly",          "url": "https://www.holafly.com",   "category": "esim"},
+    "insurance":    {"name": "IATI Seguros",     "url": "https://www.iatiseguros.com", "category": "insurance"},
+    "googlemaps":   {"name": "Google Maps",      "url": "https://maps.google.com",   "category": "map"},
+}
+
+@api_router.get("/affiliate-links")
+async def get_affiliate_links():
+    """Public endpoint — returns affiliate links config for frontend"""
+    return {k: {"url": v["url"], "name": v["name"]} for k, v in AFFILIATE_LINKS.items()}
+
+@api_router.post("/affiliate-click")
+async def track_affiliate_click(request: Request):
+    """Track affiliate link clicks for analytics"""
+    data = await request.json()
+    platform = data.get("platform")
+    if not platform or platform not in AFFILIATE_LINKS:
+        raise HTTPException(status_code=400, detail="Plataforma invalida")
+    
+    user = None
+    try:
+        user = await get_current_user(request)
+    except Exception:
+        pass
+    
+    click_doc = {
+        "click_id": f"click_{uuid.uuid4().hex[:12]}",
+        "platform": platform,
+        "category": AFFILIATE_LINKS[platform]["category"],
+        "user_id": user.user_id if user else None,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.affiliate_clicks.insert_one(click_doc)
+    
+    return {"status": "tracked"}
+
+@api_router.get("/admin/affiliate-stats")
+async def get_affiliate_stats(request: Request):
+    """Admin endpoint — affiliate click analytics"""
+    await require_admin(request)
+    
+    pipeline = [
+        {"$group": {"_id": "$platform", "clicks": {"$sum": 1}}},
+        {"$sort": {"clicks": -1}}
+    ]
+    stats = await db.affiliate_clicks.aggregate(pipeline).to_list(100)
+    total = sum(s["clicks"] for s in stats)
+    
+    return {
+        "total_clicks": total,
+        "by_platform": {s["_id"]: s["clicks"] for s in stats}
+    }
+
+
+
 # ==================== OFFERS SYSTEM (ADMIN ONLY) ====================
 
 @api_router.get("/admin/offers")

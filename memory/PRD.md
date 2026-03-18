@@ -6,101 +6,88 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 ## Architecture & Tech Stack
 - **Frontend**: React 18 + Tailwind CSS + Framer Motion + @paypal/react-paypal-js
 - **Backend**: FastAPI (Python 3.11)
-- **Database**: MongoDB (collections: users, journeys, contributions, support_tickets, testimonials, drafts, offers)
-- **Payments**: PayPal Checkout (sandbox), Crypto, MBWay, Revolut, Wise, Stripe
+- **Database**: MongoDB (collections: users, journeys, contributions, support_tickets, testimonials, drafts, offers, affiliate_clicks)
+- **Payments**: PayPal Checkout (live), Crypto, MBWay, Revolut, Wise, Stripe
 - **Email**: Resend (mail@4luis.com)
 - **Auth**: JWT + Google OAuth
 - **Translation**: OpenAI GPT-5.2 via Emergent LLM Key
 - **Object Storage**: Emergent Object Storage
 
-## DB Schema
-
-### Users
-- user_id (PK), email (unique), password_hash, is_admin (role), name, surname
-- total_contributed (default 0, updated on contribution confirm)
-- level (sonhador/embaixador), sponsor_id, valid_referrals_count
-- contributed_to_main_trip, created_at, registered_at
-
-### Journeys
-- journey_id (PK), name, description, goal_amount, current_amount (default 0)
-- status (ativa/completed), target_date, is_active, is_main_trip, created_at
-
-### Contributions
-- contribution_id (PK), user_id (FK), journey_id (FK), amount
-- payment_method (paypal/mbway/revolut/wise/crypto)
-- status (pending/confirmed/completed/failed/rejected)
-- paypal_order_id (for PayPal), payment_reference (for manual), created_at
-
-### Offers (admin only)
-- offer_id (PK), user_id (FK), type (voucher/parceiro)
-- description, status (pending/sent), created_at
-
 ## What's Been Implemented
 
-### Sistema de Pagamentos Completo (2026-03-18)
+### Pagina Planear Viagem + Afiliados (2026-03-18)
+- Pagina /plan-trip com 7 seccoes (Voos, Alojamento, Atividades, Transporte, eSIM, Seguro, Mapa)
+- Links afiliados configuraveis centralizados no backend (AFFILIATE_LINKS dict)
+- Tracking de cliques: POST /api/affiliate-click + GET /api/admin/affiliate-stats
+- Navegacao: link no header desktop e mobile
+
+### Conformidade RGPD (2026-03-18)
+- Checkbox obrigatorio no registo com link para politica
+- Politica de Privacidade atualizada (PayPal, afiliados, cookies)
+- Banner de cookies com mensagem completa
+
+### Elementos de Confianca no Checkout (2026-03-18)
+- Badge "Recomendado" + "Pagamento seguro" + "Nao partilhamos os teus dados bancarios"
+
+### PayPal Live (2026-03-18)
+- Credenciais live configuradas, ordens reais criadas com sucesso
+
+### Sistema de Pagamentos (2026-03-18)
 - PayPal Checkout SDK: create-order, capture-order, confirmacao automatica
-- Frontend: botao PayPal SDK no step 2, metodos manuais separados
-- Backend: GET /api/paypal/config, POST /api/paypal/create-order, POST /api/paypal/capture-order/{id}
-- Idempotencia no capture (evita duplicacao)
-- Atualizacao automatica: contribution confirmed, journey.current_amount, user.total_contributed
-- Progressao embaixador funciona com PayPal
-- Notificacao + email enviados apos pagamento
+- Metodos manuais mantidos: MBWay, Revolut, Wise, Crypto
 
 ### Consolidacao Logica de Negocio (2026-03-18)
-- Campo total_contributed no User (modelo, registo, 3 pontos de confirmacao + PayPal)
-- Migracao de 12 users existentes
-- Tabela Offers com CRUD admin (GET, POST, PATCH, DELETE)
+- Campo total_contributed no User + Tabela Offers CRUD admin
 
 ### Sistema de Senha no Registo (2026-03-18)
-- Campos Senha + Confirmar senha com validacao em tempo real
-- Indicador de forca, botao mostrar/ocultar, micro-copy
+- Confirmar senha, indicador forca, mostrar/ocultar
 
-### Bug Fix: Scroll do Ticket de Suporte (2026-03-17)
-- Corrigido scroll que levava ao final da conversa ao abrir ticket
+### Bug Fix: Scroll Ticket (2026-03-17)
+- Corrigido scroll ao abrir ticket de suporte
 
-### Anteriores (2026-03-17 e antes)
-- Sistema de testemunhos, melhorias suporte V2, momentos de prova social
-- Pagina sobre, refatoracao backend parcial, SEO e meta tags
-- Botao de partilha, notificacoes in-app, autosave dual-layer
-- Suporte completo, preview emails, sistema confianca, paginas legais
+### Anteriores
+- Testemunhos, suporte V2, prova social, pagina sobre, refatoracao parcial, SEO, partilha, notificacoes, autosave
 
 ## Key API Endpoints
 
+### Affiliates
+- GET /api/affiliate-links (public, returns all links config)
+- POST /api/affiliate-click {platform} (tracks click)
+- GET /api/admin/affiliate-stats (admin analytics)
+
 ### PayPal
-- GET /api/paypal/config (client_id + mode)
-- POST /api/paypal/create-order {amount, journey_id}
+- GET /api/paypal/config
+- POST /api/paypal/create-order
 - POST /api/paypal/capture-order/{order_id}
 
-### Manual Contributions
-- POST /api/contributions/create {amount, payment_method, journey_id}
-- GET /api/contributions/payment-info
-
 ### Offers (Admin)
-- GET /api/admin/offers
-- POST /api/admin/offers
-- PATCH /api/admin/offers/:id
-- DELETE /api/admin/offers/:id
+- CRUD: GET/POST /api/admin/offers, PATCH/DELETE /api/admin/offers/:id
 
-### Core
-- GET /api/journeys, GET /api/journeys/:id
-- GET /api/my-contributions
-- POST /api/admin/contributions/:id/confirm
-- POST /api/admin/contributions/:id/validate
+## Affiliate Links (Placeholder — to replace)
+- skyscanner: https://www.skyscanner.pt
+- booking: https://www.booking.com
+- hotels: https://www.hotels.com
+- getyourguide: https://www.getyourguide.com
+- cars: https://www.discovercars.com
+- airalo: https://www.airalo.com
+- holafly: https://www.holafly.com
+- insurance: https://www.iatiseguros.com
+- googlemaps: https://maps.google.com
 
 ## Prioritized Backlog
 
 ### P1
 - Celebracao especial quando viagem atinge 100%
+- Substituir links placeholder por links de afiliado reais
 
 ### P2
-- Completar refatoracao do backend (mover endpoints para APIRouters em backend/routes/)
+- Completar refatoracao do backend (APIRouters)
 
 ### Backlog
-- Sistema de gamificacao (pontos e sorteios)
-- Mudar PayPal de sandbox para producao
+- Sistema de gamificacao
 - Notificacoes push/email
 
 ## Credentials
 - **Admin**: admin@4luis.com / Admin1
 - **Resend sender**: mail@4luis.com
-- **PayPal**: Sandbox mode (credentials in backend/.env)
+- **PayPal**: Live mode (credentials in backend/.env)

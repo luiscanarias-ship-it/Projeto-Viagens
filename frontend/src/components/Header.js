@@ -103,6 +103,13 @@ const Header = () => {
             >
               Viagens dos outros<br />sonhadores
             </Link>
+            <Link 
+              to="/plan-trip" 
+              className="text-[#2D2A26] hover:text-[#FFBE98] transition-colors font-medium text-sm"
+              data-testid="nav-plan-trip"
+            >
+              Planear Viagem
+            </Link>
             
             {user && (
               <Link 
@@ -307,6 +314,14 @@ const Header = () => {
               >
                 Viagens dos outros sonhadores
               </button>
+              <Link
+                to="/plan-trip"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block py-3 text-[#2D2A26] font-medium"
+                data-testid="mobile-nav-plan-trip"
+              >
+                Planear Viagem
+              </Link>
               {user && (
                 <Link
                   to="/dashboard"
