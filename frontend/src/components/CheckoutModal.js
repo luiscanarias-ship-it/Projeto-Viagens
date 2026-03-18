@@ -2,8 +2,9 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, Check, Copy, Bitcoin, Smartphone, ExternalLink,
-  Wallet, CreditCard, ArrowRight, QrCode, Heart, Sparkles
+  Wallet, CreditCard, ArrowRight, QrCode, Heart, Sparkles, ShieldCheck
 } from 'lucide-react';
+import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 import QRCode from 'qrcode';
 import axios from 'axios';
 import ShareMenu, { buildInviteLink } from './ShareMenu';
@@ -80,13 +81,6 @@ const paymentMethodsConfig = {
     icon: CreditCard,
     username: '@luisc8030',
     link: 'https://wise.com/pay/me/luisc8030'
-  },
-  paypal: {
-    id: 'paypal',
-    name: 'PayPal',
-    icon: ExternalLink,
-    username: 'LuisCanarias',
-    link: 'https://paypal.me/LuisCanarias'
   }
 };
 
@@ -118,6 +112,11 @@ const CheckoutModal = ({
   const [cryptoURI, setCryptoURI] = useState(null);
   const [qrImageUrl, setQrImageUrl] = useState(null);
   const [nonCryptoQrUrl, setNonCryptoQrUrl] = useState(null);
+
+  // PayPal state
+  const [paypalClientId, setPaypalClientId] = useState(null);
+  const [paypalProcessing, setPaypalProcessing] = useState(false);
+  const [paypalError, setPaypalError] = useState(null);
 
   // Fetch crypto prices from CoinGecko
   const fetchCryptoPrices = useCallback(async () => {
@@ -157,9 +156,15 @@ const CheckoutModal = ({
       setCryptoURI(null);
       setQrImageUrl(null);
       setNonCryptoQrUrl(null);
+      setPaypalProcessing(false);
+      setPaypalError(null);
     } else {
       // Fetch crypto prices when modal opens
       fetchCryptoPrices();
+      // Fetch PayPal config
+      axios.get(`${API}/paypal/config`).then(res => {
+        setPaypalClientId(res.data.client_id);
+      }).catch(() => {});
     }
   }, [isOpen, fetchCryptoPrices]);
 
@@ -258,8 +263,6 @@ const CheckoutModal = ({
     if (!method) return '';
     
     switch (methodId) {
-      case 'paypal':
-        return `${method.link}/${selectedAmount}EUR`;
       case 'revolut':
         return method.link;
       case 'wise':
@@ -528,7 +531,82 @@ const CheckoutModal = ({
                     </div>
                   </div>
 
-                  <p className="text-sm text-[#6B6661]">Escolhe o método de pagamento:</p>
+                  <p className="text-sm text-[#6B6661]">Escolhe o metodo de pagamento:</p>
+
+                  {/* PayPal - Automatic payment (primary) */}
+                  {paypalClientId && (
+                    <div className="border-2 border-[#0070BA]/40 rounded-xl overflow-hidden" data-testid="paypal-section">
+                      <div className="bg-[#0070BA]/5 px-3 py-2 flex items-center gap-2 border-b border-[#0070BA]/10">
+                        <ShieldCheck className="w-4 h-4 text-[#0070BA]" />
+                        <span className="text-xs font-semibold text-[#0070BA]">Pagamento automatico e seguro</span>
+                      </div>
+                      <div className="p-3">
+                        {paypalError && (
+                          <p className="text-xs text-red-500 mb-2">{paypalError}</p>
+                        )}
+                        <PayPalScriptProvider options={{ 
+                          clientId: paypalClientId, 
+                          currency: "EUR",
+                          intent: "capture"
+                        }}>
+                          <PayPalButtons
+                            style={{ layout: "horizontal", height: 45, tagline: false, label: "pay" }}
+                            disabled={paypalProcessing}
+                            forceReRender={[selectedAmount, journeyId]}
+                            createOrder={async () => {
+                              setPaypalProcessing(true);
+                              setPaypalError(null);
+                              try {
+                                const res = await axios.post(`${API}/paypal/create-order`, {
+                                  amount: selectedAmount,
+                                  journey_id: journeyId,
+                                  contributor_name: user?.name || null,
+                                  contributor_email: user?.email || null
+                                }, {
+                                  headers: getAuthHeaders ? getAuthHeaders() : {}
+                                });
+                                return res.data.paypal_order_id;
+                              } catch (err) {
+                                setPaypalError(err.response?.data?.detail || 'Erro ao criar ordem PayPal');
+                                setPaypalProcessing(false);
+                                throw err;
+                              }
+                            }}
+                            onApprove={async (data) => {
+                              try {
+                                const res = await axios.post(`${API}/paypal/capture-order/${data.orderID}`, {}, {
+                                  headers: getAuthHeaders ? getAuthHeaders() : {}
+                                });
+                                setContribution(res.data);
+                                setShowConfirmation(true);
+                              } catch (err) {
+                                setPaypalError(err.response?.data?.detail || 'Erro ao capturar pagamento');
+                              } finally {
+                                setPaypalProcessing(false);
+                              }
+                            }}
+                            onError={(err) => {
+                              setPaypalError('Erro no pagamento PayPal. Tente novamente.');
+                              setPaypalProcessing(false);
+                            }}
+                            onCancel={() => {
+                              setPaypalProcessing(false);
+                            }}
+                          />
+                        </PayPalScriptProvider>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Divider */}
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-stone-200"></div>
+                    </div>
+                    <div className="relative flex justify-center text-xs">
+                      <span className="px-3 bg-white text-[#6B6661]">ou metodo manual</span>
+                    </div>
+                  </div>
 
                   {/* Payment methods */}
                   <div className="space-y-2">
@@ -788,26 +866,6 @@ const CheckoutModal = ({
                           </a>
                         </div>
                       )}
-
-                      {/* PayPal */}
-                      {selectedMethod === 'paypal' && methodData && (
-                        <div className="space-y-2">
-                          <div className="bg-white border border-stone-200 rounded-xl p-3">
-                            <p className="text-xs text-[#6B6661] mb-1">Enviar para:</p>
-                            <p className="text-lg font-bold text-[#2D2A26]">{methodData.username}</p>
-                            <p className="text-xs text-[#6B6661] mt-1">paypal.me/{methodData.username}/{selectedAmount}</p>
-                          </div>
-                          <a
-                            href={`${methodData.link}/${selectedAmount}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="w-full py-2.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-emerald-700 transition-colors"
-                          >
-                            <ExternalLink className="w-3.5 h-3.5" />
-                            Abrir PayPal (€{selectedAmount})
-                          </a>
-                        </div>
-                      )}
                     </div>
                   )}
 
@@ -860,18 +918,25 @@ const CheckoutModal = ({
                     <h3 className="text-xl font-bold text-[#2D2A26]" data-testid="thank-you-title">
                       Acabaste de ajudar este sonho a ganhar forma.
                     </h3>
-                    <p className="text-sm text-[#6B6661] mt-2">
-                      Obrigado. A tua contribuição foi registada<br />
-                      e será confirmada assim que o pagamento for recebido.
-                    </p>
+                    {contribution?.status === 'COMPLETED' ? (
+                      <p className="text-sm text-green-600 mt-2 font-medium">
+                        Pagamento confirmado automaticamente via PayPal.<br />
+                        Obrigado pelo teu apoio de {contribution.amount}EUR!
+                      </p>
+                    ) : (
+                      <p className="text-sm text-[#6B6661] mt-2">
+                        Obrigado. A tua contribuicao foi registada<br />
+                        e sera confirmada assim que o pagamento for recebido.
+                      </p>
+                    )}
                     <p className="text-xs text-[#FFBE98] mt-3 italic" data-testid="post-contrib-proof">
-                      Cada contribuição aproxima este sonho da realidade.
+                      Cada contribuicao aproxima este sonho da realidade.
                     </p>
                   </div>
 
-                  {contribution && (
+                  {contribution?.payment_reference && (
                     <div className="bg-stone-50 rounded-xl p-3 inline-block">
-                      <p className="text-xs text-[#6B6661]">Referência:</p>
+                      <p className="text-xs text-[#6B6661]">Referencia:</p>
                       <p className="font-bold text-lg">{contribution.payment_reference}</p>
                     </div>
                   )}

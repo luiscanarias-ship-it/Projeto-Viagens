@@ -25,6 +25,12 @@ STRIPE_SONHADOR_PRICE_ID = "price_1T1sngEBabTiQNkcaNBfBaHR"
 STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET', '')
 stripe.api_key = STRIPE_API_KEY
 
+# PayPal Config
+PAYPAL_CLIENT_ID = os.environ.get('PAYPAL_CLIENT_ID', '')
+PAYPAL_SECRET = os.environ.get('PAYPAL_SECRET', '')
+PAYPAL_MODE = os.environ.get('PAYPAL_MODE', 'sandbox')
+PAYPAL_API_URL = "https://api-m.sandbox.paypal.com" if PAYPAL_MODE == "sandbox" else "https://api-m.paypal.com"
+
 # Resend Email Config
 RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '')
 SENDER_EMAIL = os.environ.get('SENDER_EMAIL', 'onboarding@resend.dev')

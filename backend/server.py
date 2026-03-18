@@ -15,7 +15,8 @@ from config import (
     db, client, logger, JWT_SECRET, JWT_ALGORITHM, ADMIN_PASSWORD, ADMIN_EMAIL,
     STRIPE_API_KEY, STRIPE_SONHADOR_PRICE_ID, STRIPE_WEBHOOK_SECRET, FRONTEND_URL,
     FIXED_CONTRIBUTION_AMOUNTS, PAYMENT_METHODS, CRYPTO_TYPES, JOURNEY_STATUSES,
-    TICKET_TYPES, TICKET_STATUSES, TICKET_PRIORITIES
+    TICKET_TYPES, TICKET_STATUSES, TICKET_PRIORITIES,
+    PAYPAL_CLIENT_ID, PAYPAL_SECRET, PAYPAL_API_URL, PAYPAL_MODE
 )
 from models import (
     UserBase, UserCreate, UserLogin, User, Journey, JourneyCreate, JourneyUpdate,
@@ -489,6 +490,251 @@ async def get_stripe_config():
     """Get Stripe publishable key for frontend"""
     publishable_key = os.environ.get("STRIPE_PUBLISHABLE_KEY", "")
     return {"publishable_key": publishable_key}
+
+# ==================== PAYPAL CHECKOUT ====================
+
+async def get_paypal_access_token():
+    """Get PayPal OAuth2 access token"""
+    import base64
+    auth_str = base64.b64encode(f"{PAYPAL_CLIENT_ID}:{PAYPAL_SECRET}".encode()).decode()
+    async with httpx.AsyncClient() as client_http:
+        resp = await client_http.post(
+            f"{PAYPAL_API_URL}/v1/oauth2/token",
+            headers={
+                "Authorization": f"Basic {auth_str}",
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            data="grant_type=client_credentials"
+        )
+        if resp.status_code != 200:
+            logger.error(f"PayPal auth failed: {resp.text}")
+            raise HTTPException(status_code=500, detail="Erro ao autenticar com PayPal")
+        return resp.json()["access_token"]
+
+@api_router.get("/paypal/config")
+async def get_paypal_config():
+    """Get PayPal client ID for frontend SDK"""
+    return {"client_id": PAYPAL_CLIENT_ID, "mode": PAYPAL_MODE}
+
+@api_router.post("/paypal/create-order")
+async def paypal_create_order(request: Request):
+    """Create a PayPal order for a contribution"""
+    data = await request.json()
+    amount = data.get("amount")
+    journey_id = data.get("journey_id")
+    
+    if amount not in FIXED_CONTRIBUTION_AMOUNTS:
+        raise HTTPException(status_code=400, detail=f"Montante invalido: {FIXED_CONTRIBUTION_AMOUNTS}")
+    
+    journey = await db.journeys.find_one({"journey_id": journey_id, "is_active": True}, {"_id": 0})
+    if not journey:
+        raise HTTPException(status_code=404, detail="Viagem nao encontrada ou inativa")
+    
+    user = await get_current_user(request)
+    user_id = user.user_id if user else None
+    contributor_name = data.get("contributor_name") or (user.name if user else None)
+    contributor_email = data.get("contributor_email") or (user.email if user else None)
+    sponsor_code = data.get("sponsor_code")
+    
+    # Create contribution as pending
+    contribution_id = f"contrib_{uuid.uuid4().hex[:12]}"
+    payment_reference = generate_payment_reference()
+    while await db.contributions.find_one({"payment_reference": payment_reference}):
+        payment_reference = generate_payment_reference()
+    
+    # Get PayPal access token and create order
+    access_token = await get_paypal_access_token()
+    
+    order_payload = {
+        "intent": "CAPTURE",
+        "purchase_units": [{
+            "reference_id": contribution_id,
+            "description": f"Contribuicao 4Luis - {journey.get('name', 'Viagem')}",
+            "amount": {
+                "currency_code": "EUR",
+                "value": f"{amount:.2f}"
+            }
+        }]
+    }
+    
+    async with httpx.AsyncClient() as client_http:
+        resp = await client_http.post(
+            f"{PAYPAL_API_URL}/v2/checkout/orders",
+            headers={
+                "Authorization": f"Bearer {access_token}",
+                "Content-Type": "application/json"
+            },
+            json=order_payload
+        )
+        if resp.status_code not in (200, 201):
+            logger.error(f"PayPal create order failed: {resp.text}")
+            raise HTTPException(status_code=500, detail="Erro ao criar ordem PayPal")
+        
+        paypal_order = resp.json()
+    
+    # Save contribution with PayPal order ID
+    contribution_doc = {
+        "contribution_id": contribution_id,
+        "journey_id": journey_id,
+        "user_id": user_id,
+        "amount": amount,
+        "currency": "EUR",
+        "payment_method": "paypal",
+        "payment_reference": payment_reference,
+        "paypal_order_id": paypal_order["id"],
+        "status": "pending",
+        "is_main_trip": journey.get("is_main_trip", False),
+        "sponsor_link_id": sponsor_code,
+        "contributor_name": contributor_name,
+        "contributor_email": contributor_email,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.contributions.insert_one(contribution_doc)
+    
+    return {
+        "paypal_order_id": paypal_order["id"],
+        "contribution_id": contribution_id,
+        "status": "CREATED"
+    }
+
+@api_router.post("/paypal/capture-order/{order_id}")
+async def paypal_capture_order(order_id: str, request: Request):
+    """Capture a PayPal order after user approval — marks contribution as completed"""
+    # Find the contribution by paypal_order_id
+    contribution = await db.contributions.find_one(
+        {"paypal_order_id": order_id},
+        {"_id": 0}
+    )
+    if not contribution:
+        raise HTTPException(status_code=404, detail="Contribuicao nao encontrada")
+    
+    # Idempotency: if already completed, return success
+    if contribution["status"] in ("completed", "confirmed"):
+        return {
+            "status": "ALREADY_CAPTURED",
+            "contribution_id": contribution["contribution_id"],
+            "message": "Pagamento ja confirmado"
+        }
+    
+    # Capture the PayPal order
+    access_token = await get_paypal_access_token()
+    
+    async with httpx.AsyncClient() as client_http:
+        resp = await client_http.post(
+            f"{PAYPAL_API_URL}/v2/checkout/orders/{order_id}/capture",
+            headers={
+                "Authorization": f"Bearer {access_token}",
+                "Content-Type": "application/json"
+            }
+        )
+        if resp.status_code not in (200, 201):
+            logger.error(f"PayPal capture failed: {resp.text}")
+            # Mark as failed
+            await db.contributions.update_one(
+                {"paypal_order_id": order_id},
+                {"$set": {"status": "failed"}}
+            )
+            raise HTTPException(status_code=500, detail="Erro ao capturar pagamento PayPal")
+        
+        capture_data = resp.json()
+    
+    if capture_data.get("status") != "COMPLETED":
+        await db.contributions.update_one(
+            {"paypal_order_id": order_id},
+            {"$set": {"status": "failed", "paypal_response": capture_data.get("status")}}
+        )
+        raise HTTPException(status_code=400, detail=f"PayPal status: {capture_data.get('status')}")
+    
+    contribution_id = contribution["contribution_id"]
+    journey_id = contribution["journey_id"]
+    amount = contribution["amount"]
+    user_id = contribution.get("user_id")
+    
+    # Update contribution to completed
+    await db.contributions.update_one(
+        {"contribution_id": contribution_id},
+        {"$set": {
+            "status": "confirmed",
+            "confirmed": True,
+            "confirmed_at": datetime.now(timezone.utc).isoformat(),
+            "validated_by": "paypal_capture",
+            "paypal_capture_id": capture_data.get("id")
+        }}
+    )
+    
+    # Update journey current_amount
+    await db.journeys.update_one(
+        {"journey_id": journey_id},
+        {"$inc": {"current_amount": amount}}
+    )
+    
+    # Update user total_contributed
+    if user_id:
+        await db.users.update_one(
+            {"user_id": user_id},
+            {"$inc": {"total_contributed": amount}}
+        )
+    
+    # Check if journey reached goal
+    await check_and_update_journey_funding_status(journey_id)
+    await check_and_update_story_chapter(journey_id)
+    
+    # Process ambassador progression
+    if user_id:
+        user_doc = await db.users.find_one({"user_id": user_id}, {"_id": 0})
+        if user_doc:
+            main_journey = await db.journeys.find_one(
+                {"is_active": True, "$or": [{"is_main_trip": True}, {"status": "ativa"}]},
+                {"_id": 0}
+            )
+            is_main = main_journey and journey_id == main_journey.get("journey_id")
+            if is_main:
+                await db.users.update_one(
+                    {"user_id": user_id},
+                    {"$set": {"contributed_to_main_trip": True}}
+                )
+                valid_refs = user_doc.get("valid_referrals_count", 0)
+                if valid_refs >= 3 and user_doc.get("level") != "embaixador":
+                    await db.users.update_one(
+                        {"user_id": user_id},
+                        {"$set": {"level": "embaixador", "embaixador_unlocked_at": datetime.now(timezone.utc).isoformat()}}
+                    )
+                    asyncio.create_task(send_ambassador_unlocked_email(user_id))
+            
+            # Process sponsor referral
+            if user_doc.get("sponsor_id"):
+                sponsor_id = user_doc["sponsor_id"]
+                await db.users.update_one({"user_id": sponsor_id}, {"$inc": {"valid_referrals_count": 1}})
+                sponsor = await db.users.find_one({"user_id": sponsor_id}, {"_id": 0})
+                if sponsor and sponsor.get("contributed_to_main_trip") and sponsor.get("valid_referrals_count", 0) >= 3 and sponsor.get("level") != "embaixador":
+                    await db.users.update_one(
+                        {"user_id": sponsor_id},
+                        {"$set": {"level": "embaixador", "embaixador_unlocked_at": datetime.now(timezone.utc).isoformat()}}
+                    )
+                    asyncio.create_task(send_ambassador_unlocked_email(sponsor_id))
+        
+        # Send notification
+        journey_name = (await db.journeys.find_one({"journey_id": journey_id}, {"_id": 0, "name": 1})) or {}
+        await create_notification(
+            user_id,
+            "Pagamento PayPal confirmado",
+            f"A tua contribuicao de {amount}EUR para {journey_name.get('name', 'esta viagem')} foi confirmada automaticamente.",
+            f"/journey/{journey_id}",
+            "contribution"
+        )
+    
+    # Send confirmation email
+    journey_doc = await db.journeys.find_one({"journey_id": journey_id}, {"_id": 0})
+    updated_contribution = await db.contributions.find_one({"contribution_id": contribution_id}, {"_id": 0})
+    if journey_doc and updated_contribution:
+        asyncio.create_task(send_contribution_email(updated_contribution, journey_doc))
+    
+    return {
+        "status": "COMPLETED",
+        "contribution_id": contribution_id,
+        "amount": amount,
+        "message": "Pagamento confirmado com sucesso"
+    }
 
 @api_router.get("/journeys/{journey_id}/contributions")
 async def get_journey_public_contributions(journey_id: str):
