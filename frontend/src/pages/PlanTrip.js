@@ -162,7 +162,7 @@ const PlanTrip = () => {
                 </p>
                 <button
                   onClick={() => navigate('/travel-planner')}
-                  className="inline-flex items-center gap-2 bg-[#2D2A26] text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-[#1a1816] transition-colors"
+                  className="w-full flex items-center justify-center gap-2 bg-[#2D2A26] text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-[#1a1816] transition-colors"
                   data-testid="ai-planner-cta-btn"
                 >
                   <Sparkles className="w-4 h-4" />
