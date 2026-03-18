@@ -500,45 +500,30 @@ const CheckoutModal = ({
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
-                  className="space-y-4"
+                  className="space-y-3"
                 >
-                  {/* Selected amount summary */}
-                  <div className="flex items-center justify-between bg-stone-50 rounded-xl p-3">
-                    <div>
-                      <p className="text-xs text-[#6B6661]">Contribuição:</p>
-                      <p className="font-bold text-lg text-[#2D2A26]">€{selectedAmount}</p>
+                  {/* Selected amount + payment label in one line */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm text-[#6B6661]">Metodo de pagamento para</p>
+                      <span className="font-bold text-[#2D2A26]">€{selectedAmount}</span>
                     </div>
                     <button
                       onClick={goToStep1}
-                      className="text-sm text-[#FFBE98] hover:underline"
+                      className="text-xs text-[#FFBE98] hover:underline"
                     >
-                      Alterar valor
+                      Alterar
                     </button>
                   </div>
-
-                  <p className="text-center text-sm text-[#6B6661] italic leading-relaxed" data-testid="motivational-text">
-                    Mesmo uma pequena contribuição<br />ajuda este sonho a ganhar forma.
-                  </p>
-
-                  {/* Micro-testimonial - social proof at critical moment */}
-                  <div className="flex items-start gap-2.5 bg-stone-50/80 rounded-xl p-3 border border-stone-100" data-testid="micro-testimonial">
-                    <span className="text-[#FFBE98] text-lg leading-none mt-0.5">"</span>
-                    <div>
-                      <p className="text-xs text-[#2D2A26] italic leading-relaxed">Contribuí em menos de 1 minuto</p>
-                      <p className="text-[10px] text-[#6B6661] mt-1">— João</p>
-                    </div>
-                  </div>
-
-                  <p className="text-sm text-[#6B6661]">Escolhe o metodo de pagamento:</p>
 
                   {/* PayPal - Automatic payment (primary) */}
                   {paypalClientId && (
                     <div className="border-2 border-[#0070BA]/40 rounded-xl overflow-hidden" data-testid="paypal-section">
-                      <div className="bg-[#0070BA]/5 px-3 py-2 flex items-center gap-2 border-b border-[#0070BA]/10">
-                        <ShieldCheck className="w-4 h-4 text-[#0070BA]" />
-                        <span className="text-xs font-semibold text-[#0070BA]">Pagamento automatico e seguro</span>
+                      <div className="bg-[#0070BA]/5 px-3 py-1.5 flex items-center gap-2 border-b border-[#0070BA]/10">
+                        <ShieldCheck className="w-3.5 h-3.5 text-[#0070BA]" />
+                        <span className="text-[11px] font-semibold text-[#0070BA]">Pagamento automatico e seguro</span>
                       </div>
-                      <div className="p-3">
+                      <div className="px-3 py-2">
                         {paypalError && (
                           <p className="text-xs text-red-500 mb-2">{paypalError}</p>
                         )}
@@ -548,7 +533,7 @@ const CheckoutModal = ({
                           intent: "capture"
                         }}>
                           <PayPalButtons
-                            style={{ layout: "horizontal", height: 45, tagline: false, label: "pay" }}
+                            style={{ layout: "horizontal", height: 40, tagline: false, label: "pay" }}
                             disabled={paypalProcessing}
                             forceReRender={[selectedAmount, journeyId]}
                             createOrder={async () => {
