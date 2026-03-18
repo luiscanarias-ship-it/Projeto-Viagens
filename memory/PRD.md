@@ -27,8 +27,11 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - Botoes: Gerar novo plano, Copiar para clipboard, Partilhar (Web Share API)
 - Responsivo em mobile (375px+)
 
-### Pagina Planear Viagem + Afiliados (2026-03-18)
-- /plan-trip com 7 seccoes, links configuraveis centralizados, tracking cliques
+### Pagina Planear Viagem + Afiliados (2026-03-18, melhorado 2026-03-18)
+- /plan-trip com 7 seccoes reordenadas (Hotels>Flights>Activities>Cars>eSIM>Insurance>Map)
+- Integracao AI Planner no topo com CTA destacado
+- Links configuraveis centralizados, tracking cliques
+- Textos corrigidos para portugues europeu com acentos
 
 ### PayPal Live + Sistema Pagamentos (2026-03-18)
 - PayPal Checkout SDK live, metodos manuais mantidos

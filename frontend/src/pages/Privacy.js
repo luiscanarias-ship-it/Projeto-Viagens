@@ -11,21 +11,21 @@ export default function Privacy() {
           data-testid="privacy-back-link"
         >
           <ArrowLeft className="w-4 h-4" />
-          Voltar ao inicio
+          Voltar ao início
         </Link>
 
-        <h1 className="text-3xl font-bold text-[#2D2A26] mb-2">Politica de Privacidade</h1>
-        <p className="text-sm text-[#6B6661] mb-8">Ultima atualizacao: Fevereiro 2026</p>
+        <h1 className="text-3xl font-bold text-[#2D2A26] mb-2">Política de Privacidade</h1>
+        <p className="text-sm text-[#6B6661] mb-8">Última atualização: Fevereiro 2026</p>
 
         <div className="bg-white rounded-2xl p-8 shadow-sm space-y-8 text-[#6B6661] leading-relaxed">
           <p>
-            A 4Luis respeita a privacidade dos seus utilizadores e compromete-se a proteger os dados pessoais de acordo com o Regulamento Geral de Protecao de Dados (RGPD).
+            A 4Luis respeita a privacidade dos seus utilizadores e compromete-se a proteger os dados pessoais de acordo com o Regulamento Geral de Proteção de Dados (RGPD).
           </p>
 
           <section>
             <h2 className="text-lg font-bold text-[#2D2A26] mb-3">1. Quem somos</h2>
             <p>
-              A 4Luis e uma plataforma digital de CrowdDreaming, onde utilizadores podem apoiar sonhos de viagem e acompanhar a evolucao desses sonhos atraves de uma comunidade de sonhadores.
+              A 4Luis é uma plataforma digital de CrowdDreaming, onde utilizadores podem apoiar sonhos de viagem e acompanhar a evolução desses sonhos através de uma comunidade de sonhadores.
             </p>
           </section>
 
