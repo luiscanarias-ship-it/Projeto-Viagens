@@ -119,7 +119,7 @@ const PlanTrip = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#FAFAF9]">
+    <div className="min-h-screen bg-[#F5F3F0]">
       {/* Hero */}
       <div className="bg-gradient-to-b from-[#FFBE98]/12 to-transparent pt-28 pb-14 px-6">
         <div className="max-w-2xl mx-auto text-center">
@@ -146,11 +146,11 @@ const PlanTrip = () => {
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative overflow-hidden rounded-2xl border border-[#FFBE98]/35 bg-gradient-to-br from-[#FFBE98]/14 via-[#FFF5EE] to-[#E6A07C]/8 shadow-[0_2px_16px_rgba(255,190,152,0.12)] mb-8"
+          className="relative overflow-hidden rounded-2xl border border-[#F2CBB7] bg-[#FFF1E8] shadow-[0_10px_30px_rgba(0,0,0,0.06)] mb-8"
           data-testid="ai-planner-cta"
         >
-          <div className="absolute top-0 right-0 w-48 h-48 bg-[#FFBE98]/6 rounded-full -translate-y-1/2 translate-x-1/3" />
-          <div className="absolute bottom-0 left-0 w-32 h-32 bg-[#E6A07C]/5 rounded-full translate-y-1/2 -translate-x-1/4" />
+          <div className="absolute top-0 right-0 w-48 h-48 bg-[#FFBE98]/8 rounded-full -translate-y-1/2 translate-x-1/3" />
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-[#E6A07C]/6 rounded-full translate-y-1/2 -translate-x-1/4" />
           <div className="relative p-6 sm:p-8">
             <div className="flex items-start gap-4">
               <div className="w-12 h-12 bg-white/80 rounded-xl flex items-center justify-center shrink-0 shadow-sm border border-[#FFBE98]/15">
@@ -190,7 +190,7 @@ const PlanTrip = () => {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: (idx + 1) * 0.04 }}
-              className="bg-white rounded-2xl border border-stone-200/60 overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.04)] transition-all duration-250 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-stone-300/60"
+              className="bg-white rounded-2xl border border-stone-200/70 overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.05)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_12px_35px_rgba(0,0,0,0.10)] hover:border-[#E6D5C8]"
               data-testid={`section-${section.id}`}
             >
             <div className="p-5">
