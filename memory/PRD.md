@@ -16,9 +16,11 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 ## What's Been Implemented
 
 ### AI Travel Planner (2026-03-18, melhorado 2026-03-18)
-- POST /api/ai/travel-plan (GPT-5.2, structured JSON response)
+- POST /api/ai/travel-plan (GPT-5.2, structured JSON response, aceita trip_type string ou array)
 - POST /api/ai/travel-plan/refine (ajustar plano com feedback do utilizador)
-- Guia unificado: Clima + Packing no header, Roteiro, Checklist, Dicas locais separados
+- Multi-select tipo de viagem (Cultural, Aventura, Passeio, Gastronomica, Romantica, Familia)
+- Documento unificado com tabs: Guia (clima+packing+booking), Roteiro, Checklist, Dicas
+- Seccoes ocultaveis com persistencia em localStorage
 - Funcionalidade "Ajustar plano": input inline para refinamento iterativo
 - Botoes: Copiar para clipboard, Partilhar (Web Share API)
 - CTAs contextuais entre seccoes (Booking, Skyscanner, Airalo, GetYourGuide)
