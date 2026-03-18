@@ -606,30 +606,21 @@ const CheckoutModal = ({
                     </div>
                   </div>
 
-                  {/* Payment methods */}
-                  <div className="space-y-2">
+                  {/* Payment methods - 2 column grid */}
+                  <div className="grid grid-cols-2 gap-1.5">
                     {/* Crypto option */}
                     <button
                       onClick={() => handleMethodSelect('crypto')}
                       disabled={loading}
-                      className={`w-full p-3 rounded-xl border-2 transition-all flex items-center gap-3 ${
+                      className={`p-2.5 rounded-xl border-2 transition-all text-center ${
                         selectedMethod === 'crypto'
                           ? 'border-[#FFBE98] bg-[#FFBE98]/10'
                           : 'border-[#F7931A]/40 bg-gradient-to-r from-[#F7931A]/5 to-[#627EEA]/5 hover:border-[#F7931A]'
                       }`}
                     >
-                      <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[#F7931A]/20">
-                        <Bitcoin className="w-5 h-5 text-[#F7931A]" />
-                      </div>
-                      <div className="flex-1 text-left">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">Criptomoeda</span>
-                          <span className="text-[10px] bg-[#F7931A] text-white px-2 py-0.5 rounded-full font-bold">
-                            TOP
-                          </span>
-                        </div>
-                        <span className="text-xs text-[#6B6661]">BTC, ETH, USDT, USDC</span>
-                      </div>
+                      <Bitcoin className="w-5 h-5 text-[#F7931A] mx-auto" />
+                      <span className="text-xs font-medium block mt-1">Crypto</span>
+                      <span className="text-[9px] text-[#F7931A] font-bold">TOP</span>
                     </button>
 
                     {/* Other payment methods */}
@@ -640,23 +631,17 @@ const CheckoutModal = ({
                           key={method.id}
                           onClick={() => handleMethodSelect(method.id)}
                           disabled={loading}
-                          className={`w-full p-3 rounded-xl border-2 transition-all flex items-center gap-3 ${
+                          className={`p-2.5 rounded-xl border-2 transition-all text-center ${
                             selectedMethod === method.id
                               ? 'border-[#FFBE98] bg-[#FFBE98]/10'
                               : 'border-stone-200 hover:border-stone-300'
                           }`}
                         >
-                          <div className="w-10 h-10 rounded-full flex items-center justify-center bg-stone-100">
-                            <Icon className="w-5 h-5 text-[#6B6661]" />
-                          </div>
-                          <div className="flex-1 text-left">
-                            <span className="font-medium">{method.name}</span>
-                            <span className="text-xs text-[#6B6661] block">
-                              {method.phone || method.username || method.link?.replace('https://', '')}
-                            </span>
-                          </div>
+                          <Icon className="w-5 h-5 text-[#6B6661] mx-auto" />
+                          <span className="text-xs font-medium block mt-1">{method.name}</span>
+                          <span className="text-[9px] text-[#6B6661] block">{method.phone || method.username}</span>
                           {loading && selectedMethod === method.id && (
-                            <div className="w-5 h-5 border-2 border-[#FFBE98] border-t-transparent rounded-full animate-spin" />
+                            <div className="w-4 h-4 border-2 border-[#FFBE98] border-t-transparent rounded-full animate-spin mx-auto mt-0.5" />
                           )}
                         </button>
                       );
