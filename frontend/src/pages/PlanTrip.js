@@ -141,12 +141,12 @@ const PlanTrip = () => {
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto px-6 pb-20 space-y-5">
-        {/* AI Planner Integration */}
+      <div className="max-w-4xl mx-auto px-6 pb-20">
+        {/* AI Planner Integration - full width */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative overflow-hidden rounded-2xl border border-[#FFBE98]/25 bg-gradient-to-br from-[#FFBE98]/8 via-white to-[#E6A07C]/5"
+          className="relative overflow-hidden rounded-2xl border border-[#FFBE98]/25 bg-gradient-to-br from-[#FFBE98]/8 via-white to-[#E6A07C]/5 mb-5"
           data-testid="ai-planner-cta"
         >
           <div className="absolute top-0 right-0 w-40 h-40 bg-[#FFBE98]/5 rounded-full -translate-y-1/2 translate-x-1/2" />
@@ -179,29 +179,28 @@ const PlanTrip = () => {
           </div>
         </motion.div>
 
-        {/* Sections */}
-        {sections.map((section, idx) => (
-          <motion.div
-            key={section.id}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: (idx + 1) * 0.04 }}
-            className="bg-white rounded-2xl border border-stone-100/80 overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
-            data-testid={`section-${section.id}`}
-          >
-            <div className="p-5 sm:p-6">
-              <div className="flex items-start gap-4 mb-4">
+        {/* Sections — 2-col grid on desktop, single col on mobile */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {sections.map((section, idx) => (
+            <motion.div
+              key={section.id}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: (idx + 1) * 0.04 }}
+              className="bg-white rounded-2xl border border-stone-200/60 overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.07)]"
+              data-testid={`section-${section.id}`}
+            >
+            <div className="p-5">
+              <div className="flex items-center gap-3 mb-3">
                 <div className={`w-10 h-10 ${section.iconBg} rounded-xl flex items-center justify-center shrink-0`}>
                   <section.icon className={`w-5 h-5 ${section.iconColor}`} />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <h2 className="text-base font-bold text-[#2D2A26] leading-snug">{section.title}</h2>
-                  <p className="text-sm text-[#6B6661] mt-0.5 leading-relaxed">{section.description}</p>
-                </div>
+                <h2 className="text-base font-bold text-[#2D2A26] leading-snug">{section.title}</h2>
               </div>
+              <p className="text-sm text-[#6B6661] leading-relaxed mb-4">{section.description}</p>
 
               {/* CTAs - compact, left-aligned, pill-style */}
-              <div className="flex flex-wrap items-center gap-2.5 pl-14">
+              <div className="flex flex-wrap items-center gap-2.5">
                 {section.ctas.map((cta) => (
                   <a
                     key={cta.id}
@@ -225,7 +224,7 @@ const PlanTrip = () => {
 
               {/* Micro text + badge */}
               {(section.micro || section.badge) && (
-                <div className="flex flex-wrap items-center gap-3 mt-3 pl-14">
+                <div className="flex flex-wrap items-center gap-3 mt-3">
                   {section.micro && (
                     <span className="text-[11px] text-[#6B6661]/60">{section.micro}</span>
                   )}
@@ -240,9 +239,10 @@ const PlanTrip = () => {
             </div>
           </motion.div>
         ))}
+        </div>
 
         {/* Footer note */}
-        <p className="text-center text-xs text-[#6B6661]/50 pt-6">
+        <p className="text-center text-xs text-[#6B6661]/50 pt-8">
           Alguns dos links nesta página são de parceiros. Ao usar estes links,<br/>
           ajuda a 4Luis a continuar a apoiar viagens de sonho.
         </p>
