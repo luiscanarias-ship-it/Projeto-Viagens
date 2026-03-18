@@ -37,9 +37,10 @@ const PlanTrip = () => {
       title: 'Reservar alojamento com confiança',
       description: 'Selecionámos as melhores plataformas para encontrar o alojamento ideal.',
       ctas: [
-        { id: 'booking', label: 'Ver opções recomendadas', primary: true, micro: 'Cancelamento flexível' },
-        { id: 'hotels', label: 'Ver ofertas com benefícios', primary: false }
+        { id: 'booking', icon: Hotel, label: 'Ver opções recomendadas', primary: true },
+        { id: 'hotels', icon: Star, label: 'Ver ofertas com benefícios', primary: false }
       ],
+      micro: 'Cancelamento flexível',
       badge: 'Recomendado pela 4Luis'
     },
     {
@@ -50,8 +51,9 @@ const PlanTrip = () => {
       title: 'Encontrar voos ao melhor preço',
       description: 'Compare centenas de opções e escolha o melhor voo para a sua viagem.',
       ctas: [
-        { id: 'skyscanner', label: 'Pesquisar voos', primary: true, micro: 'Sem custos adicionais para si' }
+        { id: 'skyscanner', icon: Plane, label: 'Pesquisar voos', primary: true }
       ],
+      micro: 'Sem custos adicionais para si',
       badge: 'Recomendado pela 4Luis'
     },
     {
@@ -62,8 +64,9 @@ const PlanTrip = () => {
       title: 'Descobrir experiências únicas',
       description: 'Reserve atividades, tours e experiências no seu destino.',
       ctas: [
-        { id: 'getyourguide', label: 'Descobrir atividades', primary: true, micro: 'Cancelamento flexível' }
+        { id: 'getyourguide', icon: Compass, label: 'Descobrir atividades', primary: true }
       ],
+      micro: 'Cancelamento flexível',
       badge: 'Melhores opções disponíveis'
     },
     {
@@ -74,8 +77,9 @@ const PlanTrip = () => {
       title: 'Aluguer de carro ao melhor preço',
       description: 'Compare opções e encontre o carro ideal para a sua viagem.',
       ctas: [
-        { id: 'cars', label: 'Pesquisar carros', primary: true, micro: 'Sem custos adicionais para si' }
-      ]
+        { id: 'cars', icon: Car, label: 'Pesquisar carros', primary: true }
+      ],
+      micro: 'Sem custos adicionais para si'
     },
     {
       id: 'esim',
@@ -85,8 +89,8 @@ const PlanTrip = () => {
       title: 'Internet em viagem sem complicações',
       description: 'Evite roaming caro e fique sempre ligado.',
       ctas: [
-        { id: 'airalo', label: 'Ver opções económicas', primary: true },
-        { id: 'holafly', label: 'Ver dados ilimitados', primary: false }
+        { id: 'airalo', icon: Wifi, label: 'Ver opções económicas', primary: true },
+        { id: 'holafly', icon: Wifi, label: 'Ver dados ilimitados', primary: false }
       ]
     },
     {
@@ -97,8 +101,9 @@ const PlanTrip = () => {
       title: 'Viajar com segurança',
       description: 'Proteja a sua viagem com seguro adequado.',
       ctas: [
-        { id: 'insurance', label: 'Ver planos de seguro', primary: true, micro: 'Recomendado pela 4Luis' }
-      ]
+        { id: 'insurance', icon: Shield, label: 'Ver planos de seguro', primary: true }
+      ],
+      micro: 'Recomendado pela 4Luis'
     },
     {
       id: 'map',
@@ -108,7 +113,7 @@ const PlanTrip = () => {
       title: 'Explorar o destino',
       description: 'Descubra pontos de interesse e planeie as suas rotas.',
       ctas: [
-        { id: 'googlemaps', label: 'Abrir Google Maps', primary: true, isMap: true }
+        { id: 'googlemaps', icon: MapPin, label: 'Abrir Google Maps', primary: true, isMap: true }
       ]
     }
   ];
@@ -116,13 +121,13 @@ const PlanTrip = () => {
   return (
     <div className="min-h-screen bg-[#FAFAF9]">
       {/* Hero */}
-      <div className="bg-gradient-to-b from-[#FFBE98]/15 to-[#FAFAF9] pt-28 pb-12 px-6">
+      <div className="bg-gradient-to-b from-[#FFBE98]/12 to-transparent pt-28 pb-14 px-6">
         <div className="max-w-2xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <div className="inline-flex items-center gap-2 bg-white/80 rounded-full px-4 py-1.5 mb-5 border border-[#FFBE98]/20">
+            <div className="inline-flex items-center gap-2 bg-white/70 backdrop-blur-sm rounded-full px-4 py-1.5 mb-5 border border-[#FFBE98]/15">
               <Heart className="w-3.5 h-3.5 text-[#FFBE98] fill-[#FFBE98]" />
               <span className="text-xs font-medium text-[#6B6661]">Ferramentas selecionadas pela 4Luis</span>
             </div>
@@ -136,22 +141,22 @@ const PlanTrip = () => {
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto px-6 pb-20 space-y-4">
+      <div className="max-w-2xl mx-auto px-6 pb-20 space-y-5">
         {/* AI Planner Integration */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative overflow-hidden rounded-2xl border border-[#FFBE98]/30 bg-gradient-to-br from-[#FFBE98]/10 via-white to-[#E6A07C]/8 shadow-sm"
+          className="relative overflow-hidden rounded-2xl border border-[#FFBE98]/25 bg-gradient-to-br from-[#FFBE98]/8 via-white to-[#E6A07C]/5"
           data-testid="ai-planner-cta"
         >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-[#FFBE98]/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute top-0 right-0 w-40 h-40 bg-[#FFBE98]/5 rounded-full -translate-y-1/2 translate-x-1/2" />
           <div className="relative p-5 sm:p-6">
             <div className="flex items-start gap-4">
-              <div className="w-11 h-11 bg-[#FFBE98]/15 rounded-xl flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 bg-[#FFBE98]/12 rounded-xl flex items-center justify-center shrink-0">
                 <Sparkles className="w-5 h-5 text-[#FFBE98]" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
+                <div className="flex items-center gap-2 mb-1.5">
                   <span className="text-[10px] font-bold text-[#FFBE98] bg-[#FFBE98]/10 px-2 py-0.5 rounded-full uppercase tracking-wide">Novo</span>
                 </div>
                 <h2 className="text-lg font-bold text-[#2D2A26] mb-1" data-testid="ai-planner-cta-title">
@@ -162,12 +167,12 @@ const PlanTrip = () => {
                 </p>
                 <button
                   onClick={() => navigate('/travel-planner')}
-                  className="w-full flex items-center justify-center gap-2 bg-[#2D2A26] text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-[#1a1816] transition-colors"
+                  className="inline-flex items-center gap-2 bg-[#FFBE98] text-white text-sm font-semibold px-5 py-2.5 rounded-full hover:bg-[#E6A07C] transition-colors shadow-sm"
                   data-testid="ai-planner-cta-btn"
                 >
-                  <Sparkles className="w-4 h-4" />
+                  <Sparkles className="w-3.5 h-3.5" />
                   Gerar plano de viagem
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
@@ -180,52 +185,56 @@ const PlanTrip = () => {
             key={section.id}
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: (idx + 1) * 0.05 }}
-            className="bg-white rounded-2xl border border-stone-100 overflow-hidden shadow-sm"
+            transition={{ delay: (idx + 1) * 0.04 }}
+            className="bg-white rounded-2xl border border-stone-100/80 overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
             data-testid={`section-${section.id}`}
           >
-            <div className="p-5">
-              <div className="flex items-start gap-4">
-                <div className={`w-11 h-11 ${section.iconBg} rounded-xl flex items-center justify-center shrink-0`}>
-                  <section.icon className={`w-5.5 h-5.5 ${section.iconColor}`} />
+            <div className="p-5 sm:p-6">
+              <div className="flex items-start gap-4 mb-4">
+                <div className={`w-10 h-10 ${section.iconBg} rounded-xl flex items-center justify-center shrink-0`}>
+                  <section.icon className={`w-5 h-5 ${section.iconColor}`} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-lg font-bold text-[#2D2A26]">{section.title}</h2>
+                  <h2 className="text-base font-bold text-[#2D2A26] leading-snug">{section.title}</h2>
                   <p className="text-sm text-[#6B6661] mt-0.5 leading-relaxed">{section.description}</p>
                 </div>
               </div>
 
-              <div className={`mt-4 ${section.ctas.length > 1 ? 'grid grid-cols-2 gap-2' : ''}`}>
+              {/* CTAs - compact, left-aligned, pill-style */}
+              <div className="flex flex-wrap items-center gap-2.5 pl-14">
                 {section.ctas.map((cta) => (
-                  <div key={cta.id} className="flex flex-col">
-                    <a
-                      href={cta.isMap ? 'https://maps.google.com' : getLink(cta.id)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={() => trackClick(cta.id)}
-                      data-testid={`cta-${cta.id}`}
-                      className={`flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all ${
-                        cta.primary
-                          ? 'bg-[#2D2A26] text-white hover:bg-[#1a1816]'
-                          : 'bg-stone-100 text-[#2D2A26] hover:bg-stone-200'
-                      }`}
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" />
-                      {cta.label}
-                    </a>
-                    {cta.micro && (
-                      <span className="text-[10px] text-[#6B6661]/70 text-center mt-1">{cta.micro}</span>
-                    )}
-                  </div>
+                  <a
+                    key={cta.id}
+                    href={cta.isMap ? 'https://maps.google.com' : getLink(cta.id)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => trackClick(cta.id)}
+                    data-testid={`cta-${cta.id}`}
+                    className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                      cta.primary
+                        ? 'bg-[#FFBE98] text-white hover:bg-[#E6A07C] shadow-sm'
+                        : 'bg-transparent text-[#6B6661] border border-stone-200 hover:border-[#FFBE98]/40 hover:text-[#2D2A26]'
+                    }`}
+                  >
+                    <cta.icon className="w-3.5 h-3.5" />
+                    {cta.label}
+                    <ExternalLink className="w-3 h-3 opacity-50" />
+                  </a>
                 ))}
               </div>
 
-              {section.badge && (
-                <div className="mt-2.5 flex items-center gap-1.5">
-                  <Star className="w-3 h-3 text-[#FFBE98] fill-[#FFBE98]" />
-                  <span className="text-[11px] text-[#FFBE98] font-medium">
-                    {section.badge}
-                  </span>
+              {/* Micro text + badge */}
+              {(section.micro || section.badge) && (
+                <div className="flex flex-wrap items-center gap-3 mt-3 pl-14">
+                  {section.micro && (
+                    <span className="text-[11px] text-[#6B6661]/60">{section.micro}</span>
+                  )}
+                  {section.badge && (
+                    <span className="inline-flex items-center gap-1 text-[11px] text-[#FFBE98] font-medium">
+                      <Star className="w-2.5 h-2.5 fill-[#FFBE98]" />
+                      {section.badge}
+                    </span>
+                  )}
                 </div>
               )}
             </div>
@@ -233,7 +242,7 @@ const PlanTrip = () => {
         ))}
 
         {/* Footer note */}
-        <p className="text-center text-xs text-[#6B6661]/60 pt-4">
+        <p className="text-center text-xs text-[#6B6661]/50 pt-6">
           Alguns dos links nesta página são de parceiros. Ao usar estes links,<br/>
           ajuda a 4Luis a continuar a apoiar viagens de sonho.
         </p>
