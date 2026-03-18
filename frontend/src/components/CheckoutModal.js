@@ -1001,7 +1001,7 @@ const CheckoutModal = ({
                 <ArrowRight className="w-4 h-4" />
               </button>
               <p className="text-[10px] leading-relaxed text-[#6B6661]/70 text-center mt-2">
-                As contribuições são voluntárias e destinam-se a apoiar sonhos de viagem.
+                As contribuições são voluntárias e destinam-se a apoiar viagens de sonho.
               </p>
             </div>
           )}
