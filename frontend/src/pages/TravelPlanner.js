@@ -166,7 +166,16 @@ const RefinePanel = ({ onSubmit, loading, success }) => {
             className="text-xs text-[#6B6661] hover:text-[#2D2A26] px-2 py-2.5 whitespace-nowrap">Cancelar</button>
         </div>
         {loading && (
-          <p className="text-[10px] text-[#FFBE98] animate-pulse">A IA está a ajustar o plano...</p>
+          <div className="flex items-center gap-2 mt-1">
+            <div className="flex gap-[3px]">
+              <span className="w-1 h-1 rounded-full bg-[#FFBE98] animate-bounce" style={{ animationDelay: '0ms' }} />
+              <span className="w-1 h-1 rounded-full bg-[#FFBE98] animate-bounce" style={{ animationDelay: '150ms' }} />
+              <span className="w-1 h-1 rounded-full bg-[#FFBE98] animate-bounce" style={{ animationDelay: '300ms' }} />
+            </div>
+            <span className="text-sm font-semibold bg-gradient-to-r from-[#FFBE98] via-[#E6A07C] to-[#FFBE98] bg-[length:200%_100%] bg-clip-text text-transparent animate-[shimmer_2s_linear_infinite]">
+              A IA está a ajustar o plano
+            </span>
+          </div>
         )}
       </div>
     </motion.div>
@@ -439,8 +448,17 @@ const TravelPlanner = () => {
                 className="bg-[#FFBE98]/8 border border-[#FFBE98]/25 rounded-xl p-4 flex items-center gap-3 mb-3 shadow-sm">
                 <Loader2 className="w-5 h-5 animate-spin text-[#FFBE98]" />
                 <div>
-                  <p className="text-sm font-semibold text-[#2D2A26]">A ajustar o seu plano com IA...</p>
-                  <p className="text-xs text-[#6B6661]">Isto pode demorar até 30 segundos. O plano será atualizado automaticamente.</p>
+                  <div className="flex items-center gap-2">
+                    <div className="flex gap-[3px]">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#FFBE98] animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#FFBE98] animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#FFBE98] animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </div>
+                    <span className="text-sm font-semibold bg-gradient-to-r from-[#FFBE98] via-[#E6A07C] to-[#FFBE98] bg-[length:200%_100%] bg-clip-text text-transparent animate-[shimmer_2s_linear_infinite]">
+                      A ajustar o seu plano com IA
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#6B6661] mt-0.5">Isto pode demorar até 30 segundos.</p>
                 </div>
               </motion.div>
             )}

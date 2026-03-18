@@ -108,6 +108,12 @@ code {
     animation: pulse-soft 3s ease-in-out infinite;
 }
 
+@keyframes shimmer {
+    0% { background-position: 100% 0; }
+    100% { background-position: -100% 0; }
+}
+
+
 /* Glass effect */
 .glass {
     background: rgba(255, 255, 255, 0.7);
