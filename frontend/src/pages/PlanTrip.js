@@ -32,44 +32,47 @@ const PlanTrip = () => {
       icon: Plane,
       iconBg: 'bg-sky-50',
       iconColor: 'text-sky-500',
-      title: 'Voos',
-      description: 'Compara precos e encontra os melhores voos para o teu destino.',
+      title: 'Encontrar voos ao melhor preco',
+      description: 'Compare centenas de opcoes e escolha o melhor voo para a sua viagem.',
       ctas: [
-        { id: 'skyscanner', label: 'Comparar voos', badge: 'Recomendado', primary: true }
-      ]
+        { id: 'skyscanner', label: 'Pesquisar voos', primary: true, micro: 'Sem custos adicionais' }
+      ],
+      badge: 'Recomendado pela 4Luis'
     },
     {
       id: 'hotels',
       icon: Hotel,
       iconBg: 'bg-[#FFBE98]/10',
       iconColor: 'text-[#FFBE98]',
-      title: 'Alojamento',
-      description: 'Hoteis, apartamentos e experiencias unicas ao melhor preco.',
+      title: 'Reservar alojamento com confianca',
+      description: 'Selecionamos as melhores plataformas para encontrar o alojamento ideal.',
       ctas: [
-        { id: 'booking', label: 'Ver opcoes recomendadas', badge: 'Recomendado pela 4Luis', primary: true },
-        { id: 'hotels', label: 'Ver ofertas com beneficios', primary: false }
-      ]
+        { id: 'booking', label: 'Ver opcoes recomendadas', primary: true, micro: 'Cancelamento flexivel' },
+        { id: 'hotels', label: 'Descobrir ofertas', primary: false }
+      ],
+      badge: 'Recomendado pela 4Luis'
     },
     {
       id: 'activities',
       icon: Compass,
       iconBg: 'bg-emerald-50',
       iconColor: 'text-emerald-500',
-      title: 'Atividades',
-      description: 'Tours, experiencias e atividades selecionadas por locais.',
+      title: 'Descobrir experiencias unicas',
+      description: 'Reserve atividades, tours e experiencias no seu destino.',
       ctas: [
-        { id: 'getyourguide', label: 'Explorar atividades', badge: 'Melhores opcoes', primary: true }
-      ]
+        { id: 'getyourguide', label: 'Descobrir atividades', primary: true, micro: 'Cancelamento flexivel' }
+      ],
+      badge: 'Melhores opcoes disponiveis'
     },
     {
       id: 'transport',
       icon: Car,
       iconBg: 'bg-violet-50',
       iconColor: 'text-violet-500',
-      title: 'Transporte',
-      description: 'Aluga um carro e explora ao teu ritmo, com total liberdade.',
+      title: 'Aluguer de carro ao melhor preco',
+      description: 'Compare opcoes e encontre o carro ideal para a sua viagem.',
       ctas: [
-        { id: 'cars', label: 'Ver carros disponiveis', primary: true }
+        { id: 'cars', label: 'Pesquisar carros', primary: true, micro: 'Sem custos adicionais' }
       ]
     },
     {
@@ -77,8 +80,8 @@ const PlanTrip = () => {
       icon: Wifi,
       iconBg: 'bg-teal-50',
       iconColor: 'text-teal-500',
-      title: 'Internet (eSIM)',
-      description: 'Mantem-te ligado em qualquer parte do mundo, sem roaming.',
+      title: 'Internet em viagem sem complicacoes',
+      description: 'Evite roaming caro e fique sempre ligado.',
       ctas: [
         { id: 'airalo', label: 'Ver opcoes economicas', primary: true },
         { id: 'holafly', label: 'Ver dados ilimitados', primary: false }
@@ -89,10 +92,10 @@ const PlanTrip = () => {
       icon: Shield,
       iconBg: 'bg-amber-50',
       iconColor: 'text-amber-500',
-      title: 'Seguro de Viagem',
-      description: 'Viaja com tranquilidade. Protege-te contra imprevistos.',
+      title: 'Viajar com seguranca',
+      description: 'Proteja a sua viagem com seguro adequado.',
       ctas: [
-        { id: 'insurance', label: 'Ver planos de seguro', primary: true }
+        { id: 'insurance', label: 'Ver planos de seguro', primary: true, micro: 'Recomendado pela 4Luis' }
       ]
     },
     {
@@ -100,10 +103,10 @@ const PlanTrip = () => {
       icon: MapPin,
       iconBg: 'bg-red-50',
       iconColor: 'text-red-500',
-      title: 'Mapa',
-      description: 'Explora o destino, descobre pontos de interesse e planeia rotas.',
+      title: 'Explorar o destino',
+      description: 'Descubra pontos de interesse e planeie as suas rotas.',
       ctas: [
-        { id: 'googlemaps', label: 'Explorar destino no mapa', primary: true, isMap: true }
+        { id: 'googlemaps', label: 'Abrir Google Maps', primary: true, isMap: true }
       ]
     }
   ];
@@ -122,10 +125,10 @@ const PlanTrip = () => {
               <span className="text-xs font-medium text-[#6B6661]">Ferramentas selecionadas pela 4Luis</span>
             </div>
             <h1 className="text-3xl sm:text-4xl font-bold text-[#2D2A26] mb-3" data-testid="plan-trip-title">
-              Planeia a Tua Viagem
+              Planeia a Sua Viagem
             </h1>
             <p className="text-base text-[#6B6661] max-w-lg mx-auto">
-              Tudo o que precisas para organizar a viagem dos teus sonhos, num so lugar.
+              Tudo o que precisa para planear a sua viagem num so lugar.
             </p>
           </motion.div>
         </div>
@@ -155,30 +158,34 @@ const PlanTrip = () => {
 
               <div className={`mt-4 ${section.ctas.length > 1 ? 'grid grid-cols-2 gap-2' : ''}`}>
                 {section.ctas.map((cta) => (
-                  <a
-                    key={cta.id}
-                    href={cta.isMap ? 'https://maps.google.com' : getLink(cta.id)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => trackClick(cta.id)}
-                    data-testid={`cta-${cta.id}`}
-                    className={`flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all ${
-                      cta.primary
-                        ? 'bg-[#2D2A26] text-white hover:bg-[#1a1816]'
-                        : 'bg-stone-100 text-[#2D2A26] hover:bg-stone-200'
-                    }`}
-                  >
-                    {cta.label}
-                    <ChevronRight className="w-4 h-4" />
-                  </a>
+                  <div key={cta.id} className="flex flex-col">
+                    <a
+                      href={cta.isMap ? 'https://maps.google.com' : getLink(cta.id)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => trackClick(cta.id)}
+                      data-testid={`cta-${cta.id}`}
+                      className={`flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all ${
+                        cta.primary
+                          ? 'bg-[#2D2A26] text-white hover:bg-[#1a1816]'
+                          : 'bg-stone-100 text-[#2D2A26] hover:bg-stone-200'
+                      }`}
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      {cta.label}
+                    </a>
+                    {cta.micro && (
+                      <span className="text-[10px] text-[#6B6661]/70 text-center mt-1">{cta.micro}</span>
+                    )}
+                  </div>
                 ))}
               </div>
 
-              {section.ctas.some(c => c.badge) && (
+              {section.badge && (
                 <div className="mt-2.5 flex items-center gap-1.5">
                   <Star className="w-3 h-3 text-[#FFBE98] fill-[#FFBE98]" />
                   <span className="text-[11px] text-[#FFBE98] font-medium">
-                    {section.ctas.find(c => c.badge)?.badge}
+                    {section.badge}
                   </span>
                 </div>
               )}
