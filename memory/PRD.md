@@ -4,10 +4,10 @@
 Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis (Sonhador - Embaixador), multiplos metodos de pagamento, e sistema de referrals.
 
 ## Architecture & Tech Stack
-- **Frontend**: React 18 + Tailwind CSS + Framer Motion
+- **Frontend**: React 18 + Tailwind CSS + Framer Motion + @paypal/react-paypal-js
 - **Backend**: FastAPI (Python 3.11)
 - **Database**: MongoDB (collections: users, journeys, contributions, support_tickets, testimonials, drafts, offers)
-- **Payments**: Crypto, MBWay, PayPal, Revolut, Wise, Stripe
+- **Payments**: PayPal Checkout (sandbox), Crypto, MBWay, Revolut, Wise, Stripe
 - **Email**: Resend (mail@4luis.com)
 - **Auth**: JWT + Google OAuth
 - **Translation**: OpenAI GPT-5.2 via Emergent LLM Key
@@ -27,7 +27,9 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 
 ### Contributions
 - contribution_id (PK), user_id (FK), journey_id (FK), amount
-- payment_method, status (pending/confirmed/completed/rejected), created_at
+- payment_method (paypal/mbway/revolut/wise/crypto)
+- status (pending/confirmed/completed/failed/rejected)
+- paypal_order_id (for PayPal), payment_reference (for manual), created_at
 
 ### Offers (admin only)
 - offer_id (PK), user_id (FK), type (voucher/parceiro)
@@ -35,11 +37,19 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 
 ## What's Been Implemented
 
+### Sistema de Pagamentos Completo (2026-03-18)
+- PayPal Checkout SDK: create-order, capture-order, confirmacao automatica
+- Frontend: botao PayPal SDK no step 2, metodos manuais separados
+- Backend: GET /api/paypal/config, POST /api/paypal/create-order, POST /api/paypal/capture-order/{id}
+- Idempotencia no capture (evita duplicacao)
+- Atualizacao automatica: contribution confirmed, journey.current_amount, user.total_contributed
+- Progressao embaixador funciona com PayPal
+- Notificacao + email enviados apos pagamento
+
 ### Consolidacao Logica de Negocio (2026-03-18)
-- Campo total_contributed no User (modelo, registo, 3 pontos de confirmacao)
+- Campo total_contributed no User (modelo, registo, 3 pontos de confirmacao + PayPal)
 - Migracao de 12 users existentes
 - Tabela Offers com CRUD admin (GET, POST, PATCH, DELETE)
-- Logica automatica: contribuicao confirmada -> atualiza journey + user atomicamente
 
 ### Sistema de Senha no Registo (2026-03-18)
 - Campos Senha + Confirmar senha com validacao em tempo real
@@ -56,15 +66,24 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 
 ## Key API Endpoints
 
+### PayPal
+- GET /api/paypal/config (client_id + mode)
+- POST /api/paypal/create-order {amount, journey_id}
+- POST /api/paypal/capture-order/{order_id}
+
+### Manual Contributions
+- POST /api/contributions/create {amount, payment_method, journey_id}
+- GET /api/contributions/payment-info
+
 ### Offers (Admin)
-- GET /api/admin/offers?status=&user_id=
-- POST /api/admin/offers {user_id, type, description}
-- PATCH /api/admin/offers/:id {status}
+- GET /api/admin/offers
+- POST /api/admin/offers
+- PATCH /api/admin/offers/:id
 - DELETE /api/admin/offers/:id
 
-### Core (existentes)
+### Core
 - GET /api/journeys, GET /api/journeys/:id
-- POST /api/contributions, GET /api/my-contributions
+- GET /api/my-contributions
 - POST /api/admin/contributions/:id/confirm
 - POST /api/admin/contributions/:id/validate
 
@@ -78,10 +97,10 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 
 ### Backlog
 - Sistema de gamificacao (pontos e sorteios)
-- Integracao PayPal
-- Sistema de ofertas automatico
+- Mudar PayPal de sandbox para producao
 - Notificacoes push/email
 
 ## Credentials
 - **Admin**: admin@4luis.com / Admin1
 - **Resend sender**: mail@4luis.com
+- **PayPal**: Sandbox mode (credentials in backend/.env)
