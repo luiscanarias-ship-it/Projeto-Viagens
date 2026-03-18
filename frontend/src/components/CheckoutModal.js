@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, Check, Copy, Bitcoin, Smartphone, ExternalLink,
-  Wallet, CreditCard, ArrowRight, QrCode, Heart, Sparkles, ShieldCheck
+  Wallet, CreditCard, ArrowRight, QrCode, Heart, Sparkles, ShieldCheck, Lock
 } from 'lucide-react';
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 import QRCode from 'qrcode';
@@ -518,12 +518,17 @@ const CheckoutModal = ({
 
                   {/* PayPal - Automatic payment (primary) */}
                   {paypalClientId && (
-                    <div className="border-2 border-[#0070BA]/40 rounded-xl overflow-hidden" data-testid="paypal-section">
-                      <div className="bg-[#0070BA]/5 px-3 py-1.5 flex items-center gap-2 border-b border-[#0070BA]/10">
-                        <ShieldCheck className="w-3.5 h-3.5 text-[#0070BA]" />
-                        <span className="text-[11px] font-semibold text-[#0070BA]">Pagamento automatico e seguro</span>
+                    <div className="border-2 border-[#0070BA]/30 rounded-xl overflow-hidden bg-gradient-to-b from-[#0070BA]/[0.03] to-white" data-testid="paypal-section">
+                      <div className="px-3 py-2 flex items-center justify-between">
+                        <div className="flex items-center gap-1.5">
+                          <ShieldCheck className="w-4 h-4 text-[#0070BA]" />
+                          <span className="text-[11px] font-bold text-[#0070BA]">Recomendado</span>
+                        </div>
+                        <span className="text-[10px] text-[#0070BA]/60 flex items-center gap-1">
+                          <Lock className="w-3 h-3" /> Pagamento seguro
+                        </span>
                       </div>
-                      <div className="px-3 py-2">
+                      <div className="px-3 pb-2">
                         {paypalError && (
                           <p className="text-xs text-red-500 mb-2">{paypalError}</p>
                         )}
@@ -577,6 +582,9 @@ const CheckoutModal = ({
                             }}
                           />
                         </PayPalScriptProvider>
+                        <p className="text-[10px] text-center text-[#6B6661]/70 mt-1.5" data-testid="paypal-trust-text">
+                          Nao partilhamos os teus dados bancarios.
+                        </p>
                       </div>
                     </div>
                   )}
