@@ -110,6 +110,13 @@ const Header = () => {
             >
               Planear Viagem
             </Link>
+            <Link 
+              to="/travel-planner" 
+              className="text-[#2D2A26] hover:text-[#FFBE98] transition-colors font-medium text-sm"
+              data-testid="nav-travel-planner"
+            >
+              AI Planner
+            </Link>
             
             {user && (
               <Link 
@@ -321,6 +328,14 @@ const Header = () => {
                 data-testid="mobile-nav-plan-trip"
               >
                 Planear Viagem
+              </Link>
+              <Link
+                to="/travel-planner"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block py-3 text-[#2D2A26] font-medium"
+                data-testid="mobile-nav-travel-planner"
+              >
+                AI Planner
               </Link>
               {user && (
                 <Link
