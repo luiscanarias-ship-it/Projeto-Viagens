@@ -405,7 +405,13 @@ const TravelPlanner = () => {
                 <p className="text-[10px] text-[#FFBE98] mt-1.5">{tripTypes.length} tipos selecionados</p>
               )}
             </div>
-            {error && <p className="text-sm text-red-500 text-center" data-testid="planner-error">{error}</p>}
+            {error && (
+              <div className={`text-sm text-center px-4 py-3 rounded-xl ${
+                error.includes('✈️') ? 'bg-sky-50 text-sky-700' : 'bg-red-50 text-red-500'
+              }`} data-testid="planner-error">
+                {error}
+              </div>
+            )}
             <button type="submit" disabled={loading || !destination || !startDate || !endDate}
               className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2" data-testid="generate-btn">
               <Sparkles className="w-4 h-4" />Gerar plano de viagem
@@ -620,7 +626,16 @@ const TravelPlanner = () => {
                     </button>
                   </div>
                 </div>
-                {error && <p className="text-xs text-red-500 text-center mt-2">{error}</p>}
+                {error && (
+                  <div className={`text-xs text-center mt-2 px-3 py-2 rounded-lg w-full ${
+                    error.includes('✈️') ? 'bg-sky-50 text-sky-700' : 'bg-red-50 text-red-500'
+                  }`} data-testid="refine-error">
+                    {error}
+                    {error.includes('✈️') && (
+                      <p className="text-[10px] mt-1 opacity-70">Podes continuar a ajustar, copiar ou partilhar o plano atual.</p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 

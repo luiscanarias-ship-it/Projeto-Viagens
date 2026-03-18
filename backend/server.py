@@ -6102,7 +6102,7 @@ async def generate_travel_plan(request: Request):
         requests_list = [t for t in requests_list if (now - datetime.fromisoformat(t)).total_seconds() < 3600]
         ai_travel_plan_cache[user_key] = requests_list
         if len(requests_list) >= 5:
-            raise HTTPException(status_code=429, detail="Limite de pedidos atingido. Tenta novamente dentro de 1 hora.")
+            raise HTTPException(status_code=429, detail="Já criaste vários planos! ✈️ Podes gerar um novo dentro de 1 hora.")
     
     # Check cache for identical request
     cache_key = f"{destination}_{start_date}_{end_date}_{trip_type}".lower()
@@ -6228,7 +6228,7 @@ async def refine_travel_plan(request: Request):
         requests_list = [t for t in requests_list if (now - datetime.fromisoformat(t)).total_seconds() < 3600]
         ai_travel_plan_cache[user_key] = requests_list
         if len(requests_list) >= 5:
-            raise HTTPException(status_code=429, detail="Limite de pedidos atingido. Tenta novamente dentro de 1 hora.")
+            raise HTTPException(status_code=429, detail="Já criaste vários planos! ✈️ Podes gerar um novo dentro de 1 hora.")
 
     trip_type_text = f"Tipo de viagem: {trip_type}. " if trip_type else ""
     previous_plan_json = json.dumps(previous_plan, ensure_ascii=False)
