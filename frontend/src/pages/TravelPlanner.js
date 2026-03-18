@@ -314,7 +314,7 @@ const TravelPlanner = () => {
       });
     }
     if (plan.local_tips?.length) { l.push('\n--- DICAS LOCAIS ---'); plan.local_tips.forEach(t => l.push(`  - ${t}`)); }
-    l.push('\n\nGerado por 4Luis AI Travel Planner\nSonho connosco ✈️');
+    l.push('\n\nGerado por 4Luis AI Travel Planner\nSonha connosco ✈️');
     return l.join('\n');
   };
 
@@ -324,7 +324,6 @@ const TravelPlanner = () => {
       await navigator.clipboard.writeText(text);
       setCopied(true);
     } catch {
-      // Fallback for browsers without clipboard permission
       const ta = document.createElement('textarea');
       ta.value = text;
       ta.style.position = 'fixed';
@@ -340,14 +339,8 @@ const TravelPlanner = () => {
   const handleShare = async () => {
     if (!plan) return;
     const fullText = buildPlanText();
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: `Viagem: ${plan.destination}`, text: fullText });
-        return;
-      } catch {}
-    }
-    // Fallback: copy to clipboard
-    await handleCopy();
+    // WhatsApp URL scheme handles long text reliably
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(fullText)}`, '_blank');
   };
 
   return (
