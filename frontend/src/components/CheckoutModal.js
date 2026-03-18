@@ -374,7 +374,7 @@ const CheckoutModal = ({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={{ duration: 0.2 }}
-          className="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-hidden shadow-2xl"
+          className="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-hidden shadow-2xl flex flex-col"
         >
           {/* Header */}
           <div className="bg-gradient-to-r from-[#FFBE98]/20 to-[#E6F4F1]/30 px-4 py-3 border-b border-stone-100">
@@ -426,7 +426,7 @@ const CheckoutModal = ({
           </div>
 
           {/* Content */}
-          <div className="px-4 py-3 overflow-y-auto max-h-[70vh]">
+          <div className="px-4 py-3 overflow-y-auto flex-1 min-h-0">
             <AnimatePresence mode="wait">
               
               {/* STEP 1: Choose Amount */}
