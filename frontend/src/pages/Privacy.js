@@ -62,21 +62,35 @@ export default function Privacy() {
               Os dados podem ser partilhados apenas com prestadores de servicos necessarios ao funcionamento da plataforma, como:
             </p>
             <ul className="list-disc pl-6 mt-2 space-y-1">
-              <li>Servicos de envio de email</li>
-              <li>Servicos de alojamento e infraestrutura</li>
-              <li>Servicos de analise de utilizacao</li>
+              <li><strong>PayPal</strong> — para processar pagamentos de contribuicoes. Os dados partilhados limitam-se ao necessario para completar a transacao (nome, email, montante)</li>
+              <li><strong>Servicos de envio de email</strong> — para comunicacoes transacionais e atualizacoes sobre viagens</li>
+              <li><strong>Servicos de alojamento e infraestrutura</strong> — para manter a plataforma em funcionamento</li>
+              <li><strong>Servicos de analise de utilizacao</strong> — para melhorar a experiencia do utilizador</li>
             </ul>
+            <p className="mt-3">
+              A 4Luis nao partilha dados bancarios ou financeiros com terceiros, para alem do processador de pagamentos (PayPal).
+            </p>
           </section>
 
           <section>
-            <h2 className="text-lg font-bold text-[#2D2A26] mb-3">5. Conservacao de dados</h2>
+            <h2 className="text-lg font-bold text-[#2D2A26] mb-3">5. Sistema de afiliados e cookies</h2>
+            <p>
+              A 4Luis utiliza um sistema de patrocinadores (afiliados) que permite aos utilizadores convidar novos membros atraves de links personalizados. Estes links podem conter identificadores que associam novos registos ao patrocinador.
+            </p>
+            <p className="mt-2">
+              Os cookies de afiliados e de analise so sao ativados apos o consentimento do utilizador atraves do banner de cookies apresentado na primeira visita.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-lg font-bold text-[#2D2A26] mb-3">6. Conservacao de dados</h2>
             <p>
               Os dados sao conservados apenas pelo periodo necessario ao funcionamento da plataforma e cumprimento de obrigacoes legais.
             </p>
           </section>
 
           <section>
-            <h2 className="text-lg font-bold text-[#2D2A26] mb-3">6. Direitos dos utilizadores</h2>
+            <h2 className="text-lg font-bold text-[#2D2A26] mb-3">7. Direitos dos utilizadores</h2>
             <p>Os utilizadores tem o direito de:</p>
             <ul className="list-disc pl-6 mt-2 space-y-1">
               <li>Aceder aos seus dados</li>
@@ -97,14 +111,14 @@ export default function Privacy() {
           </section>
 
           <section>
-            <h2 className="text-lg font-bold text-[#2D2A26] mb-3">7. Seguranca</h2>
+            <h2 className="text-lg font-bold text-[#2D2A26] mb-3">8. Seguranca</h2>
             <p>
               A 4Luis implementa medidas tecnicas e organizativas adequadas para proteger os dados pessoais.
             </p>
           </section>
 
           <section>
-            <h2 className="text-lg font-bold text-[#2D2A26] mb-3">8. Alteracoes</h2>
+            <h2 className="text-lg font-bold text-[#2D2A26] mb-3">9. Alteracoes</h2>
             <p>
               Esta politica pode ser atualizada periodicamente. A versao mais recente estara sempre disponivel nesta pagina.
             </p>

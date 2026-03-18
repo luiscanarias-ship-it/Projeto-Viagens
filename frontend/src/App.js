@@ -91,6 +91,7 @@ const AppRouter = () => {
           <Route path="/politica-cookies" element={<CookiePolicy />} />
           <Route path="/cookies" element={<CookiePolicy />} />
           <Route path="/privacy" element={<Privacy />} />
+          <Route path="/privacy-policy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/support/new" element={<SupportNewTicket />} />
           <Route path="/support/:ticketId" element={<SupportTicketDetail />} />

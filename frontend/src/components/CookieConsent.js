@@ -76,7 +76,7 @@ export default function CookieConsent() {
                 Ola... Nos somos as cookies!
               </p>
               <p className="text-[#6B6661] text-sm leading-relaxed">
-                Esperamos um pouco para ter a certeza que o conteudo do nosso site te interessava antes de te incomodar.
+                Este site utiliza cookies para melhorar a experiencia e para fins de analise e parcerias.
               </p>
               <p className="text-[#2D2A26] font-semibold text-base">
                 Autorizas-nos?

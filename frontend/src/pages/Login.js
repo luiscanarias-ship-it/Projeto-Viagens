@@ -39,6 +39,7 @@ const Login = () => {
     name: '',
     surname: ''
   });
+  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
 
   const strength = useMemo(() => getPasswordStrength(formData.password), [formData.password]);
   const passwordTooShort = formData.password.length > 0 && formData.password.length < 8;
@@ -307,13 +308,32 @@ const Login = () => {
               </div>
             )}
 
+            {/* Privacy consent (register only) */}
+            {isRegister && (
+              <label className="flex items-start gap-2.5 cursor-pointer group" data-testid="privacy-consent-label">
+                <input
+                  type="checkbox"
+                  checked={acceptedPrivacy}
+                  onChange={(e) => setAcceptedPrivacy(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 rounded border-stone-300 text-[#FFBE98] focus:ring-[#FFBE98] cursor-pointer"
+                  data-testid="privacy-consent-checkbox"
+                />
+                <span className="text-xs text-[#6B6661] leading-relaxed">
+                  Li e aceito a{' '}
+                  <a href="/privacy" target="_blank" className="text-[#FFBE98] font-medium hover:underline">
+                    Politica de Privacidade
+                  </a>
+                </span>
+              </label>
+            )}
+
             {error && (
               <p className="text-red-500 text-sm text-center" data-testid="error-message">{error}</p>
             )}
 
             <button
               type="submit"
-              disabled={loading || (isRegister && (passwordTooShort || !passwordsMatch))}
+              disabled={loading || (isRegister && (passwordTooShort || !passwordsMatch || !acceptedPrivacy))}
               className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
               data-testid="submit-btn"
             >
@@ -328,7 +348,7 @@ const Login = () => {
           <p className="text-center text-sm text-[#6B6661] mt-6">
             {isRegister ? t('auth.has_account') : t('auth.no_account')}{' '}
             <button
-              onClick={() => { setIsRegister(!isRegister); setError(''); }}
+              onClick={() => { setIsRegister(!isRegister); setError(''); setAcceptedPrivacy(false); }}
               className="text-[#FFBE98] font-medium hover:underline"
               data-testid="toggle-auth-btn"
             >
