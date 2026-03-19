@@ -823,15 +823,15 @@ const Home = () => {
                       <span className="text-xs font-semibold text-[#6B6661]">{mainJourney.progress.percentage}%</span>
                     </div>
                   )}
-                  {dreamersStats?.total_dreamers > 0 && (
-                    <span className="hidden md:flex items-center gap-1.5 text-xs text-[#6B6661] whitespace-nowrap" data-testid="sticky-dreamers-count">
-                      <Users className="w-3 h-3 text-[#FFBE98]" />
-                      <span className="font-semibold text-[#2D2A26]">{dreamersStats.total_dreamers}</span> sonhadores já apoiaram a 4Luis
-                    </span>
-                  )}
                 </div>
               </div>
-              <div className="flex-1 flex justify-center sm:justify-end sm:pr-[180px]">
+              {dreamersStats?.total_dreamers > 0 && (
+                <span className="hidden md:flex items-center gap-1.5 text-xs text-[#6B6661] whitespace-nowrap" data-testid="sticky-dreamers-count">
+                  <Users className="w-3 h-3 text-[#FFBE98]" />
+                  <span className="font-semibold text-[#2D2A26]">{dreamersStats.total_dreamers}</span> sonhadores já apoiaram a 4Luis
+                </span>
+              )}
+              <div className="flex-1 flex justify-center sm:justify-end">
                 <button
                   onClick={() => setShowCheckout(true)}
                   className="w-full sm:w-auto py-3 px-6 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-[#FFAB7D] transition-colors"
