@@ -42,6 +42,18 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 ### Conformidade RGPD (2026-03-18)
 - Checkbox registo, politica privacidade, banner cookies
 
+### Pagina Viagem Principal (2026-03-19)
+- Removidas seccoes legacy: Bing Maps, Onde Ficar, Voos e Transportes, O Que Dizem nas Redes
+- Adicionado CTA "Planeie esta viagem com IA" que liga ao AI Travel Planner com destino pre-preenchido
+- Mantidas seccoes de contribuicao intactas (apoiantes, testemunhos, checkout modal, sticky bar)
+- Limpeza de imports e estado nao utilizado
+
+### Melhorias Tecnicas de Estabilidade (2026-03-19)
+- Models: Adicionado updated_at a User e Contribution, criado modelo TravelPlan
+- AI: Logging de requests, timeout 45s com asyncio.wait_for, mensagens amigaveis, race condition corrigida
+- Seguranca: Validacao de inputs (destino max 200 chars, formato de data, limites de trip_type)
+- Consistencia frontend: botoes unificados com btn-primary
+
 ### Bug Fix: Scroll SupportTicketDetail (2026-03-19)
 - Corrigido bug recorrente de scroll na pagina de detalhes do ticket de suporte
 - Implementado useLayoutEffect para scroll sincrono antes do paint
