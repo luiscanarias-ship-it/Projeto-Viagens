@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   MapPin, Calendar, Compass, Sparkles, Loader2,
   Sun, Shirt, ClipboardList, Lightbulb, Hotel, Plane, Wifi,
   ExternalLink, Globe, Ticket, Send, SlidersHorizontal, 
-  CheckCircle2, Copy, Share2, Check, Eye, EyeOff, Car
+  CheckCircle2, Copy, Share2, Check, Eye, EyeOff, Car, Clock
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -260,8 +260,12 @@ const TravelPlanner = () => {
   const [plan, setPlan] = useState(null);
   const [affiliateLinks, setAffiliateLinks] = useState({});
   const [copied, setCopied] = useState(false);
+  const [shared, setShared] = useState(false);
   const [showStickyBar, setShowStickyBar] = useState(false);
   const [activeTab, setActiveTab] = useState('guia');
+  const [rateLimited, setRateLimited] = useState(false);
+  const [rateLimitExpiry, setRateLimitExpiry] = useState(null);
+  const [rateLimitMinutes, setRateLimitMinutes] = useState(0);
   const [hiddenSections, setHiddenSections] = useState(() => {
     try { return JSON.parse(localStorage.getItem('planner_hidden') || '[]'); } catch { return []; }
   });
@@ -284,6 +288,19 @@ const TravelPlanner = () => {
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, [plan]);
+
+  // Countdown timer for rate limit
+  useEffect(() => {
+    if (!rateLimitExpiry) return;
+    const tick = () => {
+      const remaining = Math.max(0, Math.ceil((rateLimitExpiry - Date.now()) / 60000));
+      setRateLimitMinutes(remaining);
+      if (remaining <= 0) { setRateLimited(false); setRateLimitExpiry(null); }
+    };
+    tick();
+    const interval = setInterval(tick, 30000);
+    return () => clearInterval(interval);
+  }, [rateLimitExpiry]);
 
   const toggleSection = (id) => {
     setHiddenSections(prev => {
@@ -318,8 +335,15 @@ const TravelPlanner = () => {
       }, { headers: token ? { Authorization: `Bearer ${token}` } : {}, timeout: 60000 });
       setPlan(res.data.plan);
       setActiveTab('guia');
+      setRateLimited(false);
     } catch (err) {
-      setError(err.response?.data?.detail || 'Erro ao gerar plano. Tente novamente.');
+      if (err.response?.status === 429) {
+        setRateLimited(true);
+        setRateLimitExpiry(Date.now() + 60 * 60 * 1000);
+        setError(err.response?.data?.detail || 'Já criaste vários planos! ✈️ Podes gerar um novo dentro de 1 hora.');
+      } else {
+        setError(err.response?.data?.detail || 'Erro ao gerar plano. Tente novamente.');
+      }
     } finally { setLoading(false); }
   };
 
@@ -396,8 +420,24 @@ const TravelPlanner = () => {
   const handleShare = async () => {
     if (!plan) return;
     const fullText = buildPlanText();
-    // WhatsApp URL scheme handles long text reliably
-    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(fullText)}`, '_blank');
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: `Plano de viagem: ${plan.destination}`, text: fullText });
+        return;
+      } catch (e) {
+        if (e.name === 'AbortError') return; // user cancelled
+      }
+    }
+    // Fallback: copy to clipboard
+    try {
+      await navigator.clipboard.writeText(fullText);
+    } catch {
+      const ta = document.createElement('textarea');
+      ta.value = fullText; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    }
+    setShared(true);
+    setTimeout(() => setShared(false), 2500);
   };
 
   return (
@@ -469,10 +509,17 @@ const TravelPlanner = () => {
                 {error}
               </div>
             )}
-            <button type="submit" disabled={loading || !destination || !startDate || !endDate}
-              className="w-full btn-primary text-[#2D2A26] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2" data-testid="generate-btn">
-              <Sparkles className="w-4 h-4" />Gerar plano de viagem
-            </button>
+            <div className="space-y-1.5">
+              <button type="submit" disabled={loading || rateLimited || !destination || !startDate || !endDate}
+                className="w-full btn-primary text-[#2D2A26] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2" data-testid="generate-btn">
+                <Sparkles className="w-4 h-4" />Gerar plano de viagem
+              </button>
+              {rateLimited && rateLimitMinutes > 0 && (
+                <p className="text-xs text-center text-[#6B6661] flex items-center justify-center gap-1" data-testid="rate-limit-countdown">
+                  <Clock className="w-3 h-3" />Novo plano disponível em {rateLimitMinutes} {rateLimitMinutes === 1 ? 'minuto' : 'minutos'}
+                </p>
+              )}
+            </div>
           </motion.form>
         )}
 
@@ -715,7 +762,8 @@ const TravelPlanner = () => {
                     </button>
                     <button onClick={handleShare} data-testid="share-btn"
                       className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold text-[#6B6661] border border-stone-200 bg-white hover:bg-stone-50 hover:border-stone-300 px-3 py-2 rounded-lg transition-colors">
-                      <Share2 className="w-3.5 h-3.5" />Partilhar
+                      {shared ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Share2 className="w-3.5 h-3.5" />}
+                      {shared ? 'Plano copiado! Partilha onde quiseres' : 'Partilhar'}
                     </button>
                   </div>
                 </div>
