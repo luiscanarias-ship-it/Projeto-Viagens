@@ -45,6 +45,7 @@ class User(UserBase):
     user_id: str
     is_admin: bool = False
     created_at: datetime
+    updated_at: Optional[datetime] = None
     picture: Optional[str] = None
     preferred_language: Optional[str] = None
     anonymous_alias: Optional[str] = None
@@ -167,6 +168,7 @@ class Contribution(BaseModel):
     show_name: bool = True
     notes: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 def generate_payment_reference() -> str:
@@ -223,3 +225,13 @@ class OfferCreate(BaseModel):
     user_id: str
     type: str
     description: str
+
+
+class TravelPlan(BaseModel):
+    plan_id: str = Field(default_factory=lambda: f"plan_{uuid.uuid4().hex[:12]}")
+    cache_key: str
+    destination: str
+    plan: dict
+    user_id: Optional[str] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

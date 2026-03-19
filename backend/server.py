@@ -6074,17 +6074,26 @@ async def generate_travel_plan(request: Request):
         raise HTTPException(status_code=500, detail="Chave de IA nao configurada")
     
     data = await request.json()
-    destination = data.get("destination", "").strip()
-    start_date = data.get("start_date", "").strip()
-    end_date = data.get("end_date", "").strip()
+    destination = data.get("destination", "").strip()[:200]
+    start_date = data.get("start_date", "").strip()[:20]
+    end_date = data.get("end_date", "").strip()[:20]
     trip_type = data.get("trip_type", "")
     if isinstance(trip_type, list):
-        trip_type = ", ".join(trip_type)
+        trip_type = ", ".join([str(t).strip()[:30] for t in trip_type[:6]])
     else:
-        trip_type = str(trip_type).strip()
+        trip_type = str(trip_type).strip()[:100]
     
     if not destination or not start_date or not end_date:
         raise HTTPException(status_code=400, detail="Destino, data de inicio e data de fim sao obrigatorios")
+    
+    # Validate date format
+    try:
+        datetime.strptime(start_date, "%Y-%m-%d")
+        datetime.strptime(end_date, "%Y-%m-%d")
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Formato de data invalido. Use AAAA-MM-DD.")
+    
+    logger.info(f"AI Travel Plan request: destination={destination}, dates={start_date} to {end_date}, type={trip_type}")
     
     # Rate limiting: max 5 requests per user per hour
     user = None
@@ -6154,7 +6163,7 @@ Responde APENAS com um JSON valido com esta estrutura exata (sem markdown, sem `
     ).with_model("openai", "gpt-5.2")
     
     try:
-        response = await chat.send_message(UserMessage(text=prompt))
+        response = await asyncio.wait_for(chat.send_message(UserMessage(text=prompt)), timeout=45)
         clean = response.strip()
         if clean.startswith("```"):
             clean = clean.split("```")[1]
@@ -6163,6 +6172,7 @@ Responde APENAS com um JSON valido com esta estrutura exata (sem markdown, sem `
             clean = clean.strip()
         
         plan = json.loads(clean)
+        logger.info(f"AI Travel Plan success: destination={destination}, sections={list(plan.keys())}")
         
         # Cache the result
         await db.travel_plans.update_one(
@@ -6171,18 +6181,23 @@ Responde APENAS com um JSON valido com esta estrutura exata (sem markdown, sem `
                 "cache_key": cache_key,
                 "destination": destination,
                 "plan": plan,
-                "created_at": now.isoformat()
+                "user_id": user.user_id if user else None,
+                "created_at": now.isoformat(),
+                "updated_at": now.isoformat()
             }},
             upsert=True
         )
         
         return {"plan": plan, "cached": False}
+    except asyncio.TimeoutError:
+        logger.error(f"AI travel plan timeout: destination={destination}")
+        raise HTTPException(status_code=504, detail="Não foi possível gerar o plano. Tente novamente.")
     except json.JSONDecodeError:
         logger.error(f"AI travel plan JSON parse error: {response[:500]}")
-        raise HTTPException(status_code=500, detail="Erro ao processar resposta da IA. Tente novamente.")
+        raise HTTPException(status_code=500, detail="Não foi possível gerar o plano. Tente novamente.")
     except Exception as e:
         logger.error(f"AI travel plan error: {e}")
-        raise HTTPException(status_code=500, detail="Erro ao gerar plano de viagem")
+        raise HTTPException(status_code=500, detail="Não foi possível gerar o plano. Tente novamente.")
 
 
 @api_router.post("/ai/travel-plan/refine")
@@ -6195,16 +6210,16 @@ async def refine_travel_plan(request: Request):
         raise HTTPException(status_code=500, detail="Chave de IA nao configurada")
 
     data = await request.json()
-    destination = data.get("destination", "").strip()
-    start_date = data.get("start_date", "").strip()
-    end_date = data.get("end_date", "").strip()
+    destination = data.get("destination", "").strip()[:200]
+    start_date = data.get("start_date", "").strip()[:20]
+    end_date = data.get("end_date", "").strip()[:20]
     trip_type = data.get("trip_type", "")
     if isinstance(trip_type, list):
-        trip_type = ", ".join(trip_type)
+        trip_type = ", ".join([str(t).strip()[:30] for t in trip_type[:6]])
     else:
-        trip_type = str(trip_type).strip()
+        trip_type = str(trip_type).strip()[:100]
     previous_plan = data.get("previous_plan")
-    refinement = data.get("refinement", "").strip()
+    refinement = data.get("refinement", "").strip()[:500]
 
     if not destination or not start_date or not end_date:
         raise HTTPException(status_code=400, detail="Destino e datas sao obrigatorios")
@@ -6212,6 +6227,8 @@ async def refine_travel_plan(request: Request):
         raise HTTPException(status_code=400, detail="Plano anterior e obrigatorio")
     if not refinement:
         raise HTTPException(status_code=400, detail="Instrucoes de ajuste sao obrigatorias")
+
+    logger.info(f"AI Travel Plan refine: destination={destination}, refinement={refinement[:100]}")
 
     # Rate limiting
     user = None
@@ -6284,7 +6301,7 @@ Responde APENAS com um JSON valido com esta estrutura exata (sem markdown, sem `
     ).with_model("openai", "gpt-5.2")
 
     try:
-        response = await chat.send_message(UserMessage(text=prompt))
+        response = await asyncio.wait_for(chat.send_message(UserMessage(text=prompt)), timeout=45)
         clean = response.strip()
         if clean.startswith("```"):
             clean = clean.split("```")[1]
@@ -6293,14 +6310,18 @@ Responde APENAS com um JSON valido com esta estrutura exata (sem markdown, sem `
             clean = clean.strip()
 
         plan = json.loads(clean)
+        logger.info(f"AI Travel Plan refine success: destination={destination}")
 
         return {"plan": plan, "refined": True}
+    except asyncio.TimeoutError:
+        logger.error(f"AI travel refine timeout: destination={destination}")
+        raise HTTPException(status_code=504, detail="Não foi possível gerar o plano. Tente novamente.")
     except json.JSONDecodeError:
         logger.error(f"AI travel refine JSON parse error: {response[:500]}")
-        raise HTTPException(status_code=500, detail="Erro ao processar resposta da IA. Tente novamente.")
+        raise HTTPException(status_code=500, detail="Não foi possível gerar o plano. Tente novamente.")
     except Exception as e:
         logger.error(f"AI travel refine error: {e}")
-        raise HTTPException(status_code=500, detail="Erro ao ajustar plano de viagem")
+        raise HTTPException(status_code=500, detail="Não foi possível gerar o plano. Tente novamente.")
 
 
 
