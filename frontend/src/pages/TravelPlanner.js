@@ -51,7 +51,7 @@ const tipHasBookingHint = (tip) => TIP_BOOKING_KEYWORDS.some(k => tip.toLowerCas
 const InlineActivityCTA = ({ match, link, onTrack }) => (
   <a href={link || '#'} target="_blank" rel="noopener noreferrer"
     onClick={() => onTrack(match.platform)}
-    className="inline-flex items-center gap-1 text-[10px] font-medium text-[#FFBE98] hover:text-[#E6A07C] transition-colors ml-1">
+    className="inline-flex items-center gap-1 text-[10px] font-bold text-[#FFBE98] hover:text-[#E6A07C] transition-colors ml-1">
     <match.icon className="w-3 h-3" />{match.label}<ExternalLink className="w-2.5 h-2.5 opacity-60" />
   </a>
 );
@@ -649,7 +649,7 @@ const TravelPlanner = () => {
                           {key === 'tech' && (
                             <a href={affiliateLinks.airalo?.url || '#'} target="_blank" rel="noopener noreferrer"
                               onClick={() => trackClick('airalo')} data-testid="checklist-esim-cta"
-                              className="flex items-center gap-1 mt-1.5 text-[10px] font-medium text-[#FFBE98] hover:text-[#E6A07C] transition-colors">
+                              className="flex items-center gap-1 mt-1.5 text-[10px] font-bold text-[#FFBE98] hover:text-[#E6A07C] transition-colors">
                               <Wifi className="w-3 h-3" />Internet no destino<ExternalLink className="w-2.5 h-2.5 opacity-60" />
                             </a>
                           )}
@@ -685,7 +685,7 @@ const TravelPlanner = () => {
                             {tipHasBookingHint(tip) && (
                               <a href={affiliateLinks.getyourguide?.url || '#'} target="_blank" rel="noopener noreferrer"
                                 onClick={() => trackClick('getyourguide')}
-                                className="inline-flex items-center gap-1 text-[10px] font-medium text-[#FFBE98] hover:text-[#E6A07C] transition-colors ml-1">
+                                className="inline-flex items-center gap-1 text-[10px] font-bold text-[#FFBE98] hover:text-[#E6A07C] transition-colors ml-1">
                                 <Ticket className="w-3 h-3" />Ver disponibilidade<ExternalLink className="w-2.5 h-2.5 opacity-60" />
                               </a>
                             )}
