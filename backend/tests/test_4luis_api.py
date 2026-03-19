@@ -6,7 +6,7 @@ import pytest
 import requests
 import os
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://travel-planner-boost.preview.emergentagent.com').rstrip('/')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://dynamic-itinerary-1.preview.emergentagent.com').rstrip('/')
 
 class TestHealthAndBasicEndpoints:
     """Basic API health and public endpoints"""
@@ -197,7 +197,7 @@ class TestPaymentEndpoints:
             json={
                 "amount_key": "20",
                 "journey_id": "journey_china001",
-                "origin_url": "https://travel-planner-boost.preview.emergentagent.com"
+                "origin_url": "https://dynamic-itinerary-1.preview.emergentagent.com"
             },
             headers={"Authorization": f"Bearer {auth_token}"}
         )
@@ -215,7 +215,7 @@ class TestPaymentEndpoints:
             json={
                 "amount_key": "999",
                 "journey_id": "journey_china001",
-                "origin_url": "https://travel-planner-boost.preview.emergentagent.com"
+                "origin_url": "https://dynamic-itinerary-1.preview.emergentagent.com"
             },
             headers={"Authorization": f"Bearer {auth_token}"}
         )

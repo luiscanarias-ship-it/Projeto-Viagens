@@ -4,7 +4,7 @@ import {
   MapPin, Calendar, Compass, Sparkles, Loader2,
   Sun, Shirt, ClipboardList, Lightbulb, Hotel, Plane, Wifi,
   ExternalLink, Globe, Ticket, Send, SlidersHorizontal, 
-  CheckCircle2, Copy, Share2, Check, Eye, EyeOff
+  CheckCircle2, Copy, Share2, Check, Eye, EyeOff, Car
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -25,6 +25,54 @@ const TABS = [
   { id: 'checklist', label: 'Checklist', icon: ClipboardList },
   { id: 'dicas', label: 'Dicas', icon: Lightbulb },
 ];
+
+/* ── Activity keyword detection for contextual CTAs ── */
+const ACTIVITY_PATTERNS = [
+  { keywords: ['museu', 'museum', 'galeria', 'exposição', 'exposicao', 'palácio', 'palacio', 'castelo', 'torre', 'catedral', 'basílica', 'basilica', 'mosteiro', 'igreja'],
+    label: 'Reservar entrada', platform: 'getyourguide', icon: Ticket },
+  { keywords: ['tour', 'visita guiada', 'excursão', 'excursao', 'passeio de barco', 'cruzeiro', 'safari', 'mergulho'],
+    label: 'Ver atividades', platform: 'getyourguide', icon: Compass },
+  { keywords: ['aeroporto', 'transfer', 'aluguer', 'rent a car', 'carro'],
+    label: 'Ver transporte', platform: 'cars', icon: Car },
+];
+
+const detectActivityCTA = (text) => {
+  const lower = text.toLowerCase();
+  for (const p of ACTIVITY_PATTERNS) {
+    if (p.keywords.some(k => lower.includes(k))) return p;
+  }
+  return null;
+};
+
+const TIP_BOOKING_KEYWORDS = ['reserv', 'bilhete', 'ingresso', 'anteced', 'antecipadamente', 'comprar', 'book'];
+const tipHasBookingHint = (tip) => TIP_BOOKING_KEYWORDS.some(k => tip.toLowerCase().includes(k));
+
+/* ── Inline Activity CTA (subtle, inside itinerary) ── */
+const InlineActivityCTA = ({ match, link, onTrack }) => (
+  <a href={link || '#'} target="_blank" rel="noopener noreferrer"
+    onClick={() => onTrack(match.platform)}
+    className="inline-flex items-center gap-1 text-[10px] font-medium text-[#FFBE98] hover:text-[#E6A07C] transition-colors ml-1">
+    <match.icon className="w-3 h-3" />{match.label}<ExternalLink className="w-2.5 h-2.5 opacity-60" />
+  </a>
+);
+
+/* ── Top Booking Bar (compact, after summary) ── */
+const TopBookingBar = ({ links, onTrack }) => (
+  <div className="flex items-center gap-2 pt-3" data-testid="top-booking-bar">
+    <span className="text-[10px] font-semibold text-[#6B6661] whitespace-nowrap">Reservar:</span>
+    {[
+      { id: 'booking', icon: Hotel, label: 'Alojamento' },
+      { id: 'skyscanner', icon: Plane, label: 'Voos' },
+      { id: 'getyourguide', icon: Ticket, label: 'Atividades' },
+    ].map(item => (
+      <a key={item.id} href={links[item.id]?.url || '#'} target="_blank" rel="noopener noreferrer"
+        onClick={() => onTrack(item.id)} data-testid={`top-booking-${item.id}`}
+        className="flex items-center gap-1 text-[10px] font-semibold text-[#2D2A26] bg-stone-100 hover:bg-[#FFBE98]/10 hover:text-[#FFBE98] px-2.5 py-1.5 rounded-full transition-colors border border-stone-200/60 hover:border-[#FFBE98]/30">
+        <item.icon className="w-3 h-3" />{item.label}
+      </a>
+    ))}
+  </div>
+);
 
 /* ── Contextual CTA ── */
 const ContextualCTA = ({ icon: Icon, text, label, sublabel, link, platform, onTrack }) => (
@@ -471,6 +519,7 @@ const TravelPlanner = () => {
                 <h2 className="text-xl font-bold text-[#2D2A26]" data-testid="plan-destination">{plan.destination}</h2>
                 <p className="text-sm text-[#6B6661] mt-0.5">{plan.dates}</p>
                 {plan.summary && <p className="text-sm text-[#2D2A26]/80 mt-2 italic leading-relaxed">{plan.summary}</p>}
+                <TopBookingBar links={affiliateLinks} onTrack={trackClick} />
               </div>
 
               {/* Tab Navigation */}
@@ -549,11 +598,20 @@ const TravelPlanner = () => {
                         <p className="text-xs font-bold text-[#FFBE98]">Dia {day.day}</p>
                         <p className="text-sm font-semibold text-[#2D2A26]">{day.title}</p>
                         <ul className="mt-1 space-y-0.5">
-                          {day.activities?.map((a, j) => (
-                            <li key={j} className="text-xs text-[#6B6661] flex items-start gap-1.5">
-                              <span className="text-[#FFBE98] mt-0.5">&#8226;</span> {a}
-                            </li>
-                          ))}
+                          {day.activities?.map((a, j) => {
+                            const match = detectActivityCTA(a);
+                            return (
+                              <li key={j} className="text-xs text-[#6B6661] flex items-start gap-1.5 flex-wrap">
+                                <span className="text-[#FFBE98] mt-0.5 shrink-0">&#8226;</span>
+                                <span className="flex-1">{a}</span>
+                                {match && (
+                                  <InlineActivityCTA match={match}
+                                    link={affiliateLinks[match.platform]?.url}
+                                    onTrack={trackClick} />
+                                )}
+                              </li>
+                            );
+                          })}
                         </ul>
                       </div>
                     ))}
@@ -588,6 +646,13 @@ const TravelPlanner = () => {
                               <CheckCircle2 className="w-3 h-3 text-emerald-400 shrink-0" />{item}
                             </p>
                           ))}
+                          {key === 'tech' && (
+                            <a href={affiliateLinks.airalo?.url || '#'} target="_blank" rel="noopener noreferrer"
+                              onClick={() => trackClick('airalo')} data-testid="checklist-esim-cta"
+                              className="flex items-center gap-1 mt-1.5 text-[10px] font-medium text-[#FFBE98] hover:text-[#E6A07C] transition-colors">
+                              <Wifi className="w-3 h-3" />Internet no destino<ExternalLink className="w-2.5 h-2.5 opacity-60" />
+                            </a>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -614,7 +679,17 @@ const TravelPlanner = () => {
                     <ul className="space-y-2">
                       {plan.local_tips.map((tip, i) => (
                         <li key={i} className="text-sm text-[#6B6661] flex items-start gap-2">
-                          <Lightbulb className="w-3.5 h-3.5 text-teal-400 mt-0.5 shrink-0" />{tip}
+                          <Lightbulb className="w-3.5 h-3.5 text-teal-400 mt-0.5 shrink-0" />
+                          <span className="flex-1">
+                            {tip}
+                            {tipHasBookingHint(tip) && (
+                              <a href={affiliateLinks.getyourguide?.url || '#'} target="_blank" rel="noopener noreferrer"
+                                onClick={() => trackClick('getyourguide')}
+                                className="inline-flex items-center gap-1 text-[10px] font-medium text-[#FFBE98] hover:text-[#E6A07C] transition-colors ml-1">
+                                <Ticket className="w-3 h-3" />Ver disponibilidade<ExternalLink className="w-2.5 h-2.5 opacity-60" />
+                              </a>
+                            )}
+                          </span>
                         </li>
                       ))}
                     </ul>
