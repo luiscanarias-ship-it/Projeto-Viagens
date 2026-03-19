@@ -470,7 +470,7 @@ const TravelPlanner = () => {
               </div>
             )}
             <button type="submit" disabled={loading || !destination || !startDate || !endDate}
-              className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2" data-testid="generate-btn">
+              className="w-full btn-primary text-[#2D2A26] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2" data-testid="generate-btn">
               <Sparkles className="w-4 h-4" />Gerar plano de viagem
             </button>
           </motion.form>
