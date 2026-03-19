@@ -65,28 +65,13 @@ const Header = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-6">
+          <nav className="hidden md:flex items-center gap-5">
             <Link 
               to="/" 
-              className="text-[#2D2A26] hover:text-[#FFBE98] transition-colors font-medium"
+              className="text-[#2D2A26] hover:text-[#FFBE98] transition-colors text-sm font-medium whitespace-nowrap"
               data-testid="nav-home"
             >
               {t('nav.home')}
-            </Link>
-            <Link 
-              to="/" 
-              onClick={(e) => {
-                e.preventDefault();
-                if (window.location.pathname === '/') {
-                  document.getElementById('main-journey')?.scrollIntoView({ behavior: 'smooth' });
-                } else {
-                  navigate('/');
-                }
-              }}
-              className="px-4 py-1.5 bg-[#FFBE98]/15 text-[#2D2A26] hover:bg-[#FFBE98]/25 transition-colors font-semibold rounded-full text-sm border border-[#FFBE98]/30"
-              data-testid="nav-main-journey"
-            >
-              Viagem Principal
             </Link>
             <Link 
               to="/" 
@@ -98,30 +83,38 @@ const Header = () => {
                   navigate('/?scrollTo=journeys');
                 }
               }}
-              className="text-[#2D2A26] hover:text-[#FFBE98] transition-colors font-medium text-center leading-tight text-sm"
+              className="text-[#2D2A26] hover:text-[#FFBE98] transition-colors text-sm font-medium whitespace-nowrap"
               data-testid="nav-journeys"
             >
-              Viagens dos outros<br />sonhadores
+              Explorar Viagens
+            </Link>
+            <Link 
+              to="/" 
+              onClick={(e) => {
+                e.preventDefault();
+                if (window.location.pathname === '/') {
+                  document.getElementById('main-journey')?.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                  navigate('/');
+                }
+              }}
+              className="px-5 py-2 bg-[#FFBE98] text-white hover:bg-[#E6A07C] transition-colors font-bold rounded-full text-sm shadow-sm whitespace-nowrap"
+              data-testid="nav-main-journey"
+            >
+              Viagem Principal
             </Link>
             <Link 
               to="/plan-trip" 
-              className="text-[#2D2A26] hover:text-[#FFBE98] transition-colors font-medium text-sm"
+              className="text-[#2D2A26] hover:text-[#FFBE98] transition-colors text-sm font-medium whitespace-nowrap"
               data-testid="nav-plan-trip"
             >
               Planear Viagem
-            </Link>
-            <Link 
-              to="/travel-planner" 
-              className="text-[#2D2A26] hover:text-[#FFBE98] transition-colors font-medium text-sm"
-              data-testid="nav-travel-planner"
-            >
-              AI Planner
             </Link>
             
             {user && (
               <Link 
                 to="/dashboard" 
-                className="text-[#2D2A26] hover:text-[#FFBE98] transition-colors font-medium"
+                className="text-[#2D2A26] hover:text-[#FFBE98] transition-colors text-sm font-medium whitespace-nowrap"
                 data-testid="nav-dashboard"
               >
                 {t('nav.dashboard')}
@@ -131,7 +124,7 @@ const Header = () => {
             {user?.is_admin && (
               <Link 
                 to="/admin" 
-                className="text-[#2D2A26] hover:text-[#FFBE98] transition-colors font-medium"
+                className="text-[#2D2A26] hover:text-[#FFBE98] transition-colors text-sm font-medium whitespace-nowrap"
                 data-testid="nav-admin"
               >
                 {t('nav.admin')}
@@ -290,24 +283,6 @@ const Header = () => {
                   setMobileMenuOpen(false);
                   if (window.location.pathname === '/') {
                     setTimeout(() => {
-                      document.getElementById('main-journey')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }, 350);
-                  } else {
-                    navigate('/');
-                    setTimeout(() => {
-                      document.getElementById('main-journey')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }, 800);
-                  }
-                }}
-                className="block py-3 text-[#FFBE98] font-semibold w-full text-left"
-              >
-                Viagem Principal
-              </button>
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  if (window.location.pathname === '/') {
-                    setTimeout(() => {
                       document.getElementById('journeys')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }, 350);
                   } else {
@@ -319,7 +294,25 @@ const Header = () => {
                 }}
                 className="block py-3 text-[#2D2A26] font-medium w-full text-left"
               >
-                Viagens dos outros sonhadores
+                Explorar Viagens
+              </button>
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  if (window.location.pathname === '/') {
+                    setTimeout(() => {
+                      document.getElementById('main-journey')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 350);
+                  } else {
+                    navigate('/');
+                    setTimeout(() => {
+                      document.getElementById('main-journey')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 800);
+                  }
+                }}
+                className="block py-3 text-[#FFBE98] font-bold w-full text-left"
+              >
+                Viagem Principal
               </button>
               <Link
                 to="/plan-trip"
@@ -328,14 +321,6 @@ const Header = () => {
                 data-testid="mobile-nav-plan-trip"
               >
                 Planear Viagem
-              </Link>
-              <Link
-                to="/travel-planner"
-                onClick={() => setMobileMenuOpen(false)}
-                className="block py-3 text-[#2D2A26] font-medium"
-                data-testid="mobile-nav-travel-planner"
-              >
-                AI Planner
               </Link>
               {user && (
                 <Link

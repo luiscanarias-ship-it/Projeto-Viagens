@@ -269,7 +269,7 @@ const TravelPlanner = () => {
   const tabRefs = { guia: useRef(null), roteiro: useRef(null), checklist: useRef(null), dicas: useRef(null) };
 
   useEffect(() => {
-    document.title = '4Luis — AI Travel Planner';
+    document.title = '4Luis — Planeie a sua viagem com IA';
     window.scrollTo(0, 0);
     axios.get(`${API}/affiliate-links`).then(r => setAffiliateLinks(r.data)).catch(() => {});
   }, []);
@@ -410,7 +410,7 @@ const TravelPlanner = () => {
               <Sparkles className="w-3.5 h-3.5 text-[#FFBE98]" />
               <span className="text-xs font-medium text-[#6B6661]">Powered by AI</span>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-[#2D2A26] mb-3" data-testid="planner-title">AI Travel Planner</h1>
+            <h1 className="text-3xl sm:text-4xl font-bold text-[#2D2A26] mb-3" data-testid="planner-title">Planeie a sua viagem com IA</h1>
             <p className="text-base text-[#6B6661]">Gera um plano de viagem personalizado em segundos.</p>
           </motion.div>
         </div>
