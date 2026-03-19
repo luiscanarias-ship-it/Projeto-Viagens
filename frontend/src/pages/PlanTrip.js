@@ -14,7 +14,7 @@ const PlanTrip = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    document.title = '4Luis — Planeie a Sua Viagem';
+    document.title = '4Luis — Planeie a sua viagem com IA';
     window.scrollTo(0, 0);
     axios.get(`${API}/affiliate-links`).then(r => setAffiliateLinks(r.data)).catch(() => {});
   }, []);
@@ -132,7 +132,7 @@ const PlanTrip = () => {
               <span className="text-xs font-medium text-[#6B6661]">Ferramentas selecionadas pela 4Luis</span>
             </div>
             <h1 className="text-3xl sm:text-4xl font-bold text-[#2D2A26] mb-3" data-testid="plan-trip-title">
-              Planeie a Sua Viagem
+              Planeie a sua viagem com IA
             </h1>
             <p className="text-base text-[#6B6661] max-w-lg mx-auto">
               Tudo o que precisa para planear a sua viagem num só lugar.
