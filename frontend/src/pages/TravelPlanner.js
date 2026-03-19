@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   MapPin, Calendar, Compass, Sparkles, Loader2,
@@ -249,7 +250,8 @@ const HideableSection = ({ id, children, hiddenSections, toggleSection }) => {
 /* ── MAIN COMPONENT ── */
 /* ════════════════════════════════════════════ */
 const TravelPlanner = () => {
-  const [destination, setDestination] = useState('');
+  const [searchParams] = useSearchParams();
+  const [destination, setDestination] = useState(searchParams.get('destination') || '');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [tripTypes, setTripTypes] = useState([]);

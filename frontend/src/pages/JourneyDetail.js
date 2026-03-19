@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, Heart, Copy, Check, CreditCard, Smartphone, Bitcoin, ExternalLink,
-  Map, Hotel, Plane, MessageCircle, Sparkles, Send, ChevronDown, ChevronUp,
-  BookOpen, Compass, Globe, User, AlertCircle, ChevronRight, ArrowRight, Flag
+  Sparkles, ChevronRight, User, AlertCircle, Flag
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import axios from 'axios';
@@ -49,25 +48,6 @@ const paymentMethods = [
   { id: 'revolut', name: 'Revolut', icon: ExternalLink, description: '@luis4dreams', type: 'direct', recommended: false },
   { id: 'wise', name: 'Wise', icon: ExternalLink, description: 'Transferência internacional', type: 'direct', recommended: false }
 ];
-
-// Icon components for social/travel resources
-const PinterestIcon = () => (
-  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/>
-  </svg>
-);
-
-const RedditIcon = () => (
-  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/>
-  </svg>
-);
-
-const ViatorIcon = () => (
-  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-  </svg>
-);
 
 const TrustBadge = ({ level, memberSince }) => {
   const config = {
@@ -143,14 +123,6 @@ const JourneyDetail = () => {
   const [paymentInfo, setPaymentInfo] = useState(null);
   const [copied, setCopied] = useState(false);
   const [showStickyBtn, setShowStickyBtn] = useState(false);
-  
-  // Travel planning state
-  const [travelResources, setTravelResources] = useState(null);
-  const [expandedSection, setExpandedSection] = useState(null);
-  const [aiQuestion, setAiQuestion] = useState('');
-  const [aiResponse, setAiResponse] = useState('');
-  const [aiLoading, setAiLoading] = useState(false);
-  const [showAiPlanner, setShowAiPlanner] = useState(false);
   const [showExitIntent, setShowExitIntent] = useState(false);
   const exitIntentShown = useRef(false);
   
@@ -188,20 +160,17 @@ const JourneyDetail = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [journeyRes, paymentRes, resourcesRes, progressRes, contribRes] = await Promise.all([
+        const [journeyRes, paymentRes, progressRes, contribRes] = await Promise.all([
           axios.get(`${API}/journeys/${id}`),
           axios.get(`${API}/contributions/payment-info`),
-          axios.get(`${API}/journey/${id}/travel-resources`),
           axios.get(`${API}/journeys/${id}/progress`),
           axios.get(`${API}/journeys/${id}/contributions`)
         ]);
         setJourney(journeyRes.data);
         setPaymentInfo(paymentRes.data);
-        setTravelResources(resourcesRes.data);
         setProgress(progressRes.data);
         setContributions(contribRes.data.contributions || []);
         
-        // Open payment modal if ?pay=true in URL
         if (openPayment) {
           setShowCheckout(true);
         }
@@ -219,37 +188,6 @@ const JourneyDetail = () => {
   const handleSupport = () => {
     setShowCheckout(true);
   };
-
-  const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const askAI = async () => {
-    if (!aiQuestion.trim()) return;
-    
-    setAiLoading(true);
-    try {
-      const response = await axios.post(`${API}/journey/${id}/ai-planner`, {
-        question: aiQuestion
-      });
-      setAiResponse(response.data.response);
-    } catch (error) {
-      console.error('AI error:', error);
-      setAiResponse('Desculpe, ocorreu um erro. Por favor tente novamente.');
-    } finally {
-      setAiLoading(false);
-    }
-  };
-
-  const quickQuestions = [
-    "Qual o melhor roteiro de 5 dias?",
-    "Onde ficar com bom custo-benefício?",
-    "Quais os melhores restaurantes locais?",
-    "Como me deslocar na cidade?",
-    "O que não posso deixar de visitar?"
-  ];
 
   // Use progress from API (can exceed 100%)
   const progressPercent = progress?.percentage || 0;
@@ -491,314 +429,34 @@ const JourneyDetail = () => {
               </motion.div>
             )}
 
-            {/* ==================== TRAVEL PLANNING SECTION ==================== */}
+            {/* AI Travel Planner CTA */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-gradient-to-br from-[#FFBE98]/10 to-[#E6F4F1]/30 rounded-3xl p-8 border border-[#FFBE98]/20"
+              className="bg-gradient-to-br from-[#FFBE98]/10 to-[#E6F4F1]/30 rounded-3xl overflow-hidden border border-[#FFBE98]/20"
+              data-testid="ai-planner-cta"
             >
-              <h2 className="text-2xl font-bold mb-6 text-[#2D2A26] flex items-center gap-3">
-                <Plane className="w-7 h-7 text-[#FFBE98]" />
-                Planeie a Sua Viagem para {journey.name}
-              </h2>
-
-              {travelResources && (
-                <div className="space-y-4">
-                  {/* Google Maps */}
-                  <div className="bg-white rounded-2xl p-4 shadow-sm">
-                    <a 
-                      href={travelResources.map.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-4 hover:bg-stone-50 p-2 rounded-xl transition-colors"
-                    >
-                      <div className="w-12 h-12 bg-[#4285F4]/10 rounded-xl flex items-center justify-center">
-                        <Map className="w-6 h-6 text-[#4285F4]" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-semibold text-[#2D2A26]">{travelResources.map.title}</p>
-                        <p className="text-sm text-[#6B6661]">{travelResources.map.description}</p>
-                      </div>
-                      <ExternalLink className="w-5 h-5 text-[#6B6661]" />
-                    </a>
+              <div className="p-8">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-[#FFBE98] to-[#F2C94C] rounded-xl flex items-center justify-center">
+                    <Sparkles className="w-5 h-5 text-white" />
                   </div>
-
-                  {/* Hotels Section */}
-                  <div className="bg-white rounded-2xl overflow-hidden shadow-sm">
-                    <button
-                      onClick={() => setExpandedSection(expandedSection === 'hotels' ? null : 'hotels')}
-                      className="w-full flex items-center gap-4 p-4 hover:bg-stone-50 transition-colors"
-                    >
-                      <div className="w-12 h-12 bg-[#FFBE98]/20 rounded-xl flex items-center justify-center">
-                        <Hotel className="w-6 h-6 text-[#FFBE98]" />
-                      </div>
-                      <div className="flex-1 text-left">
-                        <p className="font-semibold text-[#2D2A26]">Onde Ficar</p>
-                        <p className="text-sm text-[#6B6661]">Hotéis, apartamentos e alojamentos</p>
-                      </div>
-                      {expandedSection === 'hotels' ? (
-                        <ChevronUp className="w-5 h-5 text-[#6B6661]" />
-                      ) : (
-                        <ChevronDown className="w-5 h-5 text-[#6B6661]" />
-                      )}
-                    </button>
-                    <AnimatePresence>
-                      {expandedSection === 'hotels' && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: 'auto', opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          className="border-t border-stone-100"
-                        >
-                          <div className="p-4 grid grid-cols-2 md:grid-cols-3 gap-3">
-                            {travelResources.hotels.map((hotel, idx) => (
-                              <a
-                                key={idx}
-                                href={hotel.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-2 p-3 bg-stone-50 rounded-xl hover:bg-stone-100 transition-colors"
-                              >
-                                <span className="text-sm font-medium text-[#2D2A26]">{hotel.name}</span>
-                                <ExternalLink className="w-3 h-3 text-[#6B6661] ml-auto" />
-                              </a>
-                            ))}
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-
-                  {/* Flights Section */}
-                  <div className="bg-white rounded-2xl overflow-hidden shadow-sm">
-                    <button
-                      onClick={() => setExpandedSection(expandedSection === 'flights' ? null : 'flights')}
-                      className="w-full flex items-center gap-4 p-4 hover:bg-stone-50 transition-colors"
-                    >
-                      <div className="w-12 h-12 bg-[#E6F4F1] rounded-xl flex items-center justify-center">
-                        <Plane className="w-6 h-6 text-[#2D2A26]" />
-                      </div>
-                      <div className="flex-1 text-left">
-                        <p className="font-semibold text-[#2D2A26]">Voos e Transportes</p>
-                        <p className="text-sm text-[#6B6661]">Companhias aéreas e comparadores</p>
-                      </div>
-                      {expandedSection === 'flights' ? (
-                        <ChevronUp className="w-5 h-5 text-[#6B6661]" />
-                      ) : (
-                        <ChevronDown className="w-5 h-5 text-[#6B6661]" />
-                      )}
-                    </button>
-                    <AnimatePresence>
-                      {expandedSection === 'flights' && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: 'auto', opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          className="border-t border-stone-100"
-                        >
-                          <div className="p-4 grid grid-cols-2 gap-3">
-                            {travelResources.flights.map((flight, idx) => (
-                              <a
-                                key={idx}
-                                href={flight.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-2 p-3 bg-stone-50 rounded-xl hover:bg-stone-100 transition-colors"
-                              >
-                                <span className="text-sm font-medium text-[#2D2A26]">{flight.name}</span>
-                                <ExternalLink className="w-3 h-3 text-[#6B6661] ml-auto" />
-                              </a>
-                            ))}
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-
-                  {/* Social Media Section */}
-                  <div className="bg-white rounded-2xl overflow-hidden shadow-sm">
-                    <button
-                      onClick={() => setExpandedSection(expandedSection === 'social' ? null : 'social')}
-                      className="w-full flex items-center gap-4 p-4 hover:bg-stone-50 transition-colors"
-                    >
-                      <div className="w-12 h-12 bg-gradient-to-br from-[#E1306C]/20 to-[#405DE6]/20 rounded-xl flex items-center justify-center">
-                        <MessageCircle className="w-6 h-6 text-[#E1306C]" />
-                      </div>
-                      <div className="flex-1 text-left">
-                        <p className="font-semibold text-[#2D2A26]">O Que Dizem nas Redes</p>
-                        <p className="text-sm text-[#6B6661]">Opiniões, dicas e sugestões</p>
-                      </div>
-                      {expandedSection === 'social' ? (
-                        <ChevronUp className="w-5 h-5 text-[#6B6661]" />
-                      ) : (
-                        <ChevronDown className="w-5 h-5 text-[#6B6661]" />
-                      )}
-                    </button>
-                    <AnimatePresence>
-                      {expandedSection === 'social' && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: 'auto', opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          className="border-t border-stone-100"
-                        >
-                          <div className="p-4 space-y-3">
-                            {travelResources.social.map((social, idx) => (
-                              <a
-                                key={idx}
-                                href={social.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-3 p-3 bg-stone-50 rounded-xl hover:bg-stone-100 transition-colors"
-                              >
-                                <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
-                                  {social.name === 'GetYourGuide' && <Compass className="w-5 h-5 text-[#FF5533]" />}
-                                  {social.name === 'Viator' && <Globe className="w-5 h-5 text-[#00AA6C]" />}
-                                  {social.name === 'Pinterest' && <PinterestIcon />}
-                                  {social.name === 'WikiVoyage' && <BookOpen className="w-5 h-5 text-[#339966]" />}
-                                  {social.name === 'Reddit' && <RedditIcon />}
-                                </div>
-                                <div className="flex-1">
-                                  <p className="text-sm font-medium text-[#2D2A26]">{social.name}</p>
-                                  <p className="text-xs text-[#6B6661]">{social.description}</p>
-                                </div>
-                                <ExternalLink className="w-4 h-4 text-[#6B6661]" />
-                              </a>
-                            ))}
-                            
-                            {/* Blogs */}
-                            <div className="pt-3 border-t border-stone-100">
-                              <p className="text-xs text-[#6B6661] mb-2 font-medium">Blogs de Viagem</p>
-                              {travelResources.blogs.map((blog, idx) => (
-                                <a
-                                  key={idx}
-                                  href={blog.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="flex items-center gap-3 p-3 bg-stone-50 rounded-xl hover:bg-stone-100 transition-colors mb-2"
-                                >
-                                  <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
-                                    <BookOpen className="w-5 h-5 text-[#FFBE98]" />
-                                  </div>
-                                  <div className="flex-1">
-                                    <p className="text-sm font-medium text-[#2D2A26]">{blog.name}</p>
-                                    <p className="text-xs text-[#6B6661]">{blog.description}</p>
-                                  </div>
-                                  <ExternalLink className="w-4 h-4 text-[#6B6661]" />
-                                </a>
-                              ))}
-                            </div>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-
-                  {/* AI Planner Section */}
-                  <div className="bg-gradient-to-br from-[#FFBE98]/20 to-[#F2C94C]/20 rounded-2xl overflow-hidden border border-[#FFBE98]/30">
-                    <button
-                      onClick={() => setShowAiPlanner(!showAiPlanner)}
-                      className="w-full flex items-center gap-4 p-4 hover:bg-white/30 transition-colors"
-                    >
-                      <div className="w-12 h-12 bg-gradient-to-br from-[#FFBE98] to-[#F2C94C] rounded-xl flex items-center justify-center">
-                        <Sparkles className="w-6 h-6 text-white" />
-                      </div>
-                      <div className="flex-1 text-left">
-                        <p className="font-semibold text-[#2D2A26]">A IA Pode Ajudar-te a Planear</p>
-                        <p className="text-sm text-[#6B6661]">Roteiros, dicas, restaurantes e muito mais</p>
-                      </div>
-                      {showAiPlanner ? (
-                        <ChevronUp className="w-5 h-5 text-[#6B6661]" />
-                      ) : (
-                        <ChevronDown className="w-5 h-5 text-[#6B6661]" />
-                      )}
-                    </button>
-                    <AnimatePresence>
-                      {showAiPlanner && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: 'auto', opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          className="border-t border-[#FFBE98]/30"
-                        >
-                          <div className="p-4 space-y-4">
-                            {/* Quick Questions */}
-                            <div>
-                              <p className="text-xs text-[#6B6661] mb-2">Perguntas frequentes:</p>
-                              <div className="flex flex-wrap gap-2">
-                                {quickQuestions.map((q, idx) => (
-                                  <button
-                                    key={idx}
-                                    onClick={() => setAiQuestion(q)}
-                                    className="text-xs px-3 py-1.5 bg-white rounded-full text-[#2D2A26] hover:bg-[#FFBE98]/20 transition-colors"
-                                  >
-                                    {q}
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-
-                            {/* Input */}
-                            <div className="flex gap-2">
-                              <input
-                                type="text"
-                                value={aiQuestion}
-                                onChange={(e) => setAiQuestion(e.target.value)}
-                                onKeyPress={(e) => e.key === 'Enter' && askAI()}
-                                placeholder={`Pergunta algo sobre ${journey.name}...`}
-                                className="flex-1 px-4 py-3 rounded-xl border border-stone-200 bg-white focus:ring-2 focus:ring-[#FFBE98] focus:border-transparent"
-                              />
-                              <button
-                                onClick={askAI}
-                                disabled={aiLoading || !aiQuestion.trim()}
-                                className="px-4 py-3 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-medium disabled:opacity-50 hover:bg-[#FFAB7D] transition-colors"
-                              >
-                                {aiLoading ? (
-                                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                ) : (
-                                  <Send className="w-5 h-5" />
-                                )}
-                              </button>
-                            </div>
-
-                            {/* AI Response */}
-                            {aiResponse && (
-                              <motion.div
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="bg-white rounded-xl p-4 max-h-96 overflow-y-auto"
-                              >
-                                <div className="flex items-start gap-3">
-                                  <div className="w-8 h-8 bg-gradient-to-br from-[#FFBE98] to-[#F2C94C] rounded-lg flex items-center justify-center flex-shrink-0">
-                                    <Sparkles className="w-4 h-4 text-white" />
-                                  </div>
-                                  <div className="flex-1">
-                                    <div className="text-sm text-[#2D2A26] leading-relaxed">
-                                      {aiResponse.split('\n').map((line, idx) => (
-                                        <p key={idx} className={line.trim() ? 'mb-2' : 'mb-1'}>
-                                          {line.trim().startsWith('-') ? (
-                                            <span className="flex items-start gap-2">
-                                              <span className="text-[#FFBE98] mt-1">•</span>
-                                              <span>{line.trim().substring(1).trim()}</span>
-                                            </span>
-                                          ) : (
-                                            line
-                                          )}
-                                        </p>
-                                      ))}
-                                    </div>
-                                  </div>
-                                </div>
-                              </motion.div>
-                            )}
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
+                  <h2 className="text-xl font-bold text-[#2D2A26]">Planeie esta viagem com IA</h2>
                 </div>
-              )}
+                <p className="text-[#6B6661] mb-6">
+                  Receba um guia completo para {journey.name} — roteiro dia a dia, checklist, dicas locais e muito mais, gerado em segundos.
+                </p>
+                <Link
+                  to={`/travel-planner?destination=${encodeURIComponent(journey.name)}`}
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-[#FFBE98] text-[#2D2A26] rounded-full font-bold hover:bg-[#FFAB7D] transition-all hover:scale-105 shadow-sm"
+                  data-testid="ai-planner-cta-btn"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  Gerar plano de viagem
+                  <ChevronRight className="w-4 h-4" />
+                </Link>
+              </div>
             </motion.div>
           </div>
 
