@@ -210,6 +210,50 @@ test_plan:
   test_all: true
   test_priority: "high_first"
 
+  - task: "Contextual Monetization in AI Travel Planner"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/TravelPlanner.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Contextual monetization CTAs implemented: TopBookingBar, InlineActivityCTA (keyword detection in itinerary), ContextualCTA between sections, eSIM CTA in tech checklist, booking hints in tips. Needs full verification."
+
+  - task: "Scroll Bug Fix on SupportTicketDetail"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/SupportTicketDetail.js"
+    stuck_count: 2
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "user"
+        comment: "Recurring scroll bug - page doesn't scroll to top when navigating to ticket detail"
+      - working: "NA"
+        agent: "main"
+        comment: "Fixed with useLayoutEffect for synchronous scroll before paint. Removed hasLoadedOnce ref pattern, simplified to useLayoutEffect + useEffect for data fetch."
+
+metadata:
+  created_by: "testing_agent"
+  version: "1.0"
+  test_sequence: 2
+  run_ui: true
+
+test_plan:
+  current_focus:
+    - "Contextual Monetization in AI Travel Planner"
+    - "Scroll Bug Fix on SupportTicketDetail"
+  stuck_tasks:
+    - "Scroll Bug Fix on SupportTicketDetail"
+  test_all: false
+  test_priority: "high_first"
+
 agent_communication:
   - agent: "testing"
     message: "Comprehensive Stripe payment flow testing completed. Found and fixed critical JavaScript error in JourneyDetail.js that was causing 'Network error'. All backend Stripe endpoints working correctly. Frontend payment flow now functional."
+  - agent: "main"
+    message: "Two high-priority tasks to test: 1) Contextual monetization CTAs in TravelPlanner.js - verify TopBookingBar, InlineActivityCTA in itinerary, ContextualCTA between sections, eSIM CTA in tech checklist, booking hints in tips, StickyBar on scroll, and affiliate-click tracking. 2) Scroll bug fix in SupportTicketDetail.js - verify page scrolls to top when navigating to ticket detail page. Use admin@4luis.com / Admin1 to login and create a support ticket to test scroll behavior."

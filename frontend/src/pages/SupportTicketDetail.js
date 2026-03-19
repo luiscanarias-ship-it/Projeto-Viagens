@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -98,27 +98,26 @@ const SupportTicketDetail = () => {
   const [uploading, setUploading] = useState(false);
   const [sending, setSending] = useState(false);
 
-  const hasLoadedOnce = useRef(false);
-
   const fetchTicket = async () => {
     try {
       const res = await axios.get(`${API}/support/tickets/${ticketId}`, {
         headers: getAuthHeaders(), withCredentials: true
       });
       setTicket(res.data);
-      if (!hasLoadedOnce.current) {
-        hasLoadedOnce.current = true;
-        setTimeout(() => window.scrollTo(0, 0), 50);
-      }
     } catch {
       navigate('/dashboard');
     }
     setLoading(false);
   };
 
-  useEffect(() => {
+  // Force scroll to top synchronously before paint
+  useLayoutEffect(() => {
     window.scrollTo(0, 0);
-    hasLoadedOnce.current = false;
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, [ticketId]);
+
+  useEffect(() => {
     fetchTicket();
   }, [ticketId]);
 

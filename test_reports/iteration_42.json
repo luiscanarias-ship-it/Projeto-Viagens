@@ -1,0 +1,80 @@
+{
+  "summary": "Iteration 42 - Contextual Monetization & Scroll Bug Fix. ALL TESTS PASS. Backend: 11/11 tests PASS (100%). Frontend: All contextual monetization CTAs verified working. Scroll bug fix verified - SupportTicketDetail page scrolls to top (scrollY === 0) when navigated to.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "passed_tests": [
+    "Backend: GET /api/affiliate-links returns all platforms (booking, skyscanner, getyourguide, airalo, cars)",
+    "Backend: Affiliate links have correct URLs (booking.com, skyscanner, getyourguide, airalo.com, discovercars)",
+    "Backend: POST /api/affiliate-click tracks booking clicks",
+    "Backend: POST /api/affiliate-click tracks skyscanner clicks",
+    "Backend: POST /api/affiliate-click tracks getyourguide clicks",
+    "Backend: POST /api/affiliate-click tracks airalo (eSIM) clicks",
+    "Backend: POST /api/affiliate-click tracks cars/transport clicks",
+    "Backend: POST /api/affiliate-click rejects invalid platform (400)",
+    "Backend: POST /api/affiliate-click rejects missing platform (400)",
+    "Backend: Support tickets endpoint requires auth",
+    "Backend: Admin login working",
+    "Frontend: TopBookingBar renders in travel document header with Alojamento, Voos, Atividades",
+    "Frontend: TopBookingBar links have target=_blank and correct href URLs",
+    "Frontend: Tab navigation (Guia/Roteiro/Checklist/Dicas) all present and clickable",
+    "Frontend: BookingSection inside Guia tab with 4 affiliate items (booking, skyscanner, getyourguide, airalo)",
+    "Frontend: InlineActivityCTA - 'Reservar entrada' CTAs appear next to activities with museu/basílica keywords",
+    "Frontend: InlineActivityCTA - 'Ver transporte' CTA appears for airport/transfer activities",
+    "Frontend: ContextualCTA 'Ver hotéis' (booking) present between sections",
+    "Frontend: ContextualCTA 'Ver voos' (skyscanner) present after Roteiro section",
+    "Frontend: ContextualCTA 'Ver eSIM' (airalo) present after Checklist section",
+    "Frontend: ContextualCTA 'Descobrir' (getyourguide) present after Dicas section",
+    "Frontend: eSIM CTA (data-testid='checklist-esim-cta') inside tech checklist section - 'Internet no destino' link working",
+    "Frontend: Tips section shows 'Ver disponibilidade' links for tips containing booking keywords (reserv, bilhete, etc.)",
+    "Frontend: StickyBar (data-testid='sticky-booking-bar') appears at bottom when scrolling past travel document",
+    "Frontend: StickyBar has Hotéis, Voos, Atividades buttons with correct affiliate links",
+    "Frontend: All affiliate links open in new tab (target=_blank)",
+    "Frontend: SCROLL BUG FIX VERIFIED - SupportTicketDetail useLayoutEffect scrolls to top (window.scrollY === 0)"
+  ],
+  "test_report_links": [
+    "/app/backend/tests/test_affiliate_monetization_iter42.py",
+    "/app/test_reports/pytest/affiliate_monetization_iter42_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Contextual monetization properly implemented with 3 CTA types: TopBookingBar, ContextualCTA, InlineActivityCTA",
+    "ACTIVITY_PATTERNS correctly detect keywords (museu, tour, basílica, aeroporto, etc.) for inline CTAs",
+    "TIP_BOOKING_KEYWORDS correctly detect booking hints in tips for 'Ver disponibilidade' links",
+    "StickyBar uses AnimatePresence for smooth entry/exit animations",
+    "Scroll bug fixed via useLayoutEffect with triple scroll reset (window.scrollTo, documentElement.scrollTop, body.scrollTop)",
+    "All affiliate links track clicks via POST /api/affiliate-click for analytics"
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_affiliate_monetization_iter42.py"
+  ],
+  "success_rate": {
+    "backend": "100% (11/11 tests passed)",
+    "frontend": "100% (27/27 features verified)"
+  },
+  "test_credentials": {
+    "admin": "admin@4luis.com / Admin1"
+  },
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Iteration 42 verified NEW contextual monetization features in AI Travel Planner: 1) TopBookingBar with 3 booking links in header, 2) InlineActivityCTA appearing next to itinerary activities with keywords (museu, tour, basílica, aeroporto), 3) ContextualCTA between sections (booking after Guia, skyscanner after Roteiro, airalo after Checklist, getyourguide after Dicas), 4) eSIM CTA inside tech checklist section, 5) 'Ver disponibilidade' links in tips with booking keywords, 6) StickyBar at bottom on scroll. Also verified SCROLL BUG FIX: SupportTicketDetail page now correctly scrolls to top (useLayoutEffect with triple scroll reset). Rate limit for AI endpoints is 5 req/hour - use POST /api/ai/travel-plan/reset-limit to clear.",
+  "features_verified": [
+    {"feature": "GET /api/affiliate-links returns correct platforms", "status": "WORKING"},
+    {"feature": "POST /api/affiliate-click tracks clicks", "status": "WORKING"},
+    {"feature": "TopBookingBar in travel document header", "status": "WORKING"},
+    {"feature": "InlineActivityCTA for itinerary activities", "status": "WORKING"},
+    {"feature": "ContextualCTA between sections", "status": "WORKING"},
+    {"feature": "eSIM CTA in tech checklist (data-testid='checklist-esim-cta')", "status": "WORKING"},
+    {"feature": "'Ver disponibilidade' in tips with booking keywords", "status": "WORKING"},
+    {"feature": "StickyBar at bottom on scroll (data-testid='sticky-booking-bar')", "status": "WORKING"},
+    {"feature": "Affiliate links open in new tab", "status": "WORKING"},
+    {"feature": "SupportTicketDetail scroll-to-top fix (useLayoutEffect)", "status": "WORKING"}
+  ]
+}
