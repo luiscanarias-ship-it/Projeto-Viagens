@@ -6104,6 +6104,11 @@ async def generate_travel_plan(request: Request):
         if len(requests_list) >= 5:
             raise HTTPException(status_code=429, detail="Já criaste vários planos! ✈️ Podes gerar um novo dentro de 1 hora.")
     
+    # Increment rate limit counter BEFORE the AI call to prevent race conditions
+    if user_key not in ai_travel_plan_cache:
+        ai_travel_plan_cache[user_key] = []
+    ai_travel_plan_cache[user_key].append(now.isoformat())
+
     # Check cache for identical request
     cache_key = f"{destination}_{start_date}_{end_date}_{trip_type}".lower()
     cached = await db.travel_plans.find_one({"cache_key": cache_key}, {"_id": 0})
@@ -6171,11 +6176,6 @@ Responde APENAS com um JSON valido com esta estrutura exata (sem markdown, sem `
             upsert=True
         )
         
-        # Track rate limit
-        if user_key not in ai_travel_plan_cache:
-            ai_travel_plan_cache[user_key] = []
-        ai_travel_plan_cache[user_key].append(now.isoformat())
-        
         return {"plan": plan, "cached": False}
     except json.JSONDecodeError:
         logger.error(f"AI travel plan JSON parse error: {response[:500]}")
@@ -6229,6 +6229,11 @@ async def refine_travel_plan(request: Request):
         ai_travel_plan_cache[user_key] = requests_list
         if len(requests_list) >= 5:
             raise HTTPException(status_code=429, detail="Já criaste vários planos! ✈️ Podes gerar um novo dentro de 1 hora.")
+
+    # Increment rate limit counter BEFORE the AI call
+    if user_key not in ai_travel_plan_cache:
+        ai_travel_plan_cache[user_key] = []
+    ai_travel_plan_cache[user_key].append(now.isoformat())
 
     trip_type_text = f"Tipo de viagem: {trip_type}. " if trip_type else ""
     previous_plan_json = json.dumps(previous_plan, ensure_ascii=False)
@@ -6288,11 +6293,6 @@ Responde APENAS com um JSON valido com esta estrutura exata (sem markdown, sem `
             clean = clean.strip()
 
         plan = json.loads(clean)
-
-        # Track rate limit
-        if user_key not in ai_travel_plan_cache:
-            ai_travel_plan_cache[user_key] = []
-        ai_travel_plan_cache[user_key].append(now.isoformat())
 
         return {"plan": plan, "refined": True}
     except json.JSONDecodeError:
