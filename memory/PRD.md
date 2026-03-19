@@ -15,7 +15,7 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 
 ## What's Been Implemented
 
-### AI Travel Planner (2026-03-18, melhorado 2026-03-18)
+### AI Travel Planner (2026-03-18, melhorado 2026-03-19)
 - POST /api/ai/travel-plan (GPT-5.2, structured JSON response, aceita trip_type string ou array)
 - POST /api/ai/travel-plan/refine (ajustar plano com feedback do utilizador)
 - Multi-select tipo de viagem (Cultural, Aventura, Passeio, Gastronomica, Romantica, Familia)
@@ -28,6 +28,7 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - Barra sticky no fundo (Hoteis, Voos, Atividades) visivel ao scrollar
 - Cache em MongoDB (travel_plans), rate limit 5 req/hora/user
 - Responsivo em mobile (375px+)
+- Monetizacao contextual: TopBookingBar no header, InlineActivityCTA no itinerario (detecao keywords), ContextualCTA entre seccoes, eSIM CTA no checklist tech, booking hints nas dicas, tracking de cliques via POST /api/affiliate-click (2026-03-19)
 
 ### Pagina Planear Viagem + Afiliados (2026-03-18, melhorado 2026-03-18)
 - /plan-trip com 7 seccoes reordenadas (Hotels>Flights>Activities>Cars>eSIM>Insurance>Map)
@@ -40,6 +41,10 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 
 ### Conformidade RGPD (2026-03-18)
 - Checkbox registo, politica privacidade, banner cookies
+
+### Bug Fix: Scroll SupportTicketDetail (2026-03-19)
+- Corrigido bug recorrente de scroll na pagina de detalhes do ticket de suporte
+- Implementado useLayoutEffect para scroll sincrono antes do paint
 
 ### Anteriores
 - Consolidacao logica negocio, sistema senha, scroll fix, testemunhos, suporte, prova social, SEO, notificacoes, autosave
