@@ -443,15 +443,14 @@ const TravelPlanner = () => {
   return (
     <div className="min-h-screen bg-[#FAFAF9]">
       {/* Hero */}
-      <div className="bg-gradient-to-b from-[#FFBE98]/15 to-[#FAFAF9] pt-28 pb-10 px-6">
+      <div className="bg-gradient-to-b from-[#FFBE98]/15 to-[#FAFAF9] pt-24 pb-4 px-6">
         <div className="max-w-2xl mx-auto text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <div className="inline-flex items-center gap-2 bg-white/80 rounded-full px-4 py-1.5 mb-5 border border-[#FFBE98]/20">
+            <div className="inline-flex items-center gap-2 bg-white/80 rounded-full px-4 py-1.5 mb-3 border border-[#FFBE98]/20">
               <Sparkles className="w-3.5 h-3.5 text-[#FFBE98]" />
               <span className="text-xs font-medium text-[#6B6661]">Powered by AI</span>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-[#2D2A26] mb-3" data-testid="planner-title">Planeie a sua viagem com IA</h1>
-            <p className="text-base text-[#6B6661]">Gera um plano de viagem personalizado em segundos.</p>
+            <h1 className="text-3xl sm:text-4xl font-bold text-[#2D2A26]" data-testid="planner-title">Planeie a sua viagem com IA</h1>
           </motion.div>
         </div>
       </div>
@@ -460,7 +459,7 @@ const TravelPlanner = () => {
         {/* ── Form ── */}
         {!plan && !loading && (
           <motion.form initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-            onSubmit={handleSubmit} className="bg-white rounded-2xl border border-stone-100 p-5 shadow-sm space-y-4" data-testid="planner-form">
+            onSubmit={handleSubmit} className="bg-white rounded-2xl border border-stone-100 p-5 shadow-sm space-y-3" data-testid="planner-form">
             <div>
               <label className="block text-sm font-medium mb-1.5 flex items-center gap-1.5">
                 <MapPin className="w-4 h-4 text-[#FFBE98]" />Destino
