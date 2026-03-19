@@ -123,18 +123,35 @@ const JourneyDetail = () => {
   const [paymentInfo, setPaymentInfo] = useState(null);
   const [copied, setCopied] = useState(false);
   const [showStickyBtn, setShowStickyBtn] = useState(false);
+  const [sidebarVisible, setSidebarVisible] = useState(true);
   const [showExitIntent, setShowExitIntent] = useState(false);
   const exitIntentShown = useRef(false);
+  const supportBtnRef = useRef(null);
   
   const sponsorCode = searchParams.get('sponsor');
   const openPayment = searchParams.get('pay') === 'true';
 
-  // Sticky button on scroll
+  // Track sidebar visibility
   useEffect(() => {
-    const onScroll = () => setShowStickyBtn(window.scrollY > 400);
-    window.addEventListener('scroll', onScroll);
+    if (!supportBtnRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setSidebarVisible(entry.isIntersecting),
+      { threshold: 0 }
+    );
+    observer.observe(supportBtnRef.current);
+    return () => observer.disconnect();
+  }, [loading]);
+
+  // Track scroll position
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 500);
+    window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  // Show sticky only when scrolled past sidebar area AND sidebar is not visible
+  const showSticky = scrolled && !sidebarVisible && !showCheckout;
 
   // Exit intent detection
   useEffect(() => {
@@ -214,7 +231,7 @@ const JourneyDetail = () => {
       />
       {/* Sticky Bottom Bar */}
       <AnimatePresence>
-        {showStickyBtn && !showCheckout && (
+        {showSticky && (
           <motion.div
             initial={{ y: 80, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -461,7 +478,7 @@ const JourneyDetail = () => {
           </div>
 
           {/* Right Column - Support Card + Contributions Feed */}
-          <div className="lg:col-span-1 space-y-6">
+          <div ref={supportBtnRef} className="lg:col-span-1 space-y-6">
             {/* Support Card */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}

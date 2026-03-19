@@ -41,6 +41,8 @@ const Home = () => {
   const [platformStats, setPlatformStats] = useState(null);
   const [showCheckout, setShowCheckout] = useState(false);
   const [showStickyBar, setShowStickyBar] = useState(false);
+  const [mainBtnVisible, setMainBtnVisible] = useState(true);
+  const mainContributeBtnRef = useRef(null);
   
   // Translated dynamic content from DB
   const [dynTexts, setDynTexts] = useState({});
@@ -64,12 +66,18 @@ const Home = () => {
     }
   }, []);
 
-  // Sticky bar scroll listener
+  // Sticky bar: only show when main contribute button is NOT visible
   useEffect(() => {
-    const handleScroll = () => setShowStickyBar(window.scrollY > 600);
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    if (!mainContributeBtnRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setMainBtnVisible(entry.isIntersecting),
+      { threshold: 0 }
+    );
+    observer.observe(mainContributeBtnRef.current);
+    return () => observer.disconnect();
+  }, [mainJourney]);
+
+  const showSticky = !mainBtnVisible && mainJourney?.journey && !showCheckout;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -382,6 +390,7 @@ const Home = () => {
                         Queres ajudar este sonho a dar o próximo passo?
                       </p>
                       <button
+                        ref={mainContributeBtnRef}
                         onClick={() => setShowCheckout(true)}
                         className="inline-flex items-center gap-2 px-8 py-4 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-bold text-lg hover:bg-[#FFAB7D] transition-colors"
                         data-testid="contribute-main-btn">
@@ -792,7 +801,7 @@ const Home = () => {
 
       {/* Sticky Contribution Bar */}
       <AnimatePresence>
-        {showStickyBar && mainJourney?.journey && !showCheckout && (
+        {showSticky && (
           <motion.div
             initial={{ y: 80, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -817,7 +826,7 @@ const Home = () => {
                   {dreamersStats?.total_dreamers > 0 && (
                     <span className="hidden md:flex items-center gap-1.5 text-xs text-[#6B6661]" data-testid="sticky-dreamers-count">
                       <Users className="w-3 h-3 text-[#FFBE98]" />
-                      <span className="font-semibold text-[#2D2A26]">{dreamersStats.total_dreamers}</span> sonhadores já apoiaram
+                      <span className="font-semibold text-[#2D2A26]">{dreamersStats.total_dreamers}</span> sonhadores já apoiaram a 4Luis
                     </span>
                   )}
                 </div>
