@@ -824,7 +824,7 @@ const Home = () => {
                     </div>
                   )}
                   {dreamersStats?.total_dreamers > 0 && (
-                    <span className="hidden md:flex items-center gap-1.5 text-xs text-[#6B6661]" data-testid="sticky-dreamers-count">
+                    <span className="hidden md:flex items-center gap-1.5 text-xs text-[#6B6661] whitespace-nowrap" data-testid="sticky-dreamers-count">
                       <Users className="w-3 h-3 text-[#FFBE98]" />
                       <span className="font-semibold text-[#2D2A26]">{dreamersStats.total_dreamers}</span> sonhadores já apoiaram a 4Luis
                     </span>
