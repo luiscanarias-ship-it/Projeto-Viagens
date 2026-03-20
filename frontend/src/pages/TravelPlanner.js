@@ -29,10 +29,16 @@ const TABS = [
 
 /* ── Activity keyword detection for contextual CTAs ── */
 const ACTIVITY_PATTERNS = [
-  { keywords: ['museu', 'museum', 'galeria', 'exposição', 'exposicao', 'palácio', 'palacio', 'castelo', 'torre', 'catedral', 'basílica', 'basilica', 'mosteiro', 'igreja'],
-    label: 'Reservar entrada', platform: 'getyourguide', icon: Ticket },
-  { keywords: ['tour', 'visita guiada', 'excursão', 'excursao', 'passeio de barco', 'cruzeiro', 'safari', 'mergulho'],
-    label: 'Ver atividades', platform: 'getyourguide', icon: Compass },
+  { keywords: ['museu', 'museum', 'galeria', 'exposição', 'exposicao', 'palácio', 'palacio', 'castelo', 'torre', 'catedral', 'basílica', 'basilica', 'mosteiro', 'igreja', 'templo', 'santuário', 'shrine', 'temple'],
+    label: 'Reservar entrada (evita filas)', platform: 'getyourguide', icon: Ticket },
+  { keywords: ['restaurante', 'gastronomia', 'food tour', 'mercado', 'market', 'degustação', 'sabores', 'culinária'],
+    label: 'Reservar experiência', platform: 'getyourguide', icon: Ticket },
+  { keywords: ['tour', 'visita guiada', 'excursão', 'excursao', 'passeio de barco', 'cruzeiro', 'safari', 'mergulho', 'walking tour', 'day trip'],
+    label: 'Garantir vaga (muito procurado)', platform: 'getyourguide', icon: Ticket },
+  { keywords: ['bilhete', 'ingresso', 'entrada', 'ticket', 'espetáculo', 'show', 'concerto', 'ópera', 'teatro'],
+    label: 'Garantir bilhete antes de esgotar', platform: 'getyourguide', icon: Ticket },
+  { keywords: ['atividade', 'experiência', 'adventure', 'snorkel', 'surf', 'kayak', 'hiking', 'trekking', 'zip', 'bungee'],
+    label: 'Reservar atividade', platform: 'getyourguide', icon: Compass },
   { keywords: ['aeroporto', 'transfer', 'aluguer', 'rent a car', 'carro'],
     label: 'Ver transporte', platform: 'cars', icon: Car },
 ];
@@ -45,7 +51,7 @@ const detectActivityCTA = (text) => {
   return null;
 };
 
-const TIP_BOOKING_KEYWORDS = ['reserv', 'bilhete', 'ingresso', 'anteced', 'antecipadamente', 'comprar', 'book'];
+const TIP_BOOKING_KEYWORDS = ['reserv', 'bilhete', 'ingresso', 'anteced', 'antecipadamente', 'comprar', 'book', 'teamlab', 'teamLab', 'popular', 'procurad', 'esgota', 'fila'];
 const tipHasBookingHint = (tip) => TIP_BOOKING_KEYWORDS.some(k => tip.toLowerCase().includes(k));
 
 /* ── CTA type → platform + icon mapping ── */
@@ -115,7 +121,7 @@ const TextWithCTA = ({ text, links, onTrack, variant = 'inline' }) => {
 const InlineActivityCTA = ({ match, link, onTrack }) => (
   <a href={link || '#'} target="_blank" rel="noopener noreferrer"
     onClick={() => onTrack(match.platform)}
-    className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#FFBE98] bg-[#FFBE98]/8 hover:bg-[#FFBE98]/15 border border-[#FFBE98]/15 hover:border-[#FFBE98]/30 px-3 py-1.5 rounded-xl transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 ml-1 group"
+    className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#FFBE98] bg-[#FFBE98]/8 hover:bg-[#FFBE98]/15 border border-[#FFBE98]/15 hover:border-[#FFBE98]/30 px-3 py-1.5 rounded-xl shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 ml-1 group"
     data-testid={`inline-cta-${match.platform}`}>
     <match.icon className="w-3.5 h-3.5" />
     <span>{match.label}</span>
@@ -128,9 +134,9 @@ const TopBookingBar = ({ links, onTrack, destination }) => (
   <div className="pt-3 space-y-1.5" data-testid="top-booking-bar">
     <div className="flex items-center gap-2 flex-wrap">
       {[
-        { id: 'booking', icon: Hotel, label: destination ? `Hotéis em ${destination}` : 'Alojamento', trust: true },
-        { id: 'skyscanner', icon: Plane, label: destination ? `Voos para ${destination}` : 'Voos', trust: false },
-        { id: 'getyourguide', icon: Ticket, label: destination ? `Atividades em ${destination}` : 'Atividades', trust: true },
+        { id: 'booking', icon: Hotel, label: destination ? `\ud83c\udfe8 Hotéis bem localizados em ${destination}` : '\ud83c\udfe8 Alojamento', trust: true },
+        { id: 'skyscanner', icon: Plane, label: '\u2708\ufe0f Voos para estas datas (melhor preço)', trust: false },
+        { id: 'getyourguide', icon: Ticket, label: destination ? `\ud83c\udfab Experiências em ${destination} (evita filas)` : '\ud83c\udfab Atividades', trust: true },
       ].map(item => (
         <a key={item.id} href={links[item.id]?.url || '#'} target="_blank" rel="noopener noreferrer"
           onClick={() => onTrack(item.id)} data-testid={`top-booking-${item.id}`}
@@ -152,48 +158,48 @@ const getCTACopy = (destination, tripTypes = []) => {
 
   const typeSpecific = {
     cultural: {
-      hotel: { text: `Hotéis no centro histórico de ${dest}`, sublabel: 'Reservar com antecedência \u00b7 Cancelamento gratuito', label: 'Ver hotéis' },
-      activitiesMid: { text: `Experiências culturais deste roteiro`, sublabel: 'Evita filas \u00b7 Bilhetes sem espera', label: 'Reservar' },
-      flights: { text: `Encontrar voos para ${dest} nestas datas`, sublabel: 'Preços variam rapidamente \u00b7 Compare agora', label: 'Comparar' },
-      insurance: { text: `Proteja a sua viagem cultural a ${dest}`, sublabel: 'Indispensável \u00b7 Cobertura médica e cancelamento', label: 'Proteger' },
-      activitiesDicas: { text: `Descubra ${dest} com guias culturais locais`, sublabel: 'Muito procurado \u00b7 Experiências autênticas', label: 'Explorar' },
+      hotel: { text: `\ud83c\udfe8 Hotéis no centro histórico de ${dest}`, sublabel: 'Melhor localização \u00b7 Cancelamento gratuito', label: `Ver hotéis no centro de ${dest}` },
+      activitiesMid: { text: `\ud83c\udfcc Experiências imperdíveis em ${dest}`, sublabel: 'Evita filas \u00b7 Bilhetes sem espera', label: 'Reservar experiências (evita filas)' },
+      flights: { text: `\u2708\ufe0f Encontrar voos para estas datas (melhor preço)`, sublabel: 'Preços sobem rapidamente \u00b7 Compare agora', label: 'Comparar voos' },
+      insurance: { text: `\ud83d\udee1\ufe0f Os imprevistos acontecem \u2014 faz o teu seguro`, sublabel: 'Cancelamento + assistência médica', label: 'Fazer seguro' },
+      activitiesDicas: { text: `\ud83c\udfcc Descubra ${dest} com guias culturais locais`, sublabel: 'Muito procurado \u00b7 Reservar com antecedência', label: 'Reservar com antecedência' },
     },
     gastronomica: {
-      hotel: { text: `Hotéis perto dos melhores restaurantes de ${dest}`, sublabel: 'Reservar com antecedência \u00b7 Cancelamento gratuito', label: 'Ver hotéis' },
-      activitiesMid: { text: `Reservar experiências gastronómicas em ${dest}`, sublabel: 'Muito procurado \u00b7 Sabores autênticos', label: 'Reservar' },
-      flights: { text: `Voos para ${dest} nestas datas`, sublabel: 'Preços variam rapidamente \u00b7 Compare agora', label: 'Comparar' },
-      insurance: { text: `Proteja a sua escapadela gastronómica`, sublabel: 'Indispensável \u00b7 Cobertura médica e cancelamento', label: 'Proteger' },
-      activitiesDicas: { text: `Tours gastronómicos e sabores de ${dest}`, sublabel: 'Muito procurado \u00b7 Experiências locais', label: 'Explorar' },
+      hotel: { text: `\ud83c\udfe8 Hotéis perto dos melhores restaurantes de ${dest}`, sublabel: 'Melhor localização \u00b7 Cancelamento gratuito', label: `Ver hotéis em ${dest}` },
+      activitiesMid: { text: `\ud83c\udf7d\ufe0f Experiências gastronómicas em ${dest}`, sublabel: 'Muito procurado \u00b7 Sabores autênticos', label: 'Reservar experiências' },
+      flights: { text: `\u2708\ufe0f Voos para estas datas (melhor preço)`, sublabel: 'Preços sobem rapidamente \u00b7 Compare agora', label: 'Comparar voos' },
+      insurance: { text: `\ud83d\udee1\ufe0f Os imprevistos acontecem \u2014 faz o teu seguro`, sublabel: 'Cancelamento + assistência médica', label: 'Fazer seguro' },
+      activitiesDicas: { text: `\ud83c\udf7d\ufe0f Tours gastronómicos e sabores de ${dest}`, sublabel: 'Muito procurado \u00b7 Reservar com antecedência', label: 'Reservar com antecedência' },
     },
     romantica: {
-      hotel: { text: `Hotéis românticos recomendados em ${dest}`, sublabel: 'Reservar com antecedência \u00b7 Cancelamento gratuito', label: 'Ver hotéis' },
-      activitiesMid: { text: `Experiências românticas para este roteiro`, sublabel: 'Muito procurado \u00b7 Momentos únicos a dois', label: 'Reservar' },
-      flights: { text: `Voos para a vossa escapadela em ${dest}`, sublabel: 'Preços variam rapidamente \u00b7 Compare agora', label: 'Comparar' },
-      insurance: { text: `Proteja a vossa viagem romântica`, sublabel: 'Indispensável \u00b7 Cobertura médica e cancelamento', label: 'Proteger' },
-      activitiesDicas: { text: `Experiências a dois em ${dest}`, sublabel: 'Muito procurado \u00b7 Momentos inesquecíveis', label: 'Explorar' },
+      hotel: { text: `\ud83c\udfe8 Hotéis românticos recomendados em ${dest}`, sublabel: 'Melhor localização \u00b7 Cancelamento gratuito', label: `Ver hotéis em ${dest}` },
+      activitiesMid: { text: `\u2764\ufe0f Experiências românticas deste roteiro`, sublabel: 'Muito procurado \u00b7 Momentos únicos a dois', label: 'Reservar experiências' },
+      flights: { text: `\u2708\ufe0f Voos para a vossa escapadela (melhor preço)`, sublabel: 'Preços sobem rapidamente \u00b7 Compare agora', label: 'Comparar voos' },
+      insurance: { text: `\ud83d\udee1\ufe0f Os imprevistos acontecem \u2014 faz o teu seguro`, sublabel: 'Cancelamento + assistência médica', label: 'Fazer seguro' },
+      activitiesDicas: { text: `\u2764\ufe0f Experiências a dois em ${dest}`, sublabel: 'Muito procurado \u00b7 Reservar com antecedência', label: 'Reservar com antecedência' },
     },
     aventura: {
-      hotel: { text: `Alojamento para aventureiros em ${dest}`, sublabel: 'Reservar com antecedência \u00b7 Cancelamento gratuito', label: 'Ver hotéis' },
-      activitiesMid: { text: `Atividades ao ar livre deste roteiro`, sublabel: 'Muito procurado \u00b7 Vagas limitadas', label: 'Reservar' },
-      flights: { text: `Voos para a aventura em ${dest}`, sublabel: 'Preços variam rapidamente \u00b7 Compare agora', label: 'Comparar' },
-      insurance: { text: `Seguro essencial para viagem de aventura`, sublabel: 'Indispensável \u00b7 Cobertura para atividades radicais', label: 'Proteger' },
-      activitiesDicas: { text: `Aventuras e desportos em ${dest}`, sublabel: 'Vagas limitadas \u00b7 Experiências únicas', label: 'Explorar' },
+      hotel: { text: `\ud83c\udfe8 Alojamento para aventureiros em ${dest}`, sublabel: 'Melhor localização \u00b7 Cancelamento gratuito', label: `Ver hotéis em ${dest}` },
+      activitiesMid: { text: `\ud83c\udfd4\ufe0f Atividades ao ar livre deste roteiro`, sublabel: 'Vagas limitadas \u00b7 Reservar com antecedência', label: 'Reservar atividades' },
+      flights: { text: `\u2708\ufe0f Voos para a aventura (melhor preço)`, sublabel: 'Preços sobem rapidamente \u00b7 Compare agora', label: 'Comparar voos' },
+      insurance: { text: `\ud83d\udee1\ufe0f Seguro essencial para aventura \u2014 não arrisques`, sublabel: 'Cobertura para atividades radicais', label: 'Fazer seguro' },
+      activitiesDicas: { text: `\ud83c\udfd4\ufe0f Aventuras imperdíveis em ${dest}`, sublabel: 'Vagas limitadas \u00b7 Reservar com antecedência', label: 'Reservar com antecedência' },
     },
     familia: {
-      hotel: { text: `Hotéis family-friendly em ${dest}`, sublabel: 'Reservar com antecedência \u00b7 Cancelamento gratuito', label: 'Ver hotéis' },
-      activitiesMid: { text: `Atividades para toda a família neste roteiro`, sublabel: 'Evita filas \u00b7 Bilhetes sem espera', label: 'Reservar' },
-      flights: { text: `Voos para ${dest} para toda a família`, sublabel: 'Preços variam rapidamente \u00b7 Compare agora', label: 'Comparar' },
-      insurance: { text: `Proteja a viagem em família a ${dest}`, sublabel: 'Indispensável \u00b7 Cobertura para toda a família', label: 'Proteger' },
-      activitiesDicas: { text: `Atividades para crianças e famílias em ${dest}`, sublabel: 'Muito procurado \u00b7 Diversão garantida', label: 'Explorar' },
+      hotel: { text: `\ud83c\udfe8 Hotéis family-friendly em ${dest}`, sublabel: 'Melhor localização \u00b7 Cancelamento gratuito', label: `Ver hotéis em ${dest}` },
+      activitiesMid: { text: `\ud83c\udfa0 Atividades para toda a família`, sublabel: 'Evita filas \u00b7 Bilhetes sem espera', label: 'Reservar experiências (evita filas)' },
+      flights: { text: `\u2708\ufe0f Voos para a família (melhor preço)`, sublabel: 'Preços sobem rapidamente \u00b7 Compare agora', label: 'Comparar voos' },
+      insurance: { text: `\ud83d\udee1\ufe0f Os imprevistos acontecem \u2014 protege a família`, sublabel: 'Cobertura para toda a família', label: 'Fazer seguro' },
+      activitiesDicas: { text: `\ud83c\udfa0 Atividades para crianças em ${dest}`, sublabel: 'Muito procurado \u00b7 Reservar com antecedência', label: 'Reservar com antecedência' },
     },
   };
 
   const defaults = {
-    hotel: { text: `Hotéis bem localizados em ${dest}`, sublabel: 'Reservar com antecedência \u00b7 Cancelamento gratuito', label: 'Ver hotéis' },
-    activitiesMid: { text: `Reservar experiências deste roteiro`, sublabel: 'Evita filas \u00b7 Bilhetes sem espera', label: 'Reservar' },
-    flights: { text: `Encontrar voos para ${dest} nestas datas`, sublabel: 'Preços variam rapidamente \u00b7 Compare agora', label: 'Comparar' },
-    insurance: { text: `Proteja a sua viagem a ${dest}`, sublabel: 'Indispensável \u00b7 Cobertura médica e cancelamento', label: 'Proteger' },
-    activitiesDicas: { text: `Experiências e atividades em ${dest}`, sublabel: 'Muito procurado \u00b7 Experiências autênticas', label: 'Explorar' },
+    hotel: { text: `\ud83c\udfe8 Hotéis bem localizados em ${dest}`, sublabel: 'Melhor localização \u00b7 Cancelamento gratuito', label: `Ver hotéis no centro de ${dest}` },
+    activitiesMid: { text: `\ud83c\udfab Experiências imperdíveis em ${dest}`, sublabel: 'Evita filas \u00b7 Bilhetes sem espera', label: 'Reservar experiências (evita filas)' },
+    flights: { text: `\u2708\ufe0f Encontrar voos para estas datas (melhor preço)`, sublabel: 'Preços sobem rapidamente \u00b7 Compare agora', label: 'Comparar voos' },
+    insurance: { text: `\ud83d\udee1\ufe0f Os imprevistos acontecem \u2014 faz o teu seguro`, sublabel: 'Cancelamento + assistência médica', label: 'Fazer seguro' },
+    activitiesDicas: { text: `\ud83c\udfab Experiências e atividades em ${dest}`, sublabel: 'Muito procurado \u00b7 Reservar com antecedência', label: 'Reservar com antecedência' },
   };
 
   const specific = typeSpecific[primary] || {};
@@ -247,17 +253,17 @@ const ContextualCTA = ({ icon: Icon, text, label, sublabel, link, platform, onTr
 const EsimMicroCard = ({ link, onTrack, destination }) => (
   <a href={link || '#'} target="_blank" rel="noopener noreferrer"
     onClick={() => onTrack('airalo')} data-testid="checklist-esim-cta"
-    className="block mt-2.5 bg-[#FFBE98]/8 rounded-xl border border-[#FFBE98]/15 p-3 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group">
+    className="block mt-2.5 bg-[#FFBE98]/8 rounded-xl border border-[#FFBE98]/15 p-3 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group">
     <div className="flex items-center gap-2.5">
       <div className="w-8 h-8 bg-white rounded-xl flex items-center justify-center shadow-sm shrink-0 group-hover:shadow-md transition-shadow">
         <Wifi className="w-4 h-4 text-[#FFBE98]" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-[12px] font-bold text-[#2D2A26]">Internet no destino</p>
-        <p className="text-[10px] text-[#6B6661]">{destination ? `Fique ligado em ${destination}` : 'eSIM sem roaming'}</p>
+        <p className="text-[12px] font-bold text-[#2D2A26]">{destination ? `Comprar eSIM para ${destination}` : 'Comprar eSIM internacional'}</p>
+        <p className="text-[10px] text-[#6B6661]">Ativa antes de viajar · Sem roaming</p>
       </div>
       <span className="text-[11px] font-bold text-[#FFBE98] group-hover:translate-x-0.5 transition-transform flex items-center gap-0.5">
-        Ver <ExternalLink className="w-3 h-3" />
+        Comprar <ExternalLink className="w-3 h-3" />
       </span>
     </div>
   </a>
@@ -267,8 +273,8 @@ const EsimMicroCard = ({ link, onTrack, destination }) => (
 const TipBookingLink = ({ link, onTrack }) => (
   <a href={link || '#'} target="_blank" rel="noopener noreferrer"
     onClick={() => onTrack('getyourguide')}
-    className="inline-flex items-center gap-1.5 text-[12px] font-bold text-[#FFBE98] hover:text-[#E6A07C] bg-[#FFBE98]/8 hover:bg-[#FFBE98]/15 border border-[#FFBE98]/15 hover:border-[#FFBE98]/30 px-3 py-1 rounded-xl transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 ml-1">
-    Ver bilhetes <ExternalLink className="w-3 h-3 opacity-70" />
+    className="inline-flex items-center gap-1.5 text-[12px] font-bold text-[#FFBE98] hover:text-[#E6A07C] bg-[#FFBE98]/8 hover:bg-[#FFBE98]/15 border border-[#FFBE98]/15 hover:border-[#FFBE98]/30 px-3 py-1 rounded-xl shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 ml-1">
+    Reservar com antecedência <ExternalLink className="w-3 h-3 opacity-70" />
   </a>
 );
 
@@ -289,7 +295,7 @@ const StickyBar = ({ links, onTrack, visible, destination }) => {
   const dest = destination || '';
   const items = [
     { id: 'booking', icon: Hotel, label: dest ? `Hotéis em ${dest}` : 'Hotéis' },
-    { id: 'skyscanner', icon: Plane, label: dest ? `Voos para ${dest}` : 'Voos' },
+    { id: 'skyscanner', icon: Plane, label: 'Voos (melhor preço)' },
     { id: 'getyourguide', icon: Ticket, label: dest ? `Atividades em ${dest}` : 'Atividades' },
   ];
   return (
