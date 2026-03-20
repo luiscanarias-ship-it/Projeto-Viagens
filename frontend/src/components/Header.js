@@ -59,7 +59,7 @@ const Header = () => {
               whileHover={{ scale: 1.05 }}
               className="flex items-center gap-2"
             >
-              <Heart className="w-8 h-8 text-[#E67E22] fill-[#E67E22]" />
+              <Heart className="w-8 h-8 text-[#FFBE98] fill-[#FFBE98]" />
               <span className="text-2xl font-bold text-[#2D2A26] tracking-tight">4Luis</span>
             </motion.div>
           </Link>
@@ -68,7 +68,7 @@ const Header = () => {
           <nav className="hidden md:flex items-center gap-5">
             <Link 
               to="/" 
-              className="text-[#2D2A26] hover:text-[#E67E22] transition-colors text-sm font-medium whitespace-nowrap"
+              className="text-[#2D2A26] hover:text-[#FFBE98] transition-colors text-sm font-medium whitespace-nowrap"
               data-testid="nav-home"
             >
               {t('nav.home')}
@@ -83,7 +83,7 @@ const Header = () => {
                   navigate('/?scrollTo=journeys');
                 }
               }}
-              className="text-[#2D2A26] hover:text-[#E67E22] transition-colors text-sm font-medium whitespace-nowrap"
+              className="text-[#2D2A26] hover:text-[#FFBE98] transition-colors text-sm font-medium whitespace-nowrap"
               data-testid="nav-journeys"
             >
               Explorar Viagens
@@ -98,14 +98,14 @@ const Header = () => {
                   navigate('/');
                 }
               }}
-              className="px-5 py-2 bg-[#E67E22] text-white hover:bg-[#D35400] transition-colors font-bold rounded-full text-sm shadow-sm whitespace-nowrap"
+              className="px-5 py-2 bg-[#FFBE98] text-white hover:bg-[#E6A07C] transition-colors font-bold rounded-full text-sm shadow-sm whitespace-nowrap"
               data-testid="nav-main-journey"
             >
               Viagem Principal
             </Link>
             <Link 
               to="/plan-trip" 
-              className="text-[#2D2A26] hover:text-[#E67E22] transition-colors text-sm font-medium whitespace-nowrap"
+              className="text-[#2D2A26] hover:text-[#FFBE98] transition-colors text-sm font-medium whitespace-nowrap"
               data-testid="nav-plan-trip"
             >
               Planear Viagem
@@ -114,7 +114,7 @@ const Header = () => {
             {user && (
               <Link 
                 to="/dashboard" 
-                className="text-[#2D2A26] hover:text-[#E67E22] transition-colors text-sm font-medium whitespace-nowrap"
+                className="text-[#2D2A26] hover:text-[#FFBE98] transition-colors text-sm font-medium whitespace-nowrap"
                 data-testid="nav-dashboard"
               >
                 {t('nav.dashboard')}
@@ -124,7 +124,7 @@ const Header = () => {
             {user?.is_admin && (
               <Link 
                 to="/admin" 
-                className="text-[#2D2A26] hover:text-[#E67E22] transition-colors text-sm font-medium whitespace-nowrap"
+                className="text-[#2D2A26] hover:text-[#FFBE98] transition-colors text-sm font-medium whitespace-nowrap"
                 data-testid="nav-admin"
               >
                 {t('nav.admin')}
@@ -144,7 +144,7 @@ const Header = () => {
                 <Globe className="w-5 h-5 text-[#6B6661]" />
                 <span className="hidden sm:inline text-sm">{currentLang.flag}</span>
                 {isTranslating && (
-                  <span className="w-2 h-2 rounded-full bg-[#E67E22] animate-pulse-soft" />
+                  <span className="w-2 h-2 rounded-full bg-[#FFBE98] animate-pulse-soft" />
                 )}
               </button>
               
@@ -310,7 +310,7 @@ const Header = () => {
                     }, 800);
                   }
                 }}
-                className="block py-3 text-[#E67E22] font-bold w-full text-left"
+                className="block py-3 text-[#FFBE98] font-bold w-full text-left"
               >
                 Viagem Principal
               </button>
