@@ -58,6 +58,14 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - Corrigido bug recorrente de scroll na pagina de detalhes do ticket de suporte
 - Implementado useLayoutEffect para scroll sincrono antes do paint
 
+### Restauração da Identidade Visual (2026-03-20)
+- Revertido #E67E22 (laranja agressivo) para #FFBE98 (soft peach) em TravelPlanner.js, Header.js e index.css
+- Background restaurado para #FAFAF9, borders para stone-100/stone-200
+- Sticky bar: 3 botões iguais (bg-[#2D2A26]), sem pulse/ênfase
+- Melhorias estruturais mantidas: hover lift (-translate-y-0.5) + shadow em CTAs
+- CTAs primários usam bg-[#2D2A26] (escuro, não peach) para melhor contraste
+- Zero referências #E67E22, #FFF6ED ou #F5E6DA restantes
+
 ### Melhoria Visual dos CTAs de Afiliados (2026-03-20)
 - Cor de marca reforçada: #E67E22 (hover #D35400) substituiu #FFBE98 pálido nos CTAs
 - CTAs inline convertidos em soft-buttons com fundo beige (#FFF6ED), padding, border-radius
