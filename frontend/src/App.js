@@ -28,6 +28,7 @@ import TestimonialResult from "./pages/TestimonialResult";
 import About from "./pages/About";
 import PlanTrip from "./pages/PlanTrip";
 import TravelPlanner from "./pages/TravelPlanner";
+import PublicPlan from "./pages/PublicPlan";
 
 // Syncs user's preferred language on login
 const LanguageSync = () => {
@@ -101,6 +102,7 @@ const AppRouter = () => {
           <Route path="/about" element={<About />} />
           <Route path="/plan-trip" element={<PlanTrip />} />
           <Route path="/travel-planner" element={<TravelPlanner />} />
+          <Route path="/plano/:slug" element={<PublicPlan />} />
         </Routes>
       </main>
       <Footer />

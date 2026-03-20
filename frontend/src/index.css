@@ -173,6 +173,48 @@ code {
     background: rgba(255, 190, 152, 0.3);
 }
 
+/* Mobile touch targets & optimization */
+@media (max-width: 640px) {
+    .btn-primary,
+    .btn-secondary,
+    button[type="submit"],
+    a[data-testid] {
+        min-height: 44px;
+    }
+
+    /* Hero section mobile optimization */
+    section.dream-mesh .text-5xl {
+        font-size: 2.5rem;
+    }
+    section.dream-mesh .text-3xl {
+        font-size: 1.5rem;
+    }
+
+    /* Better spacing on small screens */
+    .max-w-5xl,
+    .max-w-6xl,
+    .max-w-4xl {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
+
+/* Ensure all interactive elements meet 44px touch target */
+@media (pointer: coarse) {
+    button,
+    a,
+    input,
+    select,
+    [role="button"] {
+        min-height: 44px;
+    }
+    
+    input[type="date"],
+    input[type="text"] {
+        font-size: 16px;
+    }
+}
+
 /* Noise texture overlay */
 .noise-overlay::before {
     content: '';

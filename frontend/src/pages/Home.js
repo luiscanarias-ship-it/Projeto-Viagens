@@ -170,47 +170,47 @@ const Home = () => {
         description="A plataforma de CrowdDreaming para quem acredita que as viagens de sonho se podem concretizar. Contribui e ajuda sonhos a ganhar forma."
       />
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center dream-mesh">
+      <section className="relative min-h-[100svh] flex items-center justify-center dream-mesh">
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-20 left-10 w-64 h-64 bg-[#FFBE98]/20 rounded-full blur-3xl animate-float" />
           <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#E6F4F1]/40 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
         </div>
 
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 text-center pt-20">
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 text-center pt-24 sm:pt-20">
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1 }}
-            className="text-sm md:text-base text-[#6B6661]/70 italic mb-6" data-testid="opening-question">
+            className="text-sm md:text-base text-[#6B6661]/70 italic mb-4 sm:mb-6" data-testid="opening-question">
             E se os sonhos pudessem ser financiados por todos?
           </motion.p>
 
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }}>
-            <h1 className="tracking-tight mb-6">
-              <span className="font-handwritten text-5xl md:text-8xl text-[#FFBE98] block mb-4">4Luis</span>
-              <span className="font-handwritten text-3xl md:text-6xl text-[#FFBE98]" style={{ fontWeight: 700 }}>{t('hero.tagline')}</span>
+            <h1 className="tracking-tight mb-4 sm:mb-6">
+              <span className="font-handwritten text-4xl sm:text-5xl md:text-8xl text-[#FFBE98] block mb-2 sm:mb-4">4Luis</span>
+              <span className="font-handwritten text-2xl sm:text-3xl md:text-6xl text-[#FFBE98]" style={{ fontWeight: 700 }}>{t('hero.tagline')}</span>
             </h1>
           </motion.div>
 
           <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-base sm:text-xl md:text-2xl text-[#6B6661] mb-12 max-w-2xl mx-auto leading-relaxed">
-            A plataforma de <span className="font-bold text-[#FFBE98]">CrowdDreaming</span> para quem acredita que as viagens de sonho se podem concretizar.
+            className="text-sm sm:text-xl md:text-2xl text-[#6B6661] mb-8 sm:mb-12 max-w-2xl mx-auto leading-relaxed px-2">
+            Financiamento coletivo de viagens de sonho. Contribui, partilha e ajuda sonhos a ganhar forma.
           </motion.p>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.4 }}>
-            <button onClick={scrollToMain} className="btn-primary text-lg" data-testid="discover-btn">
+            <button onClick={scrollToMain} className="btn-primary text-base sm:text-lg" data-testid="discover-btn">
               {t('hero.cta')}
             </button>
           </motion.div>
 
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}
-            className="mt-8 flex flex-col sm:flex-row items-center gap-3 sm:gap-6" data-testid="trust-signals">
+            className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-center gap-2 sm:gap-6" data-testid="trust-signals">
             {['Pagamentos diretos ao sonhador', 'Sem comissões da plataforma', 'Clube de sonhadores'].map((text) => (
-              <span key={text} className="flex items-center gap-1.5 text-sm text-[#6B6661]">
+              <span key={text} className="flex items-center gap-1.5 text-xs sm:text-sm text-[#6B6661]">
                 <CheckCircle className="w-4 h-4 text-[#FFBE98]" />
                 {text}
               </span>
             ))}
           </motion.div>
 
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }} className="absolute bottom-10 left-1/2 -translate-x-1/2">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }} className="absolute bottom-6 sm:bottom-10 left-1/2 -translate-x-1/2">
             <motion.div animate={{ y: [0, 10, 0] }} transition={{ repeat: Infinity, duration: 2 }}>
               <ArrowDown className="w-6 h-6 text-[#FFBE98]" />
             </motion.div>
@@ -264,7 +264,7 @@ const Home = () => {
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.4 }}
               className="text-center mt-10">
               <Link to={`/journey/${mainJourney.journey.journey_id}?pay=true`}
-                className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#2D2A26] text-white rounded-xl font-semibold hover:bg-[#4A4640] transition-colors text-base"
+                className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 bg-[#2D2A26] text-white rounded-xl font-semibold hover:bg-[#4A4640] transition-colors text-sm sm:text-base"
                 data-testid="howit-works-cta"
               >
                 <Heart className="w-5 h-5" />
@@ -280,16 +280,16 @@ const Home = () => {
         {mainJourney?.journey ? (
           <>
             {/* Immersive Hero Card */}
-            <div className="relative min-h-[60vh] flex items-end overflow-hidden">
+            <div className="relative min-h-[50vh] sm:min-h-[60vh] flex items-end overflow-hidden">
               <img src={mainJourney.journey.image_url} alt={mainJourney.journey.name}
                 className="absolute inset-0 w-full h-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10" />
               
-              <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 pb-8 pt-10">
+              <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 pb-6 sm:pb-8 pt-10">
                 <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-                  <div className="flex justify-center mb-4">
+                  <div className="flex justify-center mb-3 sm:mb-4">
                     <Link to={`/journey/${mainJourney.journey.journey_id}`}
-                      className="group relative inline-flex items-center gap-2 sm:gap-3 px-5 sm:px-8 py-2.5 sm:py-3.5 rounded-full font-bold text-sm sm:text-lg text-white border-2 border-[#FFBE98]/60 hover:border-[#FFBE98] transition-all duration-500 overflow-hidden shadow-[0_0_25px_rgba(255,190,152,0.3)] hover:shadow-[0_0_40px_rgba(255,190,152,0.5)] hover:scale-105"
+                      className="group relative inline-flex items-center gap-2 sm:gap-3 px-4 sm:px-8 py-2.5 sm:py-3.5 rounded-full font-bold text-xs sm:text-lg text-white border-2 border-[#FFBE98]/60 hover:border-[#FFBE98] transition-all duration-500 overflow-hidden shadow-[0_0_25px_rgba(255,190,152,0.3)] hover:shadow-[0_0_40px_rgba(255,190,152,0.5)] hover:scale-105"
                       data-testid="main-journey-label"
                     >
                       <span className="absolute inset-0 bg-gradient-to-r from-[#FFBE98]/30 via-[#F2C94C]/20 to-[#FFBE98]/30 backdrop-blur-md" />
@@ -301,10 +301,10 @@ const Home = () => {
                     </Link>
                   </div>
                   
-                  <h2 className="text-3xl sm:text-5xl md:text-7xl font-bold text-white mb-2">
+                  <h2 className="text-2xl sm:text-5xl md:text-7xl font-bold text-white mb-2">
                     {mainJourney.journey.name}
                   </h2>
-                  <p className="font-handwritten text-2xl sm:text-3xl md:text-4xl text-[#FFBE98] mb-4">
+                  <p className="font-handwritten text-xl sm:text-3xl md:text-4xl text-[#FFBE98] mb-3 sm:mb-4">
                     {d('main.poetic', mainJourney.journey.poetic_name)}
                   </p>
 
@@ -354,7 +354,7 @@ const Home = () => {
                       <button
                         ref={mainContributeBtnRef}
                         onClick={() => setShowCheckout(true)}
-                        className="inline-flex items-center gap-2 px-8 py-4 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-bold text-lg hover:bg-[#FFAB7D] transition-colors"
+                        className="inline-flex items-center gap-2 px-6 sm:px-8 py-3.5 sm:py-4 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-bold text-base sm:text-lg hover:bg-[#FFAB7D] transition-colors w-full sm:w-auto justify-center"
                         data-testid="contribute-main-btn">
                         <Heart className="w-5 h-5" /> {t('home.contribute_dream')}
                       </button>
@@ -440,11 +440,11 @@ const Home = () => {
             <p className="text-[#6B6661] mb-2">{t('home.plan_trip_intro')}</p>
             <p className="text-sm text-[#6B6661]/70 mb-6">{t('home.plan_trip_desc')}</p>
             
-            <div className="max-w-md mx-auto flex gap-2">
+            <div className="max-w-md mx-auto flex flex-col sm:flex-row gap-2">
               <input type="text" value={customDestination} onChange={(e) => setCustomDestination(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && searchDestination()}
                 placeholder={t('home.plan_placeholder')}
-                className="flex-1 px-4 py-3 rounded-xl border border-stone-200 bg-white text-[#2D2A26] focus:outline-none focus:ring-2 focus:ring-[#FFBE98]"
+                className="flex-1 px-4 py-3 rounded-xl border border-stone-200 bg-white text-[#2D2A26] focus:outline-none focus:ring-2 focus:ring-[#FFBE98] text-base"
                 data-testid="home-search-input"
               />
               <button onClick={searchDestination} disabled={!customDestination.trim()}
@@ -721,7 +721,7 @@ const Home = () => {
             className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-stone-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
             data-testid="home-sticky-bar"
           >
-            <div className="max-w-5xl mx-auto px-4 md:px-6 py-3 flex items-center gap-3 md:gap-5">
+            <div className="max-w-5xl mx-auto px-4 md:px-6 py-2.5 sm:py-3 flex items-center gap-3 md:gap-5">
               <div className="flex-1 min-w-0 hidden sm:block">
                 <p className="text-sm font-bold text-[#2D2A26] truncate">
                   {mainJourney.journey.name} — <span className="font-handwritten text-[#FFBE98]">{d('main.poetic', mainJourney.journey.poetic_name)}</span>
@@ -737,12 +737,6 @@ const Home = () => {
                   )}
                 </div>
               </div>
-              {dreamersStats?.total_dreamers > 0 && (
-                <span className="hidden md:flex items-center gap-1.5 text-xs text-[#6B6661] whitespace-nowrap" data-testid="sticky-dreamers-count">
-                  <Users className="w-3 h-3 text-[#FFBE98]" />
-                  <span className="font-semibold text-[#2D2A26]">{dreamersStats.total_dreamers}</span> sonhadores já apoiaram a 4Luis
-                </span>
-              )}
               <div className="flex-1 flex justify-center sm:justify-end">
                 <button
                   onClick={() => setShowCheckout(true)}

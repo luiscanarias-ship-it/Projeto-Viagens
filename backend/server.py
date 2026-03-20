@@ -6410,13 +6410,30 @@ Responde APENAS com um JSON valido com esta estrutura exata (sem markdown, sem `
         plan = json.loads(clean)
         logger.info(f"AI Travel Plan success: destination={destination}, sections={list(plan.keys())}")
         
-        # Cache the result
+        # Cache the result + generate SEO slug
+        import re as _re
+        def _slugify(text):
+            s = text.lower().strip()
+            s = _re.sub(r'[àáâãäå]', 'a', s)
+            s = _re.sub(r'[èéêë]', 'e', s)
+            s = _re.sub(r'[ìíîï]', 'i', s)
+            s = _re.sub(r'[òóôõö]', 'o', s)
+            s = _re.sub(r'[ùúûü]', 'u', s)
+            s = _re.sub(r'[ç]', 'c', s)
+            s = _re.sub(r'[^a-z0-9\s-]', '', s)
+            s = _re.sub(r'[\s_]+', '-', s)
+            s = _re.sub(r'-+', '-', s).strip('-')
+            return s
+        slug = f"{_slugify(destination)}-{uuid.uuid4().hex[:6]}"
+
         await db.travel_plans.update_one(
             {"cache_key": cache_key},
             {"$set": {
                 "cache_key": cache_key,
                 "destination": destination,
                 "plan": plan,
+                "slug": slug,
+                "is_public": True,
                 "user_id": user.user_id if user else None,
                 "created_at": now.isoformat(),
                 "updated_at": now.isoformat()
@@ -6570,17 +6587,19 @@ Responde APENAS com um JSON valido com esta estrutura exata (sem markdown, sem `
 
 # ==================== AFFILIATE SYSTEM ====================
 
-# Centralized affiliate links config — update affiliate_id with your real IDs
+# Centralized affiliate links config
+# Replace ONLY the base URLs below when real affiliate links are available.
+# Dynamic params (?destination=...&checkin=...&checkout=...) are appended by the frontend.
 AFFILIATE_LINKS = {
-    "skyscanner":   {"name": "Skyscanner",      "url": "https://www.skyscanner.pt",         "category": "flights",    "affiliate_id": "4luis"},
-    "booking":      {"name": "Booking.com",      "url": "https://www.booking.com",           "category": "hotels",     "affiliate_id": "4luis"},
-    "hotels":       {"name": "Hotels.com",       "url": "https://www.hotels.com",            "category": "hotels",     "affiliate_id": ""},
-    "getyourguide": {"name": "GetYourGuide",     "url": "https://www.getyourguide.com",      "category": "activities", "affiliate_id": "4luis"},
-    "cars":         {"name": "DiscoverCars",     "url": "https://www.discovercars.com",      "category": "transport",  "affiliate_id": ""},
-    "airalo":       {"name": "Airalo",           "url": "https://www.airalo.com",            "category": "esim",       "affiliate_id": ""},
-    "holafly":      {"name": "Holafly",          "url": "https://www.holafly.com",           "category": "esim",       "affiliate_id": ""},
-    "insurance":    {"name": "IATI Seguros",     "url": "https://www.iatiseguros.com",       "category": "insurance",  "affiliate_id": "4luis"},
-    "googlemaps":   {"name": "Google Maps",      "url": "https://maps.google.com",           "category": "map",        "affiliate_id": ""},
+    "skyscanner":   {"name": "Skyscanner",      "url": "SKYSCANNER_LINK_HERE",    "category": "flights",    "affiliate_id": "4luis"},
+    "booking":      {"name": "Booking.com",      "url": "BOOKING_LINK_HERE",       "category": "hotels",     "affiliate_id": "4luis"},
+    "hotels":       {"name": "Hotels.com",       "url": "HOTELS_LINK_HERE",        "category": "hotels",     "affiliate_id": ""},
+    "getyourguide": {"name": "GetYourGuide",     "url": "GETYOURGUIDE_LINK_HERE",  "category": "activities", "affiliate_id": "4luis"},
+    "cars":         {"name": "DiscoverCars",     "url": "DISCOVERCARS_LINK_HERE",  "category": "transport",  "affiliate_id": ""},
+    "airalo":       {"name": "Airalo",           "url": "AIRALO_LINK_HERE",        "category": "esim",       "affiliate_id": ""},
+    "holafly":      {"name": "Holafly",          "url": "HOLAFLY_LINK_HERE",       "category": "esim",       "affiliate_id": ""},
+    "insurance":    {"name": "IATI Seguros",     "url": "IATI_LINK_HERE",          "category": "insurance",  "affiliate_id": "4luis"},
+    "googlemaps":   {"name": "Google Maps",      "url": "https://maps.google.com", "category": "map",        "affiliate_id": ""},
 }
 
 @api_router.get("/affiliate-links")
@@ -6704,6 +6723,81 @@ async def delete_offer(offer_id: str, request: Request):
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Oferta não encontrada")
     return {"message": "Oferta eliminada"}
+
+
+# ==================== SEO ENDPOINTS ====================
+
+@api_router.get("/plan/{slug}")
+async def get_public_plan(slug: str):
+    """Public endpoint — returns a travel plan by its slug for SEO pages"""
+    plan_doc = await db.travel_plans.find_one(
+        {"slug": slug, "is_public": True},
+        {"_id": 0, "cache_key": 0}
+    )
+    if not plan_doc:
+        raise HTTPException(status_code=404, detail="Plano não encontrado")
+    return plan_doc
+
+@api_router.patch("/plan/{slug}/visibility")
+async def toggle_plan_visibility(slug: str, request: Request):
+    """Toggle a plan's public visibility — owner or admin only"""
+    user = await get_current_user(request)
+    plan_doc = await db.travel_plans.find_one({"slug": slug}, {"_id": 0, "user_id": 1, "is_public": 1})
+    if not plan_doc:
+        raise HTTPException(status_code=404, detail="Plano não encontrado")
+    if plan_doc.get("user_id") != user.user_id and not user.is_admin:
+        raise HTTPException(status_code=403, detail="Sem permissão")
+    new_status = not plan_doc.get("is_public", True)
+    await db.travel_plans.update_one({"slug": slug}, {"$set": {"is_public": new_status}})
+    return {"is_public": new_status}
+
+
+@api_router.get("/sitemap.xml")
+async def sitemap_xml():
+    """Generate sitemap.xml for SEO — includes public journeys and travel plans"""
+    frontend_url = os.environ.get("FRONTEND_URL", FRONTEND_URL or "https://4luis.com")
+
+    urls = [
+        {"loc": frontend_url, "priority": "1.0"},
+        {"loc": f"{frontend_url}/about", "priority": "0.6"},
+        {"loc": f"{frontend_url}/plan-trip", "priority": "0.8"},
+        {"loc": f"{frontend_url}/travel-planner", "priority": "0.8"},
+    ]
+
+    journeys = await db.journeys.find(
+        {"status": {"$in": ["active", "funded"]}},
+        {"_id": 0, "journey_id": 1, "updated_at": 1}
+    ).to_list(500)
+    for j in journeys:
+        urls.append({
+            "loc": f"{frontend_url}/journey/{j['journey_id']}",
+            "lastmod": j.get("updated_at", ""),
+            "priority": "0.7"
+        })
+
+    plans = await db.travel_plans.find(
+        {"is_public": True, "slug": {"$exists": True}},
+        {"_id": 0, "slug": 1, "updated_at": 1}
+    ).to_list(500)
+    for p in plans:
+        urls.append({
+            "loc": f"{frontend_url}/plano/{p['slug']}",
+            "lastmod": p.get("updated_at", ""),
+            "priority": "0.5"
+        })
+
+    xml_parts = ['<?xml version="1.0" encoding="UTF-8"?>']
+    xml_parts.append('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">')
+    for u in urls:
+        xml_parts.append("  <url>")
+        xml_parts.append(f"    <loc>{u['loc']}</loc>")
+        if u.get("lastmod"):
+            xml_parts.append(f"    <lastmod>{u['lastmod'][:10]}</lastmod>")
+        xml_parts.append(f"    <priority>{u['priority']}</priority>")
+        xml_parts.append("  </url>")
+    xml_parts.append("</urlset>")
+
+    return Response(content="\n".join(xml_parts), media_type="application/xml")
 
 
 # Include router

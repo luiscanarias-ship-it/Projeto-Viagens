@@ -280,15 +280,16 @@ const TipBookingLink = ({ link, onTrack }) => (
 );
 
 /* ── Build dynamic affiliate links with destination/dates ── */
+/* Appends ?destination=...&checkin=...&checkout=... to each base URL.
+   When real affiliate URLs replace the placeholders, this logic stays the same. */
 const buildDynamicLinks = (baseLinks, destination, startDate, endDate) => {
   const enc = encodeURIComponent;
-  const links = { ...baseLinks };
-  if (links.booking) links.booking = { ...links.booking, url: `https://www.booking.com/searchresults.html?ss=${enc(destination)}&checkin=${startDate}&checkout=${endDate}` };
-  if (links.skyscanner) links.skyscanner = { ...links.skyscanner, url: `https://www.skyscanner.pt/transport/flights/?query=${enc(destination)}` };
-  if (links.getyourguide) links.getyourguide = { ...links.getyourguide, url: `https://www.getyourguide.com/s/?q=${enc(destination)}` };
-  if (links.airalo) links.airalo = { ...links.airalo, url: `https://www.airalo.com/search?keyword=${enc(destination)}` };
-  if (links.cars) links.cars = { ...links.cars, url: `https://www.rentalcars.com/search-results?location=${enc(destination)}` };
-  if (links.insurance) links.insurance = { ...links.insurance, url: `https://www.iatiseguros.com/?destination=${enc(destination)}` };
+  const links = {};
+  Object.entries(baseLinks).forEach(([key, val]) => {
+    const base = val.url || '';
+    const sep = base.includes('?') ? '&' : '?';
+    links[key] = { ...val, url: `${base}${sep}destination=${enc(destination)}&checkin=${startDate}&checkout=${endDate}` };
+  });
   return links;
 };
 /* ── Sticky Booking Bar ── */
@@ -306,16 +307,16 @@ const StickyBar = ({ links, onTrack, visible, destination }) => {
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-stone-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
           data-testid="sticky-booking-bar">
-          <div className="max-w-2xl mx-auto px-4 py-2.5">
+          <div className="max-w-2xl mx-auto px-3 sm:px-4 py-2.5">
             <p className="text-[10px] font-medium text-[#6B6661] text-center mb-1.5 flex items-center justify-center gap-1">
               <Sparkles className="w-3 h-3 text-[#FFBE98]" />Planeie e reserve a sua viagem
             </p>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               {items.map(item => (
                 <a key={item.id} href={links[item.id]?.url || '#'} target="_blank" rel="noopener noreferrer"
                   onClick={() => onTrack(item.id)} data-testid={`sticky-cta-${item.id}`}
-                  className="flex-1 flex items-center justify-center gap-1.5 bg-[#2D2A26] text-white text-xs font-bold py-2.5 px-3 rounded-xl shadow-sm hover:shadow-lg hover:-translate-y-0.5 hover:bg-[#1a1816] transition-all duration-200">
-                  <item.icon className="w-4 h-4" /><span>{item.label}</span>
+                  className="flex-1 flex items-center justify-center gap-1 sm:gap-1.5 bg-[#2D2A26] text-white text-[10px] sm:text-xs font-bold py-2.5 px-2 sm:px-3 rounded-xl shadow-sm hover:shadow-lg hover:-translate-y-0.5 hover:bg-[#1a1816] transition-all duration-200">
+                  <item.icon className="w-3.5 sm:w-4 h-3.5 sm:h-4" /><span className="truncate">{item.label}</span>
                 </a>
               ))}
             </div>
@@ -647,7 +648,7 @@ const TravelPlanner = () => {
   return (
     <div className="min-h-screen bg-[#FAFAF9]">
       {/* Hero */}
-      <div className="bg-gradient-to-b from-[#FFBE98]/15 to-[#FAFAF9] pt-24 pb-4 px-6">
+      <div className="bg-gradient-to-b from-[#FFBE98]/15 to-[#FAFAF9] pt-24 pb-4 px-4 sm:px-6">
         <div className="max-w-2xl mx-auto text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <div className="inline-flex items-center gap-2 bg-white/80 rounded-full px-4 py-1.5 mb-3 border border-[#FFBE98]/20">
@@ -659,7 +660,7 @@ const TravelPlanner = () => {
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto px-6 pb-24">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 pb-24">
         {/* ── Form ── */}
         {!plan && !loading && (
           <motion.form initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
