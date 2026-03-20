@@ -384,6 +384,9 @@ const TravelPlanner = () => {
     }
   }, [plan, destination, startDate, endDate, affiliateLinks]);
 
+  // Resolved links: dynamic when available, fallback to static affiliate links
+  const links = Object.keys(dynamicLinks).length ? dynamicLinks : affiliateLinks;
+
   useEffect(() => {
     if (!plan) { setShowStickyBar(false); return; }
     const onScroll = () => {
@@ -672,7 +675,7 @@ const TravelPlanner = () => {
                 <h2 className="text-xl font-bold text-[#2D2A26]" data-testid="plan-destination">{plan.destination}</h2>
                 <p className="text-sm text-[#6B6661] mt-0.5">{plan.dates}</p>
                 {plan.summary && <p className="text-sm text-[#2D2A26]/80 mt-2 italic leading-relaxed">{plan.summary}</p>}
-                <TopBookingBar links={dynamicLinks} onTrack={trackClick} />
+                <TopBookingBar links={links} onTrack={trackClick} />
               </div>
 
               {/* Tab Navigation */}
@@ -729,7 +732,7 @@ const TravelPlanner = () => {
                 {/* Fixed CTA: Alojamento (always visible) */}
                 <ContextualCTA icon={Hotel} text="Reserve o alojamento ideal" label="Ver hotéis"
                   sublabel="Cancelamento gratuito na maioria das opções"
-                  link={dynamicLinks.booking?.url} platform="booking" onTrack={trackClick} trust={true} />
+                  link={links.booking?.url} platform="booking" onTrack={trackClick} trust={true} />
               </div>
 
               {/* Divider */}
@@ -746,27 +749,35 @@ const TravelPlanner = () => {
                 <HideableSection id="itinerary" hiddenSections={hiddenSections} toggleSection={toggleSection}>
                   <div className="space-y-4">
                     {plan.itinerary?.map((day, i) => (
-                      <div key={i} className="border-l-2 border-[#FFBE98]/40 pl-3">
-                        <p className="text-xs font-bold text-[#FFBE98]">Dia {day.day}</p>
-                        <p className="text-sm font-semibold text-[#2D2A26]">{day.title}</p>
-                        <ul className="mt-1 space-y-0.5">
-                          {day.activities?.map((a, j) => (
-                            <li key={j} className="text-xs text-[#6B6661] flex items-start gap-1.5 flex-wrap">
-                              <span className="text-[#FFBE98] mt-0.5 shrink-0">&#8226;</span>
-                              <span className="flex-1">
-                                <TextWithCTA text={a} links={dynamicLinks} onTrack={trackClick} variant="inline" />
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
+                      <React.Fragment key={i}>
+                        <div className="border-l-2 border-[#FFBE98]/40 pl-3">
+                          <p className="text-xs font-bold text-[#FFBE98]">Dia {day.day}</p>
+                          <p className="text-sm font-semibold text-[#2D2A26]">{day.title}</p>
+                          <ul className="mt-1 space-y-0.5">
+                            {day.activities?.map((a, j) => (
+                              <li key={j} className="text-xs text-[#6B6661] flex items-start gap-1.5 flex-wrap">
+                                <span className="text-[#FFBE98] mt-0.5 shrink-0">&#8226;</span>
+                                <span className="flex-1">
+                                  <TextWithCTA text={a} links={links} onTrack={trackClick} variant="inline" />
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        {/* Mid-itinerary CTA: after ~half of days */}
+                        {i === Math.floor((plan.itinerary.length - 1) / 2) && (
+                          <ContextualCTA icon={Ticket} text="Descubra atividades e experiências" label="Ver atividades"
+                            sublabel="Tours guiados, bilhetes e experiências únicas"
+                            link={links.getyourguide?.url} platform="getyourguide" onTrack={trackClick} trust={true} />
+                        )}
+                      </React.Fragment>
                     ))}
                   </div>
                 </HideableSection>
 
                 <ContextualCTA icon={Plane} text="Ver voos disponíveis" label="Ver voos"
                   sublabel="Compare preços de centenas de companhias"
-                  link={dynamicLinks.skyscanner?.url} platform="skyscanner" onTrack={trackClick} trust={false} />
+                  link={links.skyscanner?.url} platform="skyscanner" onTrack={trackClick} trust={false} />
               </div>
 
               <div className="h-px bg-stone-100 mx-5" />
@@ -790,11 +801,11 @@ const TravelPlanner = () => {
                           {items?.map((item, i) => (
                             <p key={i} className="text-xs text-[#6B6661] flex items-center gap-1.5 py-0.5">
                               <CheckCircle2 className="w-3 h-3 text-emerald-400 shrink-0" />
-                              <TextWithCTA text={item} links={dynamicLinks} onTrack={trackClick} variant="inline" />
+                              <TextWithCTA text={item} links={links} onTrack={trackClick} variant="inline" />
                             </p>
                           ))}
                           {key === 'tech' && (
-                            <EsimMicroCard link={dynamicLinks.airalo?.url} onTrack={trackClick} destination={plan.destination} />
+                            <EsimMicroCard link={links.airalo?.url} onTrack={trackClick} destination={plan.destination} />
                           )}
                         </div>
                       ))}
@@ -805,7 +816,7 @@ const TravelPlanner = () => {
                 {/* Fixed CTA: Seguro de viagem (always visible) */}
                 <ContextualCTA icon={Shield} text="Proteja a sua viagem" label="Ver seguros"
                   sublabel="Seguro com cobertura médica e cancelamento"
-                  link={dynamicLinks.insurance?.url} platform="insurance" onTrack={trackClick} trust={true} />
+                  link={links.insurance?.url} platform="insurance" onTrack={trackClick} trust={true} />
               </div>
 
               <div className="h-px bg-stone-100 mx-5" />
@@ -825,7 +836,7 @@ const TravelPlanner = () => {
                         <li key={i} className="text-sm text-[#6B6661] flex items-start gap-2">
                           <Lightbulb className="w-3.5 h-3.5 text-teal-400 mt-0.5 shrink-0" />
                           <span className="flex-1">
-                            <TextWithCTA text={tip} links={dynamicLinks} onTrack={trackClick} variant="inline" />
+                            <TextWithCTA text={tip} links={links} onTrack={trackClick} variant="inline" />
                           </span>
                         </li>
                       ))}
@@ -835,7 +846,7 @@ const TravelPlanner = () => {
 
                 <ContextualCTA icon={Compass} text="Reservar atividades e experiências" label="Descobrir"
                   sublabel="Tours, visitas guiadas e muito mais"
-                  link={dynamicLinks.getyourguide?.url} platform="getyourguide" onTrack={trackClick} trust={true} />
+                  link={links.getyourguide?.url} platform="getyourguide" onTrack={trackClick} trust={true} />
               </div>
 
               {/* ── Actions Footer ── */}
@@ -879,7 +890,7 @@ const TravelPlanner = () => {
         )}
       </div>
 
-      <StickyBar links={dynamicLinks} onTrack={trackClick} visible={showStickyBar} />
+      <StickyBar links={links} onTrack={trackClick} visible={showStickyBar} />
     </div>
   );
 };

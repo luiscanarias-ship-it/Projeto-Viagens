@@ -1,0 +1,65 @@
+{
+  "summary": "Iteration 48 - Fixed CTA Regression Tests PASSED. All 5+ fixed CTAs visible and functioning correctly. Backend: 9/9 passed (100%). Frontend: All features verified - hybrid CTA system working with always-visible fixed CTAs + AI-generated inline CTAs.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "passed_tests": [
+    "Backend: GET /api/affiliate-links returns all required platforms (booking, skyscanner, getyourguide, airalo, insurance)",
+    "Backend: Insurance affiliate is IATI Seguros (url contains 'iati')",
+    "Backend: POST /api/affiliate-click tracks clicks for all platforms (booking, skyscanner, getyourguide, airalo, insurance)",
+    "Backend: /travel-planner route accessible",
+    "Backend: /travel-planner?destination=Paris accessible",
+    "Frontend: TopBookingBar (data-testid='top-booking-bar') visible in Guia tab with 3 items",
+    "Frontend: top-booking-booking has valid URL (https://www.booking.com/...)",
+    "Frontend: top-booking-skyscanner has valid URL (https://www.skyscanner.pt/...)",
+    "Frontend: top-booking-getyourguide has valid URL (https://www.getyourguide.com/...)",
+    "Frontend: Trust badges '4Luis' present in TopBookingBar",
+    "Frontend: Hotel CTA (cta-card-booking) visible after Guia packing section with trust signal",
+    "Frontend: Mid-itinerary Activities CTA (cta-card-getyourguide) visible between itinerary days",
+    "Frontend: Flights CTA (cta-card-skyscanner) visible after Roteiro tab",
+    "Frontend: eSIM MicroCard (checklist-esim-cta) visible in tech checklist with destination context",
+    "Frontend: Insurance CTA (cta-card-insurance) visible after Checklist with trust signal",
+    "Frontend: Activities CTA after Dicas (cta-contextual-getyourguide) visible",
+    "Frontend: StickyBar (sticky-booking-bar) visible on scroll with micro-copy 'Planeie e reserve a sua viagem'",
+    "Frontend: All 3 sticky CTA buttons present (sticky-cta-booking, sticky-cta-skyscanner, sticky-cta-getyourguide)",
+    "Frontend: Total 18 CTA elements found (PASS: minimum 5+ requirement)",
+    "Frontend: All CTA href attributes contain actual URLs (not '#')",
+    "Frontend: Trust signal 'Recomendado pela 4Luis' visible on ContextualCTA cards",
+    "Frontend: AI inline CTAs ([CTA:type:label]) render correctly as 'Ver bilhetes', 'Ver atividades' links",
+    "Frontend: No raw [CTA:*:*] markers visible in page content",
+    "Frontend: Tab navigation works (Guia, Roteiro, Checklist, Dicas)",
+    "Frontend: Links fallback works (line 388: links = dynamicLinks.length ? dynamicLinks : affiliateLinks)"
+  ],
+  "test_report_links": [
+    "/app/backend/tests/test_cta_fixed_iter48.py",
+    "/app/test_reports/pytest/cta_fixed_iter48_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "TravelPlanner.js line 388: Fallback works correctly - links = Object.keys(dynamicLinks).length ? dynamicLinks : affiliateLinks",
+    "TopBookingBar (line 127-146): Shows 3 items with trust badges for booking and getyourguide",
+    "ContextualCTA (line 148-172): Shows trust signal when trust=true prop passed",
+    "Fixed CTAs positioned correctly: Hotel after Guia (line 733), Mid-itinerary after half days (line 768), Flights after Roteiro (line 778), eSIM in tech checklist (line 808), Insurance after Checklist (line 817), Activities after Dicas (line 847)",
+    "StickyBar (line 216-248): Shows on scroll with micro-copy and 3 CTAs",
+    "Insurance platform added to CTA_MAP (line 58) and buildDynamicLinks (line 213)"
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_cta_fixed_iter48.py"
+  ],
+  "success_rate": {
+    "backend": "100% (9/9 tests passed)",
+    "frontend": "100% (all 25 features verified)"
+  },
+  "test_credentials": null,
+  "seed_data_creation": "Generated travel plan for Paris (2026-08-01 to 2026-08-07)",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Iteration 48 verified CRITICAL FIX for affiliate CTAs. Key implementation: 1) Line 388 has fallback: links = Object.keys(dynamicLinks).length ? dynamicLinks : affiliateLinks. 2) Fixed CTAs never depend on AI output. 3) 18 total CTA elements found (TopBookingBar 3 items, Hotel CTA, Mid-itinerary CTA, Flights CTA, eSIM MicroCard, Insurance CTA, Activities CTA after Dicas, StickyBar 3 CTAs, plus inline AI CTAs). 4) All hrefs are valid URLs. 5) Trust badges '4Luis' and 'Recomendado pela 4Luis' visible. 6) Insurance affiliate is IATI Seguros. 7) AI inline CTAs render as peach-colored links (Ver bilhetes, Ver atividades) without raw markers.",
+  "rca_of_issue": null
+}
