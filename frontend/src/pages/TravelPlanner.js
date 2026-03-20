@@ -124,13 +124,13 @@ const InlineActivityCTA = ({ match, link, onTrack }) => (
 );
 
 /* ── Top Booking Bar (compact, after summary) ── */
-const TopBookingBar = ({ links, onTrack }) => (
+const TopBookingBar = ({ links, onTrack, destination }) => (
   <div className="pt-3 space-y-1.5" data-testid="top-booking-bar">
     <div className="flex items-center gap-2 flex-wrap">
       {[
-        { id: 'booking', icon: Hotel, label: 'Alojamento', trust: true },
-        { id: 'skyscanner', icon: Plane, label: 'Voos', trust: false },
-        { id: 'getyourguide', icon: Ticket, label: 'Atividades', trust: true },
+        { id: 'booking', icon: Hotel, label: destination ? `Hotéis em ${destination}` : 'Alojamento', trust: true },
+        { id: 'skyscanner', icon: Plane, label: destination ? `Voos para ${destination}` : 'Voos', trust: false },
+        { id: 'getyourguide', icon: Ticket, label: destination ? `Atividades em ${destination}` : 'Atividades', trust: true },
       ].map(item => (
         <a key={item.id} href={links[item.id]?.url || '#'} target="_blank" rel="noopener noreferrer"
           onClick={() => onTrack(item.id)} data-testid={`top-booking-${item.id}`}
@@ -144,6 +144,67 @@ const TopBookingBar = ({ links, onTrack }) => (
     </div>
   </div>
 );
+
+/* ── Contextual CTA Copy Generator ── */
+const getCTACopy = (destination, tripTypes = []) => {
+  const dest = destination || 'o destino';
+  const primary = tripTypes[0] || '';
+
+  const typeSpecific = {
+    cultural: {
+      hotel: { text: `Hotéis no centro histórico de ${dest}`, sublabel: 'Reservar com antecedência \u00b7 Cancelamento gratuito', label: 'Ver hotéis' },
+      activitiesMid: { text: `Experiências culturais deste roteiro`, sublabel: 'Evita filas \u00b7 Bilhetes sem espera', label: 'Reservar' },
+      flights: { text: `Encontrar voos para ${dest} nestas datas`, sublabel: 'Preços variam rapidamente \u00b7 Compare agora', label: 'Comparar' },
+      insurance: { text: `Proteja a sua viagem cultural a ${dest}`, sublabel: 'Indispensável \u00b7 Cobertura médica e cancelamento', label: 'Proteger' },
+      activitiesDicas: { text: `Descubra ${dest} com guias culturais locais`, sublabel: 'Muito procurado \u00b7 Experiências autênticas', label: 'Explorar' },
+    },
+    gastronomica: {
+      hotel: { text: `Hotéis perto dos melhores restaurantes de ${dest}`, sublabel: 'Reservar com antecedência \u00b7 Cancelamento gratuito', label: 'Ver hotéis' },
+      activitiesMid: { text: `Reservar experiências gastronómicas em ${dest}`, sublabel: 'Muito procurado \u00b7 Sabores autênticos', label: 'Reservar' },
+      flights: { text: `Voos para ${dest} nestas datas`, sublabel: 'Preços variam rapidamente \u00b7 Compare agora', label: 'Comparar' },
+      insurance: { text: `Proteja a sua escapadela gastronómica`, sublabel: 'Indispensável \u00b7 Cobertura médica e cancelamento', label: 'Proteger' },
+      activitiesDicas: { text: `Tours gastronómicos e sabores de ${dest}`, sublabel: 'Muito procurado \u00b7 Experiências locais', label: 'Explorar' },
+    },
+    romantica: {
+      hotel: { text: `Hotéis românticos recomendados em ${dest}`, sublabel: 'Reservar com antecedência \u00b7 Cancelamento gratuito', label: 'Ver hotéis' },
+      activitiesMid: { text: `Experiências românticas para este roteiro`, sublabel: 'Muito procurado \u00b7 Momentos únicos a dois', label: 'Reservar' },
+      flights: { text: `Voos para a vossa escapadela em ${dest}`, sublabel: 'Preços variam rapidamente \u00b7 Compare agora', label: 'Comparar' },
+      insurance: { text: `Proteja a vossa viagem romântica`, sublabel: 'Indispensável \u00b7 Cobertura médica e cancelamento', label: 'Proteger' },
+      activitiesDicas: { text: `Experiências a dois em ${dest}`, sublabel: 'Muito procurado \u00b7 Momentos inesquecíveis', label: 'Explorar' },
+    },
+    aventura: {
+      hotel: { text: `Alojamento para aventureiros em ${dest}`, sublabel: 'Reservar com antecedência \u00b7 Cancelamento gratuito', label: 'Ver hotéis' },
+      activitiesMid: { text: `Atividades ao ar livre deste roteiro`, sublabel: 'Muito procurado \u00b7 Vagas limitadas', label: 'Reservar' },
+      flights: { text: `Voos para a aventura em ${dest}`, sublabel: 'Preços variam rapidamente \u00b7 Compare agora', label: 'Comparar' },
+      insurance: { text: `Seguro essencial para viagem de aventura`, sublabel: 'Indispensável \u00b7 Cobertura para atividades radicais', label: 'Proteger' },
+      activitiesDicas: { text: `Aventuras e desportos em ${dest}`, sublabel: 'Vagas limitadas \u00b7 Experiências únicas', label: 'Explorar' },
+    },
+    familia: {
+      hotel: { text: `Hotéis family-friendly em ${dest}`, sublabel: 'Reservar com antecedência \u00b7 Cancelamento gratuito', label: 'Ver hotéis' },
+      activitiesMid: { text: `Atividades para toda a família neste roteiro`, sublabel: 'Evita filas \u00b7 Bilhetes sem espera', label: 'Reservar' },
+      flights: { text: `Voos para ${dest} para toda a família`, sublabel: 'Preços variam rapidamente \u00b7 Compare agora', label: 'Comparar' },
+      insurance: { text: `Proteja a viagem em família a ${dest}`, sublabel: 'Indispensável \u00b7 Cobertura para toda a família', label: 'Proteger' },
+      activitiesDicas: { text: `Atividades para crianças e famílias em ${dest}`, sublabel: 'Muito procurado \u00b7 Diversão garantida', label: 'Explorar' },
+    },
+  };
+
+  const defaults = {
+    hotel: { text: `Hotéis bem localizados em ${dest}`, sublabel: 'Reservar com antecedência \u00b7 Cancelamento gratuito', label: 'Ver hotéis' },
+    activitiesMid: { text: `Reservar experiências deste roteiro`, sublabel: 'Evita filas \u00b7 Bilhetes sem espera', label: 'Reservar' },
+    flights: { text: `Encontrar voos para ${dest} nestas datas`, sublabel: 'Preços variam rapidamente \u00b7 Compare agora', label: 'Comparar' },
+    insurance: { text: `Proteja a sua viagem a ${dest}`, sublabel: 'Indispensável \u00b7 Cobertura médica e cancelamento', label: 'Proteger' },
+    activitiesDicas: { text: `Experiências e atividades em ${dest}`, sublabel: 'Muito procurado \u00b7 Experiências autênticas', label: 'Explorar' },
+  };
+
+  const specific = typeSpecific[primary] || {};
+  return {
+    hotel: specific.hotel || defaults.hotel,
+    activitiesMid: specific.activitiesMid || defaults.activitiesMid,
+    flights: specific.flights || defaults.flights,
+    insurance: specific.insurance || defaults.insurance,
+    activitiesDicas: specific.activitiesDicas || defaults.activitiesDicas,
+  };
+};
 
 /* ── Contextual CTA (micro-card between sections) ── */
 const ContextualCTA = ({ icon: Icon, text, label, sublabel, link, platform, onTrack, trust }) => (
@@ -224,11 +285,12 @@ const buildDynamicLinks = (baseLinks, destination, startDate, endDate) => {
   return links;
 };
 /* ── Sticky Booking Bar ── */
-const StickyBar = ({ links, onTrack, visible }) => {
+const StickyBar = ({ links, onTrack, visible, destination }) => {
+  const dest = destination || '';
   const items = [
-    { id: 'booking', icon: Hotel, label: 'Hotéis' },
-    { id: 'skyscanner', icon: Plane, label: 'Voos' },
-    { id: 'getyourguide', icon: Ticket, label: 'Atividades' },
+    { id: 'booking', icon: Hotel, label: dest ? `Hotéis em ${dest}` : 'Hotéis' },
+    { id: 'skyscanner', icon: Plane, label: dest ? `Voos para ${dest}` : 'Voos' },
+    { id: 'getyourguide', icon: Ticket, label: dest ? `Atividades em ${dest}` : 'Atividades' },
   ];
   return (
     <AnimatePresence>
@@ -396,6 +458,9 @@ const TravelPlanner = () => {
 
   // Resolved links: dynamic when available, fallback to static affiliate links
   const links = Object.keys(dynamicLinks).length ? dynamicLinks : affiliateLinks;
+
+  // Contextual CTA copy based on destination and trip type
+  const ctaCopy = plan ? getCTACopy(plan.destination || destination, tripTypes) : getCTACopy(destination, tripTypes);
 
   useEffect(() => {
     if (!plan) { setShowStickyBar(false); return; }
@@ -685,7 +750,7 @@ const TravelPlanner = () => {
                 <h2 className="text-xl font-bold text-[#2D2A26]" data-testid="plan-destination">{plan.destination}</h2>
                 <p className="text-sm text-[#6B6661] mt-0.5">{plan.dates}</p>
                 {plan.summary && <p className="text-sm text-[#2D2A26]/80 mt-2 italic leading-relaxed">{plan.summary}</p>}
-                <TopBookingBar links={links} onTrack={trackClick} />
+                <TopBookingBar links={links} onTrack={trackClick} destination={plan.destination} />
               </div>
 
               {/* Tab Navigation */}
@@ -740,8 +805,8 @@ const TravelPlanner = () => {
                 </HideableSection>
 
                 {/* Fixed CTA: Alojamento (always visible) */}
-                <ContextualCTA icon={Hotel} text="Reserve o alojamento ideal" label="Ver hotéis"
-                  sublabel="Cancelamento gratuito na maioria das opções"
+                <ContextualCTA icon={Hotel} text={ctaCopy.hotel.text} label={ctaCopy.hotel.label}
+                  sublabel={ctaCopy.hotel.sublabel}
                   link={links.booking?.url} platform="booking" onTrack={trackClick} trust={true} />
               </div>
 
@@ -790,8 +855,8 @@ const TravelPlanner = () => {
                         </div>
                         {/* Mid-itinerary CTA: after ~half of days */}
                         {i === Math.floor((plan.itinerary.length - 1) / 2) && (
-                          <ContextualCTA icon={Ticket} text="Descubra atividades e experiências" label="Ver atividades"
-                            sublabel="Tours guiados, bilhetes e experiências únicas"
+                          <ContextualCTA icon={Ticket} text={ctaCopy.activitiesMid.text} label={ctaCopy.activitiesMid.label}
+                            sublabel={ctaCopy.activitiesMid.sublabel}
                             link={links.getyourguide?.url} platform="getyourguide" onTrack={trackClick} trust={true} />
                         )}
                       </React.Fragment>
@@ -799,8 +864,8 @@ const TravelPlanner = () => {
                   </div>
                 </HideableSection>
 
-                <ContextualCTA icon={Plane} text="Ver voos disponíveis" label="Ver voos"
-                  sublabel="Compare preços de centenas de companhias"
+                <ContextualCTA icon={Plane} text={ctaCopy.flights.text} label={ctaCopy.flights.label}
+                  sublabel={ctaCopy.flights.sublabel}
                   link={links.skyscanner?.url} platform="skyscanner" onTrack={trackClick} trust={false} />
               </div>
 
@@ -838,8 +903,8 @@ const TravelPlanner = () => {
                 </HideableSection>
 
                 {/* Fixed CTA: Seguro de viagem (always visible) */}
-                <ContextualCTA icon={Shield} text="Proteja a sua viagem" label="Ver seguros"
-                  sublabel="Seguro com cobertura médica e cancelamento"
+                <ContextualCTA icon={Shield} text={ctaCopy.insurance.text} label={ctaCopy.insurance.label}
+                  sublabel={ctaCopy.insurance.sublabel}
                   link={links.insurance?.url} platform="insurance" onTrack={trackClick} trust={true} />
               </div>
 
@@ -868,8 +933,8 @@ const TravelPlanner = () => {
                   )}
                 </HideableSection>
 
-                <ContextualCTA icon={Compass} text="Reservar atividades e experiências" label="Descobrir"
-                  sublabel="Tours, visitas guiadas e muito mais"
+                <ContextualCTA icon={Compass} text={ctaCopy.activitiesDicas.text} label={ctaCopy.activitiesDicas.label}
+                  sublabel={ctaCopy.activitiesDicas.sublabel}
                   link={links.getyourguide?.url} platform="getyourguide" onTrack={trackClick} trust={true} />
               </div>
 
@@ -914,7 +979,7 @@ const TravelPlanner = () => {
         )}
       </div>
 
-      <StickyBar links={links} onTrack={trackClick} visible={showStickyBar} />
+      <StickyBar links={links} onTrack={trackClick} visible={showStickyBar} destination={plan?.destination || destination} />
     </div>
   );
 };
