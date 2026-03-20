@@ -58,6 +58,15 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - Corrigido bug recorrente de scroll na pagina de detalhes do ticket de suporte
 - Implementado useLayoutEffect para scroll sincrono antes do paint
 
+### Melhoria Visual dos CTAs de Afiliados (2026-03-20)
+- Cor de marca reforçada: #E67E22 (hover #D35400) substituiu #FFBE98 pálido nos CTAs
+- CTAs inline convertidos em soft-buttons com fundo beige (#FDF2E9), padding, border-radius
+- Hover effects: scale(1.03), shadow intensificado, cor mais forte
+- Ícones aumentados 10-15%, cor de marca #E67E22
+- Enfase seletivo: CTAs primários (trust=true) com estilo forte + label "Recomendado pela 4Luis", secundários discretos
+- StickyBar com botões laranja #E67E22
+- Design premium e elegante mantido
+
 ### Anteriores
 - Consolidacao logica negocio, sistema senha, scroll fix, testemunhos, suporte, prova social, SEO, notificacoes, autosave
 
