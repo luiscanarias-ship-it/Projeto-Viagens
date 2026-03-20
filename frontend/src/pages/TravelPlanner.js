@@ -5,7 +5,7 @@ import {
   MapPin, Calendar, Compass, Sparkles, Loader2,
   Sun, Shirt, ClipboardList, Lightbulb, Hotel, Plane, Wifi,
   ExternalLink, Globe, Ticket, Send, SlidersHorizontal, 
-  CheckCircle2, Copy, Share2, Check, Eye, EyeOff, Car, Clock
+  CheckCircle2, Copy, Share2, Check, Eye, EyeOff, Car, Clock, Star
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -48,49 +48,94 @@ const detectActivityCTA = (text) => {
 const TIP_BOOKING_KEYWORDS = ['reserv', 'bilhete', 'ingresso', 'anteced', 'antecipadamente', 'comprar', 'book'];
 const tipHasBookingHint = (tip) => TIP_BOOKING_KEYWORDS.some(k => tip.toLowerCase().includes(k));
 
-/* ── Inline Activity CTA (subtle, inside itinerary) ── */
+/* ── Inline Activity CTA (micro-card inside itinerary) ── */
 const InlineActivityCTA = ({ match, link, onTrack }) => (
   <a href={link || '#'} target="_blank" rel="noopener noreferrer"
     onClick={() => onTrack(match.platform)}
-    className="inline-flex items-center gap-1 text-[10px] font-bold text-[#FFBE98] hover:text-[#E6A07C] transition-colors ml-1">
-    <match.icon className="w-3 h-3" />{match.label}<ExternalLink className="w-2.5 h-2.5 opacity-60" />
+    className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#FFBE98] bg-[#FFBE98]/8 hover:bg-[#FFBE98]/15 border border-[#FFBE98]/15 hover:border-[#FFBE98]/30 px-2.5 py-1 rounded-lg transition-all hover:shadow-sm ml-1 group"
+    data-testid={`inline-cta-${match.platform}`}>
+    <match.icon className="w-3 h-3" />
+    <span>{match.label}</span>
+    <ExternalLink className="w-2.5 h-2.5 opacity-50 group-hover:opacity-80 transition-opacity" />
   </a>
 );
 
 /* ── Top Booking Bar (compact, after summary) ── */
 const TopBookingBar = ({ links, onTrack }) => (
-  <div className="flex items-center gap-2 pt-3" data-testid="top-booking-bar">
-    <span className="text-[10px] font-semibold text-[#6B6661] whitespace-nowrap">Reservar:</span>
-    {[
-      { id: 'booking', icon: Hotel, label: 'Alojamento' },
-      { id: 'skyscanner', icon: Plane, label: 'Voos' },
-      { id: 'getyourguide', icon: Ticket, label: 'Atividades' },
-    ].map(item => (
-      <a key={item.id} href={links[item.id]?.url || '#'} target="_blank" rel="noopener noreferrer"
-        onClick={() => onTrack(item.id)} data-testid={`top-booking-${item.id}`}
-        className="flex items-center gap-1 text-[10px] font-semibold text-[#2D2A26] bg-stone-100 hover:bg-[#FFBE98]/10 hover:text-[#FFBE98] px-2.5 py-1.5 rounded-full transition-colors border border-stone-200/60 hover:border-[#FFBE98]/30">
-        <item.icon className="w-3 h-3" />{item.label}
-      </a>
-    ))}
+  <div className="pt-3 space-y-1.5" data-testid="top-booking-bar">
+    <div className="flex items-center gap-2 flex-wrap">
+      {[
+        { id: 'booking', icon: Hotel, label: 'Alojamento', trust: true },
+        { id: 'skyscanner', icon: Plane, label: 'Voos', trust: false },
+        { id: 'getyourguide', icon: Ticket, label: 'Atividades', trust: true },
+      ].map(item => (
+        <a key={item.id} href={links[item.id]?.url || '#'} target="_blank" rel="noopener noreferrer"
+          onClick={() => onTrack(item.id)} data-testid={`top-booking-${item.id}`}
+          className="flex items-center gap-1.5 text-[11px] font-semibold text-[#2D2A26] bg-stone-50 hover:bg-[#FFBE98]/10 hover:text-[#FFBE98] px-3 py-2 rounded-xl transition-all border border-stone-200/60 hover:border-[#FFBE98]/30 hover:shadow-sm group">
+          <item.icon className="w-3.5 h-3.5 text-[#FFBE98]" />
+          {item.label}
+          {item.trust && <span className="text-[8px] font-bold text-[#FFBE98]/70 bg-[#FFBE98]/10 px-1.5 py-0.5 rounded-full">4Luis</span>}
+          <ExternalLink className="w-2.5 h-2.5 opacity-0 group-hover:opacity-60 transition-opacity" />
+        </a>
+      ))}
+    </div>
   </div>
 );
 
-/* ── Contextual CTA ── */
-const ContextualCTA = ({ icon: Icon, text, label, sublabel, link, platform, onTrack }) => (
-  <div className="bg-gradient-to-r from-[#FFBE98]/8 to-[#E6A07C]/5 rounded-xl border border-[#FFBE98]/15 p-3.5 flex items-center gap-3 my-3">
-    <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center shadow-sm shrink-0">
-      <Icon className="w-4 h-4 text-[#FFBE98]" />
+/* ── Contextual CTA (micro-card between sections) ── */
+const ContextualCTA = ({ icon: Icon, text, label, sublabel, link, platform, onTrack, trust }) => (
+  <div className="bg-gradient-to-r from-[#FFBE98]/8 to-transparent rounded-xl border border-[#FFBE98]/15 p-4 my-3 hover:shadow-md hover:border-[#FFBE98]/25 transition-all group"
+    data-testid={`cta-card-${platform}`}>
+    <div className="flex items-center gap-3">
+      <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm shrink-0 group-hover:shadow-md transition-shadow">
+        <Icon className="w-5 h-5 text-[#FFBE98]" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-bold text-[#2D2A26]">{text}</p>
+        <p className="text-[11px] text-[#6B6661] mt-0.5">{sublabel}</p>
+      </div>
+      <a href={link || '#'} target="_blank" rel="noopener noreferrer" onClick={() => onTrack(platform)}
+        data-testid={`cta-contextual-${platform}`}
+        className="shrink-0 flex items-center gap-1.5 bg-[#2D2A26] text-white text-xs font-bold px-4 py-2.5 rounded-xl hover:bg-[#1a1816] hover:scale-[1.03] transition-all shadow-sm hover:shadow-md">
+        {label}<ExternalLink className="w-3 h-3" />
+      </a>
     </div>
-    <div className="flex-1 min-w-0">
-      <p className="text-xs font-semibold text-[#2D2A26]">{text}</p>
-      {sublabel && <p className="text-[10px] text-[#6B6661] mt-0.5">{sublabel}</p>}
-    </div>
-    <a href={link || '#'} target="_blank" rel="noopener noreferrer" onClick={() => onTrack(platform)}
-      data-testid={`cta-contextual-${platform}`}
-      className="shrink-0 flex items-center gap-1.5 bg-[#2D2A26] text-white text-xs font-semibold px-3 py-2 rounded-lg hover:bg-[#1a1816] transition-colors">
-      {label}<ExternalLink className="w-3 h-3" />
-    </a>
+    {trust && (
+      <div className="flex items-center gap-1 mt-2 ml-[52px]">
+        <Star className="w-3 h-3 text-[#FFBE98] fill-[#FFBE98]" />
+        <span className="text-[10px] font-semibold text-[#FFBE98]">Recomendado pela 4Luis</span>
+      </div>
+    )}
   </div>
+);
+
+/* ── eSIM Micro-Card (inside tech checklist) ── */
+const EsimMicroCard = ({ link, onTrack, destination }) => (
+  <a href={link || '#'} target="_blank" rel="noopener noreferrer"
+    onClick={() => onTrack('airalo')} data-testid="checklist-esim-cta"
+    className="block mt-2.5 bg-gradient-to-r from-[#FFBE98]/8 to-transparent rounded-lg border border-[#FFBE98]/15 p-2.5 hover:shadow-sm hover:border-[#FFBE98]/25 transition-all group">
+    <div className="flex items-center gap-2">
+      <div className="w-7 h-7 bg-white rounded-lg flex items-center justify-center shadow-sm shrink-0">
+        <Wifi className="w-3.5 h-3.5 text-[#FFBE98]" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-[11px] font-bold text-[#2D2A26]">Internet no destino</p>
+        <p className="text-[9px] text-[#6B6661]">{destination ? `Fique ligado em ${destination}` : 'eSIM sem roaming'}</p>
+      </div>
+      <span className="text-[10px] font-bold text-[#FFBE98] group-hover:translate-x-0.5 transition-transform flex items-center gap-0.5">
+        Ver <ExternalLink className="w-2.5 h-2.5" />
+      </span>
+    </div>
+  </a>
+);
+
+/* ── Tip Booking CTA (inline action at end of sentence) ── */
+const TipBookingLink = ({ link, onTrack }) => (
+  <a href={link || '#'} target="_blank" rel="noopener noreferrer"
+    onClick={() => onTrack('getyourguide')}
+    className="inline-flex items-center gap-1 text-[11px] font-bold text-[#FFBE98] hover:text-[#E6A07C] bg-[#FFBE98]/8 hover:bg-[#FFBE98]/15 border border-[#FFBE98]/15 px-2 py-0.5 rounded-md transition-all ml-1">
+    Ver bilhetes <ExternalLink className="w-2.5 h-2.5 opacity-60" />
+  </a>
 );
 
 /* ── Build dynamic affiliate links with destination/dates ── */
@@ -118,15 +163,19 @@ const StickyBar = ({ links, onTrack, visible }) => {
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-stone-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
           data-testid="sticky-booking-bar">
-          <div className="max-w-2xl mx-auto px-4 py-2.5 flex items-center gap-2">
-            <span className="text-xs font-semibold text-[#6B6661] hidden sm:block whitespace-nowrap mr-1">Reservar:</span>
-            {items.map(item => (
-              <a key={item.id} href={links[item.id]?.url || '#'} target="_blank" rel="noopener noreferrer"
-                onClick={() => onTrack(item.id)} data-testid={`sticky-cta-${item.id}`}
-                className="flex-1 flex items-center justify-center gap-1.5 bg-[#2D2A26] text-white text-xs font-semibold py-2.5 px-3 rounded-xl hover:bg-[#1a1816] transition-colors">
-                <item.icon className="w-3.5 h-3.5" /><span>{item.label}</span>
-              </a>
-            ))}
+          <div className="max-w-2xl mx-auto px-4 py-2.5">
+            <p className="text-[10px] font-medium text-[#6B6661] text-center mb-1.5 flex items-center justify-center gap-1">
+              <Sparkles className="w-3 h-3 text-[#FFBE98]" />Planeie e reserve a sua viagem
+            </p>
+            <div className="flex items-center gap-2">
+              {items.map(item => (
+                <a key={item.id} href={links[item.id]?.url || '#'} target="_blank" rel="noopener noreferrer"
+                  onClick={() => onTrack(item.id)} data-testid={`sticky-cta-${item.id}`}
+                  className="flex-1 flex items-center justify-center gap-1.5 bg-[#2D2A26] text-white text-xs font-bold py-2.5 px-3 rounded-xl hover:bg-[#1a1816] hover:scale-[1.03] hover:shadow-lg transition-all">
+                  <item.icon className="w-3.5 h-3.5" /><span>{item.label}</span>
+                </a>
+              ))}
+            </div>
           </div>
         </motion.div>
       )}
@@ -653,7 +702,7 @@ const TravelPlanner = () => {
 
                 <ContextualCTA icon={Plane} text="Ver voos disponíveis" label="Ver voos"
                   sublabel="Compare preços de centenas de companhias"
-                  link={dynamicLinks.skyscanner?.url} platform="skyscanner" onTrack={trackClick} />
+                  link={dynamicLinks.skyscanner?.url} platform="skyscanner" onTrack={trackClick} trust={false} />
               </div>
 
               <div className="h-px bg-stone-100 mx-5" />
@@ -680,11 +729,7 @@ const TravelPlanner = () => {
                             </p>
                           ))}
                           {key === 'tech' && (
-                            <a href={dynamicLinks.airalo?.url || '#'} target="_blank" rel="noopener noreferrer"
-                              onClick={() => trackClick('airalo')} data-testid="checklist-esim-cta"
-                              className="flex items-center gap-1 mt-1.5 text-[10px] font-bold text-[#FFBE98] hover:text-[#E6A07C] transition-colors">
-                              <Wifi className="w-3 h-3" />Internet no destino<ExternalLink className="w-2.5 h-2.5 opacity-60" />
-                            </a>
+                            <EsimMicroCard link={dynamicLinks.airalo?.url} onTrack={trackClick} destination={plan.destination} />
                           )}
                         </div>
                       ))}
@@ -712,11 +757,7 @@ const TravelPlanner = () => {
                           <span className="flex-1">
                             {tip}
                             {tipHasBookingHint(tip) && (
-                              <a href={dynamicLinks.getyourguide?.url || '#'} target="_blank" rel="noopener noreferrer"
-                                onClick={() => trackClick('getyourguide')}
-                                className="inline-flex items-center gap-1 text-[10px] font-bold text-[#FFBE98] hover:text-[#E6A07C] transition-colors ml-1">
-                                <Ticket className="w-3 h-3" />Ver disponibilidade<ExternalLink className="w-2.5 h-2.5 opacity-60" />
-                              </a>
+                              <TipBookingLink link={dynamicLinks.getyourguide?.url} onTrack={trackClick} />
                             )}
                           </span>
                         </li>
@@ -727,7 +768,7 @@ const TravelPlanner = () => {
 
                 <ContextualCTA icon={Compass} text="Reservar atividades e experiências" label="Descobrir"
                   sublabel="Tours, visitas guiadas e muito mais"
-                  link={dynamicLinks.getyourguide?.url} platform="getyourguide" onTrack={trackClick} />
+                  link={dynamicLinks.getyourguide?.url} platform="getyourguide" onTrack={trackClick} trust={true} />
               </div>
 
               {/* ── Actions Footer ── */}
