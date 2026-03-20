@@ -58,6 +58,16 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - Corrigido bug recorrente de scroll na pagina de detalhes do ticket de suporte
 - Implementado useLayoutEffect para scroll sincrono antes do paint
 
+### Sistema Ambassador (2026-03-20)
+- Backend: recalculate_ambassador_status() dinâmico, 3 endpoints (progress, generate-referral, features)
+- Anti-abuse: prevenção self-referral no registo, validação de contribuições confirmadas > 0€
+- Frontend: AmbassadorProgress (barra de progresso, referral CTA com WhatsApp/copy link)
+- PremiumGate: Smart Map, AI Assistant e Dicas Secretas gated com blur + lock overlay
+- Feature flags: smart_map, secret_tips, enhanced_ctas, ai_assistant, premium_guide
+- AMBASSADOR_REQUIRED_REFERRALS = 3 (config fácil de alterar)
+- Badge "Embaixador 4Luis" quando desbloqueado
+- Estrutura future-ready para monetização (feature flags independentes do método de unlock)
+
 ### Copy de Alta Conversão dos CTAs (2026-03-20)
 - getCTACopy: copy dinâmico com emojis, urgência e destino para 5 tipos de CTA x 5 tipos de viagem
 - TopBookingBar: "🏨 Hotéis bem localizados em {dest}", "✈️ Voos (melhor preço)", "🎟️ Experiências (evita filas)"
