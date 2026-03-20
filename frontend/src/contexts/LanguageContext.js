@@ -40,7 +40,7 @@ const defaultTexts = {
   "home.step1_title": "Apoia um sonho",
   "home.step1_desc": "Apoia a viagem principal e ajuda a concretizar um sonho",
   "home.step2_title": "Convida 3 amigos a contribuirem",
-  "home.step2_desc": "Partilha o sonho com os teus amigos e torna-te embaixador da 4Luis",
+  "home.step2_desc": "Partilha a viagem principal da 4Luis com os teus amigos e torna-te embaixador",
   "home.step3_title": "Embaixador: financia a tua viagem",
   "home.step3_desc": "Angaria apoio para realizares a tua viagem de sonho",
   "home.support_dream": "Apoiar este sonho",
