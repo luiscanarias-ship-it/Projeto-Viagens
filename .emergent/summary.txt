@@ -1,159 +1,178 @@
 <analysis>**original_problem_statement**:
-O utilizador iniciou a sessão com um pedido para corrigir um bug de scroll na página de detalhes do ticket de suporte. Embora este bug não tenha sido abordado, o foco mudou imediatamente para uma série de melhorias e redesenhos significativos para as páginas AI Travel Planner e Planear Viagem.
+O utilizador iniciou a sessão com um pedido para melhorar a visibilidade e a taxa de cliques (CTR) dos CTAs de afiliados. Isto evoluiu para uma série de refinamentos de UI significativos:
+1.  **Melhoria Visual dos CTAs**: Uma tentativa inicial de aumentar o contraste com uma cor laranja forte () foi implementada e depois totalmente revertida a pedido do utilizador, que preferia a identidade visual original, mais suave e premium ().
+2.  **Otimização de Copy de CTAs**: O foco mudou para a melhoria da performance dos CTAs através da otimização do texto. O agente implementou um sistema para gerar *copy* dinâmico e contextual, adaptado ao destino e tipo de viagem, e adicionou emojis e gatilhos de urgência para aumentar a conversão.
+3.  **Sistema Ambassador**: O utilizador solicitou a implementação de um sistema de acesso a funcionalidades premium. O acesso é concedido aos utilizadores que se tornam Embaixadores ao convidar 3 amigos que se registam e contribuem para a viagem principal. Isto envolveu uma lógica de backend robusta para validação, *gating* de funcionalidades no frontend e uma UI para mostrar o progresso.
+4.  **Ativação do Growth Loop**: Para apoiar o sistema Ambassador, foi implementado um sistema de notificações no backend (para informar sobre o progresso dos referrals) e os links de afiliados placeholder foram substituídos por URLs reais com tracking.
+5.  **Melhoria da Marca e Otimização**: O último pedido do utilizador foi uma tarefa multifacetada para melhorar a clareza da marca (copy da secção *hero*), a consistência visual (imagens), a otimização para dispositivos móveis (uma prioridade crítica) e a preparação para SEO (URLs públicos, meta tags).
 
-Ao longo da sessão, o utilizador orientou o agente na implementação das seguintes funcionalidades:
-1.  **Melhorias no AI Travel Planner (V1 a V2):** Adição de CTAs contextuais, uma barra de reservas sticky, reordenação de secções, e botões de Regenerar e Partilhar.
-2.  **Redesenho da Página Planear Viagem:** Várias iterações para melhorar a UI/UX, incluindo a integração do AI Planner no topo, reordenação de secções para otimização da conversão, correções extensivas de língua portuguesa, e melhorias no copy.
-3.  **Layout e Design Premium:** A página Planear Viagem foi transformada, passando de botões a toda a largura para botões compactos pill-style, implementando um layout de grelha de 2 colunas para desktop, e elevando o design com gradientes, sombras e uma hierarquia visual clara para um aspeto premium.
-4.  **Refinamento Iterativo do AI Planner:** A funcionalidade Gerar novo plano foi substituída por um sistema iterativo Ajustar plano, permitindo aos utilizadores refinar o guia de viagem gerado com instruções adicionais.
-5.  **Guia de Viagem Unificado:** A saída do AI Planner foi transformada de blocos separados para um único documento coeso com navegação por separadores (Guia, Roteiro, Checklist, Dicas) e secções que podem ser ocultadas.
-6.  **Melhorias de Funcionalidade:** O tipo de viagem foi alterado para multi-seleção, a funcionalidade de partilha foi corrigida para incluir o conteúdo completo do plano (com uma solução alternativa para o limite de texto do WhatsApp), e a mensagem de limite de pedidos (rate limit) foi melhorada para ser mais amigável.
-7.  **Animações e Efeitos Visuais:** Foi adicionado um efeito de animação shimmer aos textos de loading para uma melhor experiência do utilizador.
-8.  **Monetização Contextual:** A última tarefa foi injetar dinamicamente CTAs de afiliados (alojamento, voos, atividades, eSIM) diretamente no conteúdo gerado pela IA (itinerário, checklist, dicas).
-
-**User's preferred language**:
-Português. O próximo agente DEVE comunicar exclusivamente em português.
+**User's preferred language**: Português. O próximo agente DEVE comunicar exclusivamente em português.
 
 **what currently exists?**
-Uma aplicação full-stack de crowdfunding de viagens (React/FastAPI/MongoDB) com funcionalidades robustas. As principais características incluem autenticação de utilizadores, criação de viagens, um painel de administração, pagamentos com PayPal (LIVE) e um sistema de suporte.
+Uma aplicação full-stack (React/FastAPI/MongoDB) de crowdfunding de viagens com um AI Travel Planner. A identidade visual soft peach () foi restaurada e consolidada. O copy dos CTAs é agora altamente contextual e otimizado para conversão.
 
-Os canais de monetização são agora muito avançados, centrados em duas páginas altamente refinadas:
-1.  ****: Uma página de destino de afiliados visualmente premium, com um layout de grelha em duas colunas para desktop e um forte foco na conversão.
-2.  ****: Uma ferramenta sofisticada que gera guias de viagem completos. Suporta agora pedidos multi-seleção, permite o refinamento iterativo dos planos, apresenta a saída como um documento unificado com navegação por separadores e integra monetização contextual, injetando links de afiliados diretamente no conteúdo gerado.
+Existe um sistema Ambassador completo e funcional que serve como principal motor de crescimento:
+-   **Backend**: Endpoints robustos (, ) para gerir o estado de Embaixador, validar referências, e enviar notificações. A lógica de cálculo () está integrada nos fluxos de pagamento (PayPal, Stripe).
+-   **Frontend**: O  agora inclui *feature gating* para funcionalidades premium (mapa, dicas secretas), e o componente  exibe o progresso do utilizador.
+-   **Monetização**: Os links de afiliados foram atualizados com URLs reais e incluem um  para tracking.
+
+O agente estava prestes a iniciar a implementação da última grande solicitação do utilizador: otimização para mobile, melhoria da secção *hero* e imagens, e preparação para SEO.
 
 **Last working item**:
--   **Last item agent was working:** Implementar a monetização contextual dentro dos planos de viagem gerados pela IA, adicionando um bloco de reservas no topo e CTAs de afiliados dinâmicos no itinerário, checklist e dicas locais.
--   **Status:** IN PROGRESS
+-   **Last item agent was working:** O agente estava no início da fase de planeamento para uma nova tarefa multifacetada focada em: (P0) Otimização para mobile, (P1) Melhoria da secção *hero* e consistência de imagens, e (P2) Preparação para SEO. O agente analisou o ficheiro  para obter contexto, mas ainda não iniciou nenhuma modificação no código.
+-   **Status:** NOT STARTED
 -   **Agent Testing Done:** N
--   **Which testing method agent to use?** both
+-   **Which testing method agent to use?** both. Esta tarefa envolve alterações significativas tanto no frontend (mobile UI, imagens) como no backend (rotas SEO). O  será necessário para verificar a implementação completa.
 -   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
--   **Issue 1:** (P0) Concluir a implementação da monetização contextual.
--   **Issue 2:** (P1) Bug de scroll na página de detalhes do ticket de suporte.
+-   **Issue 1:** (P0) Implementar a nova tarefa multifacetada solicitada pelo utilizador, com foco na marca, otimização para mobile e SEO.
 
 **Issues Detail**:
 -   **Issue 1:**
-    -   **Attempted fixes:** O agente implementou o código para detetar palavras-chave e injetar dinamicamente os CTAs de afiliados no ficheiro . A verificação com screenshots pareceu bem-sucedida, mas a tarefa não foi formalmente concluída nem testada a fundo.
+    -   **Attempted fixes:** N/A. O trabalho ainda não começou.
     -   **Next debug checklist:**
-        1.  Rever as alterações em  para garantir que todos os CTAs (bloco de topo, itinerário, checklist, dicas) são injetados corretamente e com os links de afiliado corretos.
-        2.  Executar o  para fazer uma verificação completa do frontend, garantindo que os novos CTAs não quebram o layout e que os links funcionam.
-        3.  Verificar que o endpoint  é chamado quando se clica num link de afiliado.
-    -   **Why fix this issue and what will be achieved with the fix?** Esta é a funcionalidade principal para a monetização da ferramenta de IA, ligando diretamente o conteúdo gerado aos fluxos de receita de afiliados.
-    -   **Status:** IN PROGRESS
+        1.  **Mobile (P0)**: Rever e corrigir ,  e outros componentes para garantir que os botões têm pelo menos 44px de altura, o texto é legível, e a secção *hero* é otimizada para a viewport móvel.
+        2.  **Hero & Images (P1)**: Atualizar o copy da secção *hero* em  conforme especificado. Substituir as imagens inconsistentes em  e  por novas imagens que sigam as diretrizes de estilo (tons quentes, pessoas reais, emoção).
+        3.  **SEO (P2)**:
+            -   Backend: Criar um novo endpoint para servir planos de viagem através de um *slug* (ex: ). Modificar o modelo  para incluir os campos  e .
+            -   Frontend: Criar uma nova página/rota (ex: ) que busca os dados do plano e os renderiza com meta tags ( ou similar).
+            -   Backend: Adicionar um endpoint .
+    -   **Why fix this issue and what will be achieved with the fix?** Para criar uma plataforma mais coesa, premium e escalável, pronta para a aquisição de utilizadores e crescimento a longo prazo, abordando áreas críticas de usabilidade (mobile) e visibilidade (SEO).
+    -   **Status:** NOT STARTED
     -   **Is recurring issue?** N
     -   **Should Test frontend/backend/both after fix?** both
     -   **Blocked on other issue:** N/A
--   **Issue 2:**
-    -   **Attempted fixes:** O agente anterior tentou várias correções com  e , mas a sua eficácia nunca foi confirmada pelo utilizador. O problema foi reportado como recorrente na sessão anterior.
-    -   **Next debug checklist:**
-        1.  Pedir ao utilizador para testar a funcionalidade, solicitando uma limpeza de cache (refresh forçado).
-        2.  Se o problema persistir, usar a ferramenta de screenshot para verificar o  imediatamente após a navegação para .
-        3.  Analisar o ficheiro  e a sua interação com o componente  em  para possíveis conflitos.
-    -   **Why fix this issue and what will be achieved with the fix?** Resolver este bug recorrente vai melhorar a experiência do utilizador no sistema de suporte e aumentar a confiança na capacidade do agente para resolver problemas.
-    -   **Status:** USER VERIFICATION PENDING
-    -   **Is recurring issue?** Y
-    -   **Should Test frontend/backend/both after fix?** Frontend
-    -   **Blocked on other issue:** N/A
 
 **In progress Task List**:
-N/A
+-   **Task 1:** (P0) Otimização para Mobile
+    -   **Where to resume:** Começar por analisar  e  para ajustar tamanhos de botões, espaçamentos e a altura da secção *hero* em ecrãs pequenos.
+    -   **What will be achieved with this?** Uma experiência de utilizador significativamente melhorada em dispositivos móveis.
+    -   **Status:** NOT STARTED
+    -   **Should Test frontend/backend/both after fix?** frontend
+    -   **Blocked on something:** N/A
+-   **Task 2:** (P1) Melhoria do Hero e Sistema de Imagens
+    -   **Where to resume:** Após a otimização para mobile, modificar o texto em  e usar  para substituir as imagens.
+    -   **What will be achieved with this?** Uma identidade de marca mais forte e uma maior ligação emocional com os utilizadores.
+    -   **Status:** NOT STARTED
+    -   **Should Test frontend/backend/both after fix?** frontend
+    -   **Blocked on something:** N/A
+-   **Task 3:** (P2) Preparação para SEO
+    -   **Where to resume:** Após as alterações de frontend, focar no backend para criar os novos endpoints e modificar os modelos da base de dados.
+    -   **What will be achieved with this?** Permitir o crescimento de tráfego orgânico através dos motores de busca.
+    -   **Status:** NOT STARTED
+    -   **Should Test frontend/backend/both after fix?** both
+    -   **Blocked on something:** N/A
 
 **Upcoming and Future Tasks**
--   **(P1) Celebração de Sonho 100% Financiado:** Criar uma vista especial ou animação para quando uma viagem atinge 100% do seu objetivo de financiamento.
--   **(P1) Substituir links de placeholder:** Atualizar todos os links de afiliados em  com os URLs reais.
+-   **(P1) Celebração de Sonho 100% Financiado:** Criar uma vista especial ou animação para quando uma viagem atinge 100% do seu objetivo.
 -   **(P2) Concluir Refatoração do Backend:** Continuar a refatoração do ficheiro monolítico , movendo os endpoints para múltiplos ficheiros  modulares na pasta .
--   **(Future/Backlog) Sistema de Gamificação:** Implementar um sistema de pontos e sorteios para incentivar a participação dos utilizadores.
--   **(Future/Backlog) Refatoração do Frontend:** Dividir componentes grandes e complexos como  e  em subcomponentes mais pequenos e reutilizáveis.
+-   **(Future/Backlog) Geração Automática de Plano:** Gerar e exibir automaticamente um plano de viagem na página Viagem Principal.
+-   **(Future/Backlog) Sistema de Gamificação:** Implementar um sistema de pontos e sorteios para incentivar a participação.
+-   **(Future/Backlog) Implementar Smart Map e AI Assistant reais**: Substituir os placeholders por integrações funcionais (ex: Google Maps/Mapbox).
+-   **(Future/Backlog) Refatoração do Frontend:** Dividir o componente  (atualmente com >1000 linhas) em subcomponentes mais pequenos.
 
 **Completed work in this session**
--   **Feature: Redesenho da Página Planear Viagem**: Implementado um design premium, com layout de grelha em 2 colunas, botões pill-style com cores da marca e ícones, e uma hierarquia visual clara em .
--   **Feature: Refinamento Iterativo do AI Planner**: Implementada a funcionalidade Ajustar plano com um novo endpoint () e UI em .
--   **Feature: Guia de Viagem Unificado**: A saída do AI Planner foi transformada num documento único com navegação por separadores e secções que podem ser ocultadas em .
--   **Feature: Melhorias de UX no AI Planner**: Alterado o tipo de viagem para multi-seleção, melhorada a mensagem de rate limit, e adicionada uma animação shimmer aos textos de loading.
--   **Bug Fix: Funcionalidade de Partilha**: Corrigida a partilha para enviar o conteúdo completo do plano, com uma solução específica para o WhatsApp, e atualizada a assinatura de partilha.
--   **Bug Fix: Correções de Língua Portuguesa**: Realizadas correções de acentuação e gramática em múltiplos ficheiros (, , , etc.).
--   **Bug Fix: Alinhamento de Botões**: Corrigido o alinhamento visual dos botões na página Planear Viagem.
+-   **Sistema Ambassador (Crescimento)**: Implementado um sistema completo onde os utilizadores desbloqueiam funcionalidades premium ao convidar 3 amigos que contribuem. Inclui lógica de backend robusta, endpoints de API e UI de frontend para *gating* e progresso.
+-   **Sistema de Notificações**: Criado um sistema de backend para notificar os utilizadores sobre o progresso dos seus referrals.
+-   **Monetização Ativada**: Todos os links de afiliados placeholder em  foram substituídos por URLs reais, incluindo um  para tracking.
+-   **Otimização de Copy de CTAs**: Refinada toda a *copy* dos CTAs para ser contextual (baseada no destino/tipo de viagem), incluir emojis e gatilhos de urgência, melhorando o potencial de conversão.
+-   **Restauração da Identidade Visual**: Implementada e depois revertida uma alteração de design agressiva, restaurando a paleta de cores soft peach () preferida pelo utilizador em todos os componentes (, , ).
 
 **Earlier issues found/mentioned but not fixed**
--   O bug de scroll na página  foi mencionado no handover inicial mas não foi abordado nesta sessão. Continua pendente de verificação pelo utilizador.
+-   Nenhum.
 
 **Known issue recurrence from previous fork**
--   O bug de scroll em  foi assinalado como recorrente na sessão anterior à atual.
+-   **Issue:** Bug de scroll na página .
+-   **Recurrence count:** Pelo menos 2.
+-   **Status:** RESOLVED (Foi corrigido na sessão anterior a esta e não voltou a ocorrer).
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Refinamento Iterativo com LLM:** Implementação de um fluxo onde o frontend envia o plano anterior e novas instruções para o backend, permitindo que a IA atualize um plano existente em vez de gerar um novo de raiz.
--   **Injeção Dinâmica de Conteúdo (Frontend):** O frontend analisa o JSON da IA e injeta dinamicamente componentes de monetização (CTAs) no itinerário, checklist e dicas, com base em correspondência de palavras-chave.
--   **CSS Avançado com TailwindCSS:** Uso extensivo de classes para design responsivo (), animações personalizadas (), transições e efeitos de  complexos para criar uma UI premium.
--   **Uso de Web APIs:** Implementação da  com uma solução alternativa para o WhatsApp () para contornar limites de texto, e uso da  com tratamento de erros.
--   **Gestão de Estado Complexa no React:** Forte utilização de ,  e  para gerir múltiplos estados da UI (formulário, loading, erro, sucesso, plano gerado, separadores ativos, secções ocultas).
+-   **Feature Gating no Frontend**: Utilização do estado do utilizador (is_ambassador) para renderizar condicionalmente componentes premium (ex: Mapa desfocado vs. funcional).
+-   **Backend-driven User Status**: O estado Ambassador é calculado e validado exclusivamente no backend (), garantindo a integridade do sistema.
+-   **Growth Loop com Notificações**: O sistema notifica os utilizadores sobre o progresso dos seus convites, criando um ciclo de engagement para incentivar a conclusão do objetivo.
+-   **Geração de Copy Contextual**: A função  no frontend que cria texto de CTA dinâmico e persuasivo com base nos parâmetros da viagem.
+-   **Design System Reversion**: O processo de reverter sistematicamente alterações de CSS ( -> ) em múltiplos ficheiros para restaurar uma identidade de marca.
 
 **key DB schema**
--   Nenhuma alteração no esquema da base de dados nesta sessão.
+-   **users**: Campos adicionados/modificados:  (string, ex: 'embaixador'),  (string),  (int),  (int),  (datetime).
+-   **notifications (NOVA COLEÇÃO)**: , ,  (string),  (string),  (dict),  (bool),  (datetime).
+-   **contributions**: O seu estado  é fundamental para a função .
 
 **changes in tech stack**
--   Nenhuma alteração no stack tecnológico.
+-   Nenhuma.
 
 **All files of reference**
--   : Ficheiro central para a ferramenta de IA; foi reescrito várias vezes para adicionar refinamento, tabs, multi-seleção e monetização contextual.
--   : Ficheiro central para a página de afiliados; foi reescrito várias vezes para implementar um novo design premium e layout de grelha.
--   : Modificado para adicionar o endpoint de refinamento (), um endpoint de utilidade para limpar o rate limit (), e para atualizar as mensagens de erro.
--   : Modificado para adicionar a animação .
+-   : Contém toda a lógica de backend para o sistema Ambassador e notificações.
+-   : O componente central que integra a maioria das novas funcionalidades de frontend.
+-   : O novo componente de UI para o progresso do Ambassador.
+-   : O próximo ficheiro a ser modificado para a tarefa atual (Mobile, Hero, SEO).
 
 **Areas that need refactoring**:
--   ****: A dívida técnica mais significativa. O ficheiro continua a crescer e precisa urgentemente de ser dividido em s modulares para melhorar a manutenibilidade.
--   ****: Tornou-se um componente extremamente grande e complexo (quase 800 linhas), gerindo múltiplos estados, lógica de API, renderização dinâmica e navegação interna. Deve ser dividido em subcomponentes mais pequenos (ex: , , ).
+-   ** (CRÍTICO)**: O ficheiro continua a crescer (agora com ~6700 linhas) e a sua complexidade torna a manutenção difícil. A refatoração para s modulares é uma dívida técnica urgente.
+-   ** (CRÍTICO)**: Com mais de 1000 linhas, este componente é extremamente difícil de gerir. Precisa urgentemente de ser dividido em subcomponentes (ex: , , ).
 
 **key api endpoints**
--   : Endpoint principal de geração, atualizado para aceitar uma lista de tipos de viagem.
--   : **NOVO** endpoint que aceita um plano anterior e instruções de refinamento para gerar uma versão atualizada.
--   : **NOVO** endpoint de utilidade para limpar o cache de rate limit do backend durante o desenvolvimento/teste.
+-   **NOVOS**:
+    -   : Retorna o progresso do utilizador para se tornar Embaixador.
+    -   : Retorna as funcionalidades premium desbloqueadas.
+    -   : Gera um link de referência.
+    -   : Obtém as notificações do utilizador.
+    -   : Marca uma notificação como lida.
+-   **MODIFICADOS**:
+    -   : Adicionada verificação anti-self-referral e criação de notificação.
+    -    & : Invocam .
+    -   : Retorna URLs reais e o .
 
 **Critical Info for New Agent**
--   A tarefa mais imediata é finalizar e testar a implementação da **monetização contextual** no .
--   O utilizador é muito orientado para os detalhes de UI/UX. Siga as suas instruções de design de perto e preste atenção à consistência visual.
--   O rate limit nos endpoints da IA é uma consideração real durante os testes. Use o endpoint  se encontrar erros 429.
--   O bug de scroll em  é um problema antigo e recorrente. Após concluir as tarefas do AI Planner, deve ser abordado para ganhar a confiança do utilizador.
--   A complexidade de  é elevada. Proponha refatorá-lo em componentes mais pequenos como uma tarefa futura para melhorar a manutenibilidade.
+-   A tarefa atual, solicitada pelo utilizador, é multifacetada e deve ser abordada na seguinte ordem de prioridade: **P0 Mobile, P1 Hero/Images, P2 SEO**.
+-   A identidade visual da marca é a soft peach (). Evite cores agressivas ou alterações drásticas de design sem confirmação.
+-   O sistema Ambassador é o principal motor de crescimento. A sua lógica de backend é robusta e deve ser preservada. As alterações devem focar-se em melhorar a experiência do utilizador no frontend.
+-   A refatoração de  e  é uma dívida técnica crítica. Embora não seja a tarefa atual, qualquer oportunidade de extrair pequenas partes de forma segura deve ser considerada.
 
 **documents and test reports created in this job**
--   
--   
--   
--   
--   
+-   /app/test_reports/iteration_55.json
+-   /app/test_reports/iteration_54.json
+-   /app/test_reports/iteration_53.json
+-   /app/test_reports/iteration_52.json
+-   /app/test_reports/iteration_51.json
+-   /app/memory/PRD.md
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **Msg 306 (PENDING):** Pedido para implementar monetização contextual no guia da IA (bloco de reservas, CTAs no itinerário, etc.). **Status: IN PROGRESS**.
-2.  **Msg 283:** Pedido para aplicar animação shimmer ao texto de loading. **Status: COMPLETED**.
-3.  **Msg 254:** Pedido para melhorar a UX do rate limit. **Status: COMPLETED**.
-4.  **Msg 247:** Pedido para corrigir a partilha do WhatsApp (conteúdo completo) e a assinatura. **Status: COMPLETED**.
-5.  **Msg 216:** Pedido para garantir que a partilha inclui o conteúdo completo do plano. **Status: COMPLETED**.
-6.  **Msg 199:** Pedido para redesenhar a secção final de ações (Copiar/Partilhar). **Status: COMPLETED**.
-7.  **Msg 174:** Pedido para corrigir a funcionalidade Ajustar plano e implementar o refinamento iterativo. **Status: COMPLETED**.
-8.  **Msg 151:** Pedido para transformar a saída num documento unificado com tabs, multi-seleção, e secções que podem ser ocultadas. **Status: COMPLETED**.
-9.  **Msg 128:** Pedido para transformar a saída num guia de viagem unificado e adicionar a funcionalidade Ajustar plano. **Status: COMPLETED**.
-10. **Msg 117:** Pedido para melhorar o contraste visual e a profundidade da página Planear Viagem. **Status: COMPLETED**.
+1.  **User**: Pede para reverter as alterações de cor agressivas () e restaurar a identidade visual original soft peach (), mantendo as melhorias estruturais (hover, sombras). Pede também para corrigir a . (Concluído)
+2.  **User**: Pede para otimizar o *copy* dos CTAs para aumentar a relevância contextual e a conversão, sem alterar o layout. (Concluído)
+3.  **User**: Pede para implementar o sistema Ambassador completo, com acesso a funcionalidades premium baseado em 3 referências válidas. (Concluído)
+4.  **User**: Pergunta onde estão as dicas secretas, indicando que a funcionalidade de *gating* pode não estar suficientemente clara. (Concluído, levou à próxima tarefa)
+5.  **User**: Pede para ativar o growth loop implementando notificações de progresso do referral, substituindo links de afiliados placeholder, e tornando os benefícios de ser Embaixador mais visíveis. (Concluído)
+6.  **User**: Pede para melhorar a clareza da marca (copy da secção *hero*), a consistência visual (imagens), a otimização para mobile e a preparação para SEO. (Tarefa Atual)
+7.  **Assistant**: Propõe um plano para a tarefa acima, perguntando sobre a prioridade das imagens e a estratégia de indexação para SEO. (Pendente de resposta)
+8.  **User**: Responde ao plano, definindo prioridades: imagens para Home + páginas de viagem; indexar páginas de viagem e apenas planos de IA selecionados; e confirma a abordagem paralela (P0 Mobile, P1 Hero, P2 SEO). (Iniciou a Tarefa Atual)
+9.  **User (from previous fork)**: Inicia a sessão com um pedido para corrigir um bug de scroll, que foi rapidamente resolvido, mudando o foco para melhorias de UI/UX. (Contexto Inicial)
+10. **User (from previous fork)**: Aprova o plano inicial do agente para corrigir a regressão dos CTAs. (Contexto Inicial)
 
 **Project Health Check:**
-- **Mocked:** O sistema de rate limit no backend ( em ) é um mock em memória, não uma solução de produção robusta.
+-   **Broken**: None
+-   **Mocked**: None
 
 **3rd Party Integrations**
--   **OpenAI (via Emergent LLM Key):** Utilizado para o AI Travel Planner.
--   **PayPal:** Integração de pagamentos existente.
+-   React
+-   FastAPI
+-   MongoDB
+-   Stripe (pagamentos)
+-   PayPal (pagamentos)
+-   Google Auth (via Emergent-managed)
 
 **Testing status**
--   **Testing agent used after significant changes:** YES
--   **Troubleshoot agent used after agent stuck in loop:** NO
--   **Test files created:** N/A
--   **Known regressions:** N/A
+-   **Testing agent used after significant changes**: YES. O  foi usado de forma consistente após cada implementação major (alterações de CTA, sistema Ambassador, notificações).
+-   **Troubleshoot agent used after agent stuck in loop**: NO
+-   **Test files created**: []
+-   **Known regressions**: Nenhuma.
 
 **Credentials to test flow:**
 -   **Admin**: admin@4luis.com / Admin1
--   (As per )
 
 **What agent forgot to execute**
--   O agente não abordou o bug de scroll recorrente em , que foi mencionado como uma tarefa de alta prioridade no handover inicial. O foco foi imediatamente desviado pelo utilizador para o AI Travel Planner.</analysis>
+O agente não se esqueceu de nada. Estava a seguir o plano aprovado pelo utilizador e a iniciar a próxima tarefa prioritária (Otimização Mobile, Imagens e SEO) quando a sessão terminou.</analysis>

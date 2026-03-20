@@ -12,7 +12,7 @@ import pytest
 import requests
 import os
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://trip-planner-cta.preview.emergentagent.com').rstrip('/')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://seo-ready-4.preview.emergentagent.com').rstrip('/')
 
 class TestHomepageSocialProof:
     """Tests for homepage main journey social proof data"""
