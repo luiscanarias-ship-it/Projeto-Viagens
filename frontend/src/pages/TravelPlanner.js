@@ -247,12 +247,21 @@ const TravelPlanner = () => {
     try { return JSON.parse(localStorage.getItem('planner_hidden') || '[]'); } catch { return []; }
   });
   const resultsRef = useRef(null);
+  const startDateRef = useRef(null);
   const tabRefs = { guia: useRef(null), roteiro: useRef(null), checklist: useRef(null), dicas: useRef(null) };
 
   useEffect(() => {
     document.title = '4Luis — Planeie a sua viagem com IA';
-    window.scrollTo(0, 0);
     axios.get(`${API}/affiliate-links`).then(r => setAffiliateLinks(r.data)).catch(() => {});
+    // If destination pre-filled, scroll to form and focus date
+    if (searchParams.get('destination')) {
+      setTimeout(() => {
+        document.querySelector('[data-testid="planner-form"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        startDateRef.current?.focus();
+      }, 400);
+    } else {
+      window.scrollTo(0, 0);
+    }
   }, []);
 
   // Build dynamic links when plan/destination/dates available
@@ -457,7 +466,7 @@ const TravelPlanner = () => {
                   <Calendar className="w-4 h-4 text-[#FFBE98]" />Início
                 </label>
                 <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full px-4 py-2.5 input-warm" required data-testid="input-start-date" />
+                  className="w-full px-4 py-2.5 input-warm" required data-testid="input-start-date" ref={startDateRef} />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1.5 flex items-center gap-1.5">

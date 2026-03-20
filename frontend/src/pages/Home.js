@@ -148,7 +148,7 @@ const Home = () => {
 
   const searchDestination = () => {
     if (!customDestination.trim()) return;
-    navigate(`/plan-trip?destination=${encodeURIComponent(customDestination.trim())}`);
+    navigate(`/travel-planner?destination=${encodeURIComponent(customDestination.trim())}`);
   };
 
   const scrollToMain = () => {
