@@ -58,6 +58,15 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - Corrigido bug recorrente de scroll na pagina de detalhes do ticket de suporte
 - Implementado useLayoutEffect para scroll sincrono antes do paint
 
+### Growth Loop e Monetização (2026-03-20)
+- Notificações: sistema completo com create_notification(), GET /api/notifications, POST /api/notifications/mark-read
+- Notificação automática ao sponsor quando amigo regista e quando contribui (milestones 1/3, 2/3, 3/3)
+- Affiliate links atualizados com campo affiliate_id para tracking (booking, skyscanner, getyourguide, iati com IDs placeholder "4luis")
+- Ambassador value section: grid 2x2 com 4 features premium (Mapa, IA, Dicas, Guia)
+- InlineReferralCTA: CTA de referral contextual após geração do guia (pico de motivação)
+- Micro-feedback: "Bom começo!" (1/3), "Quase lá!" (2/3), "Parabéns! És Embaixador!" (3/3)
+- Removido create_notification duplicado, unificada signature
+
 ### Sistema Ambassador (2026-03-20)
 - Backend: recalculate_ambassador_status() dinâmico, 3 endpoints (progress, generate-referral, features)
 - Anti-abuse: prevenção self-referral no registo, validação de contribuições confirmadas > 0€

@@ -717,10 +717,9 @@ async def paypal_capture_order(order_id: str, request: Request):
         journey_name = (await db.journeys.find_one({"journey_id": journey_id}, {"_id": 0, "name": 1})) or {}
         await create_notification(
             user_id,
-            "Pagamento PayPal confirmado",
+            "contribution",
             f"A tua contribuicao de {amount}EUR para {journey_name.get('name', 'esta viagem')} foi confirmada automaticamente.",
-            f"/journey/{journey_id}",
-            "contribution"
+            {"journey_id": journey_id, "amount": amount}
         )
     
     # Send confirmation email
@@ -2671,10 +2670,9 @@ async def confirm_contribution(contribution_id: str, request: Request):
         journey_name = (await db.journeys.find_one({"journey_id": contribution["journey_id"]}, {"_id": 0, "name": 1})) or {}
         await create_notification(
             contribution["user_id"],
-            "Contribuição confirmada",
+            "contribution",
             f"A tua contribuição de {contribution['amount']}€ para {journey_name.get('name', 'esta viagem')} foi confirmada.",
-            f"/journey/{contribution['journey_id']}",
-            "contribution"
+            {"journey_id": contribution.get("journey_id"), "amount": contribution.get("amount")}
         )
         await generate_points_for_user(
             contribution["user_id"], 
@@ -5552,10 +5550,9 @@ async def admin_reply_ticket(ticket_id: str, request: Request):
     # In-app notification
     await create_notification(
         ticket["user_id"],
-        "Nova resposta ao teu pedido",
+        "support",
         f"A equipa 4Luis respondeu ao teu pedido de suporte.",
-        f"/support/{ticket_id}",
-        "support"
+        {"ticket_id": ticket_id}
     )
     
     return {"status": "ok", "message": new_message}
@@ -6160,20 +6157,6 @@ async def mark_notification_read(notification_id: str, request: Request):
     )
     return {"status": "ok"}
 
-async def create_notification(user_id: str, title: str, message: str, link: str = None, notif_type: str = "info"):
-    notification = {
-        "notification_id": f"notif_{uuid.uuid4().hex[:12]}",
-        "user_id": user_id,
-        "title": title,
-        "message": message,
-        "link": link,
-        "type": notif_type,
-        "read": False,
-        "created_at": datetime.now(timezone.utc).isoformat()
-    }
-    await db.notifications.insert_one(notification)
-    return notification
-
 
 # ==================== ROOT ====================
 
@@ -6603,7 +6586,7 @@ AFFILIATE_LINKS = {
 @api_router.get("/affiliate-links")
 async def get_affiliate_links():
     """Public endpoint — returns affiliate links config for frontend"""
-    return {k: {"url": v["url"], "name": v["name"]} for k, v in AFFILIATE_LINKS.items()}
+    return {k: {"url": v["url"], "name": v["name"], "affiliate_id": v.get("affiliate_id", "")} for k, v in AFFILIATE_LINKS.items()}
 
 @api_router.post("/affiliate-click")
 async def track_affiliate_click(request: Request):
