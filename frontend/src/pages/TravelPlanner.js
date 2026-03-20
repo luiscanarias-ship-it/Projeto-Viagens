@@ -88,8 +88,8 @@ const TextWithCTA = ({ text, links, onTrack, variant = 'inline' }) => {
           <span key={i} className="block mt-2">
             <a href={links[mapping.platform]?.url || '#'} target="_blank" rel="noopener noreferrer"
               onClick={() => onTrack(mapping.platform)}
-              className="flex items-center gap-2.5 bg-gradient-to-r from-[#E67E22]/8 to-transparent rounded-lg border border-[#E67E22]/20 p-3 hover:shadow-md hover:border-[#E67E22]/30 hover:scale-[1.02] transition-all duration-200 group">
-              <span className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm shrink-0 group-hover:shadow-md transition-shadow">
+              className="flex items-center gap-2.5 bg-[#FFF6ED] rounded-xl border border-[#F5E6DA] p-3 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group">
+              <span className="w-8 h-8 bg-white rounded-xl flex items-center justify-center shadow-sm shrink-0 group-hover:shadow-md transition-shadow">
                 <Icon className="w-4 h-4 text-[#E67E22]" />
               </span>
               <span className="flex-1 text-[12px] font-bold text-[#2D2A26]">{p.label}</span>
@@ -102,7 +102,7 @@ const TextWithCTA = ({ text, links, onTrack, variant = 'inline' }) => {
         return (
           <a key={i} href={links[mapping.platform]?.url || '#'} target="_blank" rel="noopener noreferrer"
             onClick={() => onTrack(mapping.platform)}
-            className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#E67E22] bg-[#FDF2E9] hover:bg-[#E67E22]/15 border border-[#E67E22]/20 hover:border-[#E67E22]/35 px-3 py-1.5 rounded-lg transition-all duration-200 hover:shadow-md hover:scale-[1.03] ml-1 group">
+            className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#E67E22] bg-[#FFF6ED] hover:bg-[#E67E22]/12 border border-[#F5E6DA] hover:border-[#E67E22]/30 px-3 py-1.5 rounded-xl transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 ml-1 group">
             <Icon className="w-3.5 h-3.5" />
             <span>{p.label}</span>
             <ExternalLink className="w-3 h-3 opacity-60 group-hover:opacity-90 transition-opacity" />
@@ -115,7 +115,7 @@ const TextWithCTA = ({ text, links, onTrack, variant = 'inline' }) => {
 const InlineActivityCTA = ({ match, link, onTrack }) => (
   <a href={link || '#'} target="_blank" rel="noopener noreferrer"
     onClick={() => onTrack(match.platform)}
-    className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#E67E22] bg-[#FDF2E9] hover:bg-[#E67E22]/15 border border-[#E67E22]/20 hover:border-[#E67E22]/35 px-3 py-1.5 rounded-lg transition-all duration-200 hover:shadow-md hover:scale-[1.03] ml-1 group"
+    className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#E67E22] bg-[#FFF6ED] hover:bg-[#E67E22]/12 border border-[#F5E6DA] hover:border-[#E67E22]/30 px-3 py-1.5 rounded-xl transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 ml-1 group"
     data-testid={`inline-cta-${match.platform}`}>
     <match.icon className="w-3.5 h-3.5" />
     <span>{match.label}</span>
@@ -134,7 +134,7 @@ const TopBookingBar = ({ links, onTrack }) => (
       ].map(item => (
         <a key={item.id} href={links[item.id]?.url || '#'} target="_blank" rel="noopener noreferrer"
           onClick={() => onTrack(item.id)} data-testid={`top-booking-${item.id}`}
-          className="flex items-center gap-1.5 text-[11px] font-semibold text-[#2D2A26] bg-stone-50 hover:bg-[#FDF2E9] hover:text-[#E67E22] px-3 py-2 rounded-xl transition-all duration-200 border border-stone-200/60 hover:border-[#E67E22]/30 hover:shadow-md hover:scale-[1.03] group">
+          className="flex items-center gap-1.5 text-[11px] font-semibold text-[#2D2A26] bg-[#FFF6ED] hover:text-[#E67E22] px-3 py-2 rounded-xl transition-all duration-200 border border-[#F5E6DA] hover:border-[#E67E22]/30 hover:shadow-md hover:-translate-y-0.5 group">
           <item.icon className="w-4 h-4 text-[#E67E22]" />
           {item.label}
           {item.trust && <span className="text-[8px] font-bold text-[#E67E22]/80 bg-[#E67E22]/10 px-1.5 py-0.5 rounded-full">4Luis</span>}
@@ -147,19 +147,17 @@ const TopBookingBar = ({ links, onTrack }) => (
 
 /* ── Contextual CTA (micro-card between sections) ── */
 const ContextualCTA = ({ icon: Icon, text, label, sublabel, link, platform, onTrack, trust }) => (
-  <div className={`rounded-xl p-4 my-3 transition-all duration-200 group ${
+  <div className={`rounded-xl p-4 my-3 transition-all duration-200 group border ${
     trust
-      ? 'bg-gradient-to-r from-[#E67E22]/10 via-[#E67E22]/5 to-transparent border border-[#E67E22]/25 hover:shadow-lg hover:border-[#E67E22]/40'
-      : 'bg-gradient-to-r from-stone-50 to-transparent border border-stone-200/60 hover:shadow-md hover:border-stone-300'
+      ? 'bg-[#FFF6ED] border-[#F5E6DA] hover:shadow-lg hover:border-[#E67E22]/30'
+      : 'bg-white border-[#F5E6DA] hover:shadow-md hover:border-[#E67E22]/20'
   }`}
     data-testid={`cta-card-${platform}`}>
     <div className="flex items-center gap-3">
-      <div className={`flex items-center justify-center shrink-0 transition-shadow ${
-        trust
-          ? 'w-11 h-11 bg-white rounded-xl shadow-sm group-hover:shadow-lg'
-          : 'w-10 h-10 bg-white rounded-xl shadow-sm group-hover:shadow-md'
+      <div className={`flex items-center justify-center shrink-0 rounded-xl bg-white shadow-sm group-hover:shadow-md transition-shadow ${
+        trust ? 'w-11 h-11' : 'w-10 h-10'
       }`}>
-        <Icon className={`${trust ? 'w-5.5 h-5.5' : 'w-5 h-5'} text-[#E67E22]`} />
+        <Icon className={`${trust ? 'w-[22px] h-[22px]' : 'w-5 h-5'} text-[#E67E22]`} />
       </div>
       <div className="flex-1 min-w-0">
         <p className={`font-bold text-[#2D2A26] ${trust ? 'text-sm' : 'text-[13px]'}`}>{text}</p>
@@ -167,10 +165,10 @@ const ContextualCTA = ({ icon: Icon, text, label, sublabel, link, platform, onTr
       </div>
       <a href={link || '#'} target="_blank" rel="noopener noreferrer" onClick={() => onTrack(platform)}
         data-testid={`cta-contextual-${platform}`}
-        className={`shrink-0 flex items-center gap-1.5 font-bold rounded-xl hover:scale-[1.03] transition-all duration-200 shadow-sm hover:shadow-lg ${
+        className={`shrink-0 flex items-center gap-1.5 font-bold rounded-xl hover:-translate-y-0.5 transition-all duration-200 ${
           trust
-            ? 'bg-[#E67E22] text-white text-xs px-5 py-2.5 hover:bg-[#D35400]'
-            : 'bg-[#2D2A26] text-white text-[11px] px-4 py-2 hover:bg-[#1a1816]'
+            ? 'bg-[#E67E22] text-white text-xs px-5 py-2.5 shadow-[0_4px_14px_rgba(230,126,34,0.25)] hover:shadow-[0_6px_20px_rgba(230,126,34,0.35)] hover:bg-[#D35400]'
+            : 'bg-[#FFF6ED] text-[#E67E22] text-[11px] px-4 py-2 border border-[#F5E6DA] hover:border-[#E67E22]/30 hover:shadow-md'
         }`}>
         {label}<ExternalLink className={`${trust ? 'w-3.5 h-3.5' : 'w-3 h-3'}`} />
       </a>
@@ -188,9 +186,9 @@ const ContextualCTA = ({ icon: Icon, text, label, sublabel, link, platform, onTr
 const EsimMicroCard = ({ link, onTrack, destination }) => (
   <a href={link || '#'} target="_blank" rel="noopener noreferrer"
     onClick={() => onTrack('airalo')} data-testid="checklist-esim-cta"
-    className="block mt-2.5 bg-gradient-to-r from-[#E67E22]/8 to-transparent rounded-lg border border-[#E67E22]/20 p-3 hover:shadow-md hover:border-[#E67E22]/30 hover:scale-[1.02] transition-all duration-200 group">
+    className="block mt-2.5 bg-[#FFF6ED] rounded-xl border border-[#F5E6DA] p-3 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group">
     <div className="flex items-center gap-2.5">
-      <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm shrink-0 group-hover:shadow-md transition-shadow">
+      <div className="w-8 h-8 bg-white rounded-xl flex items-center justify-center shadow-sm shrink-0 group-hover:shadow-md transition-shadow">
         <Wifi className="w-4 h-4 text-[#E67E22]" />
       </div>
       <div className="flex-1 min-w-0">
@@ -208,7 +206,7 @@ const EsimMicroCard = ({ link, onTrack, destination }) => (
 const TipBookingLink = ({ link, onTrack }) => (
   <a href={link || '#'} target="_blank" rel="noopener noreferrer"
     onClick={() => onTrack('getyourguide')}
-    className="inline-flex items-center gap-1.5 text-[12px] font-bold text-[#E67E22] hover:text-[#D35400] bg-[#FDF2E9] hover:bg-[#E67E22]/15 border border-[#E67E22]/20 hover:border-[#E67E22]/35 px-3 py-1 rounded-lg transition-all duration-200 hover:shadow-md hover:scale-[1.03] ml-1">
+    className="inline-flex items-center gap-1.5 text-[12px] font-bold text-[#E67E22] hover:text-[#D35400] bg-[#FFF6ED] hover:bg-[#E67E22]/12 border border-[#F5E6DA] hover:border-[#E67E22]/30 px-3 py-1 rounded-xl transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 ml-1">
     Ver bilhetes <ExternalLink className="w-3 h-3 opacity-70" />
   </a>
 );
@@ -228,16 +226,16 @@ const buildDynamicLinks = (baseLinks, destination, startDate, endDate) => {
 /* ── Sticky Booking Bar ── */
 const StickyBar = ({ links, onTrack, visible }) => {
   const items = [
-    { id: 'booking', icon: Hotel, label: 'Hotéis' },
-    { id: 'skyscanner', icon: Plane, label: 'Voos' },
-    { id: 'getyourguide', icon: Ticket, label: 'Atividades' },
+    { id: 'booking', icon: Hotel, label: 'Hotéis', pulse: true },
+    { id: 'skyscanner', icon: Plane, label: 'Voos', pulse: false },
+    { id: 'getyourguide', icon: Ticket, label: 'Atividades', pulse: false },
   ];
   return (
     <AnimatePresence>
       {visible && (
         <motion.div initial={{ y: 80, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 80, opacity: 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-stone-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
+          className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-[#F5E6DA] shadow-[0_-4px_20px_rgba(0,0,0,0.06)]"
           data-testid="sticky-booking-bar">
           <div className="max-w-2xl mx-auto px-4 py-2.5">
             <p className="text-[10px] font-medium text-[#6B6661] text-center mb-1.5 flex items-center justify-center gap-1">
@@ -247,7 +245,11 @@ const StickyBar = ({ links, onTrack, visible }) => {
               {items.map(item => (
                 <a key={item.id} href={links[item.id]?.url || '#'} target="_blank" rel="noopener noreferrer"
                   onClick={() => onTrack(item.id)} data-testid={`sticky-cta-${item.id}`}
-                  className="flex-1 flex items-center justify-center gap-1.5 bg-[#E67E22] text-white text-xs font-bold py-2.5 px-3 rounded-xl hover:bg-[#D35400] hover:scale-[1.03] hover:shadow-lg transition-all duration-200">
+                  className={`flex-1 flex items-center justify-center gap-1.5 text-xs font-bold py-2.5 px-3 rounded-xl hover:-translate-y-0.5 transition-all duration-200 ${
+                    item.pulse
+                      ? 'bg-[#E67E22] text-white shadow-[0_4px_14px_rgba(230,126,34,0.25)] hover:shadow-[0_6px_20px_rgba(230,126,34,0.4)] hover:bg-[#D35400] animate-[ctaPulse_2.5s_ease-in-out_infinite]'
+                      : 'bg-[#FFF6ED] text-[#E67E22] border border-[#F5E6DA] hover:border-[#E67E22]/30 hover:shadow-md'
+                  }`}>
                   <item.icon className="w-4 h-4" /><span>{item.label}</span>
                 </a>
               ))}
@@ -289,7 +291,7 @@ const RefinePanel = ({ onSubmit, loading, success }) => {
   if (!open) {
     return (
       <button onClick={handleOpen} data-testid="refine-btn"
-        className="flex items-center justify-center gap-2 bg-[#FFBE98] text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-[#E6A07C] transition-colors shadow-sm w-full">
+        className="flex items-center justify-center gap-2 bg-[#FFF6ED] text-[#E67E22] text-sm font-semibold px-5 py-2.5 rounded-xl border border-[#F5E6DA] hover:border-[#E67E22]/30 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 w-full">
         <SlidersHorizontal className="w-4 h-4" />Ajustar o seu plano
       </button>
     );
@@ -303,10 +305,10 @@ const RefinePanel = ({ onSubmit, loading, success }) => {
           <input ref={inputRef} type="text" value={text} onChange={e => setText(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleSubmit()}
             placeholder="Ex: Adicionar mais restaurantes, evitar museus..."
-            className="flex-1 px-3 py-2 text-sm rounded-lg border border-stone-200 focus:border-[#FFBE98] focus:ring-1 focus:ring-[#FFBE98]/30 outline-none transition-all"
+            className="flex-1 px-3 py-2 text-sm rounded-xl border border-[#F5E6DA] focus:border-[#E67E22] focus:ring-1 focus:ring-[#E67E22]/20 outline-none transition-all"
             disabled={loading} data-testid="refine-input" />
           <button onClick={handleSubmit} disabled={!text.trim() || loading} data-testid="refine-submit"
-            className="flex items-center gap-1.5 bg-[#FFBE98] text-white text-xs font-semibold px-4 py-2.5 rounded-lg hover:bg-[#E6A07C] transition-colors disabled:opacity-50 whitespace-nowrap">
+            className="flex items-center gap-1.5 bg-[#E67E22] text-white text-xs font-semibold px-4 py-2.5 rounded-xl hover:bg-[#D35400] transition-all duration-200 disabled:opacity-50 whitespace-nowrap shadow-[0_4px_14px_rgba(230,126,34,0.25)]">
             {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
             {loading ? 'A ajustar...' : 'Ajustar'}
           </button>
@@ -316,11 +318,11 @@ const RefinePanel = ({ onSubmit, loading, success }) => {
         {loading && (
           <div className="flex items-center gap-2 mt-1">
             <div className="flex gap-[3px]">
-              <span className="w-1 h-1 rounded-full bg-[#FFBE98] animate-bounce" style={{ animationDelay: '0ms' }} />
-              <span className="w-1 h-1 rounded-full bg-[#FFBE98] animate-bounce" style={{ animationDelay: '150ms' }} />
-              <span className="w-1 h-1 rounded-full bg-[#FFBE98] animate-bounce" style={{ animationDelay: '300ms' }} />
+              <span className="w-1 h-1 rounded-full bg-[#E67E22] animate-bounce" style={{ animationDelay: '0ms' }} />
+              <span className="w-1 h-1 rounded-full bg-[#E67E22] animate-bounce" style={{ animationDelay: '150ms' }} />
+              <span className="w-1 h-1 rounded-full bg-[#E67E22] animate-bounce" style={{ animationDelay: '300ms' }} />
             </div>
-            <span className="text-sm font-semibold bg-gradient-to-r from-[#FFBE98] via-[#E6A07C] to-[#FFBE98] bg-[length:200%_100%] bg-clip-text text-transparent animate-[shimmer_2s_linear_infinite]">
+            <span className="text-sm font-semibold bg-gradient-to-r from-[#E67E22] via-[#D35400] to-[#E67E22] bg-[length:200%_100%] bg-clip-text text-transparent animate-[shimmer_2s_linear_infinite]">
               A IA está a ajustar o plano
             </span>
           </div>
@@ -563,13 +565,20 @@ const TravelPlanner = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAF9]">
+    <div className="min-h-screen bg-[#FFF6ED]">
+      {/* Pulse animation for primary CTA */}
+      <style>{`
+        @keyframes ctaPulse {
+          0%, 100% { box-shadow: 0 4px 14px rgba(230,126,34,0.25); }
+          50% { box-shadow: 0 4px 22px rgba(230,126,34,0.45); }
+        }
+      `}</style>
       {/* Hero */}
-      <div className="bg-gradient-to-b from-[#FFBE98]/15 to-[#FAFAF9] pt-24 pb-4 px-6">
+      <div className="bg-gradient-to-b from-[#E67E22]/8 to-[#FFF6ED] pt-24 pb-4 px-6">
         <div className="max-w-2xl mx-auto text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <div className="inline-flex items-center gap-2 bg-white/80 rounded-full px-4 py-1.5 mb-3 border border-[#FFBE98]/20">
-              <Sparkles className="w-3.5 h-3.5 text-[#FFBE98]" />
+            <div className="inline-flex items-center gap-2 bg-white/80 rounded-full px-4 py-1.5 mb-3 border border-[#F5E6DA]">
+              <Sparkles className="w-3.5 h-3.5 text-[#E67E22]" />
               <span className="text-xs font-medium text-[#6B6661]">Powered by AI</span>
             </div>
             <h1 className="text-3xl sm:text-4xl font-bold text-[#2D2A26]" data-testid="planner-title">Planeie a sua viagem com IA</h1>
@@ -581,10 +590,10 @@ const TravelPlanner = () => {
         {/* ── Form ── */}
         {!plan && !loading && (
           <motion.form initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-            onSubmit={handleSubmit} className="bg-white rounded-2xl border border-stone-100 p-5 shadow-sm space-y-3" data-testid="planner-form">
+            onSubmit={handleSubmit} className="bg-white rounded-2xl border border-[#F5E6DA] p-5 shadow-sm space-y-3" data-testid="planner-form">
             <div>
               <label className="block text-sm font-medium mb-1.5 flex items-center gap-1.5">
-                <MapPin className="w-4 h-4 text-[#FFBE98]" />Destino
+                <MapPin className="w-4 h-4 text-[#E67E22]" />Destino
               </label>
               <input type="text" value={destination} onChange={(e) => setDestination(e.target.value)}
                 placeholder="Ex: Tóquio, Japão" className="w-full px-4 py-2.5 input-warm" required data-testid="input-destination" />
@@ -592,14 +601,14 @@ const TravelPlanner = () => {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-sm font-medium mb-1.5 flex items-center gap-1.5">
-                  <Calendar className="w-4 h-4 text-[#FFBE98]" />Início
+                  <Calendar className="w-4 h-4 text-[#E67E22]" />Início
                 </label>
                 <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}
                   className="w-full px-4 py-2.5 input-warm" required data-testid="input-start-date" ref={startDateRef} />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1.5 flex items-center gap-1.5">
-                  <Calendar className="w-4 h-4 text-[#FFBE98]" />Fim
+                  <Calendar className="w-4 h-4 text-[#E67E22]" />Fim
                 </label>
                 <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)}
                   min={startDate} className="w-full px-4 py-2.5 input-warm" required data-testid="input-end-date" />
@@ -608,19 +617,19 @@ const TravelPlanner = () => {
             {numDays > 0 && <p className="text-xs text-[#6B6661] text-center">{numDays} {numDays === 1 ? 'dia' : 'dias'} de viagem</p>}
             <div>
               <label className="block text-sm font-medium mb-1.5 flex items-center gap-1.5">
-                <Compass className="w-4 h-4 text-[#FFBE98]" />
+                <Compass className="w-4 h-4 text-[#E67E22]" />
                 Tipo de viagem <span className="text-[#6B6661] font-normal">(selecione um ou mais)</span>
               </label>
               <div className="flex flex-wrap gap-1.5">
                 {TRIP_TYPES.map(t => (
                   <button key={t.id} type="button" onClick={() => toggleTripType(t.id)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                      tripTypes.includes(t.id) ? 'bg-[#FFBE98] text-white' : 'bg-stone-100 text-[#6B6661] hover:bg-stone-200'
+                    className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
+                      tripTypes.includes(t.id) ? 'bg-[#E67E22] text-white' : 'bg-[#FFF6ED] text-[#6B6661] border border-[#F5E6DA] hover:border-[#E67E22]/30'
                     }`} data-testid={`trip-type-${t.id}`}>{t.label}</button>
                 ))}
               </div>
               {tripTypes.length > 1 && (
-                <p className="text-[10px] text-[#FFBE98] mt-1.5">{tripTypes.length} tipos selecionados</p>
+                <p className="text-[10px] text-[#E67E22] mt-1.5">{tripTypes.length} tipos selecionados</p>
               )}
             </div>
             {error && (
@@ -647,8 +656,8 @@ const TravelPlanner = () => {
         {/* Loading */}
         {loading && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            className="bg-white rounded-2xl border border-stone-100 p-10 shadow-sm text-center">
-            <Loader2 className="w-8 h-8 animate-spin text-[#FFBE98] mx-auto mb-4" />
+            className="bg-white rounded-2xl border border-[#F5E6DA] p-10 shadow-sm text-center">
+            <Loader2 className="w-8 h-8 animate-spin text-[#E67E22] mx-auto mb-4" />
             <p className="text-sm font-semibold text-[#2D2A26]">A gerar o seu guia de viagem...</p>
             <p className="text-xs text-[#6B6661] mt-1">Isto pode demorar até 30 segundos</p>
           </motion.div>
@@ -661,16 +670,16 @@ const TravelPlanner = () => {
             {/* Refining overlay */}
             {refining && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                className="bg-[#FFBE98]/8 border border-[#FFBE98]/25 rounded-xl p-4 flex items-center gap-3 mb-3 shadow-sm">
-                <Loader2 className="w-5 h-5 animate-spin text-[#FFBE98]" />
+                className="bg-[#E67E22]/6 border border-[#E67E22]/15 rounded-xl p-4 flex items-center gap-3 mb-3 shadow-sm">
+                <Loader2 className="w-5 h-5 animate-spin text-[#E67E22]" />
                 <div>
                   <div className="flex items-center gap-2">
                     <div className="flex gap-[3px]">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#FFBE98] animate-bounce" style={{ animationDelay: '0ms' }} />
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#FFBE98] animate-bounce" style={{ animationDelay: '150ms' }} />
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#FFBE98] animate-bounce" style={{ animationDelay: '300ms' }} />
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#E67E22] animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#E67E22] animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#E67E22] animate-bounce" style={{ animationDelay: '300ms' }} />
                     </div>
-                    <span className="text-sm font-semibold bg-gradient-to-r from-[#FFBE98] via-[#E6A07C] to-[#FFBE98] bg-[length:200%_100%] bg-clip-text text-transparent animate-[shimmer_2s_linear_infinite]">
+                    <span className="text-sm font-semibold bg-gradient-to-r from-[#E67E22] via-[#D35400] to-[#E67E22] bg-[length:200%_100%] bg-clip-text text-transparent animate-[shimmer_2s_linear_infinite]">
                       A ajustar o seu plano com IA
                     </span>
                   </div>
@@ -680,10 +689,10 @@ const TravelPlanner = () => {
             )}
 
             {/* ── Single Document Card ── */}
-            <div className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden" data-testid="travel-document">
+            <div className="bg-white rounded-2xl border border-[#F5E6DA] shadow-sm overflow-hidden" data-testid="travel-document">
               {/* Document header */}
-              <div className="bg-gradient-to-r from-[#FFBE98]/10 to-[#E6A07C]/5 px-5 py-5 border-b border-stone-100/50">
-                <p className="text-[10px] font-semibold text-[#FFBE98] uppercase tracking-wider mb-1">O seu guia de viagem</p>
+              <div className="bg-[#FFF6ED] px-5 py-5 border-b border-[#F5E6DA]">
+                <p className="text-[10px] font-semibold text-[#E67E22] uppercase tracking-wider mb-1">O seu guia de viagem</p>
                 <h2 className="text-xl font-bold text-[#2D2A26]" data-testid="plan-destination">{plan.destination}</h2>
                 <p className="text-sm text-[#6B6661] mt-0.5">{plan.dates}</p>
                 {plan.summary && <p className="text-sm text-[#2D2A26]/80 mt-2 italic leading-relaxed">{plan.summary}</p>}
@@ -691,12 +700,12 @@ const TravelPlanner = () => {
               </div>
 
               {/* Tab Navigation */}
-              <div className="flex border-b border-stone-100 sticky top-16 bg-white z-10" data-testid="tab-navigation">
+              <div className="flex border-b border-[#F5E6DA] sticky top-16 bg-white z-10" data-testid="tab-navigation">
                 {TABS.map(tab => (
                   <button key={tab.id} onClick={() => scrollToTab(tab.id)} data-testid={`tab-${tab.id}`}
                     className={`flex-1 flex items-center justify-center gap-1.5 py-3 text-xs font-semibold transition-all border-b-2 ${
                       activeTab === tab.id
-                        ? 'text-[#FFBE98] border-[#FFBE98]'
+                        ? 'text-[#E67E22] border-[#E67E22]'
                         : 'text-[#6B6661] border-transparent hover:text-[#2D2A26]'
                     }`}>
                     <tab.icon className="w-3.5 h-3.5" />{tab.label}
@@ -732,7 +741,7 @@ const TravelPlanner = () => {
                           ))}
                           {plan.packing.essentials?.map((item, i) => (
                             <p key={`e-${i}`} className="text-xs text-[#6B6661] flex items-center gap-1.5">
-                              <span className="w-1 h-1 bg-[#FFBE98] rounded-full shrink-0" />{item}
+                              <span className="w-1 h-1 bg-[#E67E22] rounded-full shrink-0" />{item}
                             </p>
                           ))}
                         </div>
@@ -748,7 +757,7 @@ const TravelPlanner = () => {
               </div>
 
               {/* Divider */}
-              <div className="h-px bg-stone-100 mx-5" />
+              <div className="h-px bg-[#F5E6DA] mx-5" />
 
               {/* ── TAB: Roteiro ── */}
               <div ref={tabRefs.roteiro} className="px-5 pt-5 pb-3" data-testid="tab-content-roteiro">
@@ -762,8 +771,8 @@ const TravelPlanner = () => {
                   <div className="space-y-4">
                     {plan.itinerary?.map((day, i) => (
                       <React.Fragment key={i}>
-                        <div className="border-l-2 border-[#FFBE98]/40 pl-3">
-                          <p className="text-xs font-bold text-[#FFBE98]">Dia {day.day}</p>
+                        <div className="border-l-2 border-[#E67E22]/30 pl-3">
+                          <p className="text-xs font-bold text-[#E67E22]">Dia {day.day}</p>
                           <p className="text-sm font-semibold text-[#2D2A26]">{day.title}</p>
                           <ul className="mt-1 space-y-0.5">
                             {day.activities?.map((a, j) => {
@@ -772,7 +781,7 @@ const TravelPlanner = () => {
                               const cleanText = a.replace(/\[CTA:\w+:[^\]]+\]/g, '').trim();
                               return (
                                 <li key={j} className="text-xs text-[#6B6661] flex items-start gap-1.5 flex-wrap">
-                                  <span className="text-[#FFBE98] mt-0.5 shrink-0">&#8226;</span>
+                                  <span className="text-[#E67E22] mt-0.5 shrink-0">&#8226;</span>
                                   <span className="flex-1">
                                     {hasCTAMarker ? (
                                       <TextWithCTA text={a} links={links} onTrack={trackClick} variant="inline" />
@@ -806,7 +815,7 @@ const TravelPlanner = () => {
                   link={links.skyscanner?.url} platform="skyscanner" onTrack={trackClick} trust={false} />
               </div>
 
-              <div className="h-px bg-stone-100 mx-5" />
+              <div className="h-px bg-[#F5E6DA] mx-5" />
 
               {/* ── TAB: Checklist ── */}
               <div ref={tabRefs.checklist} className="px-5 pt-5 pb-3" data-testid="tab-content-checklist">
@@ -820,7 +829,7 @@ const TravelPlanner = () => {
                   {plan.checklist && (
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                       {Object.entries(plan.checklist).map(([key, items]) => (
-                        <div key={key} className="bg-stone-50/50 rounded-lg p-2.5">
+                        <div key={key} className="bg-[#FFF6ED]/50 rounded-xl p-2.5">
                           <p className="text-[10px] font-bold text-[#2D2A26] uppercase tracking-wide mb-1.5">
                             {key === 'documents' ? 'Documentos' : key === 'hygiene' ? 'Higiene' : 'Tecnologia'}
                           </p>
@@ -845,7 +854,7 @@ const TravelPlanner = () => {
                   link={links.insurance?.url} platform="insurance" onTrack={trackClick} trust={true} />
               </div>
 
-              <div className="h-px bg-stone-100 mx-5" />
+              <div className="h-px bg-[#F5E6DA] mx-5" />
 
               {/* ── TAB: Dicas ── */}
               <div ref={tabRefs.dicas} className="px-5 pt-5 pb-3" data-testid="tab-content-dicas">
@@ -876,19 +885,19 @@ const TravelPlanner = () => {
               </div>
 
               {/* ── Actions Footer ── */}
-              <div className="px-5 py-4 border-t border-stone-100 bg-[#FFBE98]/[0.03]" data-testid="actions-footer">
+              <div className="px-5 py-4 border-t border-[#F5E6DA] bg-[#FFF6ED]/50" data-testid="actions-footer">
                 <div className="space-y-3">
                   {/* Primary: Ajustar */}
                   <RefinePanel onSubmit={handleRefine} loading={refining} success={refineSuccess} />
                   {/* Secondary: Copy + Share */}
                   <div className="flex items-center gap-2">
                     <button onClick={handleCopy} data-testid="copy-btn"
-                      className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold text-[#6B6661] border border-stone-200 bg-white hover:bg-stone-50 hover:border-stone-300 px-3 py-2 rounded-lg transition-colors">
+                      className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold text-[#6B6661] border border-[#F5E6DA] bg-white hover:bg-[#FFF6ED] hover:border-[#E67E22]/20 px-3 py-2 rounded-xl transition-all duration-200">
                       {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
                       {copied ? 'Copiado!' : 'Copiar plano'}
                     </button>
                     <button onClick={handleShare} data-testid="share-btn"
-                      className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold text-[#6B6661] border border-stone-200 bg-white hover:bg-stone-50 hover:border-stone-300 px-3 py-2 rounded-lg transition-colors">
+                      className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold text-[#6B6661] border border-[#F5E6DA] bg-white hover:bg-[#FFF6ED] hover:border-[#E67E22]/20 px-3 py-2 rounded-xl transition-all duration-200">
                       {shared ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Share2 className="w-3.5 h-3.5" />}
                       {shared ? 'Plano copiado! Partilha onde quiseres' : 'Partilhar'}
                     </button>
