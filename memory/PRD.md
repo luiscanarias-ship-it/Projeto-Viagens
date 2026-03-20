@@ -58,6 +58,13 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - Corrigido bug recorrente de scroll na pagina de detalhes do ticket de suporte
 - Implementado useLayoutEffect para scroll sincrono antes do paint
 
+### Copy Contextual dos CTAs (2026-03-20)
+- Função getCTACopy(destination, tripTypes) gera copy dinâmico para 5 tipos de CTA
+- Suporta 5 tipos de viagem: cultural, gastronomica, romantica, aventura, familia
+- TopBookingBar e StickyBar mostram labels com destino (ex: "Hotéis em Lisboa")
+- Urgência subtil nos sublabels: "Reservar com antecedência", "Evita filas", "Muito procurado", "Preços variam", "Indispensável"
+- Layout inalterado — mesmo número e estrutura de CTAs
+
 ### Restauração da Identidade Visual (2026-03-20)
 - Revertido #E67E22 (laranja agressivo) para #FFBE98 (soft peach) em TravelPlanner.js, Header.js e index.css
 - Background restaurado para #FAFAF9, borders para stone-100/stone-200
