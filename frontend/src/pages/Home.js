@@ -170,7 +170,7 @@ const Home = () => {
         description="A plataforma de CrowdDreaming para quem acredita que as viagens de sonho se podem concretizar. Contribui e ajuda sonhos a ganhar forma."
       />
       {/* Hero Section */}
-      <section className="relative min-h-[100svh] flex items-center justify-center dream-mesh">
+      <section className="relative min-h-[60vh] sm:min-h-[65vh] flex items-center justify-center dream-mesh">
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-20 left-10 w-64 h-64 bg-[#FFBE98]/20 rounded-full blur-3xl animate-float" />
           <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#E6F4F1]/40 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
@@ -190,8 +190,8 @@ const Home = () => {
           </motion.div>
 
           <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-sm sm:text-xl md:text-2xl text-[#6B6661] mb-8 sm:mb-12 max-w-2xl mx-auto leading-relaxed px-2">
-            A plataforma de <span className="font-bold text-[#FFBE98]">CrowdDreaming</span> para quem acredita que as viagens de sonho se podem concretizar.
+            className="text-sm sm:text-lg md:text-xl text-[#6B6661] mb-8 sm:mb-10 max-w-2xl mx-auto leading-relaxed px-2">
+            Uma plataforma onde qualquer pessoa pode financiar viagens de sonho — e onde tu também podes financiar a tua.
           </motion.p>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.4 }}>
@@ -208,12 +208,6 @@ const Home = () => {
                 {text}
               </span>
             ))}
-          </motion.div>
-
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }} className="absolute bottom-6 sm:bottom-10 left-1/2 -translate-x-1/2">
-            <motion.div animate={{ y: [0, 10, 0] }} transition={{ repeat: Infinity, duration: 2 }}>
-              <ArrowDown className="w-6 h-6 text-[#FFBE98]" />
-            </motion.div>
           </motion.div>
         </div>
       </section>

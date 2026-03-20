@@ -6087,7 +6087,7 @@ async def get_curated_dreams():
             "name": "Caminho de Santiago",
             "country": "Espanha",
             "region": "europa",
-            "image_url": "https://images.unsplash.com/photo-1543785734-4b6e564642f8?w=800",
+            "image_url": "https://images.pexels.com/photos/4080520/pexels-photo-4080520.jpeg?auto=compress&cs=tinysrgb&w=800",
             "story": "Uma peregrinação de autodescoberta pelos caminhos ancestrais da Península Ibérica.",
             "is_curated": True
         },
@@ -6096,7 +6096,7 @@ async def get_curated_dreams():
             "name": "Montanhas do Nepal",
             "country": "Nepal",
             "region": "asia",
-            "image_url": "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800",
+            "image_url": "https://images.unsplash.com/photo-1591602333477-618f471b5c01?w=800",
             "story": "Onde o céu encontra a terra, uma jornada de elevação espiritual nos Himalaias.",
             "is_curated": True
         },
@@ -6105,7 +6105,7 @@ async def get_curated_dreams():
             "name": "Costa Amalfitana",
             "country": "Itália",
             "region": "europa",
-            "image_url": "https://images.unsplash.com/photo-1534113414509-0eec2bfb493f?w=800",
+            "image_url": "https://images.unsplash.com/photo-1529914266944-527632c9ea58?w=800",
             "story": "Cores vibrantes e paisagens deslumbrantes no coração do Mediterrâneo.",
             "is_curated": True
         },
@@ -6114,7 +6114,7 @@ async def get_curated_dreams():
             "name": "Deserto do Sahara",
             "country": "Marrocos",
             "region": "africa",
-            "image_url": "https://images.unsplash.com/photo-1489493887464-892be6d1daae?w=800",
+            "image_url": "https://images.unsplash.com/photo-1769537145747-ff380b863f49?w=800",
             "story": "Noites estreladas e dunas infinitas, uma experiência de silêncio profundo.",
             "is_curated": True
         }
