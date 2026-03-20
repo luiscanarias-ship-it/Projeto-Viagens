@@ -88,13 +88,13 @@ const TextWithCTA = ({ text, links, onTrack, variant = 'inline' }) => {
           <span key={i} className="block mt-2">
             <a href={links[mapping.platform]?.url || '#'} target="_blank" rel="noopener noreferrer"
               onClick={() => onTrack(mapping.platform)}
-              className="flex items-center gap-2.5 bg-gradient-to-r from-[#FFBE98]/8 to-transparent rounded-lg border border-[#FFBE98]/15 p-2.5 hover:shadow-sm hover:border-[#FFBE98]/25 transition-all group">
-              <span className="w-7 h-7 bg-white rounded-lg flex items-center justify-center shadow-sm shrink-0">
-                <Icon className="w-3.5 h-3.5 text-[#FFBE98]" />
+              className="flex items-center gap-2.5 bg-gradient-to-r from-[#E67E22]/8 to-transparent rounded-lg border border-[#E67E22]/20 p-3 hover:shadow-md hover:border-[#E67E22]/30 hover:scale-[1.02] transition-all duration-200 group">
+              <span className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm shrink-0 group-hover:shadow-md transition-shadow">
+                <Icon className="w-4 h-4 text-[#E67E22]" />
               </span>
-              <span className="flex-1 text-[11px] font-bold text-[#2D2A26]">{p.label}</span>
-              <span className="text-[10px] font-bold text-[#FFBE98] group-hover:translate-x-0.5 transition-transform flex items-center gap-0.5">
-                Ver <ExternalLink className="w-2.5 h-2.5" />
+              <span className="flex-1 text-[12px] font-bold text-[#2D2A26]">{p.label}</span>
+              <span className="text-[11px] font-bold text-[#E67E22] group-hover:translate-x-0.5 transition-transform flex items-center gap-0.5">
+                Ver <ExternalLink className="w-3 h-3" />
               </span>
             </a>
           </span>
@@ -102,10 +102,10 @@ const TextWithCTA = ({ text, links, onTrack, variant = 'inline' }) => {
         return (
           <a key={i} href={links[mapping.platform]?.url || '#'} target="_blank" rel="noopener noreferrer"
             onClick={() => onTrack(mapping.platform)}
-            className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#FFBE98] bg-[#FFBE98]/8 hover:bg-[#FFBE98]/15 border border-[#FFBE98]/15 hover:border-[#FFBE98]/30 px-2.5 py-1 rounded-lg transition-all hover:shadow-sm ml-1 group">
-            <Icon className="w-3 h-3" />
+            className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#E67E22] bg-[#FDF2E9] hover:bg-[#E67E22]/15 border border-[#E67E22]/20 hover:border-[#E67E22]/35 px-3 py-1.5 rounded-lg transition-all duration-200 hover:shadow-md hover:scale-[1.03] ml-1 group">
+            <Icon className="w-3.5 h-3.5" />
             <span>{p.label}</span>
-            <ExternalLink className="w-2.5 h-2.5 opacity-50 group-hover:opacity-80 transition-opacity" />
+            <ExternalLink className="w-3 h-3 opacity-60 group-hover:opacity-90 transition-opacity" />
           </a>
         );
       })}
@@ -115,11 +115,11 @@ const TextWithCTA = ({ text, links, onTrack, variant = 'inline' }) => {
 const InlineActivityCTA = ({ match, link, onTrack }) => (
   <a href={link || '#'} target="_blank" rel="noopener noreferrer"
     onClick={() => onTrack(match.platform)}
-    className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#FFBE98] bg-[#FFBE98]/8 hover:bg-[#FFBE98]/15 border border-[#FFBE98]/15 hover:border-[#FFBE98]/30 px-2.5 py-1 rounded-lg transition-all hover:shadow-sm ml-1 group"
+    className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#E67E22] bg-[#FDF2E9] hover:bg-[#E67E22]/15 border border-[#E67E22]/20 hover:border-[#E67E22]/35 px-3 py-1.5 rounded-lg transition-all duration-200 hover:shadow-md hover:scale-[1.03] ml-1 group"
     data-testid={`inline-cta-${match.platform}`}>
-    <match.icon className="w-3 h-3" />
+    <match.icon className="w-3.5 h-3.5" />
     <span>{match.label}</span>
-    <ExternalLink className="w-2.5 h-2.5 opacity-50 group-hover:opacity-80 transition-opacity" />
+    <ExternalLink className="w-3 h-3 opacity-60 group-hover:opacity-90 transition-opacity" />
   </a>
 );
 
@@ -134,11 +134,11 @@ const TopBookingBar = ({ links, onTrack }) => (
       ].map(item => (
         <a key={item.id} href={links[item.id]?.url || '#'} target="_blank" rel="noopener noreferrer"
           onClick={() => onTrack(item.id)} data-testid={`top-booking-${item.id}`}
-          className="flex items-center gap-1.5 text-[11px] font-semibold text-[#2D2A26] bg-stone-50 hover:bg-[#FFBE98]/10 hover:text-[#FFBE98] px-3 py-2 rounded-xl transition-all border border-stone-200/60 hover:border-[#FFBE98]/30 hover:shadow-sm group">
-          <item.icon className="w-3.5 h-3.5 text-[#FFBE98]" />
+          className="flex items-center gap-1.5 text-[11px] font-semibold text-[#2D2A26] bg-stone-50 hover:bg-[#FDF2E9] hover:text-[#E67E22] px-3 py-2 rounded-xl transition-all duration-200 border border-stone-200/60 hover:border-[#E67E22]/30 hover:shadow-md hover:scale-[1.03] group">
+          <item.icon className="w-4 h-4 text-[#E67E22]" />
           {item.label}
-          {item.trust && <span className="text-[8px] font-bold text-[#FFBE98]/70 bg-[#FFBE98]/10 px-1.5 py-0.5 rounded-full">4Luis</span>}
-          <ExternalLink className="w-2.5 h-2.5 opacity-0 group-hover:opacity-60 transition-opacity" />
+          {item.trust && <span className="text-[8px] font-bold text-[#E67E22]/80 bg-[#E67E22]/10 px-1.5 py-0.5 rounded-full">4Luis</span>}
+          <ExternalLink className="w-2.5 h-2.5 opacity-0 group-hover:opacity-70 transition-opacity" />
         </a>
       ))}
     </div>
@@ -147,26 +147,38 @@ const TopBookingBar = ({ links, onTrack }) => (
 
 /* ── Contextual CTA (micro-card between sections) ── */
 const ContextualCTA = ({ icon: Icon, text, label, sublabel, link, platform, onTrack, trust }) => (
-  <div className="bg-gradient-to-r from-[#FFBE98]/8 to-transparent rounded-xl border border-[#FFBE98]/15 p-4 my-3 hover:shadow-md hover:border-[#FFBE98]/25 transition-all group"
+  <div className={`rounded-xl p-4 my-3 transition-all duration-200 group ${
+    trust
+      ? 'bg-gradient-to-r from-[#E67E22]/10 via-[#E67E22]/5 to-transparent border border-[#E67E22]/25 hover:shadow-lg hover:border-[#E67E22]/40'
+      : 'bg-gradient-to-r from-stone-50 to-transparent border border-stone-200/60 hover:shadow-md hover:border-stone-300'
+  }`}
     data-testid={`cta-card-${platform}`}>
     <div className="flex items-center gap-3">
-      <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm shrink-0 group-hover:shadow-md transition-shadow">
-        <Icon className="w-5 h-5 text-[#FFBE98]" />
+      <div className={`flex items-center justify-center shrink-0 transition-shadow ${
+        trust
+          ? 'w-11 h-11 bg-white rounded-xl shadow-sm group-hover:shadow-lg'
+          : 'w-10 h-10 bg-white rounded-xl shadow-sm group-hover:shadow-md'
+      }`}>
+        <Icon className={`${trust ? 'w-5.5 h-5.5' : 'w-5 h-5'} text-[#E67E22]`} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-bold text-[#2D2A26]">{text}</p>
+        <p className={`font-bold text-[#2D2A26] ${trust ? 'text-sm' : 'text-[13px]'}`}>{text}</p>
         <p className="text-[11px] text-[#6B6661] mt-0.5">{sublabel}</p>
       </div>
       <a href={link || '#'} target="_blank" rel="noopener noreferrer" onClick={() => onTrack(platform)}
         data-testid={`cta-contextual-${platform}`}
-        className="shrink-0 flex items-center gap-1.5 bg-[#2D2A26] text-white text-xs font-bold px-4 py-2.5 rounded-xl hover:bg-[#1a1816] hover:scale-[1.03] transition-all shadow-sm hover:shadow-md">
-        {label}<ExternalLink className="w-3 h-3" />
+        className={`shrink-0 flex items-center gap-1.5 font-bold rounded-xl hover:scale-[1.03] transition-all duration-200 shadow-sm hover:shadow-lg ${
+          trust
+            ? 'bg-[#E67E22] text-white text-xs px-5 py-2.5 hover:bg-[#D35400]'
+            : 'bg-[#2D2A26] text-white text-[11px] px-4 py-2 hover:bg-[#1a1816]'
+        }`}>
+        {label}<ExternalLink className={`${trust ? 'w-3.5 h-3.5' : 'w-3 h-3'}`} />
       </a>
     </div>
     {trust && (
-      <div className="flex items-center gap-1 mt-2 ml-[52px]">
-        <Star className="w-3 h-3 text-[#FFBE98] fill-[#FFBE98]" />
-        <span className="text-[10px] font-semibold text-[#FFBE98]">Recomendado pela 4Luis</span>
+      <div className="flex items-center gap-1.5 mt-2.5 ml-[56px]">
+        <Star className="w-3.5 h-3.5 text-[#E67E22] fill-[#E67E22]" />
+        <span className="text-[11px] font-semibold text-[#E67E22]">Recomendado pela 4Luis</span>
       </div>
     )}
   </div>
@@ -176,17 +188,17 @@ const ContextualCTA = ({ icon: Icon, text, label, sublabel, link, platform, onTr
 const EsimMicroCard = ({ link, onTrack, destination }) => (
   <a href={link || '#'} target="_blank" rel="noopener noreferrer"
     onClick={() => onTrack('airalo')} data-testid="checklist-esim-cta"
-    className="block mt-2.5 bg-gradient-to-r from-[#FFBE98]/8 to-transparent rounded-lg border border-[#FFBE98]/15 p-2.5 hover:shadow-sm hover:border-[#FFBE98]/25 transition-all group">
-    <div className="flex items-center gap-2">
-      <div className="w-7 h-7 bg-white rounded-lg flex items-center justify-center shadow-sm shrink-0">
-        <Wifi className="w-3.5 h-3.5 text-[#FFBE98]" />
+    className="block mt-2.5 bg-gradient-to-r from-[#E67E22]/8 to-transparent rounded-lg border border-[#E67E22]/20 p-3 hover:shadow-md hover:border-[#E67E22]/30 hover:scale-[1.02] transition-all duration-200 group">
+    <div className="flex items-center gap-2.5">
+      <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm shrink-0 group-hover:shadow-md transition-shadow">
+        <Wifi className="w-4 h-4 text-[#E67E22]" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-[11px] font-bold text-[#2D2A26]">Internet no destino</p>
-        <p className="text-[9px] text-[#6B6661]">{destination ? `Fique ligado em ${destination}` : 'eSIM sem roaming'}</p>
+        <p className="text-[12px] font-bold text-[#2D2A26]">Internet no destino</p>
+        <p className="text-[10px] text-[#6B6661]">{destination ? `Fique ligado em ${destination}` : 'eSIM sem roaming'}</p>
       </div>
-      <span className="text-[10px] font-bold text-[#FFBE98] group-hover:translate-x-0.5 transition-transform flex items-center gap-0.5">
-        Ver <ExternalLink className="w-2.5 h-2.5" />
+      <span className="text-[11px] font-bold text-[#E67E22] group-hover:translate-x-0.5 transition-transform flex items-center gap-0.5">
+        Ver <ExternalLink className="w-3 h-3" />
       </span>
     </div>
   </a>
@@ -196,8 +208,8 @@ const EsimMicroCard = ({ link, onTrack, destination }) => (
 const TipBookingLink = ({ link, onTrack }) => (
   <a href={link || '#'} target="_blank" rel="noopener noreferrer"
     onClick={() => onTrack('getyourguide')}
-    className="inline-flex items-center gap-1 text-[11px] font-bold text-[#FFBE98] hover:text-[#E6A07C] bg-[#FFBE98]/8 hover:bg-[#FFBE98]/15 border border-[#FFBE98]/15 px-2 py-0.5 rounded-md transition-all ml-1">
-    Ver bilhetes <ExternalLink className="w-2.5 h-2.5 opacity-60" />
+    className="inline-flex items-center gap-1.5 text-[12px] font-bold text-[#E67E22] hover:text-[#D35400] bg-[#FDF2E9] hover:bg-[#E67E22]/15 border border-[#E67E22]/20 hover:border-[#E67E22]/35 px-3 py-1 rounded-lg transition-all duration-200 hover:shadow-md hover:scale-[1.03] ml-1">
+    Ver bilhetes <ExternalLink className="w-3 h-3 opacity-70" />
   </a>
 );
 
@@ -229,14 +241,14 @@ const StickyBar = ({ links, onTrack, visible }) => {
           data-testid="sticky-booking-bar">
           <div className="max-w-2xl mx-auto px-4 py-2.5">
             <p className="text-[10px] font-medium text-[#6B6661] text-center mb-1.5 flex items-center justify-center gap-1">
-              <Sparkles className="w-3 h-3 text-[#FFBE98]" />Planeie e reserve a sua viagem
+              <Sparkles className="w-3 h-3 text-[#E67E22]" />Planeie e reserve a sua viagem
             </p>
             <div className="flex items-center gap-2">
               {items.map(item => (
                 <a key={item.id} href={links[item.id]?.url || '#'} target="_blank" rel="noopener noreferrer"
                   onClick={() => onTrack(item.id)} data-testid={`sticky-cta-${item.id}`}
-                  className="flex-1 flex items-center justify-center gap-1.5 bg-[#2D2A26] text-white text-xs font-bold py-2.5 px-3 rounded-xl hover:bg-[#1a1816] hover:scale-[1.03] hover:shadow-lg transition-all">
-                  <item.icon className="w-3.5 h-3.5" /><span>{item.label}</span>
+                  className="flex-1 flex items-center justify-center gap-1.5 bg-[#E67E22] text-white text-xs font-bold py-2.5 px-3 rounded-xl hover:bg-[#D35400] hover:scale-[1.03] hover:shadow-lg transition-all duration-200">
+                  <item.icon className="w-4 h-4" /><span>{item.label}</span>
                 </a>
               ))}
             </div>
