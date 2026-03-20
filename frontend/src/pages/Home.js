@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
-  ArrowDown, Users, Star, MapPin, Map, Hotel, Plane, 
-  Sparkles, ChevronDown, ExternalLink, Compass, Globe, 
+  ArrowDown, Users, Star, MapPin,
+  Sparkles, ChevronDown, ExternalLink, Globe, 
   Heart, Bitcoin, Clock, Camera, ChevronRight, Play, CheckCircle
 } from 'lucide-react';
 import axios from 'axios';
@@ -50,9 +50,7 @@ const Home = () => {
   
   // Travel planner state
   const [customDestination, setCustomDestination] = useState('');
-  const [travelResources, setTravelResources] = useState(null);
-  const [expandedSection, setExpandedSection] = useState(null);
-  const [loadingResources, setLoadingResources] = useState(false);
+  const navigate = useNavigate();
 
   // Scroll to section if coming from another page with ?scrollTo=
   useEffect(() => {
@@ -148,45 +146,9 @@ const Home = () => {
   // Helper to get dynamic translated text
   const d = useCallback((key, fallback) => dynTexts[key] || fallback, [dynTexts]);
 
-  const searchDestination = async () => {
+  const searchDestination = () => {
     if (!customDestination.trim()) return;
-    setLoadingResources(true);
-    setExpandedSection(null);
-    
-    try {
-      const response = await axios.get(`${API}/travel-resources/${encodeURIComponent(customDestination.trim())}`);
-      setTravelResources(response.data);
-    } catch (error) {
-      const destination = customDestination.trim();
-      const destEncoded = encodeURIComponent(destination);
-      const destPlus = destination.replace(/ /g, '+');
-      
-      setTravelResources({
-        destination: destination,
-        map: { title: "Bing Maps", url: `https://www.bing.com/maps?q=${destPlus}` },
-        hotels: [
-          { name: "Trivago", url: `https://www.trivago.pt/?search=${destPlus}` },
-          { name: "TripAdvisor", url: `https://www.tripadvisor.pt/Search?q=${destPlus}` },
-          { name: "Kayak", url: `https://www.kayak.pt/hotels` },
-          { name: "Airbnb", url: `https://www.airbnb.pt/s/${destEncoded}/homes` },
-          { name: "ALL Accor", url: "https://all.accor.com/pt-pt/world/index.shtml" }
-        ],
-        flights: [
-          { name: "TAP", url: "https://www.flytap.com/pt-pt" },
-          { name: "Ryanair", url: "https://www.ryanair.com/pt/pt" },
-          { name: "EasyJet", url: "https://www.easyjet.com/pt" },
-          { name: "Momondo", url: "https://www.momondo.pt" }
-        ],
-        social: [
-          { name: "GetYourGuide", url: `https://www.getyourguide.pt/s/?q=${destPlus}`, description: "Tours e atividades" },
-          { name: "Pinterest", url: `https://www.pinterest.pt/search/pins/?q=${destPlus}%20travel`, description: "Inspiração visual" },
-          { name: "WikiVoyage", url: `https://pt.wikivoyage.org/wiki/${destEncoded}`, description: "Guia colaborativo" },
-          { name: "Reddit", url: `https://www.reddit.com/search/?q=${destPlus}%20travel`, description: "Experiências reais" }
-        ]
-      });
-    } finally {
-      setLoadingResources(false);
-    }
+    navigate(`/plan-trip?destination=${encodeURIComponent(customDestination.trim())}`);
   };
 
   const scrollToMain = () => {
@@ -472,7 +434,7 @@ const Home = () => {
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-8">
             <div className="flex items-center justify-center gap-2 mb-4">
-              <Map className="w-6 h-6 text-[#FFBE98]" />
+              <Sparkles className="w-6 h-6 text-[#FFBE98]" />
               <h2 className="text-3xl font-bold text-[#2D2A26]">{t('home.plan_trip')}</h2>
             </div>
             <p className="text-[#6B6661] mb-2">{t('home.plan_trip_intro')}</p>
@@ -483,65 +445,15 @@ const Home = () => {
                 onKeyPress={(e) => e.key === 'Enter' && searchDestination()}
                 placeholder={t('home.plan_placeholder')}
                 className="flex-1 px-4 py-3 rounded-xl border border-stone-200 bg-white text-[#2D2A26] focus:outline-none focus:ring-2 focus:ring-[#FFBE98]"
+                data-testid="home-search-input"
               />
-              <button onClick={searchDestination} disabled={!customDestination.trim() || loadingResources}
-                className="px-6 py-3 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-medium hover:bg-[#FFAB7D] transition-colors disabled:opacity-50">
-                {loadingResources ? '...' : t('home.search')}
+              <button onClick={searchDestination} disabled={!customDestination.trim()}
+                className="px-6 py-3 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-medium hover:bg-[#FFAB7D] transition-colors disabled:opacity-50"
+                data-testid="home-search-btn">
+                {t('home.search')}
               </button>
             </div>
           </motion.div>
-
-          {travelResources && (
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mt-6">
-              <p className="text-center text-sm text-[#6B6661] mb-4">
-                {t('home.resources_for')} <span className="font-semibold text-[#2D2A26]">{travelResources.destination}</span>
-              </p>
-              
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <a href={travelResources.map?.url} target="_blank" rel="noopener noreferrer"
-                  className="bg-stone-50 rounded-xl p-4 hover:bg-stone-100 transition-colors text-center">
-                  <Map className="w-6 h-6 text-[#FFBE98] mx-auto mb-2" />
-                  <p className="text-sm font-medium text-[#2D2A26]">{travelResources.map?.title || t('home.map')}</p>
-                </a>
-
-                <div className="bg-stone-50 rounded-xl p-4 cursor-pointer hover:bg-stone-100 transition-colors text-center"
-                  onClick={() => setExpandedSection(expandedSection === 'hotels' ? null : 'hotels')}>
-                  <Hotel className="w-6 h-6 text-[#FFBE98] mx-auto mb-2" />
-                  <p className="text-sm font-medium text-[#2D2A26]">{t('home.where_to_stay')}</p>
-                  <p className="text-xs text-[#6B6661]">{travelResources.hotels?.length} {t('home.options')}</p>
-                </div>
-
-                <div className="bg-stone-50 rounded-xl p-4 cursor-pointer hover:bg-stone-100 transition-colors text-center"
-                  onClick={() => setExpandedSection(expandedSection === 'flights' ? null : 'flights')}>
-                  <Plane className="w-6 h-6 text-[#FFBE98] mx-auto mb-2" />
-                  <p className="text-sm font-medium text-[#2D2A26]">{t('home.flights')}</p>
-                  <p className="text-xs text-[#6B6661]">{travelResources.flights?.length} {t('home.airlines')}</p>
-                </div>
-
-                <div className="bg-stone-50 rounded-xl p-4 cursor-pointer hover:bg-stone-100 transition-colors text-center"
-                  onClick={() => setExpandedSection(expandedSection === 'social' ? null : 'social')}>
-                  <Compass className="w-6 h-6 text-[#FFBE98] mx-auto mb-2" />
-                  <p className="text-sm font-medium text-[#2D2A26]">{t('home.resources')}</p>
-                  <p className="text-xs text-[#6B6661]">{travelResources.social?.length} {t('home.sites')}</p>
-                </div>
-              </div>
-
-              <AnimatePresence>
-                {expandedSection && (
-                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
-                    className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3">
-                    {travelResources[expandedSection]?.map((item, idx) => (
-                      <a key={idx} href={item.url} target="_blank" rel="noopener noreferrer"
-                        className="bg-white border border-stone-200 rounded-lg p-3 hover:border-[#FFBE98] transition-colors text-center">
-                        <p className="text-sm font-medium text-[#2D2A26]">{item.name}</p>
-                        {item.description && <p className="text-xs text-[#6B6661]">{item.description}</p>}
-                      </a>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          )}
         </div>
       </section>
 

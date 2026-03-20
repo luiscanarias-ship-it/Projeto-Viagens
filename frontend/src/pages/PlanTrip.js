@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   Plane, Hotel, Compass, Car, Wifi, Shield, MapPin, 
   ExternalLink, Star, Heart, Sparkles, ArrowRight
@@ -12,6 +12,8 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const PlanTrip = () => {
   const [affiliateLinks, setAffiliateLinks] = useState({});
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const destinationParam = searchParams.get('destination') || '';
 
   useEffect(() => {
     document.title = '4Luis — Planeie a sua viagem com IA';
@@ -169,7 +171,7 @@ const PlanTrip = () => {
                   Receba um roteiro completo, dicas locais e sugestões de reserva — tudo personalizado para o seu destino e datas.
                 </p>
                 <button
-                  onClick={() => navigate('/travel-planner')}
+                  onClick={() => navigate(`/travel-planner${destinationParam ? `?destination=${encodeURIComponent(destinationParam)}` : ''}`)}
                   className="inline-flex items-center gap-2 bg-[#FFBE98] text-white font-semibold px-6 py-3 rounded-full hover:bg-[#E6A07C] transition-all shadow-[0_2px_8px_rgba(255,190,152,0.35)] hover:shadow-[0_4px_14px_rgba(255,190,152,0.45)]"
                   data-testid="ai-planner-cta-btn"
                 >
