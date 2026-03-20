@@ -39,7 +39,7 @@
     "frontend": "100% (12/12 tests passed)"
   },
   "test_credentials": {
-    "app_url": "https://dynamic-itinerary-1.preview.emergentagent.com",
+    "app_url": "https://trip-planner-cta.preview.emergentagent.com",
     "localStorage_key": "4luis_cookie_consent"
   },
   "seed_data_creation": "None - used localStorage.removeItem() to simulate first visit",

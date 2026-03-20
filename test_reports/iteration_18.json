@@ -48,7 +48,7 @@
     "frontend": "100% (all 18 tests passed)"
   },
   "test_credentials": {
-    "app_url": "https://dynamic-itinerary-1.preview.emergentagent.com",
+    "app_url": "https://trip-planner-cta.preview.emergentagent.com",
     "test_journey": "journey_china001 (China, ~2.5% progress)"
   },
   "seed_data_creation": "N/A (used existing journey_china001)",

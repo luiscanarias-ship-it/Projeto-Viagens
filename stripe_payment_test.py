@@ -14,7 +14,7 @@ from datetime import datetime
 class StripePaymentTester:
     def __init__(self):
         # Use the correct frontend URL from the review request
-        self.frontend_url = "https://dynamic-itinerary-1.preview.emergentagent.com"
+        self.frontend_url = "https://trip-planner-cta.preview.emergentagent.com"
         self.api_url = f"{self.frontend_url}/api"
         self.session = requests.Session()
         

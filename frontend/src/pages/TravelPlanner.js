@@ -754,14 +754,28 @@ const TravelPlanner = () => {
                           <p className="text-xs font-bold text-[#FFBE98]">Dia {day.day}</p>
                           <p className="text-sm font-semibold text-[#2D2A26]">{day.title}</p>
                           <ul className="mt-1 space-y-0.5">
-                            {day.activities?.map((a, j) => (
-                              <li key={j} className="text-xs text-[#6B6661] flex items-start gap-1.5 flex-wrap">
-                                <span className="text-[#FFBE98] mt-0.5 shrink-0">&#8226;</span>
-                                <span className="flex-1">
-                                  <TextWithCTA text={a} links={links} onTrack={trackClick} variant="inline" />
-                                </span>
-                              </li>
-                            ))}
+                            {day.activities?.map((a, j) => {
+                              const hasCTAMarker = /\[CTA:\w+:[^\]]+\]/.test(a);
+                              const keywordMatch = !hasCTAMarker ? detectActivityCTA(a) : null;
+                              const cleanText = a.replace(/\[CTA:\w+:[^\]]+\]/g, '').trim();
+                              return (
+                                <li key={j} className="text-xs text-[#6B6661] flex items-start gap-1.5 flex-wrap">
+                                  <span className="text-[#FFBE98] mt-0.5 shrink-0">&#8226;</span>
+                                  <span className="flex-1">
+                                    {hasCTAMarker ? (
+                                      <TextWithCTA text={a} links={links} onTrack={trackClick} variant="inline" />
+                                    ) : (
+                                      <>{cleanText}</>
+                                    )}
+                                  </span>
+                                  {keywordMatch && (
+                                    <InlineActivityCTA match={keywordMatch}
+                                      link={links[keywordMatch.platform]?.url}
+                                      onTrack={trackClick} />
+                                  )}
+                                </li>
+                              );
+                            })}
                           </ul>
                         </div>
                         {/* Mid-itinerary CTA: after ~half of days */}
