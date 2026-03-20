@@ -6134,8 +6134,8 @@ Datas: {start_date} a {end_date}
 REGRAS PARA CTAs CONTEXTUAIS:
 - Nas atividades do itinerario e nas dicas locais, adiciona marcadores de CTA quando for util para o viajante.
 - Formato do marcador: [CTA:tipo:texto do botao]
-- Tipos permitidos: activity, hotel, flight, esim, transport
-- Mapas: activity = tours/bilhetes/experiencias, hotel = alojamento, flight = voos, esim = internet/dados, transport = aluguer de carro
+- Tipos permitidos: activity, hotel, flight, esim, transport, insurance
+- Mapas: activity = tours/bilhetes/experiencias, hotel = alojamento, flight = voos, esim = internet/dados, transport = aluguer de carro, insurance = seguro de viagem
 - MAXIMO 4-6 CTAs no plano inteiro (nao em todas as frases!)
 - Coloca o CTA no FIM da frase, de forma natural
 - Exemplos: "Visite o teamLab Borderless [CTA:activity:Ver bilhetes]", "Reserve alojamento no centro [CTA:hotel:Ver hoteis]", "Garanta internet no destino [CTA:esim:Ver eSIM]"

@@ -5,7 +5,7 @@ import {
   MapPin, Calendar, Compass, Sparkles, Loader2,
   Sun, Shirt, ClipboardList, Lightbulb, Hotel, Plane, Wifi,
   ExternalLink, Globe, Ticket, Send, SlidersHorizontal, 
-  CheckCircle2, Copy, Share2, Check, Eye, EyeOff, Car, Clock, Star
+  CheckCircle2, Copy, Share2, Check, Eye, EyeOff, Car, Clock, Star, Shield
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -55,6 +55,7 @@ const CTA_MAP = {
   flight: { platform: 'skyscanner', icon: Plane },
   esim: { platform: 'airalo', icon: Wifi },
   transport: { platform: 'cars', icon: Car },
+  insurance: { platform: 'insurance', icon: Shield },
 };
 
 /* ── Parse text with [CTA:type:label] markers ── */
@@ -209,6 +210,7 @@ const buildDynamicLinks = (baseLinks, destination, startDate, endDate) => {
   if (links.getyourguide) links.getyourguide = { ...links.getyourguide, url: `https://www.getyourguide.com/s/?q=${enc(destination)}` };
   if (links.airalo) links.airalo = { ...links.airalo, url: `https://www.airalo.com/search?keyword=${enc(destination)}` };
   if (links.cars) links.cars = { ...links.cars, url: `https://www.rentalcars.com/search-results?location=${enc(destination)}` };
+  if (links.insurance) links.insurance = { ...links.insurance, url: `https://www.iatiseguros.com/?destination=${enc(destination)}` };
   return links;
 };
 /* ── Sticky Booking Bar ── */
@@ -723,6 +725,11 @@ const TravelPlanner = () => {
                     </div>
                   )}
                 </HideableSection>
+
+                {/* Fixed CTA: Alojamento (always visible) */}
+                <ContextualCTA icon={Hotel} text="Reserve o alojamento ideal" label="Ver hotéis"
+                  sublabel="Cancelamento gratuito na maioria das opções"
+                  link={dynamicLinks.booking?.url} platform="booking" onTrack={trackClick} trust={true} />
               </div>
 
               {/* Divider */}
@@ -794,6 +801,11 @@ const TravelPlanner = () => {
                     </div>
                   )}
                 </HideableSection>
+
+                {/* Fixed CTA: Seguro de viagem (always visible) */}
+                <ContextualCTA icon={Shield} text="Proteja a sua viagem" label="Ver seguros"
+                  sublabel="Seguro com cobertura médica e cancelamento"
+                  link={dynamicLinks.insurance?.url} platform="insurance" onTrack={trackClick} trust={true} />
               </div>
 
               <div className="h-px bg-stone-100 mx-5" />
