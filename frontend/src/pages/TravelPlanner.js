@@ -8,7 +8,7 @@ import {
   CheckCircle2, Copy, Share2, Check, Eye, EyeOff, Car, Clock, Star, Shield, Lock, Map
 } from 'lucide-react';
 import axios from 'axios';
-import { AmbassadorProgress, PremiumGate } from '../components/AmbassadorProgress';
+import { AmbassadorProgress, PremiumGate, InlineReferralCTA } from '../components/AmbassadorProgress';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -770,6 +770,9 @@ const TravelPlanner = () => {
                 <p className="text-sm text-[#6B6661] mt-0.5">{plan.dates}</p>
                 {plan.summary && <p className="text-sm text-[#2D2A26]/80 mt-2 italic leading-relaxed">{plan.summary}</p>}
                 <TopBookingBar links={links} onTrack={trackClick} destination={plan.destination} />
+
+                {/* Referral CTA at peak motivation (after seeing the guide) */}
+                {token && !isAmbassador && <InlineReferralCTA token={token} />}
               </div>
 
               {/* Tab Navigation */}

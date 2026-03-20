@@ -96,6 +96,14 @@ async def register(user_data: UserCreate):
     }
     await db.users.insert_one(user_doc)
     
+    # Notify sponsor that a friend registered
+    if sponsor_id:
+        asyncio.create_task(create_notification(
+            sponsor_id, "referral_registered",
+            f"O teu amigo {user_data.name} acabou de se registar! Falta contribuir para a Viagem Principal.",
+            {"referred_name": user_data.name, "referred_user_id": user_id}
+        ))
+    
     token = create_jwt_token(user_id, is_admin)
     return {
         "token": token,
@@ -1165,6 +1173,21 @@ async def recalculate_ambassador_status(user_id: str):
         {"$set": {"valid_referrals_count": valid_count}}
     )
 
+    # Notify on progress milestones
+    old_count = user.get("valid_referrals_count", 0)
+    if valid_count > old_count and valid_count < AMBASSADOR_REQUIRED_REFERRALS:
+        remaining = AMBASSADOR_REQUIRED_REFERRALS - valid_count
+        if valid_count == 1:
+            msg = "Um amigo teu contribuiu! Bom começo! Faltam 2 para seres Embaixador."
+        elif valid_count == 2:
+            msg = "Quase lá! Falta apenas 1 amigo para desbloquear o modo Embaixador!"
+        else:
+            msg = f"Já tens {valid_count}/{AMBASSADOR_REQUIRED_REFERRALS}! Faltam {remaining} amigo(s)."
+        asyncio.create_task(create_notification(
+            user_id, "referral_contributed", msg,
+            {"valid_referrals": valid_count, "required": AMBASSADOR_REQUIRED_REFERRALS}
+        ))
+
     # Check if ambassador threshold reached
     if valid_count >= AMBASSADOR_REQUIRED_REFERRALS:
         await db.users.update_one(
@@ -1175,6 +1198,11 @@ async def recalculate_ambassador_status(user_id: str):
             }}
         )
         asyncio.create_task(send_ambassador_unlocked_email(user_id))
+        asyncio.create_task(create_notification(
+            user_id, "ambassador_unlocked",
+            "Parabéns! És agora Embaixador 4Luis! Todas as funcionalidades premium estão desbloqueadas.",
+            {"valid_referrals": valid_count}
+        ))
         logger.info(f"User {user_id} promoted to ambassador with {valid_count} valid referrals")
         return True
 
@@ -1327,6 +1355,45 @@ async def get_ambassador_features(request: Request):
             "premium_guide": is_amb,
         }
     }
+
+# ==================== NOTIFICATIONS ====================
+
+async def create_notification(user_id: str, ntype: str, message: str, data: dict = None):
+    """Create a notification for a user."""
+    doc = {
+        "notification_id": f"notif_{uuid.uuid4().hex[:12]}",
+        "user_id": user_id,
+        "type": ntype,
+        "message": message,
+        "data": data or {},
+        "read": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.notifications.insert_one(doc)
+    return doc["notification_id"]
+
+
+@api_router.get("/notifications")
+async def get_notifications(request: Request):
+    """Get user notifications (most recent first)."""
+    user = await require_auth(request)
+    notifs = await db.notifications.find(
+        {"user_id": user.user_id},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(50)
+    unread = sum(1 for n in notifs if not n.get("read"))
+    return {"notifications": notifs, "unread_count": unread}
+
+
+@api_router.post("/notifications/mark-read")
+async def mark_notifications_read(request: Request):
+    """Mark all notifications as read."""
+    user = await require_auth(request)
+    await db.notifications.update_many(
+        {"user_id": user.user_id, "read": False},
+        {"$set": {"read": True}}
+    )
+    return {"status": "ok"}
 
 async def generate_points_for_user(user_id: str, journey_id: str, contribution_id: str, 
                                     points_count: int, is_crypto: bool):
@@ -6520,17 +6587,17 @@ Responde APENAS com um JSON valido com esta estrutura exata (sem markdown, sem `
 
 # ==================== AFFILIATE SYSTEM ====================
 
-# Centralized affiliate links config — update URLs here when ready
+# Centralized affiliate links config — update affiliate_id with your real IDs
 AFFILIATE_LINKS = {
-    "skyscanner":   {"name": "Skyscanner",      "url": "https://www.skyscanner.pt", "category": "flights"},
-    "booking":      {"name": "Booking.com",      "url": "https://www.booking.com",   "category": "hotels"},
-    "hotels":       {"name": "Hotels.com",       "url": "https://www.hotels.com",    "category": "hotels"},
-    "getyourguide": {"name": "GetYourGuide",     "url": "https://www.getyourguide.com", "category": "activities"},
-    "cars":         {"name": "DiscoverCars",     "url": "https://www.discovercars.com", "category": "transport"},
-    "airalo":       {"name": "Airalo",           "url": "https://www.airalo.com",    "category": "esim"},
-    "holafly":      {"name": "Holafly",          "url": "https://www.holafly.com",   "category": "esim"},
-    "insurance":    {"name": "IATI Seguros",     "url": "https://www.iatiseguros.com", "category": "insurance"},
-    "googlemaps":   {"name": "Google Maps",      "url": "https://maps.google.com",   "category": "map"},
+    "skyscanner":   {"name": "Skyscanner",      "url": "https://www.skyscanner.pt",         "category": "flights",    "affiliate_id": "4luis"},
+    "booking":      {"name": "Booking.com",      "url": "https://www.booking.com",           "category": "hotels",     "affiliate_id": "4luis"},
+    "hotels":       {"name": "Hotels.com",       "url": "https://www.hotels.com",            "category": "hotels",     "affiliate_id": ""},
+    "getyourguide": {"name": "GetYourGuide",     "url": "https://www.getyourguide.com",      "category": "activities", "affiliate_id": "4luis"},
+    "cars":         {"name": "DiscoverCars",     "url": "https://www.discovercars.com",      "category": "transport",  "affiliate_id": ""},
+    "airalo":       {"name": "Airalo",           "url": "https://www.airalo.com",            "category": "esim",       "affiliate_id": ""},
+    "holafly":      {"name": "Holafly",          "url": "https://www.holafly.com",           "category": "esim",       "affiliate_id": ""},
+    "insurance":    {"name": "IATI Seguros",     "url": "https://www.iatiseguros.com",       "category": "insurance",  "affiliate_id": "4luis"},
+    "googlemaps":   {"name": "Google Maps",      "url": "https://maps.google.com",           "category": "map",        "affiliate_id": ""},
 }
 
 @api_router.get("/affiliate-links")

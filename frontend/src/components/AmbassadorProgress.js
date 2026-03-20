@@ -1,14 +1,23 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, Users, Copy, Check, Share2, Lock, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react';
+import { Trophy, Users, Copy, Check, Share2, Lock, ExternalLink, ChevronDown, ChevronUp, Bell, Map, Sparkles, Target, Wallet } from 'lucide-react';
 
 const API = process.env.REACT_APP_BACKEND_URL;
 
-export const AmbassadorProgress = ({ token, compact = false }) => {
+/* ── Micro-feedback messages ── */
+const getMicroFeedback = (valid, required) => {
+  if (valid >= required) return { emoji: '\ud83c\udf89', text: 'Parabéns! És Embaixador!', color: 'text-emerald-600' };
+  if (valid === 2) return { emoji: '\ud83d\udd25', text: 'Quase lá!', color: 'text-amber-600' };
+  if (valid === 1) return { emoji: '\ud83d\udd25', text: 'Bom começo!', color: 'text-[#FFBE98]' };
+  return null;
+};
+
+export const AmbassadorProgress = ({ token, compact = false, showValueSection = true }) => {
   const [progress, setProgress] = useState(null);
   const [copied, setCopied] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [notifications, setNotifications] = useState([]);
 
   const fetchProgress = useCallback(async () => {
     if (!token) return;
@@ -20,7 +29,20 @@ export const AmbassadorProgress = ({ token, compact = false }) => {
     } catch (e) { /* silent */ }
   }, [token]);
 
-  useEffect(() => { fetchProgress(); }, [fetchProgress]);
+  const fetchNotifications = useCallback(async () => {
+    if (!token) return;
+    try {
+      const res = await fetch(`${API}/api/notifications`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setNotifications(data.notifications?.filter(n => !n.read && n.type.startsWith('referral')).slice(0, 3) || []);
+      }
+    } catch (e) { /* silent */ }
+  }, [token]);
+
+  useEffect(() => { fetchProgress(); fetchNotifications(); }, [fetchProgress, fetchNotifications]);
 
   const generateLink = async () => {
     if (!token || generating) return;
@@ -30,9 +52,7 @@ export const AmbassadorProgress = ({ token, compact = false }) => {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` }
       });
-      if (res.ok) {
-        await fetchProgress();
-      }
+      if (res.ok) await fetchProgress();
     } catch (e) { /* silent */ }
     setGenerating(false);
   };
@@ -41,20 +61,29 @@ export const AmbassadorProgress = ({ token, compact = false }) => {
     if (!progress?.referral_code) return;
     const url = `${window.location.origin}/?ref=${progress.referral_code}`;
     const msg = `Ajuda-me a realizar esta viagem e desbloqueia o acesso ao Roteiro Premium para as tuas viagens! ${url}`;
-    const waUrl = `https://wa.me/?text=${encodeURIComponent(msg)}`;
-    window.open(waUrl, '_blank');
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
   const copyLink = () => {
     if (!progress?.referral_code) return;
-    const url = `${window.location.origin}/?ref=${progress.referral_code}`;
-    navigator.clipboard.writeText(url);
+    navigator.clipboard.writeText(`${window.location.origin}/?ref=${progress.referral_code}`);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const dismissNotifications = async () => {
+    if (!token) return;
+    try {
+      await fetch(`${API}/api/notifications/mark-read`, {
+        method: 'POST', headers: { Authorization: `Bearer ${token}` }
+      });
+      setNotifications([]);
+    } catch (e) { /* silent */ }
+  };
+
   if (!token || !progress) return null;
 
+  // ── Ambassador Badge (unlocked) ──
   if (progress.is_ambassador) {
     return (
       <div className="bg-gradient-to-r from-[#FFBE98]/15 to-transparent rounded-xl border border-[#FFBE98]/20 p-4" data-testid="ambassador-badge">
@@ -72,7 +101,9 @@ export const AmbassadorProgress = ({ token, compact = false }) => {
   }
 
   const { valid_referrals, required, remaining, progress_pct, referral_code, referrals } = progress;
+  const feedback = getMicroFeedback(valid_referrals, required);
 
+  // ── Compact variant ──
   if (compact) {
     return (
       <div className="bg-white rounded-xl border border-stone-100 p-3 shadow-sm" data-testid="ambassador-progress-compact">
@@ -95,15 +126,39 @@ export const AmbassadorProgress = ({ token, compact = false }) => {
     );
   }
 
+  // ── Full variant ──
   return (
     <div className="bg-white rounded-xl border border-stone-100 p-5 shadow-sm space-y-4" data-testid="ambassador-progress">
-      {/* Header */}
+      {/* Notifications */}
+      {notifications.length > 0 && (
+        <div className="space-y-1.5" data-testid="ambassador-notifications">
+          {notifications.map((n, i) => (
+            <motion.div key={n.notification_id || i} initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
+              className="flex items-start gap-2 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
+              <Bell className="w-3.5 h-3.5 text-amber-500 mt-0.5 shrink-0" />
+              <p className="text-[11px] text-amber-800 flex-1">{n.message}</p>
+            </motion.div>
+          ))}
+          <button onClick={dismissNotifications} className="text-[10px] text-stone-400 hover:text-stone-600 transition-colors">
+            Marcar como lidas
+          </button>
+        </div>
+      )}
+
+      {/* Header + micro-feedback */}
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 bg-[#FFBE98]/10 rounded-xl flex items-center justify-center">
           <Trophy className="w-5 h-5 text-[#FFBE98]" />
         </div>
         <div className="flex-1">
-          <p className="text-sm font-bold text-[#2D2A26]">Modo Embaixador</p>
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-bold text-[#2D2A26]">Modo Embaixador</p>
+            {feedback && (
+              <span className={`text-[10px] font-bold ${feedback.color}`}>
+                {feedback.emoji} {feedback.text}
+              </span>
+            )}
+          </div>
           <p className="text-[11px] text-[#6B6661]">
             {remaining > 0
               ? `Faltam ${remaining} amigo${remaining > 1 ? 's' : ''} para desbloquear funcionalidades avançadas`
@@ -137,7 +192,7 @@ export const AmbassadorProgress = ({ token, compact = false }) => {
         </div>
       </div>
 
-      {/* Referral details (expandable) */}
+      {/* Referral details */}
       {referrals && referrals.length > 0 && (
         <div>
           <button onClick={() => setExpanded(!expanded)} className="flex items-center gap-1 text-[11px] font-semibold text-[#6B6661] hover:text-[#2D2A26] transition-colors">
@@ -190,23 +245,105 @@ export const AmbassadorProgress = ({ token, compact = false }) => {
         )}
       </div>
 
-      {/* Premium features preview */}
-      <div className="space-y-1.5">
-        <p className="text-[10px] font-semibold text-[#6B6661] uppercase tracking-wider">Funcionalidades premium</p>
-        {[
-          { label: 'Mapa interativo do roteiro', icon: '🗺️' },
-          { label: 'Dicas secretas locais', icon: '🤫' },
-          { label: 'CTAs de reserva avançados', icon: '🎯' },
-          { label: 'Assistente IA durante a viagem', icon: '🤖' },
-        ].map((f, i) => (
-          <div key={i} className="flex items-center gap-2 text-[11px] text-stone-400 px-2 py-1">
-            <span>{f.icon}</span>
-            <span>{f.label}</span>
-            <Lock className="w-3 h-3 ml-auto" />
+      {/* "O que desbloqueias como Embaixador" value section */}
+      {showValueSection && (
+        <div className="space-y-2" data-testid="ambassador-value-section">
+          <p className="text-[10px] font-semibold text-[#6B6661] uppercase tracking-wider">O que desbloqueias como Embaixador</p>
+          <div className="grid grid-cols-2 gap-2">
+            {[
+              { icon: Map, label: 'Mapa interativo', desc: 'Roteiro num mapa visual', color: 'bg-sky-50 text-sky-500' },
+              { icon: Sparkles, label: 'Assistente IA', desc: 'Ajuda durante a viagem', color: 'bg-violet-50 text-violet-500' },
+              { icon: Target, label: 'Dicas secretas', desc: 'Dicas locais exclusivas', color: 'bg-teal-50 text-teal-500' },
+              { icon: Wallet, label: 'Guia Premium', desc: 'Roteiro detalhado', color: 'bg-amber-50 text-amber-500' },
+            ].map((f, i) => (
+              <div key={i} className="flex items-center gap-2.5 p-2.5 rounded-xl bg-stone-50/80 border border-stone-100">
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${f.color}`}>
+                  <f.icon className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[11px] font-bold text-[#2D2A26] truncate">{f.label}</p>
+                  <p className="text-[9px] text-[#6B6661] truncate">{f.desc}</p>
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </div>
+      )}
     </div>
+  );
+};
+
+/* ── Inline Referral CTA (shown after guide generation) ── */
+export const InlineReferralCTA = ({ token }) => {
+  const [progress, setProgress] = useState(null);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!token) return;
+    fetch(`${API}/api/ambassador/progress`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d) setProgress(d); })
+      .catch(() => {});
+  }, [token]);
+
+  if (!token || !progress || progress.is_ambassador) return null;
+
+  const shareLink = () => {
+    if (!progress?.referral_code) return;
+    const url = `${window.location.origin}/?ref=${progress.referral_code}`;
+    const msg = `Ajuda-me a realizar esta viagem e desbloqueia o acesso ao Roteiro Premium! ${url}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+  };
+
+  const copyLink = () => {
+    if (!progress?.referral_code) return;
+    navigator.clipboard.writeText(`${window.location.origin}/?ref=${progress.referral_code}`);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const { remaining } = progress;
+  const feedback = getMicroFeedback(progress.valid_referrals, progress.required);
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
+      className="bg-gradient-to-r from-[#FFBE98]/10 to-transparent rounded-xl border border-[#FFBE98]/15 p-4 my-3"
+      data-testid="inline-referral-cta">
+      <div className="flex items-start gap-3">
+        <div className="w-9 h-9 bg-[#FFBE98]/15 rounded-xl flex items-center justify-center shrink-0">
+          <Trophy className="w-4.5 h-4.5 text-[#FFBE98]" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            <p className="text-xs font-bold text-[#2D2A26]">
+              {remaining > 0
+                ? `Faltam ${remaining} amigo${remaining > 1 ? 's' : ''} para o Guia Premium`
+                : 'Quase Embaixador!'
+              }
+            </p>
+            {feedback && <span className={`text-[10px] font-bold ${feedback.color}`}>{feedback.emoji}</span>}
+          </div>
+          <p className="text-[10px] text-[#6B6661] mb-2.5">
+            Convida amigos para desbloquear mapa interativo, dicas secretas e assistente IA.
+          </p>
+          {progress.referral_code ? (
+            <div className="flex gap-2">
+              <button onClick={copyLink}
+                className="flex items-center gap-1 text-[11px] font-semibold bg-white border border-stone-200 hover:border-stone-300 px-3 py-1.5 rounded-lg transition-all hover:shadow-sm">
+                {copied ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
+                {copied ? 'Copiado!' : 'Copiar link'}
+              </button>
+              <button onClick={shareLink}
+                className="flex items-center gap-1 text-[11px] font-semibold bg-[#25D366] text-white px-3 py-1.5 rounded-lg transition-all hover:shadow-md">
+                <Share2 className="w-3 h-3" />WhatsApp
+              </button>
+            </div>
+          ) : (
+            <p className="text-[10px] text-[#FFBE98] font-semibold">Gera o teu link de convite no fim do guia</p>
+          )}
+        </div>
+      </div>
+    </motion.div>
   );
 };
 

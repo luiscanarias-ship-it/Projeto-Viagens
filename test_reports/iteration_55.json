@@ -1,0 +1,83 @@
+{
+  "summary": "Iteration 55 - Testing 5 new features: Notifications, Affiliate links with affiliate_id, Ambassador value section, InlineReferralCTA, Micro-feedback system. Backend: 11/12 tests passed (1 skipped - affiliate_id bug documented). Frontend: All new features working correctly.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {
+        "endpoint": "/api/affiliate-links",
+        "issue": "affiliate_id field NOT included in response. Backend has AFFILIATE_LINKS config with affiliate_id (line 6591-6600) but endpoint at line 6606 filters it out: return {k: {\"url\": v[\"url\"], \"name\": v[\"name\"]} for k, v in AFFILIATE_LINKS.items()}",
+        "priority": "LOW",
+        "fix": "Update line 6606 to include affiliate_id: return {k: {\"url\": v[\"url\"], \"name\": v[\"name\"], \"affiliate_id\": v.get(\"affiliate_id\", \"\")} for k, v in AFFILIATE_LINKS.items()}"
+      },
+      {
+        "endpoint": "create_notification function",
+        "issue": "Duplicate create_notification functions in server.py (lines 1361-1373 and 6163-6175) with different signatures. First uses 'type' field, second uses 'title' field. Second function overwrites first, causing inconsistent notification structure.",
+        "priority": "LOW"
+      }
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "passed_tests": [
+    "Backend: GET /api/notifications requires auth (401 without token)",
+    "Backend: GET /api/notifications returns notifications array and unread_count",
+    "Backend: POST /api/notifications/mark-read requires auth (401 without token)",
+    "Backend: POST /api/notifications/mark-read returns status 'ok' and sets unread_count to 0",
+    "Backend: Referral notification flow - sponsor gets 'referral_registered' notification when referred friend registers",
+    "Backend: POST /api/ambassador/generate-referral requires auth (401 without token)",
+    "Backend: POST /api/ambassador/generate-referral returns referral_code",
+    "Backend: Referral code generation is idempotent (same code returned on multiple calls)",
+    "Backend: GET /api/affiliate-links returns platform data with url and name",
+    "Backend: GET /api/ambassador/progress requires auth (401 without token)",
+    "Backend: GET /api/ambassador/progress returns correct structure (is_ambassador, valid_referrals, required=3, remaining, progress_pct)",
+    "Frontend: Travel plan generation works (Roma, Cultural, 2026-08-01 to 2026-08-05)",
+    "Frontend: TopBookingBar visible with destination-aware labels (Hotéis bem localizados em Roma, etc.)",
+    "Frontend: InlineReferralCTA visible after TopBookingBar for logged-in non-ambassador user",
+    "Frontend: AmbassadorProgress widget visible with 'Modo Embaixador' title",
+    "Frontend: Ambassador value section visible with 4 feature cards (Mapa interativo, Assistente IA, Dicas secretas, Guia Premium)",
+    "Frontend: Progress bar shows '0 de 3 amigos com contribuição'",
+    "Frontend: 3 Premium gates visible (Smart Map, AI Assistant, Secret Tips)",
+    "Frontend: Smart Map preview visible with 'Mapa interativo para Embaixadores' label",
+    "Frontend: AI Assistant preview visible with 'Assistente IA para Embaixadores' label",
+    "Frontend: StickyBar visible after scroll with Hotels, Voos, Atividades CTAs",
+    "Frontend: All contextual CTAs functional (10 CTAs found)",
+    "Frontend: Generate referral link button visible in AmbassadorProgress widget"
+  ],
+  "failed_tests": [],
+  "skipped_tests": [
+    "Backend: affiliate_id field in /api/affiliate-links response (documented bug - field not included)"
+  ],
+  "test_report_links": [
+    "/app/backend/tests/test_notifications_iter55.py",
+    "/app/test_reports/pytest/notifications_iter55_results.xml"
+  ],
+  "action_items": [
+    "Fix /api/affiliate-links endpoint to include affiliate_id field (line 6606 in server.py)",
+    "Consider consolidating duplicate create_notification functions in server.py"
+  ],
+  "critical_code_review_comments": [
+    "Backend server.py (lines 1361-1373): First create_notification function uses 'type' field",
+    "Backend server.py (lines 6163-6175): Second create_notification function uses 'title' field - this overwrites the first",
+    "Backend server.py (line 6606): affiliate_id field filtered out from response",
+    "Frontend AmbassadorProgress.js: getMicroFeedback function correctly returns emoji+text for 1/3, 2/3, 3/3 progress",
+    "Frontend AmbassadorProgress.js: InlineReferralCTA component correctly shows for logged-in non-ambassador users",
+    "Frontend AmbassadorProgress.js: Ambassador value section shows 4 feature cards in grid layout",
+    "Frontend TravelPlanner.js (line 775): InlineReferralCTA correctly placed after TopBookingBar"
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_notifications_iter55.py"
+  ],
+  "success_rate": {
+    "backend": "92% (11/12 tests passed, 1 skipped)",
+    "frontend": "100% (all new features working)"
+  },
+  "test_credentials": "Test users created with prefix TEST_notif_, TEST_sponsor_, TEST_referred_, TEST_refgen_, TEST_idempotent_, TEST_progress_, TEST_frontend_ via API",
+  "seed_data_creation": "Generated travel plan: Roma (Cultural, 2026-08-01 to 2026-08-05)",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Iteration 55 verified 5 new features: 1) Notifications system working (GET /api/notifications, POST /api/notifications/mark-read). 2) Referral notification triggered when friend registers with sponsor_code. 3) Ambassador value section shows 4 feature cards. 4) InlineReferralCTA appears after TopBookingBar for logged-in non-ambassador users. 5) Micro-feedback (getMicroFeedback) returns correct emoji+text. Minor bugs: affiliate_id not in /api/affiliate-links response, duplicate create_notification functions with different signatures.",
+  "rca_of_issue": null
+}
