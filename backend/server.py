@@ -64,12 +64,16 @@ async def register(user_data: UserCreate):
             {"_id": 0, "user_id": 1}
         )
         if sponsor_link:
-            sponsor_id = sponsor_link["user_id"]
-            # Incrementar referral_count do sponsor_link
-            await db.sponsor_links.update_one(
-                {"link_id": user_data.sponsor_code},
-                {"$inc": {"referral_count": 1}}
-            )
+            sponsor_user_id = sponsor_link["user_id"]
+            # Anti-abuse: prevent self-referral (check if sponsor email matches new user email)
+            sponsor_user = await db.users.find_one({"user_id": sponsor_user_id}, {"_id": 0, "email": 1})
+            if sponsor_user and sponsor_user.get("email") != user_data.email:
+                sponsor_id = sponsor_user_id
+                # Incrementar referral_count do sponsor_link
+                await db.sponsor_links.update_one(
+                    {"link_id": user_data.sponsor_code},
+                    {"$inc": {"referral_count": 1}}
+                )
     
     user_doc = {
         "user_id": user_id,
@@ -680,7 +684,7 @@ async def paypal_capture_order(order_id: str, request: Request):
     await check_and_update_journey_funding_status(journey_id)
     await check_and_update_story_chapter(journey_id)
     
-    # Process ambassador progression
+    # Process ambassador progression using robust recalculation
     if user_id:
         user_doc = await db.users.find_one({"user_id": user_id}, {"_id": 0})
         if user_doc:
@@ -694,25 +698,12 @@ async def paypal_capture_order(order_id: str, request: Request):
                     {"user_id": user_id},
                     {"$set": {"contributed_to_main_trip": True}}
                 )
-                valid_refs = user_doc.get("valid_referrals_count", 0)
-                if valid_refs >= 3 and user_doc.get("level") != "embaixador":
-                    await db.users.update_one(
-                        {"user_id": user_id},
-                        {"$set": {"level": "embaixador", "embaixador_unlocked_at": datetime.now(timezone.utc).isoformat()}}
-                    )
-                    asyncio.create_task(send_ambassador_unlocked_email(user_id))
+                # Recalculate for the contributor
+                await recalculate_ambassador_status(user_id)
             
-            # Process sponsor referral
+            # Recalculate sponsor's ambassador status
             if user_doc.get("sponsor_id"):
-                sponsor_id = user_doc["sponsor_id"]
-                await db.users.update_one({"user_id": sponsor_id}, {"$inc": {"valid_referrals_count": 1}})
-                sponsor = await db.users.find_one({"user_id": sponsor_id}, {"_id": 0})
-                if sponsor and sponsor.get("contributed_to_main_trip") and sponsor.get("valid_referrals_count", 0) >= 3 and sponsor.get("level") != "embaixador":
-                    await db.users.update_one(
-                        {"user_id": sponsor_id},
-                        {"$set": {"level": "embaixador", "embaixador_unlocked_at": datetime.now(timezone.utc).isoformat()}}
-                    )
-                    asyncio.create_task(send_ambassador_unlocked_email(sponsor_id))
+                await recalculate_ambassador_status(user_doc["sponsor_id"])
         
         # Send notification
         journey_name = (await db.journeys.find_one({"journey_id": journey_id}, {"_id": 0, "name": 1})) or {}
@@ -926,7 +917,6 @@ async def stripe_webhook(request: Request):
                 journey_id = contribution["journey_id"]
                 amount = contribution["amount"]
                 user_id = contribution.get("user_id")
-                sponsor_link_id = contribution.get("sponsor_link_id")
                 
                 # Update contribution status
                 await db.contributions.update_one(
@@ -967,43 +957,11 @@ async def stripe_webhook(request: Request):
                             {"$set": {"contributed_to_main_trip": True}}
                         )
                     
-                    # Process sponsor referral
-                    if sponsor_link_id:
-                        sponsor_link = await db.sponsor_links.find_one(
-                            {"link_id": sponsor_link_id},
-                            {"_id": 0}
-                        )
-                        if sponsor_link:
-                            sponsor_user_id = sponsor_link["user_id"]
-                            # Increment successful referrals
-                            await db.sponsor_links.update_one(
-                                {"link_id": sponsor_link_id},
-                                {"$inc": {"successful_referrals": 1}}
-                            )
-                            # Update sponsor's valid_referrals_count
-                            await db.users.update_one(
-                                {"user_id": sponsor_user_id},
-                                {"$inc": {"valid_referrals_count": 1}}
-                            )
-                            
-                            # Check if sponsor becomes ambassador
-                            sponsor_user = await db.users.find_one(
-                                {"user_id": sponsor_user_id},
-                                {"_id": 0}
-                            )
-                            if sponsor_user:
-                                valid_refs = sponsor_user.get("valid_referrals_count", 0) + 1
-                                contributed = sponsor_user.get("contributed_to_main_trip", False)
-                                if contributed and valid_refs >= 3 and sponsor_user.get("level") != "embaixador":
-                                    await db.users.update_one(
-                                        {"user_id": sponsor_user_id},
-                                        {"$set": {
-                                            "level": "embaixador",
-                                            "embaixador_unlocked_at": datetime.now(timezone.utc).isoformat()
-                                        }}
-                                    )
-                                    # Send email
-                                    asyncio.create_task(send_ambassador_unlocked_email(sponsor_user_id))
+                    # Recalculate ambassador status for contributor and sponsor
+                    await recalculate_ambassador_status(user_id)
+                    contributor_doc = await db.users.find_one({"user_id": user_id}, {"_id": 0, "sponsor_id": 1})
+                    if contributor_doc and contributor_doc.get("sponsor_id"):
+                        await recalculate_ambassador_status(contributor_doc["sponsor_id"])
                 
                 # Send confirmation email
                 updated_contribution = await db.contributions.find_one(
@@ -1151,6 +1109,224 @@ async def track_sponsor_referral(link_id: str):
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Link não encontrado")
     return {"message": "Referência registada"}
+
+# ==================== AMBASSADOR SYSTEM ====================
+
+AMBASSADOR_REQUIRED_REFERRALS = 3
+
+async def recalculate_ambassador_status(user_id: str):
+    """Recalculate ambassador status dynamically based on actual data.
+    Conditions: 3+ unique invited users who each made a confirmed contribution to main trip."""
+    user = await db.users.find_one({"user_id": user_id}, {"_id": 0})
+    if not user:
+        return False
+
+    # Prevent recalculation if already ambassador
+    if user.get("level") == "embaixador":
+        return True
+
+    # Get users invited by this user (sponsor_id = this user)
+    invited_users = await db.users.find(
+        {"sponsor_id": user_id},
+        {"_id": 0, "user_id": 1, "email": 1}
+    ).to_list(1000)
+
+    if len(invited_users) < AMBASSADOR_REQUIRED_REFERRALS:
+        return False
+
+    # Get main trip journey
+    main_journey = await db.journeys.find_one(
+        {"is_main_trip": True, "is_active": True},
+        {"_id": 0, "journey_id": 1}
+    )
+    if not main_journey:
+        # Fallback: any active journey
+        main_journey = await db.journeys.find_one(
+            {"is_active": True, "status": "ativa"},
+            {"_id": 0, "journey_id": 1}
+        )
+    if not main_journey:
+        return False
+
+    # Count unique invited users with confirmed contributions > 0€ to main trip
+    invited_ids = [u["user_id"] for u in invited_users]
+    valid_contributors = await db.contributions.distinct("user_id", {
+        "user_id": {"$in": invited_ids},
+        "journey_id": main_journey["journey_id"],
+        "status": {"$in": ["confirmed", "completed"]},
+        "amount": {"$gt": 0}
+    })
+
+    valid_count = len(valid_contributors)
+
+    # Update the cached count
+    await db.users.update_one(
+        {"user_id": user_id},
+        {"$set": {"valid_referrals_count": valid_count}}
+    )
+
+    # Check if ambassador threshold reached
+    if valid_count >= AMBASSADOR_REQUIRED_REFERRALS:
+        await db.users.update_one(
+            {"user_id": user_id},
+            {"$set": {
+                "level": "embaixador",
+                "embaixador_unlocked_at": datetime.now(timezone.utc).isoformat()
+            }}
+        )
+        asyncio.create_task(send_ambassador_unlocked_email(user_id))
+        logger.info(f"User {user_id} promoted to ambassador with {valid_count} valid referrals")
+        return True
+
+    return False
+
+
+@api_router.get("/ambassador/progress")
+async def get_ambassador_progress(request: Request):
+    """Get user's progress towards ambassador status with referral details."""
+    user = await require_auth(request)
+    user_id = user.user_id
+    user_data = await db.users.find_one({"user_id": user_id}, {"_id": 0, "password_hash": 0})
+
+    is_ambassador = user_data.get("level") == "embaixador"
+
+    # Get main journey
+    main_journey = await db.journeys.find_one(
+        {"is_main_trip": True, "is_active": True},
+        {"_id": 0, "journey_id": 1, "name": 1}
+    )
+    if not main_journey:
+        main_journey = await db.journeys.find_one(
+            {"is_active": True, "status": "ativa"},
+            {"_id": 0, "journey_id": 1, "name": 1}
+        )
+
+    # Get invited users
+    invited_users = await db.users.find(
+        {"sponsor_id": user_id},
+        {"_id": 0, "user_id": 1, "name": 1, "created_at": 1}
+    ).to_list(1000)
+
+    # For each invited user, check if they contributed
+    referral_details = []
+    valid_count = 0
+    for inv in invited_users:
+        has_contribution = False
+        if main_journey:
+            contrib = await db.contributions.find_one({
+                "user_id": inv["user_id"],
+                "journey_id": main_journey["journey_id"],
+                "status": {"$in": ["confirmed", "completed"]},
+                "amount": {"$gt": 0}
+            })
+            has_contribution = contrib is not None
+        if has_contribution:
+            valid_count += 1
+        referral_details.append({
+            "name": inv.get("name", "Utilizador"),
+            "registered": True,
+            "contributed": has_contribution,
+            "registered_at": inv.get("created_at")
+        })
+
+    # Get or create sponsor link for sharing
+    sponsor_link = await db.sponsor_links.find_one(
+        {"user_id": user_id},
+        {"_id": 0, "link_id": 1}
+    )
+    referral_code = sponsor_link["link_id"] if sponsor_link else None
+
+    remaining = max(0, AMBASSADOR_REQUIRED_REFERRALS - valid_count)
+
+    return {
+        "is_ambassador": is_ambassador,
+        "unlocked_at": user_data.get("embaixador_unlocked_at"),
+        "valid_referrals": valid_count,
+        "total_invited": len(invited_users),
+        "required": AMBASSADOR_REQUIRED_REFERRALS,
+        "remaining": remaining,
+        "progress_pct": min(100, round((valid_count / AMBASSADOR_REQUIRED_REFERRALS) * 100)),
+        "referral_code": referral_code,
+        "referrals": referral_details,
+        "premium_features": {
+            "smart_map": is_ambassador,
+            "secret_tips": is_ambassador,
+            "enhanced_ctas": is_ambassador,
+            "ai_assistant": is_ambassador,
+            "premium_guide": is_ambassador,
+        }
+    }
+
+
+@api_router.post("/ambassador/generate-referral")
+async def generate_ambassador_referral(request: Request):
+    """Generate a unique referral link for ambassador progression."""
+    user = await require_auth(request)
+    user_id = user.user_id
+
+    # Anti-abuse: get main journey
+    main_journey = await db.journeys.find_one(
+        {"is_main_trip": True, "is_active": True},
+        {"_id": 0, "journey_id": 1}
+    )
+    if not main_journey:
+        main_journey = await db.journeys.find_one(
+            {"is_active": True, "status": "ativa"},
+            {"_id": 0, "journey_id": 1}
+        )
+    if not main_journey:
+        raise HTTPException(status_code=404, detail="Nenhuma viagem ativa encontrada")
+
+    # Check if link already exists
+    existing = await db.sponsor_links.find_one(
+        {"user_id": user_id, "journey_id": main_journey["journey_id"]},
+        {"_id": 0}
+    )
+    if existing:
+        return {
+            "referral_code": existing["link_id"],
+            "journey_id": main_journey["journey_id"]
+        }
+
+    # Create new sponsor link
+    link = SponsorLink(user_id=user_id, journey_id=main_journey["journey_id"])
+    doc = link.model_dump()
+    doc["created_at"] = doc["created_at"].isoformat()
+    await db.sponsor_links.insert_one(doc)
+
+    return {
+        "referral_code": doc["link_id"],
+        "journey_id": main_journey["journey_id"]
+    }
+
+
+@api_router.get("/ambassador/features")
+async def get_ambassador_features(request: Request):
+    """Check which premium features are available. Works for both auth and anonymous."""
+    user = await get_current_user(request)
+    if not user:
+        return {
+            "is_ambassador": False,
+            "features": {
+                "smart_map": False,
+                "secret_tips": False,
+                "enhanced_ctas": False,
+                "ai_assistant": False,
+                "premium_guide": False,
+            }
+        }
+    user_data = await db.users.find_one({"user_id": user.user_id}, {"_id": 0})
+    is_amb = user_data.get("level") == "embaixador" if user_data else False
+    return {
+        "is_ambassador": is_amb,
+        "features": {
+            "smart_map": is_amb,
+            "secret_tips": is_amb,
+            "enhanced_ctas": is_amb,
+            "ai_assistant": is_amb,
+            "premium_guide": is_amb,
+        }
+    }
 
 async def generate_points_for_user(user_id: str, journey_id: str, contribution_id: str, 
                                     points_count: int, is_crypto: bool):

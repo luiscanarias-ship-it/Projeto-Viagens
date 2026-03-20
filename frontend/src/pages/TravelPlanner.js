@@ -5,9 +5,10 @@ import {
   MapPin, Calendar, Compass, Sparkles, Loader2,
   Sun, Shirt, ClipboardList, Lightbulb, Hotel, Plane, Wifi,
   ExternalLink, Globe, Ticket, Send, SlidersHorizontal, 
-  CheckCircle2, Copy, Share2, Check, Eye, EyeOff, Car, Clock, Star, Shield
+  CheckCircle2, Copy, Share2, Check, Eye, EyeOff, Car, Clock, Star, Shield, Lock, Map
 } from 'lucide-react';
 import axios from 'axios';
+import { AmbassadorProgress, PremiumGate } from '../components/AmbassadorProgress';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -437,6 +438,7 @@ const TravelPlanner = () => {
   const [hiddenSections, setHiddenSections] = useState(() => {
     try { return JSON.parse(localStorage.getItem('planner_hidden') || '[]'); } catch { return []; }
   });
+  const [ambassadorData, setAmbassadorData] = useState(null);
   const resultsRef = useRef(null);
   const startDateRef = useRef(null);
   const tabRefs = { guia: useRef(null), roteiro: useRef(null), checklist: useRef(null), dicas: useRef(null) };
@@ -444,6 +446,14 @@ const TravelPlanner = () => {
   useEffect(() => {
     document.title = '4Luis — Planeie a sua viagem com IA';
     axios.get(`${API}/affiliate-links`).then(r => setAffiliateLinks(r.data)).catch(() => {});
+    // Fetch ambassador status
+    const token = localStorage.getItem('token');
+    if (token) {
+      fetch(`${API}/ambassador/features`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.ok ? r.json() : null)
+        .then(d => { if (d) setAmbassadorData(d); })
+        .catch(() => {});
+    }
     // If destination pre-filled, scroll to form and focus date
     if (searchParams.get('destination')) {
       setTimeout(() => {
@@ -467,6 +477,9 @@ const TravelPlanner = () => {
 
   // Contextual CTA copy based on destination and trip type
   const ctaCopy = plan ? getCTACopy(plan.destination || destination, tripTypes) : getCTACopy(destination, tripTypes);
+
+  const token = localStorage.getItem('token');
+  const isAmbassador = ambassadorData?.is_ambassador || false;
 
   useEffect(() => {
     if (!plan) { setShowStickyBar(false); return; }
@@ -927,7 +940,7 @@ const TravelPlanner = () => {
                 <HideableSection id="local_tips" hiddenSections={hiddenSections} toggleSection={toggleSection}>
                   {plan.local_tips && (
                     <ul className="space-y-2">
-                      {plan.local_tips.map((tip, i) => (
+                      {plan.local_tips.slice(0, isAmbassador ? undefined : 3).map((tip, i) => (
                         <li key={i} className="text-sm text-[#6B6661] flex items-start gap-2">
                           <Lightbulb className="w-3.5 h-3.5 text-teal-400 mt-0.5 shrink-0" />
                           <span className="flex-1">
@@ -936,6 +949,19 @@ const TravelPlanner = () => {
                         </li>
                       ))}
                     </ul>
+                  )}
+                  {/* Secret tips — gated for non-ambassadors */}
+                  {plan.local_tips && plan.local_tips.length > 3 && !isAmbassador && (
+                    <PremiumGate isAmbassador={isAmbassador} label="Dicas secretas para Embaixadores" compact>
+                      <ul className="space-y-2 mt-2">
+                        {plan.local_tips.slice(3).map((tip, i) => (
+                          <li key={i} className="text-sm text-[#6B6661] flex items-start gap-2">
+                            <Lightbulb className="w-3.5 h-3.5 text-teal-400 mt-0.5 shrink-0" />
+                            <span>{tip}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </PremiumGate>
                   )}
                 </HideableSection>
 
@@ -947,6 +973,37 @@ const TravelPlanner = () => {
               {/* ── Actions Footer ── */}
               <div className="px-5 py-4 border-t border-stone-100 bg-[#FFBE98]/[0.03]" data-testid="actions-footer">
                 <div className="space-y-3">
+                  {/* Premium: Smart Map (gated) */}
+                  <PremiumGate isAmbassador={isAmbassador} label="Mapa interativo para Embaixadores">
+                    <div className="bg-stone-50 rounded-xl p-4 flex items-center gap-3 border border-stone-100" data-testid="smart-map-preview">
+                      <div className="w-10 h-10 bg-sky-50 rounded-xl flex items-center justify-center shrink-0">
+                        <Map className="w-5 h-5 text-sky-500" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-[#2D2A26]">Mapa interativo do roteiro</p>
+                        <p className="text-[11px] text-[#6B6661]">Todos os locais do seu roteiro num mapa visual</p>
+                      </div>
+                    </div>
+                  </PremiumGate>
+
+                  {/* Premium: AI Assistant (gated placeholder) */}
+                  <PremiumGate isAmbassador={isAmbassador} label="Assistente IA para Embaixadores">
+                    <div className="bg-stone-50 rounded-xl p-4 flex items-center gap-3 border border-stone-100" data-testid="ai-assistant-preview">
+                      <div className="w-10 h-10 bg-violet-50 rounded-xl flex items-center justify-center shrink-0">
+                        <Sparkles className="w-5 h-5 text-violet-500" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-[#2D2A26]">Assistente IA durante a viagem</p>
+                        <p className="text-[11px] text-[#6B6661]">Pergunte qualquer coisa sobre o seu destino em tempo real</p>
+                      </div>
+                    </div>
+                  </PremiumGate>
+
+                  {/* Ambassador Progress */}
+                  {token && !isAmbassador && (
+                    <AmbassadorProgress token={token} compact={false} />
+                  )}
+
                   {/* Primary: Ajustar */}
                   <RefinePanel onSubmit={handleRefine} loading={refining} success={refineSuccess} />
                   {/* Secondary: Copy + Share */}
