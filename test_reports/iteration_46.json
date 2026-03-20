@@ -1,0 +1,61 @@
+{
+  "summary": "Iteration 46 - Duplicate CTA Removal & Dynamic Affiliate Links. All tests passed. Backend: 9/9 (100%). Frontend: All features verified - duplicate CTAs removed, dynamic affiliate links working correctly with destination/dates.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "passed_tests": [
+    "Frontend: TopBookingBar renders with 3 items (Alojamento, Voos, Atividades) in Guia header",
+    "Frontend: NO 'BookingSection' component (data-testid='booking-section') exists - VERIFIED REMOVED",
+    "Frontend: NO duplicate 'Reservar alojamento' ContextualCTA (cta-contextual-booking) - VERIFIED REMOVED",
+    "Frontend: NO duplicate eSIM ContextualCTA (cta-contextual-airalo) - VERIFIED REMOVED",
+    "Frontend: InlineActivityCTA works in itinerary - Found 6 inline CTAs for activities with keywords (museu, tour, transfer)",
+    "Frontend: eSIM CTA present inside tech checklist section (data-testid='checklist-esim-cta')",
+    "Frontend: Contextual CTA for flights present after Roteiro (data-testid='cta-contextual-skyscanner')",
+    "Frontend: Contextual CTA for activities present after Dicas (data-testid='cta-contextual-getyourguide')",
+    "Frontend: StickyBar appears at bottom when scrolling (data-testid='sticky-booking-bar')",
+    "Frontend: TopBookingBar Booking.com link contains destination and dates (ss=Tokyo&checkin=2026-06-01&checkout=2026-06-10)",
+    "Frontend: Skyscanner link contains destination in URL (query=Tokyo)",
+    "Frontend: GetYourGuide link contains destination in URL (q=Tokyo)",
+    "Frontend: StickyBar links are also dynamic with destination (ss=Paris confirmed)",
+    "Backend: GET /api/affiliate-links returns 200 with all base links (booking, skyscanner, getyourguide, airalo, cars)",
+    "Backend: POST /api/affiliate-click tracking works for booking platform",
+    "Backend: POST /api/affiliate-click tracking works for skyscanner platform",
+    "Backend: POST /api/affiliate-click tracking works for getyourguide platform",
+    "Backend: POST /api/affiliate-click tracking works for airalo platform"
+  ],
+  "test_report_links": [
+    "/app/backend/tests/test_affiliate_iter46.py",
+    "/app/test_reports/pytest/affiliate_iter46_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "TravelPlanner.js: buildDynamicLinks function (lines 96-106) correctly builds URLs with destination/dates using encodeURIComponent",
+    "TravelPlanner.js: dynamicLinks state properly updated via useEffect (lines 259-263) when plan/destination/dates change",
+    "TravelPlanner.js: TopBookingBar (line 552) correctly uses dynamicLinks instead of base affiliateLinks",
+    "TravelPlanner.js: StickyBar (line 765) also uses dynamicLinks for consistency",
+    "TravelPlanner.js: Duplicate BookingSection component successfully removed from Guia tab section",
+    "TravelPlanner.js: Duplicate ContextualCTA for hotel (cta-contextual-booking) removed between weather/packing and Roteiro",
+    "TravelPlanner.js: Duplicate ContextualCTA for eSIM (cta-contextual-airalo) removed between Checklist and Dicas",
+    "TravelPlanner.js: eSIM CTA correctly kept inline in tech checklist section (line 674-679)",
+    "TravelPlanner.js: Only 2 contextual CTAs remain - flights after Roteiro, activities after Dicas"
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_affiliate_iter46.py"
+  ],
+  "success_rate": {
+    "backend": "100% (9/9 tests passed)",
+    "frontend": "100% (all 14 features verified)"
+  },
+  "test_credentials": null,
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Iteration 46 verified: 1) Duplicate CTAs removed - BookingSection, hotel ContextualCTA, and eSIM ContextualCTA no longer exist. 2) Only remaining contextual CTAs: flights (after Roteiro) and activities (after Dicas). 3) eSIM CTA is now ONLY inline inside tech checklist. 4) Dynamic affiliate links work with buildDynamicLinks() function that adds destination/dates to Booking.com (ss=, checkin=, checkout=), Skyscanner (query=), GetYourGuide (q=), Airalo (keyword=) URLs. 5) Both TopBookingBar and StickyBar use dynamicLinks state. 6) InlineActivityCTA components work in itinerary for activities matching keywords (museu, tour, transfer, etc).",
+  "rca_of_issue": null
+}

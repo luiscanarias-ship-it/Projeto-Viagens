@@ -93,43 +93,17 @@ const ContextualCTA = ({ icon: Icon, text, label, sublabel, link, platform, onTr
   </div>
 );
 
-/* ── Booking Section ── */
-const BookingSection = ({ links, onTrack }) => {
-  const items = [
-    { id: 'booking', icon: Hotel, label: 'Reservar alojamento', desc: 'Cancelamento flexível na maioria', tag: 'Recomendado pela 4Luis', primary: true },
-    { id: 'skyscanner', icon: Plane, label: 'Pesquisar voos', desc: 'Compare centenas de opções', tag: 'Melhores preços', primary: true },
-    { id: 'getyourguide', icon: Ticket, label: 'Reservar atividades', desc: 'Tours e experiências únicas', tag: 'Recomendado pela 4Luis', primary: false },
-    { id: 'airalo', icon: Wifi, label: 'Obter eSIM', desc: 'Internet sem roaming', tag: null, primary: false },
-  ];
-  return (
-    <div className="space-y-2 my-3" data-testid="booking-section">
-      <div className="flex items-center gap-2 mb-1">
-        <Globe className="w-4 h-4 text-[#FFBE98]" />
-        <p className="text-sm font-bold text-[#2D2A26]">Reservar esta viagem</p>
-      </div>
-      {items.map(item => (
-        <a key={item.id} href={links[item.id]?.url || '#'} target="_blank" rel="noopener noreferrer"
-          onClick={() => onTrack(item.id)} data-testid={`booking-cta-${item.id}`}
-          className={`flex items-center gap-3 p-3 rounded-xl border transition-all group ${
-            item.primary ? 'border-[#FFBE98]/20 bg-[#FFBE98]/5 hover:bg-[#FFBE98]/10' : 'border-stone-100 bg-white hover:bg-stone-50'
-          }`}>
-          <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${item.primary ? 'bg-white shadow-sm' : 'bg-stone-50'}`}>
-            <item.icon className={`w-4 h-4 ${item.primary ? 'text-[#FFBE98]' : 'text-[#6B6661]'}`} />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold text-[#2D2A26]">{item.label}</span>
-              {item.tag && <span className="text-[9px] font-medium text-[#FFBE98] bg-[#FFBE98]/10 px-1.5 py-0.5 rounded-full whitespace-nowrap">{item.tag}</span>}
-            </div>
-            <p className="text-[11px] text-[#6B6661]">{item.desc}</p>
-          </div>
-          <ExternalLink className="w-3.5 h-3.5 text-[#6B6661] group-hover:text-[#FFBE98] transition-colors shrink-0" />
-        </a>
-      ))}
-    </div>
-  );
+/* ── Build dynamic affiliate links with destination/dates ── */
+const buildDynamicLinks = (baseLinks, destination, startDate, endDate) => {
+  const enc = encodeURIComponent;
+  const links = { ...baseLinks };
+  if (links.booking) links.booking = { ...links.booking, url: `https://www.booking.com/searchresults.html?ss=${enc(destination)}&checkin=${startDate}&checkout=${endDate}` };
+  if (links.skyscanner) links.skyscanner = { ...links.skyscanner, url: `https://www.skyscanner.pt/transport/flights/?query=${enc(destination)}` };
+  if (links.getyourguide) links.getyourguide = { ...links.getyourguide, url: `https://www.getyourguide.com/s/?q=${enc(destination)}` };
+  if (links.airalo) links.airalo = { ...links.airalo, url: `https://www.airalo.com/search?keyword=${enc(destination)}` };
+  if (links.cars) links.cars = { ...links.cars, url: `https://www.rentalcars.com/search-results?location=${enc(destination)}` };
+  return links;
 };
-
 /* ── Sticky Booking Bar ── */
 const StickyBar = ({ links, onTrack, visible }) => {
   const items = [
@@ -261,6 +235,7 @@ const TravelPlanner = () => {
   const [error, setError] = useState('');
   const [plan, setPlan] = useState(null);
   const [affiliateLinks, setAffiliateLinks] = useState({});
+  const [dynamicLinks, setDynamicLinks] = useState({});
   const [copied, setCopied] = useState(false);
   const [shared, setShared] = useState(false);
   const [showStickyBar, setShowStickyBar] = useState(false);
@@ -279,6 +254,13 @@ const TravelPlanner = () => {
     window.scrollTo(0, 0);
     axios.get(`${API}/affiliate-links`).then(r => setAffiliateLinks(r.data)).catch(() => {});
   }, []);
+
+  // Build dynamic links when plan/destination/dates available
+  useEffect(() => {
+    if (plan && destination && startDate && endDate && Object.keys(affiliateLinks).length) {
+      setDynamicLinks(buildDynamicLinks(affiliateLinks, plan.destination || destination, startDate, endDate));
+    }
+  }, [plan, destination, startDate, endDate, affiliateLinks]);
 
   useEffect(() => {
     if (!plan) { setShowStickyBar(false); return; }
@@ -567,7 +549,7 @@ const TravelPlanner = () => {
                 <h2 className="text-xl font-bold text-[#2D2A26]" data-testid="plan-destination">{plan.destination}</h2>
                 <p className="text-sm text-[#6B6661] mt-0.5">{plan.dates}</p>
                 {plan.summary && <p className="text-sm text-[#2D2A26]/80 mt-2 italic leading-relaxed">{plan.summary}</p>}
-                <TopBookingBar links={affiliateLinks} onTrack={trackClick} />
+                <TopBookingBar links={dynamicLinks} onTrack={trackClick} />
               </div>
 
               {/* Tab Navigation */}
@@ -620,12 +602,6 @@ const TravelPlanner = () => {
                     </div>
                   )}
                 </HideableSection>
-
-                <ContextualCTA icon={Hotel} text="Ver alojamento recomendado" label="Ver hotéis"
-                  sublabel="Cancelamento flexível na maioria das opções"
-                  link={affiliateLinks.booking?.url} platform="booking" onTrack={trackClick} />
-
-                <BookingSection links={affiliateLinks} onTrack={trackClick} />
               </div>
 
               {/* Divider */}
@@ -654,7 +630,7 @@ const TravelPlanner = () => {
                                 <span className="flex-1">{a}</span>
                                 {match && (
                                   <InlineActivityCTA match={match}
-                                    link={affiliateLinks[match.platform]?.url}
+                                    link={dynamicLinks[match.platform]?.url}
                                     onTrack={trackClick} />
                                 )}
                               </li>
@@ -668,7 +644,7 @@ const TravelPlanner = () => {
 
                 <ContextualCTA icon={Plane} text="Ver voos disponíveis" label="Ver voos"
                   sublabel="Compare preços de centenas de companhias"
-                  link={affiliateLinks.skyscanner?.url} platform="skyscanner" onTrack={trackClick} />
+                  link={dynamicLinks.skyscanner?.url} platform="skyscanner" onTrack={trackClick} />
               </div>
 
               <div className="h-px bg-stone-100 mx-5" />
@@ -695,7 +671,7 @@ const TravelPlanner = () => {
                             </p>
                           ))}
                           {key === 'tech' && (
-                            <a href={affiliateLinks.airalo?.url || '#'} target="_blank" rel="noopener noreferrer"
+                            <a href={dynamicLinks.airalo?.url || '#'} target="_blank" rel="noopener noreferrer"
                               onClick={() => trackClick('airalo')} data-testid="checklist-esim-cta"
                               className="flex items-center gap-1 mt-1.5 text-[10px] font-bold text-[#FFBE98] hover:text-[#E6A07C] transition-colors">
                               <Wifi className="w-3 h-3" />Internet no destino<ExternalLink className="w-2.5 h-2.5 opacity-60" />
@@ -706,10 +682,6 @@ const TravelPlanner = () => {
                     </div>
                   )}
                 </HideableSection>
-
-                <ContextualCTA icon={Wifi} text="Comprar eSIM para a viagem" label="Ver eSIM"
-                  sublabel="Evite custos de roaming"
-                  link={affiliateLinks.airalo?.url} platform="airalo" onTrack={trackClick} />
               </div>
 
               <div className="h-px bg-stone-100 mx-5" />
@@ -731,7 +703,7 @@ const TravelPlanner = () => {
                           <span className="flex-1">
                             {tip}
                             {tipHasBookingHint(tip) && (
-                              <a href={affiliateLinks.getyourguide?.url || '#'} target="_blank" rel="noopener noreferrer"
+                              <a href={dynamicLinks.getyourguide?.url || '#'} target="_blank" rel="noopener noreferrer"
                                 onClick={() => trackClick('getyourguide')}
                                 className="inline-flex items-center gap-1 text-[10px] font-bold text-[#FFBE98] hover:text-[#E6A07C] transition-colors ml-1">
                                 <Ticket className="w-3 h-3" />Ver disponibilidade<ExternalLink className="w-2.5 h-2.5 opacity-60" />
@@ -746,7 +718,7 @@ const TravelPlanner = () => {
 
                 <ContextualCTA icon={Compass} text="Reservar atividades e experiências" label="Descobrir"
                   sublabel="Tours, visitas guiadas e muito mais"
-                  link={affiliateLinks.getyourguide?.url} platform="getyourguide" onTrack={trackClick} />
+                  link={dynamicLinks.getyourguide?.url} platform="getyourguide" onTrack={trackClick} />
               </div>
 
               {/* ── Actions Footer ── */}
@@ -790,7 +762,7 @@ const TravelPlanner = () => {
         )}
       </div>
 
-      <StickyBar links={affiliateLinks} onTrack={trackClick} visible={showStickyBar} />
+      <StickyBar links={dynamicLinks} onTrack={trackClick} visible={showStickyBar} />
     </div>
   );
 };
