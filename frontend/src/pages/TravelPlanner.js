@@ -136,7 +136,7 @@ const TopBookingBar = ({ links, onTrack, destination }) => (
       {[
         { id: 'booking', icon: Hotel, label: destination ? `\ud83c\udfe8 Hotéis bem localizados em ${destination}` : '\ud83c\udfe8 Alojamento', trust: true },
         { id: 'skyscanner', icon: Plane, label: '\u2708\ufe0f Voos para estas datas (melhor preço)', trust: false },
-        { id: 'getyourguide', icon: Ticket, label: destination ? `\ud83c\udfab Experiências em ${destination} (evita filas)` : '\ud83c\udfab Atividades', trust: true },
+        { id: 'getyourguide', icon: Ticket, label: destination ? `\ud83c\udf9f\ufe0f Experiências em ${destination} (evita filas)` : '\ud83c\udf9f\ufe0f Atividades', trust: true },
       ].map(item => (
         <a key={item.id} href={links[item.id]?.url || '#'} target="_blank" rel="noopener noreferrer"
           onClick={() => onTrack(item.id)} data-testid={`top-booking-${item.id}`}

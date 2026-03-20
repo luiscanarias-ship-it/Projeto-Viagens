@@ -58,6 +58,18 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - Corrigido bug recorrente de scroll na pagina de detalhes do ticket de suporte
 - Implementado useLayoutEffect para scroll sincrono antes do paint
 
+### Copy de Alta Conversão dos CTAs (2026-03-20)
+- getCTACopy: copy dinâmico com emojis, urgência e destino para 5 tipos de CTA x 5 tipos de viagem
+- TopBookingBar: "🏨 Hotéis bem localizados em {dest}", "✈️ Voos (melhor preço)", "🎟️ Experiências (evita filas)"
+- Labels de ação: "Ver hotéis no centro de {dest}", "Reservar experiências (evita filas)", "Comparar voos", "Fazer seguro", "Reservar com antecedência"
+- Sublabels urgência: "Melhor localização", "Evita filas", "Preços sobem rapidamente", "Cancelamento + assistência médica"
+- Seguro humanizado: "Os imprevistos acontecem — faz o teu seguro"
+- ACTIVITY_PATTERNS: 6 padrões com urgência ("evita filas", "muito procurado", "antes de esgotar")
+- EsimMicroCard: "Comprar eSIM para {dest}" com sublabel acionável
+- TipBookingLink: "Reservar com antecedência"
+- TIP_BOOKING_KEYWORDS expandidas: +teamlab, popular, procurad, esgota, fila
+- Visual: shadow-sm adicionado a inline CTAs
+
 ### Copy Contextual dos CTAs (2026-03-20)
 - Função getCTACopy(destination, tripTypes) gera copy dinâmico para 5 tipos de CTA
 - Suporta 5 tipos de viagem: cultural, gastronomica, romantica, aventura, familia
