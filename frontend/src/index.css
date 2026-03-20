@@ -134,12 +134,12 @@ code {
 
 /* Progress bar styles */
 .progress-bar-warm {
-    background: linear-gradient(90deg, #FFBE98 0%, #E0C097 100%);
+    background: linear-gradient(90deg, #E67E22 0%, #E0C097 100%);
 }
 
 /* Button hover effects */
 .btn-primary {
-    @apply rounded-full px-8 py-4 bg-[#FFBE98] text-[#2D2A26] font-semibold transition-all duration-300;
+    @apply rounded-full px-8 py-4 bg-[#E67E22] text-[#2D2A26] font-semibold transition-all duration-300;
 }
 
 .btn-primary:hover {
@@ -165,7 +165,7 @@ code {
 
 /* Input styles */
 .input-warm {
-    @apply rounded-xl border-stone-200 bg-white/80 focus:ring-2 focus:ring-[#FFBE98] focus:border-transparent h-12 transition-all;
+    @apply rounded-xl border-stone-200 bg-white/80 focus:ring-2 focus:ring-[#E67E22] focus:border-transparent h-12 transition-all;
 }
 
 /* Selection color */
