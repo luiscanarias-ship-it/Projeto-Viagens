@@ -1,0 +1,61 @@
+{
+  "summary": "Iteration 47 - AI-driven CTA Injection Tests. All tests passed. Backend: 7/7 (100%). Frontend: All features verified - CTA markers parsed and rendered as inline links, trust badges showing, dynamic affiliate links working correctly.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "passed_tests": [
+    "Backend: POST /api/ai/travel-plan generates plan with [CTA:type:label] markers in activities and tips",
+    "Backend: POST /api/ai/travel-plan/refine also includes CTA markers",
+    "Backend: CTA types (activity, hotel, flight, esim, transport) are valid",
+    "Backend: Affiliate links endpoint returns all required platforms (booking, skyscanner, getyourguide, airalo, cars)",
+    "Backend: Affiliate click tracking works for all CTA platforms",
+    "Backend: /travel-planner route with destination param accessible",
+    "Frontend: Home search redirects to /travel-planner?destination=Barcelona correctly",
+    "Frontend: TravelPlanner pre-fills destination from query param",
+    "Frontend: parseCTAText correctly parses [CTA:type:label] into parts - no raw markers visible",
+    "Frontend: TextWithCTA renders inline CTA links (Ver hotéis, Ver bilhetes, Ver atividades, Ver eSIM)",
+    "Frontend: TopBookingBar renders with trust badges (4Luis)",
+    "Frontend: Contextual CTA cards show trust signal 'Recomendado pela 4Luis'",
+    "Frontend: EsimMicroCard renders in tech checklist with contextual destination (Fique ligado em Tokyo)",
+    "Frontend: StickyBar has micro-copy 'Planeie e reserve a sua viagem'",
+    "Frontend: Dynamic links contain destination/dates (ss=Tokyo&checkin=2026-07-01&checkout=2026-07-10)",
+    "Frontend: buildPlanText strips [CTA:*:*] markers from shared/copied text",
+    "Frontend: Copy button works correctly"
+  ],
+  "test_report_links": [
+    "/app/backend/tests/test_cta_injection_iter47.py",
+    "/app/test_reports/pytest/cta_injection_iter47_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "TravelPlanner.js: parseCTAText (lines 61-73) uses regex /\\[CTA:(\\w+):([^\\]]+)\\]/g correctly to parse markers",
+    "TravelPlanner.js: TextWithCTA component (lines 76-113) renders inline and card variant CTAs with proper styling",
+    "TravelPlanner.js: CTA_MAP (lines 52-58) correctly maps activity→getyourguide, hotel→booking, flight→skyscanner, esim→airalo, transport→cars",
+    "TravelPlanner.js: buildPlanText (lines 481-505) strips CTA markers using regex for clean shared text",
+    "TravelPlanner.js: ContextualCTA (lines 148-172) shows trust signal when trust=true",
+    "TravelPlanner.js: EsimMicroCard (lines 175-192) has contextual destination text",
+    "TravelPlanner.js: searchParams.get('destination') correctly pre-fills destination (line 339)",
+    "TravelPlanner.js: auto-scroll to form when destination param present (lines 368-376)",
+    "Home.js: searchDestination navigates to /travel-planner?destination=X (line 151)",
+    "server.py: AI prompt includes CTA injection rules (lines 6134-6142, 6281-6285)"
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_cta_injection_iter47.py"
+  ],
+  "success_rate": {
+    "backend": "100% (7/7 tests passed)",
+    "frontend": "100% (all 17 features verified)"
+  },
+  "test_credentials": null,
+  "seed_data_creation": "None - used cached travel plan from previous test",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Iteration 47 verified AI-driven CTA injection: 1) Backend generates [CTA:type:label] markers in itinerary activities and local_tips (max 4-6 per plan). 2) Valid CTA types: activity, hotel, flight, esim, transport. 3) Frontend parseCTAText() parses markers into parts. 4) TextWithCTA renders inline links with peach styling. 5) TopBookingBar has trust badges '4Luis'. 6) ContextualCTA shows 'Recomendado pela 4Luis' trust signal. 7) EsimMicroCard in tech checklist has contextual destination. 8) StickyBar micro-copy 'Planeie e reserve a sua viagem'. 9) Home search redirects to /travel-planner?destination=X. 10) buildPlanText strips CTA markers for clean shared text.",
+  "rca_of_issue": null
+}

@@ -48,7 +48,69 @@ const detectActivityCTA = (text) => {
 const TIP_BOOKING_KEYWORDS = ['reserv', 'bilhete', 'ingresso', 'anteced', 'antecipadamente', 'comprar', 'book'];
 const tipHasBookingHint = (tip) => TIP_BOOKING_KEYWORDS.some(k => tip.toLowerCase().includes(k));
 
-/* ── Inline Activity CTA (micro-card inside itinerary) ── */
+/* ── CTA type → platform + icon mapping ── */
+const CTA_MAP = {
+  activity: { platform: 'getyourguide', icon: Ticket },
+  hotel: { platform: 'booking', icon: Hotel },
+  flight: { platform: 'skyscanner', icon: Plane },
+  esim: { platform: 'airalo', icon: Wifi },
+  transport: { platform: 'cars', icon: Car },
+};
+
+/* ── Parse text with [CTA:type:label] markers ── */
+const parseCTAText = (text) => {
+  const regex = /\[CTA:(\w+):([^\]]+)\]/g;
+  const parts = [];
+  let lastIndex = 0;
+  let match;
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > lastIndex) parts.push({ type: 'text', value: text.slice(lastIndex, match.index).trim() });
+    parts.push({ type: 'cta', ctaType: match[1], label: match[2] });
+    lastIndex = regex.lastIndex;
+  }
+  if (lastIndex < text.length) parts.push({ type: 'text', value: text.slice(lastIndex).trim() });
+  return parts;
+};
+
+/* ── Render text with inline CTAs ── */
+const TextWithCTA = ({ text, links, onTrack, variant = 'inline' }) => {
+  const parts = parseCTAText(text);
+  if (parts.length === 1 && parts[0].type === 'text') return <span>{text}</span>;
+  return (
+    <span>
+      {parts.map((p, i) => {
+        if (p.type === 'text') return <span key={i}>{p.value} </span>;
+        const mapping = CTA_MAP[p.ctaType];
+        if (!mapping) return <span key={i}>{p.label}</span>;
+        const Icon = mapping.icon;
+        if (variant === 'card') return (
+          <span key={i} className="block mt-2">
+            <a href={links[mapping.platform]?.url || '#'} target="_blank" rel="noopener noreferrer"
+              onClick={() => onTrack(mapping.platform)}
+              className="flex items-center gap-2.5 bg-gradient-to-r from-[#FFBE98]/8 to-transparent rounded-lg border border-[#FFBE98]/15 p-2.5 hover:shadow-sm hover:border-[#FFBE98]/25 transition-all group">
+              <span className="w-7 h-7 bg-white rounded-lg flex items-center justify-center shadow-sm shrink-0">
+                <Icon className="w-3.5 h-3.5 text-[#FFBE98]" />
+              </span>
+              <span className="flex-1 text-[11px] font-bold text-[#2D2A26]">{p.label}</span>
+              <span className="text-[10px] font-bold text-[#FFBE98] group-hover:translate-x-0.5 transition-transform flex items-center gap-0.5">
+                Ver <ExternalLink className="w-2.5 h-2.5" />
+              </span>
+            </a>
+          </span>
+        );
+        return (
+          <a key={i} href={links[mapping.platform]?.url || '#'} target="_blank" rel="noopener noreferrer"
+            onClick={() => onTrack(mapping.platform)}
+            className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#FFBE98] bg-[#FFBE98]/8 hover:bg-[#FFBE98]/15 border border-[#FFBE98]/15 hover:border-[#FFBE98]/30 px-2.5 py-1 rounded-lg transition-all hover:shadow-sm ml-1 group">
+            <Icon className="w-3 h-3" />
+            <span>{p.label}</span>
+            <ExternalLink className="w-2.5 h-2.5 opacity-50 group-hover:opacity-80 transition-opacity" />
+          </a>
+        );
+      })}
+    </span>
+  );
+};
 const InlineActivityCTA = ({ match, link, onTrack }) => (
   <a href={link || '#'} target="_blank" rel="noopener noreferrer"
     onClick={() => onTrack(match.platform)}
@@ -418,25 +480,26 @@ const TravelPlanner = () => {
 
   const buildPlanText = () => {
     if (!plan) return '';
+    const strip = (t) => t.replace(/\[CTA:\w+:[^\]]+\]/g, '').trim();
     const l = [`GUIA DE VIAGEM: ${plan.destination}`, `Datas: ${plan.dates}`];
-    if (plan.summary) l.push(`\n${plan.summary}`);
-    if (plan.weather) l.push(`\nClima: ${plan.weather}`);
+    if (plan.summary) l.push(`\n${strip(plan.summary)}`);
+    if (plan.weather) l.push(`\nClima: ${strip(plan.weather)}`);
     if (plan.packing) {
       l.push('\nO que levar:');
-      if (plan.packing.clothing?.length) { l.push('  Roupa:'); plan.packing.clothing.forEach(i => l.push(`    - ${i}`)); }
-      if (plan.packing.essentials?.length) { l.push('  Essenciais:'); plan.packing.essentials.forEach(i => l.push(`    - ${i}`)); }
+      if (plan.packing.clothing?.length) { l.push('  Roupa:'); plan.packing.clothing.forEach(i => l.push(`    - ${strip(i)}`)); }
+      if (plan.packing.essentials?.length) { l.push('  Essenciais:'); plan.packing.essentials.forEach(i => l.push(`    - ${strip(i)}`)); }
     }
     l.push('\n--- ROTEIRO ---');
-    plan.itinerary?.forEach(d => { l.push(`\nDia ${d.day}: ${d.title}`); d.activities?.forEach(a => l.push(`  - ${a}`)); });
+    plan.itinerary?.forEach(d => { l.push(`\nDia ${d.day}: ${d.title}`); d.activities?.forEach(a => l.push(`  - ${strip(a)}`)); });
     if (plan.checklist) {
       l.push('\n--- CHECKLIST ---');
       Object.entries(plan.checklist).forEach(([key, items]) => {
         const label = key === 'documents' ? 'Documentos' : key === 'hygiene' ? 'Higiene' : 'Tecnologia';
         l.push(`  ${label}:`);
-        items?.forEach(i => l.push(`    - ${i}`));
+        items?.forEach(i => l.push(`    - ${strip(i)}`));
       });
     }
-    if (plan.local_tips?.length) { l.push('\n--- DICAS LOCAIS ---'); plan.local_tips.forEach(t => l.push(`  - ${t}`)); }
+    if (plan.local_tips?.length) { l.push('\n--- DICAS LOCAIS ---'); plan.local_tips.forEach(t => l.push(`  - ${strip(t)}`)); }
     l.push('\n\nGerado por 4Luis AI Travel Planner\nSonha connosco ✈️');
     return l.join('\n');
   };
@@ -680,20 +743,14 @@ const TravelPlanner = () => {
                         <p className="text-xs font-bold text-[#FFBE98]">Dia {day.day}</p>
                         <p className="text-sm font-semibold text-[#2D2A26]">{day.title}</p>
                         <ul className="mt-1 space-y-0.5">
-                          {day.activities?.map((a, j) => {
-                            const match = detectActivityCTA(a);
-                            return (
-                              <li key={j} className="text-xs text-[#6B6661] flex items-start gap-1.5 flex-wrap">
-                                <span className="text-[#FFBE98] mt-0.5 shrink-0">&#8226;</span>
-                                <span className="flex-1">{a}</span>
-                                {match && (
-                                  <InlineActivityCTA match={match}
-                                    link={dynamicLinks[match.platform]?.url}
-                                    onTrack={trackClick} />
-                                )}
-                              </li>
-                            );
-                          })}
+                          {day.activities?.map((a, j) => (
+                            <li key={j} className="text-xs text-[#6B6661] flex items-start gap-1.5 flex-wrap">
+                              <span className="text-[#FFBE98] mt-0.5 shrink-0">&#8226;</span>
+                              <span className="flex-1">
+                                <TextWithCTA text={a} links={dynamicLinks} onTrack={trackClick} variant="inline" />
+                              </span>
+                            </li>
+                          ))}
                         </ul>
                       </div>
                     ))}
@@ -725,7 +782,8 @@ const TravelPlanner = () => {
                           </p>
                           {items?.map((item, i) => (
                             <p key={i} className="text-xs text-[#6B6661] flex items-center gap-1.5 py-0.5">
-                              <CheckCircle2 className="w-3 h-3 text-emerald-400 shrink-0" />{item}
+                              <CheckCircle2 className="w-3 h-3 text-emerald-400 shrink-0" />
+                              <TextWithCTA text={item} links={dynamicLinks} onTrack={trackClick} variant="inline" />
                             </p>
                           ))}
                           {key === 'tech' && (
@@ -755,10 +813,7 @@ const TravelPlanner = () => {
                         <li key={i} className="text-sm text-[#6B6661] flex items-start gap-2">
                           <Lightbulb className="w-3.5 h-3.5 text-teal-400 mt-0.5 shrink-0" />
                           <span className="flex-1">
-                            {tip}
-                            {tipHasBookingHint(tip) && (
-                              <TipBookingLink link={dynamicLinks.getyourguide?.url} onTrack={trackClick} />
-                            )}
+                            <TextWithCTA text={tip} links={dynamicLinks} onTrack={trackClick} variant="inline" />
                           </span>
                         </li>
                       ))}

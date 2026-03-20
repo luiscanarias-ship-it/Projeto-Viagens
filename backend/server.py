@@ -6131,6 +6131,16 @@ Destino: {destination}
 Datas: {start_date} a {end_date}
 {trip_type_text}
 
+REGRAS PARA CTAs CONTEXTUAIS:
+- Nas atividades do itinerario e nas dicas locais, adiciona marcadores de CTA quando for util para o viajante.
+- Formato do marcador: [CTA:tipo:texto do botao]
+- Tipos permitidos: activity, hotel, flight, esim, transport
+- Mapas: activity = tours/bilhetes/experiencias, hotel = alojamento, flight = voos, esim = internet/dados, transport = aluguer de carro
+- MAXIMO 4-6 CTAs no plano inteiro (nao em todas as frases!)
+- Coloca o CTA no FIM da frase, de forma natural
+- Exemplos: "Visite o teamLab Borderless [CTA:activity:Ver bilhetes]", "Reserve alojamento no centro [CTA:hotel:Ver hoteis]", "Garanta internet no destino [CTA:esim:Ver eSIM]"
+- NAO repitas o mesmo tipo de CTA mais de 2 vezes
+
 Responde APENAS com um JSON valido com esta estrutura exata (sem markdown, sem ```):
 {{
   "destination": "{destination}",
@@ -6140,7 +6150,7 @@ Responde APENAS com um JSON valido com esta estrutura exata (sem markdown, sem `
     {{
       "day": 1,
       "title": "Titulo do dia",
-      "activities": ["Atividade 1", "Atividade 2", "Atividade 3"]
+      "activities": ["Atividade 1", "Atividade 2 [CTA:activity:Ver bilhetes]", "Atividade 3"]
     }}
   ],
   "weather": "Descricao do clima esperado durante as datas",
@@ -6153,7 +6163,7 @@ Responde APENAS com um JSON valido com esta estrutura exata (sem markdown, sem `
     "hygiene": ["item1", "item2"],
     "tech": ["item1", "item2"]
   }},
-  "local_tips": ["Dica 1", "Dica 2", "Dica 3", "Dica 4"]
+  "local_tips": ["Dica 1", "Dica 2 [CTA:activity:Ver atividades]", "Dica 3", "Dica 4"]
 }}"""
 
     chat = LlmChat(
@@ -6268,6 +6278,13 @@ Plano atual:
 O utilizador pediu o seguinte ajuste:
 "{refinement}"
 
+REGRAS PARA CTAs CONTEXTUAIS:
+- Nas atividades do itinerario e nas dicas locais, adiciona marcadores de CTA quando for util.
+- Formato: [CTA:tipo:texto do botao]
+- Tipos: activity, hotel, flight, esim, transport
+- MAXIMO 4-6 CTAs no plano inteiro. NAO repitas o mesmo tipo mais de 2 vezes.
+- Coloca no FIM da frase, de forma natural.
+
 Gera uma versao melhorada do plano incorporando o pedido do utilizador. Mantém a mesma estrutura JSON.
 Responde APENAS com um JSON valido com esta estrutura exata (sem markdown, sem ```):
 {{
@@ -6278,7 +6295,7 @@ Responde APENAS com um JSON valido com esta estrutura exata (sem markdown, sem `
     {{
       "day": 1,
       "title": "Titulo do dia",
-      "activities": ["Atividade 1", "Atividade 2", "Atividade 3"]
+      "activities": ["Atividade 1", "Atividade 2 [CTA:activity:Ver bilhetes]", "Atividade 3"]
     }}
   ],
   "weather": "Descricao do clima esperado durante as datas",
@@ -6291,7 +6308,7 @@ Responde APENAS com um JSON valido com esta estrutura exata (sem markdown, sem `
     "hygiene": ["item1", "item2"],
     "tech": ["item1", "item2"]
   }},
-  "local_tips": ["Dica 1", "Dica 2", "Dica 3", "Dica 4"]
+  "local_tips": ["Dica 1", "Dica 2 [CTA:activity:Ver atividades]", "Dica 3", "Dica 4"]
 }}"""
 
     chat = LlmChat(
