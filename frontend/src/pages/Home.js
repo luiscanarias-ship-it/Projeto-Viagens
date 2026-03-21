@@ -191,7 +191,7 @@ const Home = () => {
 
           <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }}
             className="text-sm sm:text-lg md:text-xl text-[#6B6661] mb-8 sm:mb-10 max-w-2xl mx-auto leading-relaxed px-2">
-            Uma plataforma onde qualquer pessoa pode financiar viagens de sonho — e onde tu também podes financiar a tua.
+            A plataforma de <span className="font-bold text-[#FFBE98]">CrowdDreaming</span> para quem acredita que as viagens de sonho se podem concretizar.
           </motion.p>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.4 }}>
