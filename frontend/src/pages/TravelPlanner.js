@@ -81,7 +81,7 @@ const parseCTAText = (text) => {
 };
 
 /* ── Render text with inline CTAs ── */
-const TextWithCTA = ({ text, links, onTrack, variant = 'inline' }) => {
+const TextWithCTA = ({ text, links, onTrack, variant = 'inline', destination }) => {
   const parts = parseCTAText(text);
   if (parts.length === 1 && parts[0].type === 'text') return <span>{text}</span>;
   return (
@@ -91,9 +91,13 @@ const TextWithCTA = ({ text, links, onTrack, variant = 'inline' }) => {
         const mapping = CTA_MAP[p.ctaType];
         if (!mapping) return <span key={i}>{p.label}</span>;
         const Icon = mapping.icon;
+        // Smart GYG link for activity CTAs
+        const href = (mapping.platform === 'getyourguide' && destination)
+          ? buildGYGLink(destination, p.label)
+          : (links[mapping.platform]?.url || '#');
         if (variant === 'card') return (
           <span key={i} className="block mt-2">
-            <a href={links[mapping.platform]?.url || '#'} target="_blank" rel="noopener noreferrer"
+            <a href={href} target="_blank" rel="noopener noreferrer"
               onClick={() => onTrack(mapping.platform)}
               className="flex items-center gap-2.5 bg-[#FFBE98]/8 rounded-xl border border-[#FFBE98]/15 p-3 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group">
               <span className="w-8 h-8 bg-white rounded-xl flex items-center justify-center shadow-sm shrink-0 group-hover:shadow-md transition-shadow">
@@ -107,7 +111,7 @@ const TextWithCTA = ({ text, links, onTrack, variant = 'inline' }) => {
           </span>
         );
         return (
-          <a key={i} href={links[mapping.platform]?.url || '#'} target="_blank" rel="noopener noreferrer"
+          <a key={i} href={href} target="_blank" rel="noopener noreferrer"
             onClick={() => onTrack(mapping.platform)}
             className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#FFBE98] bg-[#FFBE98]/8 hover:bg-[#FFBE98]/15 border border-[#FFBE98]/15 hover:border-[#FFBE98]/30 px-3 py-1.5 rounded-xl transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 ml-1 group">
             <Icon className="w-3.5 h-3.5" />
@@ -119,16 +123,22 @@ const TextWithCTA = ({ text, links, onTrack, variant = 'inline' }) => {
     </span>
   );
 };
-const InlineActivityCTA = ({ match, link, onTrack }) => (
-  <a href={link || '#'} target="_blank" rel="noopener noreferrer"
-    onClick={() => onTrack(match.platform)}
-    className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#FFBE98] bg-[#FFBE98]/8 hover:bg-[#FFBE98]/15 border border-[#FFBE98]/15 hover:border-[#FFBE98]/30 px-3 py-1.5 rounded-xl shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 ml-1 group"
-    data-testid={`inline-cta-${match.platform}`}>
-    <match.icon className="w-3.5 h-3.5" />
-    <span>{match.label}</span>
-    <ExternalLink className="w-3 h-3 opacity-60 group-hover:opacity-90 transition-opacity" />
-  </a>
-);
+const InlineActivityCTA = ({ match, link, onTrack, activityText, destination }) => {
+  // Smart GYG link: activity-specific when possible
+  const smartLink = (match.platform === 'getyourguide' && activityText && destination)
+    ? buildGYGLink(destination, extractActivityName(activityText))
+    : link;
+  return (
+    <a href={smartLink || link || '#'} target="_blank" rel="noopener noreferrer"
+      onClick={() => onTrack(match.platform)}
+      className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#FFBE98] bg-[#FFBE98]/8 hover:bg-[#FFBE98]/15 border border-[#FFBE98]/15 hover:border-[#FFBE98]/30 px-3 py-1.5 rounded-xl shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 ml-1 group"
+      data-testid={`inline-cta-${match.platform}`}>
+      <match.icon className="w-3.5 h-3.5" />
+      <span>{match.label}</span>
+      <ExternalLink className="w-3 h-3 opacity-60 group-hover:opacity-90 transition-opacity" />
+    </a>
+  );
+};
 
 /* ── Top Booking Bar (compact, after summary) ── */
 const TopBookingBar = ({ links, onTrack, destination }) => (
@@ -271,13 +281,56 @@ const EsimMicroCard = ({ link, onTrack, destination }) => (
 );
 
 /* ── Tip Booking CTA (inline action at end of sentence) ── */
-const TipBookingLink = ({ link, onTrack }) => (
-  <a href={link || '#'} target="_blank" rel="noopener noreferrer"
-    onClick={() => onTrack('getyourguide')}
-    className="inline-flex items-center gap-1.5 text-[12px] font-bold text-[#FFBE98] hover:text-[#E6A07C] bg-[#FFBE98]/8 hover:bg-[#FFBE98]/15 border border-[#FFBE98]/15 hover:border-[#FFBE98]/30 px-3 py-1 rounded-xl shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 ml-1">
-    Reservar com antecedência <ExternalLink className="w-3 h-3 opacity-70" />
-  </a>
-);
+const TipBookingLink = ({ link, onTrack, tipText, destination }) => {
+  const smartLink = (tipText && destination) ? buildGYGLink(destination, extractActivityName(tipText)) : link;
+  return (
+    <a href={smartLink || link || '#'} target="_blank" rel="noopener noreferrer"
+      onClick={() => onTrack('getyourguide')}
+      className="inline-flex items-center gap-1.5 text-[12px] font-bold text-[#FFBE98] hover:text-[#E6A07C] bg-[#FFBE98]/8 hover:bg-[#FFBE98]/15 border border-[#FFBE98]/15 hover:border-[#FFBE98]/30 px-3 py-1 rounded-xl shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 ml-1">
+      Reservar com antecedência <ExternalLink className="w-3 h-3 opacity-70" />
+    </a>
+  );
+};
+
+/* ── Smart GetYourGuide Link Builder ── */
+/* Generates destination-based or activity-specific GYG search links.
+   Future-ready: add curated experience mappings to GYG_CURATED_EXPERIENCES. */
+const GYG_PARTNER_ID = 'WFPE9ME';
+const GYG_BASE = 'https://www.getyourguide.com/s/';
+
+// Future: map specific activities to exact GYG product URLs
+// e.g. { 'teamlab tokyo': 'https://www.getyourguide.com/tokyo-l193/teamlab-planets-t12345/' }
+const GYG_CURATED_EXPERIENCES = {};
+
+const buildGYGLink = (destination, activityName = null) => {
+  const raw = activityName
+    ? `${activityName} ${destination}`
+    : destination;
+  const clean = raw
+    .toLowerCase()
+    .replace(/[^a-záàâãéèêíïóôõúüçñ\w\s]/gi, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  // Check curated mapping first (exact match)
+  const curatedUrl = GYG_CURATED_EXPERIENCES[clean];
+  if (curatedUrl) return `${curatedUrl}${curatedUrl.includes('?') ? '&' : '?'}partner_id=${GYG_PARTNER_ID}`;
+
+  return `${GYG_BASE}?q=${encodeURIComponent(clean)}&partner_id=${GYG_PARTNER_ID}`;
+};
+
+/* Strips common Portuguese verbs/prepositions to extract meaningful activity name */
+const extractActivityName = (text) => {
+  const stopWords = /^(visitar|ir a[os]?|conhecer|explorar|passear|passar|ver|admirar|descobrir|experimentar|provar|comprar|fazer|o|a|os|as|no|na|nos|nas|do|da|dos|das|de|pelo|pela|pelos|pelas|em|com|um|uma|e|ou)\s+/gi;
+  let name = text.replace(/\[CTA:\w+:[^\]]+\]/g, '').trim();
+  // Iteratively strip leading stop words
+  let prev = '';
+  while (prev !== name) {
+    prev = name;
+    name = name.replace(stopWords, '').trim();
+  }
+  return name || text.replace(/\[CTA:\w+:[^\]]+\]/g, '').trim();
+};
 
 /* ── Build dynamic affiliate links with destination/dates ── */
 /* Appends ?destination=...&checkin=...&checkout=... to each base URL.
@@ -286,9 +339,14 @@ const buildDynamicLinks = (baseLinks, destination, startDate, endDate) => {
   const enc = encodeURIComponent;
   const links = {};
   Object.entries(baseLinks).forEach(([key, val]) => {
-    const base = val.url || '';
-    const sep = base.includes('?') ? '&' : '?';
-    links[key] = { ...val, url: `${base}${sep}destination=${enc(destination)}&checkin=${startDate}&checkout=${endDate}` };
+    if (key === 'getyourguide') {
+      // Smart GYG link: destination-based fallback with partner_id
+      links[key] = { ...val, url: buildGYGLink(destination) };
+    } else {
+      const base = val.url || '';
+      const sep = base.includes('?') ? '&' : '?';
+      links[key] = { ...val, url: `${base}${sep}destination=${enc(destination)}&checkin=${startDate}&checkout=${endDate}` };
+    }
   });
   return links;
 };
@@ -861,7 +919,7 @@ const TravelPlanner = () => {
                                   <span className="text-[#FFBE98] mt-0.5 shrink-0">&#8226;</span>
                                   <span className="flex-1">
                                     {hasCTAMarker ? (
-                                      <TextWithCTA text={a} links={links} onTrack={trackClick} variant="inline" />
+                                      <TextWithCTA text={a} links={links} onTrack={trackClick} variant="inline" destination={plan.destination} />
                                     ) : (
                                       <>{cleanText}</>
                                     )}
@@ -869,7 +927,9 @@ const TravelPlanner = () => {
                                   {keywordMatch && (
                                     <InlineActivityCTA match={keywordMatch}
                                       link={links[keywordMatch.platform]?.url}
-                                      onTrack={trackClick} />
+                                      onTrack={trackClick}
+                                      activityText={cleanText}
+                                      destination={plan.destination} />
                                   )}
                                 </li>
                               );
@@ -913,7 +973,7 @@ const TravelPlanner = () => {
                           {items?.map((item, i) => (
                             <p key={i} className="text-xs text-[#6B6661] flex items-center gap-1.5 py-0.5">
                               <CheckCircle2 className="w-3 h-3 text-emerald-400 shrink-0" />
-                              <TextWithCTA text={item} links={links} onTrack={trackClick} variant="inline" />
+                              <TextWithCTA text={item} links={links} onTrack={trackClick} variant="inline" destination={plan.destination} />
                             </p>
                           ))}
                           {key === 'tech' && (
@@ -948,7 +1008,7 @@ const TravelPlanner = () => {
                         <li key={i} className="text-sm text-[#6B6661] flex items-start gap-2">
                           <Lightbulb className="w-3.5 h-3.5 text-teal-400 mt-0.5 shrink-0" />
                           <span className="flex-1">
-                            <TextWithCTA text={tip} links={links} onTrack={trackClick} variant="inline" />
+                            <TextWithCTA text={tip} links={links} onTrack={trackClick} variant="inline" destination={plan.destination} />
                           </span>
                         </li>
                       ))}

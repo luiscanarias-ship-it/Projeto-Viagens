@@ -6594,7 +6594,7 @@ AFFILIATE_LINKS = {
     "skyscanner":   {"name": "Skyscanner",      "url": "SKYSCANNER_LINK_HERE",    "category": "flights",    "affiliate_id": "4luis"},
     "booking":      {"name": "Booking.com",      "url": "BOOKING_LINK_HERE",       "category": "hotels",     "affiliate_id": "4luis"},
     "hotels":       {"name": "Hotels.com",       "url": "HOTELS_LINK_HERE",        "category": "hotels",     "affiliate_id": ""},
-    "getyourguide": {"name": "GetYourGuide",     "url": "GETYOURGUIDE_LINK_HERE",  "category": "activities", "affiliate_id": "4luis"},
+    "getyourguide": {"name": "GetYourGuide",     "url": "https://www.getyourguide.com/s/",  "category": "activities", "affiliate_id": "WFPE9ME"},
     "cars":         {"name": "DiscoverCars",     "url": "DISCOVERCARS_LINK_HERE",  "category": "transport",  "affiliate_id": ""},
     "airalo":       {"name": "Airalo",           "url": "AIRALO_LINK_HERE",        "category": "esim",       "affiliate_id": ""},
     "holafly":      {"name": "Holafly",          "url": "HOLAFLY_LINK_HERE",       "category": "esim",       "affiliate_id": ""},

@@ -1,0 +1,59 @@
+{
+  "summary": "Iteration 58 - Testing Smart GetYourGuide Link System. All 6 backend tests passed. All frontend tests passed. GYG links correctly generate with ?q={destination/activity}&partner_id=WFPE9ME format.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "passed_tests": [
+    "Backend: GET /api/affiliate-links returns GYG URL https://www.getyourguide.com/s/ with affiliate_id WFPE9ME",
+    "Backend: POST /api/affiliate-click tracking works for getyourguide platform",
+    "Backend: POST /api/affiliate-click returns 400 for invalid platform",
+    "Backend: GET /api/affiliate-links returns all 9 expected platforms",
+    "Frontend: GYG analytics script loaded in head with data-gyg-partner-id=WFPE9ME",
+    "Frontend: TravelPlanner page loads without errors",
+    "Frontend: buildGYGLink generates destination-based fallback: ?q={destination}&partner_id=WFPE9ME",
+    "Frontend: buildGYGLink generates activity+destination link when activity provided",
+    "Frontend: extractActivityName strips Portuguese stopwords correctly (visitar, ir a, conhecer, etc.)",
+    "Frontend: buildDynamicLinks overrides GYG key with smart destination link",
+    "Frontend: InlineActivityCTA generates activity-specific GYG link when activityText + destination provided",
+    "Frontend: TextWithCTA passes destination to generate smart GYG links for activity CTAs",
+    "Frontend: Top booking bar GYG link uses destination-based format",
+    "Frontend: Contextual CTA GYG links use destination-based format",
+    "Frontend: 14 GYG links found in generated travel plan, all with partner_id=WFPE9ME"
+  ],
+  "failed_tests": [],
+  "test_report_links": [
+    "/app/backend/tests/test_iter58_gyg_smart_links.py",
+    "/app/test_reports/pytest/iter58_gyg_smart_links_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "TravelPlanner.js (line 298): GYG_PARTNER_ID = 'WFPE9ME' correctly defined",
+    "TravelPlanner.js (line 299): GYG_BASE = 'https://www.getyourguide.com/s/' correctly defined",
+    "TravelPlanner.js (lines 305-320): buildGYGLink correctly generates ?q={clean}&partner_id={WFPE9ME} format",
+    "TravelPlanner.js (lines 323-333): extractActivityName correctly strips Portuguese stopwords (visitar, ir a, conhecer, explorar, etc.)",
+    "TravelPlanner.js (lines 338-352): buildDynamicLinks correctly overrides GYG key with smart destination link",
+    "TravelPlanner.js (lines 126-141): InlineActivityCTA correctly uses buildGYGLink with extractActivityName for activity-specific links",
+    "TravelPlanner.js (lines 84-125): TextWithCTA correctly passes destination prop to generate smart GYG links",
+    "index.html (line 25): GYG analytics script correctly loaded with data-gyg-partner-id='WFPE9ME'",
+    "server.py (line 6597): AFFILIATE_LINKS getyourguide entry has correct URL and affiliate_id"
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iter58_gyg_smart_links.py"
+  ],
+  "success_rate": {
+    "backend": "100% (6/6 tests passed)",
+    "frontend": "100% (all GYG smart link tests passed)"
+  },
+  "test_credentials": "No credentials needed for these tests",
+  "seed_data_creation": "None - used AI-generated travel plan for Tokyo, Japan",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Iteration 58 verified the Smart GYG Link System: (1) Backend returns GYG URL https://www.getyourguide.com/s/ with affiliate_id WFPE9ME. (2) Frontend buildGYGLink generates ?q={destination}&partner_id=WFPE9ME for destination-based links. (3) Frontend buildGYGLink generates ?q={activity}+{destination}&partner_id=WFPE9ME for activity-specific links. (4) extractActivityName strips Portuguese stopwords (visitar, ir a, conhecer, explorar, passear, etc.). (5) buildDynamicLinks overrides GYG key with smart destination link. (6) InlineActivityCTA and TextWithCTA correctly generate activity-specific GYG links. (7) GYG analytics script in index.html has data-gyg-partner-id=WFPE9ME. (8) GYG_CURATED_EXPERIENCES is empty (future-ready structure).",
+  "rca_of_issue": null
+}
