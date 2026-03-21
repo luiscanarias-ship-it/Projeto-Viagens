@@ -16,7 +16,7 @@ const PlanTrip = () => {
   const destinationParam = searchParams.get('destination') || '';
 
   useEffect(() => {
-    document.title = '4Luis — Planeie a sua viagem com IA';
+    document.title = '4Luis — Planeia a tua viagem com IA';
     window.scrollTo(0, 0);
     axios.get(`${API}/affiliate-links`).then(r => setAffiliateLinks(r.data)).catch(() => {});
   }, []);
@@ -134,10 +134,10 @@ const PlanTrip = () => {
               <span className="text-xs font-medium text-[#6B6661]">Ferramentas selecionadas pela 4Luis</span>
             </div>
             <h1 className="text-3xl sm:text-4xl font-bold text-[#2D2A26] mb-3" data-testid="plan-trip-title">
-              Planeie a sua viagem com IA
+              Planeia a tua viagem com IA
             </h1>
             <p className="text-base text-[#6B6661] max-w-lg mx-auto">
-              Tudo o que precisa para planear a sua viagem num só lugar.
+              Tudo o que precisas para a tua viagem de sonho
             </p>
           </motion.div>
         </div>
@@ -165,7 +165,7 @@ const PlanTrip = () => {
                   </span>
                 </div>
                 <h2 className="text-xl sm:text-2xl font-bold text-[#2D2A26] mb-1.5" data-testid="ai-planner-cta-title">
-                  Planeie a sua viagem com IA
+                  Planeia a tua viagem com IA
                 </h2>
                 <p className="text-sm text-[#6B6661] leading-relaxed mb-5">
                   Receba um roteiro completo, dicas locais e sugestões de reserva — tudo personalizado para o seu destino e datas.

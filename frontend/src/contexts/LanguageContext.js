@@ -46,9 +46,9 @@ const defaultTexts = {
   "home.support_dream": "Apoiar este sonho",
   
   // Plan Your Trip
-  "home.plan_trip": "Planeie a Sua Viagem",
+  "home.plan_trip": "Planeia a tua viagem\ncom a ajuda da IA",
   "home.plan_trip_desc": "Ferramentas úteis para planear a viagem dos teus sonhos",
-  "home.plan_trip_intro": "Descobre quanto pode custar a tua viagem e encontra as melhores opções de voos, alojamento e experiências.",
+  "home.plan_trip_intro": "Tudo o que precisas para a tua viagem de sonho",
   "home.plan_placeholder": "Escreve o teu destino... (ex: Paris, Tóquio)",
   "home.search": "Pesquisar",
   "home.resources_for": "Recursos para:",

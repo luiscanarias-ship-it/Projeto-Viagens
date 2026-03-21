@@ -429,7 +429,7 @@ const Home = () => {
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-8">
             <div className="flex items-center justify-center gap-2 mb-4">
               <Sparkles className="w-6 h-6 text-[#FFBE98]" />
-              <h2 className="text-3xl font-bold text-[#2D2A26]">{t('home.plan_trip')}</h2>
+              <h2 className="text-3xl font-bold text-[#2D2A26] whitespace-pre-line">{t('home.plan_trip')}</h2>
             </div>
             <p className="text-[#6B6661] mb-2">{t('home.plan_trip_intro')}</p>
             <p className="text-sm text-[#6B6661]/70 mb-6">{t('home.plan_trip_desc')}</p>

@@ -503,7 +503,7 @@ const TravelPlanner = () => {
   const tabRefs = { guia: useRef(null), roteiro: useRef(null), checklist: useRef(null), dicas: useRef(null) };
 
   useEffect(() => {
-    document.title = '4Luis — Planeie a sua viagem com IA';
+    document.title = '4Luis — Planeia a tua viagem com IA';
     axios.get(`${API}/affiliate-links`).then(r => setAffiliateLinks(r.data)).catch(() => {});
     // Fetch ambassador status
     const token = localStorage.getItem('token');
@@ -713,7 +713,7 @@ const TravelPlanner = () => {
               <Sparkles className="w-3.5 h-3.5 text-[#FFBE98]" />
               <span className="text-xs font-medium text-[#6B6661]">Powered by AI</span>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-[#2D2A26]" data-testid="planner-title">Planeie a sua viagem com IA</h1>
+            <h1 className="text-3xl sm:text-4xl font-bold text-[#2D2A26]" data-testid="planner-title">Planeia a tua viagem com IA</h1>
           </motion.div>
         </div>
       </div>
