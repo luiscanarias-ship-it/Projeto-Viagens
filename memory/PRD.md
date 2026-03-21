@@ -15,78 +15,58 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 
 ## What's Been Implemented
 
+### Smart GYG Dynamic Link System (2026-03-21)
+- buildGYGLink(destination, activityName?): generates ?q={query}&partner_id=WFPE9ME
+- Destination-based fallback: ?q={destination}
+- Activity-based: ?q={activity_name}+{destination} (e.g. ?q=teamlab%20tokyo)
+- extractActivityName: strips Portuguese stopwords (visitar, ir a, conhecer, explorar, etc.)
+- GYG_CURATED_EXPERIENCES: empty map, future-ready for exact URL mappings
+- GYG analytics script loaded globally via index.html head (partner_id=WFPE9ME)
+- Backend AFFILIATE_LINKS: GYG URL = https://www.getyourguide.com/s/ with affiliate_id=WFPE9ME
+- All inline CTAs (InlineActivityCTA, TextWithCTA) generate activity-specific GYG links
+- Click tracking remains fully functional
+
 ### P0 Mobile Optimization (2026-03-20)
 - CSS touch targets: all buttons/links/inputs min-height 44px on touch devices
 - Hero section: 60vh mobile / 65vh desktop, CTA visible without scrolling
 - Search input + button: flex-col on mobile, flex-row on desktop
 - Sticky bars: optimized padding/font for mobile (both Home and TravelPlanner)
-- Input font-size 16px on mobile to prevent iOS zoom
-- Contribute CTA: full-width on mobile, auto on desktop
 
 ### P1 Hero & Brand Clarity (2026-03-20)
-- Opening question preserved: "E se os sonhos pudessem ser financiados por todos?"
+- Opening question: "E se os sonhos pudessem ser financiados por todos?"
 - Hero subtitle: "Uma plataforma onde qualquer pessoa pode financiar viagens de sonho — e onde tu também podes financiar a tua."
-- Trust signals: flex-col on mobile (stacked), flex-row on desktop (inline)
-- Text hierarchy: sm/base on mobile, xl/2xl on desktop
 - Curated dreams images: warm golden-hour style (Pexels/Unsplash)
 
 ### P2 SEO Preparation (2026-03-20)
-- Backend: GET /api/plan/{slug} serves public travel plans by slug
-- Backend: PATCH /api/plan/{slug}/visibility toggles public/private
-- Backend: GET /api/sitemap.xml generates XML sitemap with static pages + journeys + public plans
-- Backend: travel_plans now include slug and is_public fields (auto-generated on creation)
-- Frontend: New /plano/:slug route renders PublicPlan page with SEO meta tags
-- Frontend: Proper H1/H2 structure (single H1, section H2s)
+- GET /api/plan/{slug}, PATCH /api/plan/{slug}/visibility, GET /api/sitemap.xml
+- Frontend: /plano/:slug with PublicPlan page + SEO meta tags
+- Proper H1/H2 structure
 
 ### Affiliate Links Restructuring (2026-03-20)
-- Backend: AFFILIATE_LINKS centralized config with placeholder base URLs (BOOKING_LINK_HERE, SKYSCANNER_LINK_HERE, GETYOURGUIDE_LINK_HERE, AIRALO_LINK_HERE, etc.)
-- Frontend: buildDynamicLinks appends ?destination=X&checkin=Y&checkout=Z to any base URL
-- Click tracking (POST /api/affiliate-click) remains fully functional
-- Easy replacement: only change base URLs in AFFILIATE_LINKS config, no frontend changes needed
-- affiliate_id field preserved for each platform
+- Centralized AFFILIATE_LINKS config with placeholder base URLs (except GYG which is now real)
+- buildDynamicLinks appends ?destination=X&checkin=Y&checkout=Z to non-GYG links
+- Click tracking active, affiliate_id preserved
 
-### Growth Loop e Monetizacao (2026-03-20)
-- Notificacoes: sistema completo com create_notification(), GET /api/notifications, POST /api/notifications/mark-read
-- Ambassador value section: grid 2x2 com 4 features premium
-- InlineReferralCTA: CTA de referral contextual apos geracao do guia
-
-### Sistema Ambassador (2026-03-20)
-- Backend: recalculate_ambassador_status() dinamico, 3 endpoints (progress, generate-referral, features)
-- Anti-abuse: prevencao self-referral, validacao de contribuicoes confirmadas > 0EUR
-- Frontend: AmbassadorProgress, PremiumGate com blur + lock overlay
-- AMBASSADOR_REQUIRED_REFERRALS = 3
-
-### Copy de Alta Conversao dos CTAs (2026-03-20)
-- getCTACopy: copy dinamico com emojis, urgencia e destino para 5 tipos de CTA x 5 tipos de viagem
-
-### AI Travel Planner (2026-03-18)
-- POST /api/ai/travel-plan (GPT-5.2, structured JSON)
-- POST /api/ai/travel-plan/refine
-- Cache em MongoDB, rate limit 5 req/hora/user
-
-### Anteriores
-- PayPal Live, RGPD, Viagem Principal, Bug fixes, Sistema suporte, Prova social
+### Growth Loop, Ambassador, CTA Copy, AI Travel Planner
+- See previous PRD versions for full details
 
 ## Key Pages
-- / (Home), /journey/:id, /plan-trip, /travel-planner, /plano/:slug, /about, /dashboard, /admin, /login, /privacy, /terms
+- / (Home), /journey/:id, /plan-trip, /travel-planner, /plano/:slug, /about, /dashboard, /admin
 
 ## Prioritized Backlog
-
 ### P1
 - Celebracao especial quando viagem atinge 100%
-
 ### P2
 - Completar refatoracao do backend (APIRouters)
 - Refatoracao do frontend (TravelPlanner.js -> subcomponentes)
-
 ### Backlog
 - Geracao automatica de plano na viagem principal
 - Sistema de gamificacao
 - Smart Map e AI Assistant reais (Google Maps/Mapbox)
-- Notificacoes push/email
-- Open Graph images para planos publicos (/plano/:slug)
+- Open Graph images para planos publicos
 
 ## Credentials
 - **Admin**: admin@4luis.com / Admin1
 - **Resend**: mail@4luis.com
 - **PayPal**: Live (backend/.env)
+- **GYG Partner ID**: WFPE9ME
