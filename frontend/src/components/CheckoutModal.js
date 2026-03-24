@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  X, Check, Copy, Bitcoin, Smartphone, 
-  Wallet, ArrowRight, Heart, Sparkles, ShieldCheck, Lock
+  X, Check, Copy, Bitcoin, Smartphone, CreditCard,
+  Wallet, ArrowRight, Heart, Sparkles, ShieldCheck, Lock, Globe, MapPin
 } from 'lucide-react';
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 import QRCode from 'qrcode';
@@ -14,6 +14,34 @@ const API = `${BACKEND_URL}/api`;
 
 // Fixed contribution amounts
 const amounts = [10, 20, 50, 100, 200, 500, 1000];
+
+// IfthenPay configuration — replace keys when available
+const IFTHENPAY_CONFIG = {
+  mbway: {
+    enabled: false, // Set to true when keys are configured
+    key: 'IFTHENPAY_MBWAY_KEY_HERE',
+  },
+  multibanco: {
+    enabled: false, // Set to true when keys are configured
+    entity: 'IFTHENPAY_ENTITY_HERE',
+    subEntity: 'IFTHENPAY_SUBENTITY_HERE',
+  }
+};
+
+// Geolocation cache
+let geoCache = null;
+const detectUserCountry = async () => {
+  if (geoCache) return geoCache;
+  try {
+    const res = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(3000) });
+    const data = await res.json();
+    geoCache = data.country_code || 'UNKNOWN';
+    return geoCache;
+  } catch {
+    geoCache = 'UNKNOWN';
+    return geoCache;
+  }
+};
 
 // Crypto configurations with addresses
 const cryptoConfig = {
@@ -59,15 +87,10 @@ const cryptoConfig = {
   }
 };
 
-// Payment methods configuration (manual methods only — PayPal is handled via Smart Buttons)
-const paymentMethodsConfig = {
-  mbway: {
-    id: 'mbway',
-    name: 'MBWay',
-    icon: Smartphone,
-    phone: '+351 968 068 535',
-    phoneClean: '351968068535'
-  }
+// Manual MBWay config (direct transfer — used while IfthenPay is not active)
+const MBWAY_MANUAL = {
+  phone: '+351 968 068 535',
+  phoneClean: '351968068535'
 };
 
 const CheckoutModal = ({ 
@@ -103,6 +126,10 @@ const CheckoutModal = ({
   const [paypalClientId, setPaypalClientId] = useState(null);
   const [paypalProcessing, setPaypalProcessing] = useState(false);
   const [paypalError, setPaypalError] = useState(null);
+
+  // Geolocation state
+  const [userCountry, setUserCountry] = useState(null);
+  const isPortugal = userCountry === 'PT';
 
   // Fetch crypto prices from CoinGecko
   const fetchCryptoPrices = useCallback(async () => {
@@ -151,6 +178,8 @@ const CheckoutModal = ({
       axios.get(`${API}/paypal/config`).then(res => {
         setPaypalClientId(res.data.client_id);
       }).catch(() => {});
+      // Detect user country for smart payment prioritization
+      detectUserCountry().then(code => setUserCountry(code));
     }
   }, [isOpen, fetchCryptoPrices]);
 
@@ -245,15 +274,52 @@ const CheckoutModal = ({
 
   // Generate QR code value for payment methods
   const getPaymentQRValue = (methodId) => {
-    const method = paymentMethodsConfig[methodId];
-    if (!method) return '';
-    
     switch (methodId) {
       case 'mbway':
-        return `tel:${method.phoneClean}`;
+        return `tel:${MBWAY_MANUAL.phoneClean}`;
       default:
         return '';
     }
+  };
+
+  // PayPal handlers (shared between Portugal/International views)
+  const createPayPalOrder = async () => {
+    setPaypalProcessing(true);
+    setPaypalError(null);
+    try {
+      const res = await axios.post(`${API}/paypal/create-order`, {
+        amount: selectedAmount,
+        journey_id: journeyId,
+        contributor_name: user?.name || null,
+        contributor_email: user?.email || null
+      }, {
+        headers: getAuthHeaders ? getAuthHeaders() : {}
+      });
+      return res.data.paypal_order_id;
+    } catch (err) {
+      setPaypalError(err.response?.data?.detail || 'Erro ao criar ordem PayPal');
+      setPaypalProcessing(false);
+      throw err;
+    }
+  };
+
+  const onPayPalApprove = async (data) => {
+    try {
+      const res = await axios.post(`${API}/paypal/capture-order/${data.orderID}`, {}, {
+        headers: getAuthHeaders ? getAuthHeaders() : {}
+      });
+      setContribution(res.data);
+      setShowConfirmation(true);
+    } catch (err) {
+      setPaypalError(err.response?.data?.detail || 'Erro ao capturar pagamento');
+    } finally {
+      setPaypalProcessing(false);
+    }
+  };
+
+  const onPayPalError = () => {
+    setPaypalError('Erro no pagamento PayPal. Tente novamente.');
+    setPaypalProcessing(false);
   };
 
   // Create contribution
@@ -346,7 +412,7 @@ const CheckoutModal = ({
   if (!isOpen) return null;
 
   const cryptoData = selectedCrypto ? cryptoConfig[selectedCrypto] : null;
-  const methodData = selectedMethod && selectedMethod !== 'crypto' ? paymentMethodsConfig[selectedMethod] : null;
+  const methodData = null; // Legacy — MBWay uses MBWAY_MANUAL directly
 
   return (
     <AnimatePresence>
@@ -498,78 +564,119 @@ const CheckoutModal = ({
                     </button>
                   </div>
 
-                  {/* PayPal - Automatic payment (primary) */}
-                  {paypalClientId && (
-                    <div className="border-2 border-[#0070BA]/30 rounded-xl overflow-hidden bg-gradient-to-b from-[#0070BA]/[0.03] to-white" data-testid="paypal-section">
-                      <div className="px-3 py-2 flex items-center justify-between">
-                        <div className="flex items-center gap-1.5">
-                          <ShieldCheck className="w-4 h-4 text-[#0070BA]" />
-                          <span className="text-[11px] font-bold text-[#0070BA]">Recomendado</span>
+                  {/* ═══ SMART PAYMENT METHODS — Geo-prioritized ═══ */}
+
+                  {/* PRIMARY: Portugal → MBWay | International → PayPal/Card */}
+                  {isPortugal ? (
+                    <>
+                      {/* MBWay — Primary for Portugal */}
+                      <button
+                        onClick={() => handleMethodSelect('mbway')}
+                        disabled={loading}
+                        className={`w-full rounded-xl border-2 overflow-hidden transition-all ${
+                          selectedMethod === 'mbway'
+                            ? 'border-[#FFBE98] bg-[#FFBE98]/5'
+                            : 'border-emerald-500/30 bg-gradient-to-b from-emerald-500/[0.03] to-white hover:border-emerald-500/50'
+                        }`}
+                        data-testid="mbway-primary-btn"
+                      >
+                        <div className="px-3 py-2 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center">
+                              <Smartphone className="w-4 h-4 text-emerald-600" />
+                            </div>
+                            <div className="text-left">
+                              <span className="text-sm font-bold text-[#2D2A26] block">MBWay</span>
+                              <span className="text-[10px] text-[#6B6661]">Pagamento instantâneo</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <MapPin className="w-3 h-3 text-emerald-500" />
+                            <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Recomendado</span>
+                          </div>
                         </div>
-                        <span className="text-[10px] text-[#0070BA]/60 flex items-center gap-1">
-                          <Lock className="w-3 h-3" /> Pagamento seguro
-                        </span>
-                      </div>
-                      <div className="px-3 pb-2">
-                        {paypalError && (
-                          <p className="text-xs text-red-500 mb-2">{paypalError}</p>
-                        )}
-                        <PayPalScriptProvider options={{ 
-                          clientId: paypalClientId, 
-                          currency: "EUR",
-                          intent: "capture",
-                          "enable-funding": "card"
-                        }}>
-                          <PayPalButtons
-                            style={{ layout: "vertical", height: 45, tagline: false, label: "pay", shape: "rect" }}
-                            disabled={paypalProcessing}
-                            forceReRender={[selectedAmount, journeyId]}
-                            createOrder={async () => {
-                              setPaypalProcessing(true);
-                              setPaypalError(null);
-                              try {
-                                const res = await axios.post(`${API}/paypal/create-order`, {
-                                  amount: selectedAmount,
-                                  journey_id: journeyId,
-                                  contributor_name: user?.name || null,
-                                  contributor_email: user?.email || null
-                                }, {
-                                  headers: getAuthHeaders ? getAuthHeaders() : {}
-                                });
-                                return res.data.paypal_order_id;
-                              } catch (err) {
-                                setPaypalError(err.response?.data?.detail || 'Erro ao criar ordem PayPal');
-                                setPaypalProcessing(false);
-                                throw err;
-                              }
-                            }}
-                            onApprove={async (data) => {
-                              try {
-                                const res = await axios.post(`${API}/paypal/capture-order/${data.orderID}`, {}, {
-                                  headers: getAuthHeaders ? getAuthHeaders() : {}
-                                });
-                                setContribution(res.data);
-                                setShowConfirmation(true);
-                              } catch (err) {
-                                setPaypalError(err.response?.data?.detail || 'Erro ao capturar pagamento');
-                              } finally {
-                                setPaypalProcessing(false);
-                              }
-                            }}
-                            onError={(err) => {
-                              setPaypalError('Erro no pagamento PayPal. Tente novamente.');
-                              setPaypalProcessing(false);
-                            }}
-                            onCancel={() => {
-                              setPaypalProcessing(false);
-                            }}
-                          />
-                        </PayPalScriptProvider>
-                        <p className="text-[10px] text-center text-[#6B6661]/70 mt-1.5" data-testid="paypal-trust-text">
-                          Nao partilhamos os teus dados bancarios.
-                        </p>
-                      </div>
-                    </div>
+                      </button>
+
+                      {/* PayPal + Card — Secondary for Portugal */}
+                      {paypalClientId && (
+                        <div className="rounded-xl border border-stone-200 overflow-hidden bg-white" data-testid="paypal-section">
+                          <div className="px-3 py-2 flex items-center justify-between border-b border-stone-100">
+                            <div className="flex items-center gap-1.5">
+                              <ShieldCheck className="w-3.5 h-3.5 text-[#0070BA]" />
+                              <span className="text-[11px] font-medium text-[#6B6661]">PayPal, Cartão, Apple Pay, Google Pay</span>
+                            </div>
+                            <span className="text-[10px] text-[#6B6661]/60 flex items-center gap-1">
+                              <Lock className="w-3 h-3" /> Seguro
+                            </span>
+                          </div>
+                          <div className="px-3 py-2">
+                            {paypalError && (
+                              <p className="text-xs text-red-500 mb-2">{paypalError}</p>
+                            )}
+                            <PayPalScriptProvider options={{ 
+                              clientId: paypalClientId, 
+                              currency: "EUR",
+                              intent: "capture",
+                              "enable-funding": "card"
+                            }}>
+                              <PayPalButtons
+                                style={{ layout: "vertical", height: 45, tagline: false, label: "pay", shape: "rect" }}
+                                disabled={paypalProcessing}
+                                forceReRender={[selectedAmount, journeyId]}
+                                createOrder={createPayPalOrder}
+                                onApprove={onPayPalApprove}
+                                onError={onPayPalError}
+                                onCancel={() => setPaypalProcessing(false)}
+                              />
+                            </PayPalScriptProvider>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      {/* PayPal + Card — Primary for International */}
+                      {paypalClientId && (
+                        <div className="border-2 border-[#0070BA]/30 rounded-xl overflow-hidden bg-gradient-to-b from-[#0070BA]/[0.03] to-white" data-testid="paypal-section">
+                          <div className="px-3 py-2 flex items-center justify-between">
+                            <div className="flex items-center gap-1.5">
+                              <ShieldCheck className="w-4 h-4 text-[#0070BA]" />
+                              <span className="text-[11px] font-bold text-[#0070BA]">Recomendado</span>
+                            </div>
+                            <span className="text-[10px] text-[#0070BA]/60 flex items-center gap-1">
+                              <Lock className="w-3 h-3" /> Pagamento seguro
+                            </span>
+                          </div>
+                          <div className="px-3 pb-2">
+                            <p className="text-[10px] text-[#6B6661] mb-2 flex items-center gap-1">
+                              <Globe className="w-3 h-3" /> PayPal, Cartão, Apple Pay, Google Pay
+                            </p>
+                            {paypalError && (
+                              <p className="text-xs text-red-500 mb-2">{paypalError}</p>
+                            )}
+                            <PayPalScriptProvider options={{ 
+                              clientId: paypalClientId, 
+                              currency: "EUR",
+                              intent: "capture",
+                              "enable-funding": "card"
+                            }}>
+                              <PayPalButtons
+                                style={{ layout: "vertical", height: 45, tagline: false, label: "pay", shape: "rect" }}
+                                disabled={paypalProcessing}
+                                forceReRender={[selectedAmount, journeyId]}
+                                createOrder={createPayPalOrder}
+                                onApprove={onPayPalApprove}
+                                onError={onPayPalError}
+                                onCancel={() => setPaypalProcessing(false)}
+                              />
+                            </PayPalScriptProvider>
+                            <p className="text-[10px] text-center text-[#6B6661]/70 mt-1.5" data-testid="paypal-trust-text">
+                              Não partilhamos os teus dados bancários.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </>
                   )}
 
                   {/* Divider */}
@@ -578,13 +685,13 @@ const CheckoutModal = ({
                       <div className="w-full border-t border-stone-200"></div>
                     </div>
                     <div className="relative flex justify-center text-xs">
-                      <span className="px-3 bg-white text-[#6B6661]">ou metodo manual</span>
+                      <span className="px-3 bg-white text-[#6B6661]">{isPortugal ? 'ou outra opção' : 'outras opções'}</span>
                     </div>
                   </div>
 
-                  {/* Payment methods - 2 column grid */}
+                  {/* SECONDARY METHODS */}
                   <div className="grid grid-cols-2 gap-1.5">
-                    {/* Crypto option */}
+                    {/* Crypto option — always visible */}
                     <button
                       onClick={() => handleMethodSelect('crypto')}
                       disabled={loading}
@@ -593,35 +700,43 @@ const CheckoutModal = ({
                           ? 'border-[#FFBE98] bg-[#FFBE98]/10'
                           : 'border-[#F7931A]/40 bg-gradient-to-r from-[#F7931A]/5 to-[#627EEA]/5 hover:border-[#F7931A]'
                       }`}
+                      data-testid="crypto-method-btn"
                     >
                       <Bitcoin className="w-5 h-5 text-[#F7931A] mx-auto" />
                       <span className="text-xs font-medium block mt-1">Crypto</span>
-                      <span className="text-[9px] text-[#F7931A] font-bold">TOP</span>
+                      <span className="text-[9px] text-[#6B6661]">BTC, ETH, USDT</span>
                     </button>
 
-                    {/* Other payment methods */}
-                    {Object.values(paymentMethodsConfig).map((method) => {
-                      const Icon = method.icon;
-                      return (
-                        <button
-                          key={method.id}
-                          onClick={() => handleMethodSelect(method.id)}
-                          disabled={loading}
-                          className={`p-2.5 rounded-xl border-2 transition-all text-center ${
-                            selectedMethod === method.id
-                              ? 'border-[#FFBE98] bg-[#FFBE98]/10'
-                              : 'border-stone-200 hover:border-stone-300'
-                          }`}
-                        >
-                          <Icon className="w-5 h-5 text-[#6B6661] mx-auto" />
-                          <span className="text-xs font-medium block mt-1">{method.name}</span>
-                          <span className="text-[9px] text-[#6B6661] block">{method.phone || method.username}</span>
-                          {loading && selectedMethod === method.id && (
-                            <div className="w-4 h-4 border-2 border-[#FFBE98] border-t-transparent rounded-full animate-spin mx-auto mt-0.5" />
-                          )}
-                        </button>
-                      );
-                    })}
+                    {/* MBWay — only in secondary for international users (hidden, Portugal shows it primary) */}
+                    {!isPortugal && (
+                      <button
+                        onClick={() => handleMethodSelect('mbway')}
+                        disabled={loading}
+                        className={`p-2.5 rounded-xl border-2 transition-all text-center ${
+                          selectedMethod === 'mbway'
+                            ? 'border-[#FFBE98] bg-[#FFBE98]/10'
+                            : 'border-stone-200 hover:border-stone-300'
+                        }`}
+                        data-testid="mbway-secondary-btn"
+                      >
+                        <Smartphone className="w-5 h-5 text-[#6B6661] mx-auto" />
+                        <span className="text-xs font-medium block mt-1">MBWay</span>
+                        <span className="text-[9px] text-[#6B6661]">Portugal</span>
+                      </button>
+                    )}
+
+                    {/* Multibanco — Portugal only, coming soon */}
+                    {isPortugal && (
+                      <button
+                        disabled
+                        className="p-2.5 rounded-xl border-2 border-stone-100 bg-stone-50/50 text-center opacity-60 cursor-not-allowed"
+                        data-testid="multibanco-soon-btn"
+                      >
+                        <CreditCard className="w-5 h-5 text-[#6B6661] mx-auto" />
+                        <span className="text-xs font-medium block mt-1">Multibanco</span>
+                        <span className="text-[9px] text-[#6B6661]">Em breve</span>
+                      </button>
+                    )}
                   </div>
 
                   {/* Crypto selection */}
@@ -763,15 +878,15 @@ const CheckoutModal = ({
                       </div>
 
                       {/* MBWay */}
-                      {selectedMethod === 'mbway' && methodData && (
+                      {selectedMethod === 'mbway' && (
                         <div className="space-y-2">
                           <div className="bg-white border border-stone-200 rounded-xl p-3">
                             <p className="text-xs text-[#6B6661] mb-1">Enviar para o número:</p>
-                            <p className="text-lg font-bold text-[#2D2A26]">{methodData.phone}</p>
+                            <p className="text-lg font-bold text-[#2D2A26]">{MBWAY_MANUAL.phone}</p>
                           </div>
                           <div className="flex gap-2">
                             <button
-                              onClick={() => copyToClipboard(methodData.phoneClean, 'phone')}
+                              onClick={() => copyToClipboard(MBWAY_MANUAL.phoneClean, 'phone')}
                               className="flex-1 py-2.5 bg-[#2D2A26] text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-[#4A4640] transition-colors"
                             >
                               {copiedField === 'phone' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
