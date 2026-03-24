@@ -1,0 +1,55 @@
+{
+  "summary": "Iteration 60 - PayPal Smart Buttons & Payment Methods Cleanup. All 7 backend tests passed. Frontend verification confirmed PayPal Smart Buttons (official SDK), MBWay, and Crypto options visible. Revolut and Wise correctly removed from both frontend and backend.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "passed_tests": [
+    "Backend: POST /api/contributions/create rejects 'revolut' as payment method (400)",
+    "Backend: POST /api/contributions/create rejects 'wise' as payment method (400)",
+    "Backend: POST /api/contributions/create accepts 'mbway' as payment method (200)",
+    "Backend: POST /api/contributions/create accepts 'crypto' as payment method (200)",
+    "Backend: POST /api/contributions/create accepts 'paypal' as payment method (200)",
+    "Backend: GET /api/contributions/config returns only paypal, mbway, crypto methods",
+    "Backend: GET /api/paypal/config returns client_id for PayPal SDK (mode=live)",
+    "Frontend: Checkout modal Step 2 shows PayPal Smart Buttons (official SDK)",
+    "Frontend: Checkout modal Step 2 shows 'Debit or Credit Card' button (via enable-funding=card)",
+    "Frontend: Checkout modal Step 2 does NOT show Revolut option",
+    "Frontend: Checkout modal Step 2 does NOT show Wise option",
+    "Frontend: Checkout modal Step 2 shows MBWay option with phone number",
+    "Frontend: Checkout modal Step 2 shows Crypto option with TOP badge",
+    "Frontend: 'ou metodo manual' divider separates PayPal from manual methods",
+    "Frontend: 'Recomendado' badge on PayPal section",
+    "Frontend: 'Pagamento seguro' security indicator on PayPal section"
+  ],
+  "failed_tests": [],
+  "test_report_links": [
+    "/app/backend/tests/test_iter60_paypal_smart_buttons.py",
+    "/app/test_reports/pytest/iter60_paypal_smart_buttons_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "server.py (line 376): valid_methods correctly set to ['crypto', 'mbway', 'paypal'] - Revolut and Wise removed",
+    "config.py (line 60-64): PAYMENT_METHODS dict only contains crypto, mbway, paypal",
+    "CheckoutModal.js (line 63-71): paymentMethodsConfig only contains mbway (manual method)",
+    "CheckoutModal.js (line 517-522): PayPalScriptProvider uses enable-funding='card' for Debit/Credit Card button",
+    "CheckoutModal.js (line 523-567): PayPalButtons component with official @paypal/react-paypal-js SDK"
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iter60_paypal_smart_buttons.py"
+  ],
+  "success_rate": {
+    "backend": "100% (7/7 tests passed)",
+    "frontend": "100% (all UI verifications passed)"
+  },
+  "test_credentials": "Admin: admin@4luis.com / Admin1",
+  "seed_data_creation": "None - used existing journey_china001",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Iteration 60 verified PayPal Smart Buttons integration and payment methods cleanup: (1) Backend only accepts crypto, mbway, paypal as payment methods - revolut and wise are rejected with 400. (2) GET /api/contributions/config returns only these 3 methods. (3) GET /api/paypal/config returns client_id for SDK (mode=live). (4) Frontend CheckoutModal Step 2 shows official PayPal Smart Buttons from @paypal/react-paypal-js with enable-funding=card for Debit/Credit Card option. (5) 'ou metodo manual' divider separates PayPal (automatic) from Crypto and MBWay (manual). (6) Revolut and Wise completely removed from UI. (7) MBWay shows phone +351 968 068 535. (8) Crypto shows BTC, ETH, USDT, USDC options with QR code and wallet URI in Step 3."
+}

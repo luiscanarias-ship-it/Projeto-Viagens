@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  X, Check, Copy, Bitcoin, Smartphone, ExternalLink,
-  Wallet, CreditCard, ArrowRight, QrCode, Heart, Sparkles, ShieldCheck, Lock
+  X, Check, Copy, Bitcoin, Smartphone, 
+  Wallet, ArrowRight, Heart, Sparkles, ShieldCheck, Lock
 } from 'lucide-react';
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 import QRCode from 'qrcode';
@@ -59,7 +59,7 @@ const cryptoConfig = {
   }
 };
 
-// Payment methods configuration
+// Payment methods configuration (manual methods only — PayPal is handled via Smart Buttons)
 const paymentMethodsConfig = {
   mbway: {
     id: 'mbway',
@@ -67,20 +67,6 @@ const paymentMethodsConfig = {
     icon: Smartphone,
     phone: '+351 968 068 535',
     phoneClean: '351968068535'
-  },
-  revolut: {
-    id: 'revolut',
-    name: 'Revolut',
-    icon: Wallet,
-    username: '@luism2npb',
-    link: 'https://revolut.me/luism2npb'
-  },
-  wise: {
-    id: 'wise',
-    name: 'Wise',
-    icon: CreditCard,
-    username: '@luisc8030',
-    link: 'https://wise.com/pay/me/luisc8030'
   }
 };
 
@@ -263,10 +249,6 @@ const CheckoutModal = ({
     if (!method) return '';
     
     switch (methodId) {
-      case 'revolut':
-        return method.link;
-      case 'wise':
-        return method.link;
       case 'mbway':
         return `tel:${method.phoneClean}`;
       default:
@@ -535,10 +517,11 @@ const CheckoutModal = ({
                         <PayPalScriptProvider options={{ 
                           clientId: paypalClientId, 
                           currency: "EUR",
-                          intent: "capture"
+                          intent: "capture",
+                          "enable-funding": "card"
                         }}>
                           <PayPalButtons
-                            style={{ layout: "horizontal", height: 40, tagline: false, label: "pay" }}
+                            style={{ layout: "vertical", height: 45, tagline: false, label: "pay", shape: "rect" }}
                             disabled={paypalProcessing}
                             forceReRender={[selectedAmount, journeyId]}
                             createOrder={async () => {
@@ -802,44 +785,6 @@ const CheckoutModal = ({
                               <span className="text-[9px] font-normal opacity-80">apenas para telemóvel</span>
                             </a>
                           </div>
-                        </div>
-                      )}
-
-                      {/* Revolut */}
-                      {selectedMethod === 'revolut' && methodData && (
-                        <div className="space-y-2">
-                          <div className="bg-white border border-stone-200 rounded-xl p-3">
-                            <p className="text-xs text-[#6B6661] mb-1">Enviar para:</p>
-                            <p className="text-lg font-bold text-[#2D2A26]">{methodData.username}</p>
-                          </div>
-                          <a
-                            href={methodData.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="w-full py-2.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-emerald-700 transition-colors"
-                          >
-                            <ExternalLink className="w-3.5 h-3.5" />
-                            Abrir Revolut
-                          </a>
-                        </div>
-                      )}
-
-                      {/* Wise */}
-                      {selectedMethod === 'wise' && methodData && (
-                        <div className="space-y-2">
-                          <div className="bg-white border border-stone-200 rounded-xl p-3">
-                            <p className="text-xs text-[#6B6661] mb-1">Enviar para:</p>
-                            <p className="text-lg font-bold text-[#2D2A26]">{methodData.username}</p>
-                          </div>
-                          <a
-                            href={methodData.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="w-full py-2.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-emerald-700 transition-colors"
-                          >
-                            <ExternalLink className="w-3.5 h-3.5" />
-                            Abrir Wise
-                          </a>
                         </div>
                       )}
                     </div>

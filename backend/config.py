@@ -59,11 +59,8 @@ CRYPTO_TYPES = {
 
 PAYMENT_METHODS = {
     "crypto": {"name": "Criptomoedas", "type": "direct", "icon": "bitcoin", "recommended": True},
-    "stripe": {"name": "Cartão (Stripe)", "type": "automatic", "icon": "credit-card", "recommended": False},
     "mbway": {"name": "MBWay", "type": "direct", "icon": "smartphone", "recommended": False},
-    "paypal": {"name": "PayPal", "type": "direct", "icon": "paypal", "recommended": False},
-    "revolut": {"name": "Revolut", "type": "direct", "icon": "wallet", "recommended": False},
-    "wise": {"name": "Wise", "type": "direct", "icon": "globe", "recommended": False}
+    "paypal": {"name": "PayPal", "type": "automatic", "icon": "paypal", "recommended": True}
 }
 
 # Journey status lifecycle
