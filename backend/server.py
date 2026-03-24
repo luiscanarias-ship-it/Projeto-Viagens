@@ -373,7 +373,7 @@ async def create_contribution(request: Request):
         )
     
     # Validate payment method (Stripe temporarily disabled)
-    valid_methods = ["crypto", "mbway", "paypal"]
+    valid_methods = ["crypto", "paypal"]
     if payment_method not in valid_methods:
         raise HTTPException(
             status_code=400, 

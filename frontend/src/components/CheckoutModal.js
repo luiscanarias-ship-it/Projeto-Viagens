@@ -569,47 +569,42 @@ const CheckoutModal = ({
                   {/* PRIMARY: Portugal → MBWay | International → PayPal/Card */}
                   {isPortugal ? (
                     <>
-                      {/* MBWay — Primary for Portugal */}
-                      <button
-                        onClick={() => handleMethodSelect('mbway')}
-                        disabled={loading}
-                        className={`w-full rounded-xl border-2 overflow-hidden transition-all ${
-                          selectedMethod === 'mbway'
-                            ? 'border-[#FFBE98] bg-[#FFBE98]/5'
-                            : 'border-emerald-500/30 bg-gradient-to-b from-emerald-500/[0.03] to-white hover:border-emerald-500/50'
-                        }`}
-                        data-testid="mbway-primary-btn"
-                      >
-                        <div className="px-3 py-2 flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center">
-                              <Smartphone className="w-4 h-4 text-emerald-600" />
-                            </div>
-                            <div className="text-left">
-                              <span className="text-sm font-bold text-[#2D2A26] block">MBWay</span>
-                              <span className="text-[10px] text-[#6B6661]">Pagamento instantâneo</span>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <MapPin className="w-3 h-3 text-emerald-500" />
-                            <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Recomendado</span>
-                          </div>
+                      {/* MBWay + Multibanco — Coming soon for Portugal */}
+                      <div className="grid grid-cols-2 gap-1.5">
+                        <div
+                          className="p-2.5 rounded-xl border-2 border-stone-100 bg-stone-50/50 text-center opacity-60 cursor-not-allowed"
+                          data-testid="mbway-primary-btn"
+                        >
+                          <Smartphone className="w-5 h-5 text-[#6B6661] mx-auto" />
+                          <span className="text-xs font-medium block mt-1">MBWay</span>
+                          <span className="text-[9px] text-[#6B6661]">Em breve</span>
                         </div>
-                      </button>
+                        <div
+                          className="p-2.5 rounded-xl border-2 border-stone-100 bg-stone-50/50 text-center opacity-60 cursor-not-allowed"
+                          data-testid="multibanco-soon-btn"
+                        >
+                          <CreditCard className="w-5 h-5 text-[#6B6661] mx-auto" />
+                          <span className="text-xs font-medium block mt-1">Multibanco</span>
+                          <span className="text-[9px] text-[#6B6661]">Em breve</span>
+                        </div>
+                      </div>
 
-                      {/* PayPal + Card — Secondary for Portugal */}
+                      {/* PayPal + Card — Primary for Portugal (while MBWay/Multibanco not active) */}
                       {paypalClientId && (
-                        <div className="rounded-xl border border-stone-200 overflow-hidden bg-white" data-testid="paypal-section">
-                          <div className="px-3 py-2 flex items-center justify-between border-b border-stone-100">
+                        <div className="border-2 border-[#0070BA]/30 rounded-xl overflow-hidden bg-gradient-to-b from-[#0070BA]/[0.03] to-white" data-testid="paypal-section">
+                          <div className="px-3 py-2 flex items-center justify-between">
                             <div className="flex items-center gap-1.5">
-                              <ShieldCheck className="w-3.5 h-3.5 text-[#0070BA]" />
-                              <span className="text-[11px] font-medium text-[#6B6661]">PayPal, Cartão, Apple Pay, Google Pay</span>
+                              <ShieldCheck className="w-4 h-4 text-[#0070BA]" />
+                              <span className="text-[11px] font-bold text-[#0070BA]">Recomendado</span>
                             </div>
-                            <span className="text-[10px] text-[#6B6661]/60 flex items-center gap-1">
-                              <Lock className="w-3 h-3" /> Seguro
+                            <span className="text-[10px] text-[#0070BA]/60 flex items-center gap-1">
+                              <Lock className="w-3 h-3" /> Pagamento seguro
                             </span>
                           </div>
-                          <div className="px-3 py-2">
+                          <div className="px-3 pb-2">
+                            <p className="text-[10px] text-[#6B6661] mb-2 flex items-center gap-1">
+                              <Globe className="w-3 h-3" /> PayPal, Cartão, Apple Pay, Google Pay
+                            </p>
                             {paypalError && (
                               <p className="text-xs text-red-500 mb-2">{paypalError}</p>
                             )}
@@ -707,35 +702,16 @@ const CheckoutModal = ({
                       <span className="text-[9px] text-[#6B6661]">BTC, ETH, USDT</span>
                     </button>
 
-                    {/* MBWay — only in secondary for international users (hidden, Portugal shows it primary) */}
+                    {/* MBWay — "Em breve" for international users too */}
                     {!isPortugal && (
-                      <button
-                        onClick={() => handleMethodSelect('mbway')}
-                        disabled={loading}
-                        className={`p-2.5 rounded-xl border-2 transition-all text-center ${
-                          selectedMethod === 'mbway'
-                            ? 'border-[#FFBE98] bg-[#FFBE98]/10'
-                            : 'border-stone-200 hover:border-stone-300'
-                        }`}
+                      <div
+                        className="p-2.5 rounded-xl border-2 border-stone-100 bg-stone-50/50 text-center opacity-60 cursor-not-allowed"
                         data-testid="mbway-secondary-btn"
                       >
                         <Smartphone className="w-5 h-5 text-[#6B6661] mx-auto" />
                         <span className="text-xs font-medium block mt-1">MBWay</span>
-                        <span className="text-[9px] text-[#6B6661]">Portugal</span>
-                      </button>
-                    )}
-
-                    {/* Multibanco — Portugal only, coming soon */}
-                    {isPortugal && (
-                      <button
-                        disabled
-                        className="p-2.5 rounded-xl border-2 border-stone-100 bg-stone-50/50 text-center opacity-60 cursor-not-allowed"
-                        data-testid="multibanco-soon-btn"
-                      >
-                        <CreditCard className="w-5 h-5 text-[#6B6661] mx-auto" />
-                        <span className="text-xs font-medium block mt-1">Multibanco</span>
                         <span className="text-[9px] text-[#6B6661]">Em breve</span>
-                      </button>
+                      </div>
                     )}
                   </div>
 
@@ -877,31 +853,6 @@ const CheckoutModal = ({
                         <p className="text-2xl font-bold text-[#2D2A26] mt-0.5">€{selectedAmount}</p>
                       </div>
 
-                      {/* MBWay */}
-                      {selectedMethod === 'mbway' && (
-                        <div className="space-y-2">
-                          <div className="bg-white border border-stone-200 rounded-xl p-3">
-                            <p className="text-xs text-[#6B6661] mb-1">Enviar para o número:</p>
-                            <p className="text-lg font-bold text-[#2D2A26]">{MBWAY_MANUAL.phone}</p>
-                          </div>
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => copyToClipboard(MBWAY_MANUAL.phoneClean, 'phone')}
-                              className="flex-1 py-2.5 bg-[#2D2A26] text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-[#4A4640] transition-colors"
-                            >
-                              {copiedField === 'phone' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                              {copiedField === 'phone' ? 'Copiado!' : 'Copiar número'}
-                            </button>
-                            <a
-                              href="mbway://transfer"
-                              className="flex-1 py-2.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold flex flex-col items-center justify-center gap-0.5 hover:bg-emerald-700 transition-colors"
-                            >
-                              <span className="flex items-center gap-1.5"><Smartphone className="w-3.5 h-3.5" /> Abrir MBWay</span>
-                              <span className="text-[9px] font-normal opacity-80">apenas para telemóvel</span>
-                            </a>
-                          </div>
-                        </div>
-                      )}
                     </div>
                   )}
 
