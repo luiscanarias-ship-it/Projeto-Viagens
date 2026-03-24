@@ -14,22 +14,33 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 
 ## What's Been Implemented
 
+### MB WAY Manual UX Improvement (2026-03-24)
+- Phone number hidden by default behind "Mostrar detalhes de envio" toggle
+- Copy reference button with "Copiar"/"Copiado!" feedback
+- Clear 3-step instructions (numbered)
+- "Abrir MBWay" deep link for mobile
+- Bug fixed: backend was rejecting mbway as payment method (added to valid_methods)
+
+### Payouts System for Ambassadors (2026-03-24)
+- New `payouts` collection in MongoDB
+- Auto-creation of payout record when ambassador journey reaches 100% funding
+- Admin endpoints: GET /api/admin/payouts, PUT /api/admin/payouts/{payout_id}/status
+- Admin UI: new "Payouts" tab with summary cards, status filters, edit/process actions
+- Ambassador notification when payout is marked as completed
+
 ### Geo-Prioritized Payment Methods (2026-03-24)
 - Smart payment prioritization based on user location (ipapi.co)
-- **Portugal (PT)**: MBWay primary ("Recomendado") → PayPal+Card secondary → Crypto → Multibanco ("Em breve")
-- **International**: PayPal+Card primary ("Recomendado") → Crypto + MBWay secondary
-- Apple Pay / Google Pay via PayPal Smart Buttons (enable-funding=card)
-- IfthenPay config prepared with placeholders (enabled: false) for MBWay + Multibanco integration
+- **Portugal (PT)**: MBWay primary -> PayPal+Card secondary -> Crypto -> Multibanco ("Em breve")
+- **International**: PayPal+Card primary -> Crypto + MBWay secondary
+- IfthenPay config prepared with placeholders (enabled: false)
 - Removed Revolut and Wise from all flows
-- Geolocation cached per session, 3s timeout fallback
 
 ### PayPal Smart Buttons (2026-03-24)
 - Official SDK @paypal/react-paypal-js with vertical layout
 - "Pay with PayPal" + "Debit or Credit Card" buttons
-- createPayPalOrder/onPayPalApprove extracted as reusable handlers
 
 ### Differentiated Funding Celebration (2026-03-24)
-- Main journey: pending_validation → admin approves → completed with confetti
+- Main journey: pending_validation -> admin approves -> completed with confetti
 - Ambassador journeys: auto-completed with confetti
 
 ### Smart GYG Links, Mobile, Hero, SEO, Affiliate Links, Ambassador System
@@ -49,16 +60,19 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 
 ## Prioritized Backlog
 ### P1
-- Activate IfthenPay when keys are available (MBWay + Multibanco automatic)
+- Celebracao "Sonho 100% Financiado": UI especial/animacao quando viagem atinge 100%
 ### P2
-- Payout tracking system (coleção payouts, admin UI)
-- Refatoracao backend server.py → APIRouters modulares
-- Refatoracao frontend TravelPlanner.js → subcomponentes
+- Ativar IfthenPay quando credenciais forem fornecidas
+- Smart Map e AI Assistant reais (substituir placeholders)
+- Refatoracao backend server.py -> APIRouters modulares
+- Refatoracao frontend TravelPlanner.js -> subcomponentes
 ### Backlog
 - Geracao automatica de plano na viagem principal
 - Sistema de gamificacao
-- Smart Map e AI Assistant reais
+- Notificacoes push/email automaticas
 - Open Graph images para planos publicos
+- SEO: meta description, favicon, og:image
+- Consistencias de dados (viagens duplicadas, endpoint /api/health)
 
 ## Credentials
 - **Admin**: admin@4luis.com / Admin1
