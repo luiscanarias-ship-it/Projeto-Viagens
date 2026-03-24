@@ -14,6 +14,11 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 
 ## What's Been Implemented
 
+### PostHog Analytics Removed (2026-03-24)
+- Removed PostHog session recording: conflicted with PayPal cross-origin iframes
+- Was causing "Uncaught runtime errors" overlay blocking payment methods
+- PostHog can be re-added later with `recordCrossOriginIframes: false` and `disable_session_recording: true`
+
 ### MB WAY Manual UX Improvement (2026-03-24)
 - Phone number hidden by default behind "Mostrar detalhes de envio" toggle
 - Copy reference button with "Copiar"/"Copiado!" feedback
