@@ -7,40 +7,35 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - **Frontend**: React 18 + Tailwind CSS + Framer Motion + canvas-confetti + @paypal/react-paypal-js
 - **Backend**: FastAPI (Python 3.11)
 - **Database**: MongoDB
-- **Payments**: PayPal Checkout (live), Stripe, Crypto, MBWay, Revolut, Wise
+- **Payments**: PayPal Smart Buttons (live, with card option), MBWay (manual), Crypto (manual)
 - **Auth**: JWT + Google OAuth
 - **AI**: OpenAI GPT-5.2 via Emergent LLM Key
 
 ## What's Been Implemented
 
+### PayPal Smart Buttons + Payment Cleanup (2026-03-24)
+- Replaced custom PayPal UI with official PayPal Smart Buttons (SDK @paypal/react-paypal-js)
+- Added "Debit or Credit Card" option via enable-funding=card
+- Removed Revolut and Wise from frontend and backend
+- Kept: PayPal (primary/recommended), MBWay (manual), Crypto (optional)
+- Backend valid_methods: ["crypto", "mbway", "paypal"]
+
 ### Differentiated Funding Celebration (2026-03-24)
-- **Main journey (is_main_trip=true)**: When funding >= 100%, sets `funding_status = "pending_validation"`, notifies admin, keeps accepting contributions. Admin approves via `POST /api/admin/journey/{id}/approve-funding` → sets `funding_status = "completed"`, activates confetti celebration.
-- **Ambassador journeys (is_ambassador_journey=true)**: Auto-completes to `funding_status = "completed"` with confetti, no manual validation needed.
-- **CelebrationBanner component**: `variant="completed"` (confetti + trophy + gold banner) and `variant="pending_validation"` (amber banner "a aguardar confirmação").
-- **FundedBadge / PendingBadge**: Inline badges for progress display.
-- **Admin panel**: "Aguarda validação" badge + "Aprovar" button for pending journeys.
-- **Progress API**: Returns `funding_status`, `is_main_trip`, `is_ambassador_journey`.
-- **Home.js**: Differentiated text per status (completed/pending/active).
+- Main journey: funding >= 100% → pending_validation → admin approves → completed with confetti
+- Ambassador journeys: auto-completed with confetti (no manual validation)
+- CelebrationBanner component (completed/pending_validation variants)
+- Admin panel: approve funding button for pending journeys
 
 ### Smart GYG Dynamic Link System (2026-03-21)
-- buildGYGLink(destination, activityName?): ?q={query}&partner_id=WFPE9ME
-- extractActivityName strips Portuguese stopwords
-- GYG_CURATED_EXPERIENCES map (future-ready)
-- GYG analytics script globally loaded
+- buildGYGLink with destination + activity-based search
+- GYG analytics script globally loaded (partner_id=WFPE9ME)
 
-### P0 Mobile Optimization (2026-03-20)
-- 44px touch targets, 60/65vh hero, responsive sticky bars, iOS zoom prevention
-
-### P1 Hero & Brand (2026-03-20)
+### P0 Mobile / P1 Hero / P2 SEO (2026-03-20)
+- 44px touch targets, 60/65vh hero, responsive sticky bars
 - CrowdDreaming copy, warm golden-hour curated images
-
-### P2 SEO (2026-03-20)
 - /api/plan/{slug}, /api/sitemap.xml, /plano/:slug with meta tags
 
-### Affiliate Links (2026-03-20)
-- Centralized AFFILIATE_LINKS, placeholders for non-GYG, click tracking active
-
-### Growth Loop, Ambassador, CTA Copy, AI Travel Planner
+### Affiliate Links, Growth Loop, Ambassador, AI Travel Planner
 - All previously implemented and functional
 
 ## Key Pages
@@ -51,11 +46,11 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - Refatoracao backend server.py → APIRouters modulares (6800+ lines)
 - Refatoracao frontend TravelPlanner.js → subcomponentes (1100+ lines)
 ### Backlog
+- Payout tracking system (coleção payouts, admin UI)
 - Geracao automatica de plano na viagem principal
 - Sistema de gamificacao
 - Smart Map e AI Assistant reais
 - Open Graph images para planos publicos
-- Notificacoes push/email
 
 ## Credentials
 - **Admin**: admin@4luis.com / Admin1
