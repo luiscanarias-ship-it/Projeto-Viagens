@@ -1064,13 +1064,42 @@ const Admin = () => {
                               Principal
                             </span>
                           )}
-                          {!journey.is_active && (
+                          {journey.funding_status === 'pending_validation' && (
+                            <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded text-[10px] font-bold animate-pulse" data-testid={`pending-badge-${journey.journey_id}`}>
+                              Aguarda validação
+                            </span>
+                          )}
+                          {journey.funding_status === 'completed' && (
+                            <span className="px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-[10px] font-bold" data-testid={`completed-badge-${journey.journey_id}`}>
+                              100% Financiado
+                            </span>
+                          )}
+                          {!journey.is_active && !journey.funding_status && (
                             <span className="px-1.5 py-0.5 bg-red-100 text-red-600 rounded text-[10px] font-bold" data-testid={`suspended-badge-${journey.journey_id}`}>
                               Suspensa
                             </span>
                           )}
                         </div>
                         <div className="flex gap-1">
+                          {journey.funding_status === 'pending_validation' && (
+                            <button
+                              onClick={async () => {
+                                if (!window.confirm(`Aprovar financiamento de "${journey.name}"? Isto ativa a celebração.`)) return;
+                                try {
+                                  await axios.post(`${API}/admin/journey/${journey.journey_id}/approve-funding`, {}, { headers: getAuthHeaders() });
+                                  alert('Financiamento aprovado! Celebração ativada.');
+                                  fetchData();
+                                } catch (e) {
+                                  alert('Erro: ' + (e.response?.data?.detail || e.message));
+                                }
+                              }}
+                              className="px-2 py-1 bg-green-500 text-white rounded-lg text-[10px] font-bold hover:bg-green-600 transition-colors flex items-center gap-1"
+                              title="Aprovar financiamento"
+                              data-testid={`approve-funding-btn-${journey.journey_id}`}
+                            >
+                              <CheckCircle className="w-3 h-3" /> Aprovar
+                            </button>
+                          )}
                           <button
                             onClick={() => handleSetMainTrip(journey)}
                             className={`p-1.5 rounded-lg transition-colors ${journey.is_main_trip ? 'bg-[#F2C94C]/20' : 'hover:bg-stone-100'}`}

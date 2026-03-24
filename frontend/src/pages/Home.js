@@ -328,7 +328,17 @@ const Home = () => {
                               className={`h-full rounded-full ${mainJourney.progress.is_funded ? 'bg-green-400' : 'bg-gradient-to-r from-[#FFBE98] to-[#F2C94C]'}`}
                             />
                           </div>
-                          {mainJourney.progress.is_funded && (
+                          {mainJourney.progress.is_funded && mainJourney.progress.funding_status === 'completed' && (
+                            <p className="text-[#F2C94C] text-sm mt-2 flex items-center gap-2">
+                              <Sparkles className="w-4 h-4" /> Sonho 100% Financiado
+                            </p>
+                          )}
+                          {mainJourney.progress.is_funded && mainJourney.progress.funding_status === 'pending_validation' && (
+                            <p className="text-amber-300 text-sm mt-2 flex items-center gap-2">
+                              <Sparkles className="w-4 h-4" /> Objetivo atingido — em validação
+                            </p>
+                          )}
+                          {mainJourney.progress.is_funded && (!mainJourney.progress.funding_status || mainJourney.progress.funding_status === 'active') && (
                             <p className="text-green-400 text-sm mt-2 flex items-center gap-2">
                               <Sparkles className="w-4 h-4" /> {t('home.goal_reached')}
                             </p>

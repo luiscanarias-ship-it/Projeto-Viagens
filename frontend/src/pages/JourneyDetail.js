@@ -17,6 +17,7 @@ import TestimonialsSection from '../components/TestimonialsSection';
 import MilestoneCelebration from '../components/MilestoneCelebration';
 import ShareButton from '../components/ShareButton';
 import SEO from '../components/SEO';
+import { CelebrationBanner, FundedBadge, PendingBadge } from '../components/CelebrationBanner';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -209,6 +210,7 @@ const JourneyDetail = () => {
   // Use progress from API (can exceed 100%)
   const progressPercent = progress?.percentage || 0;
   const isFunded = progress?.is_funded || false;
+  const fundingStatus = progress?.funding_status || 'active';
   const closingMessage = progress?.closing_message;
 
   if (loading) {
@@ -304,8 +306,18 @@ const JourneyDetail = () => {
 
         {/* Progress Bar - Always visible, percentage public, goal amount hidden */}
         <div className="bg-white rounded-3xl p-8 shadow-lg -mt-16 relative z-10 mb-8">
-          {/* Funded Banner */}
-          {isFunded && (
+          {/* Celebration / Pending Validation Banner */}
+          {fundingStatus === 'completed' && (
+            <div className="mb-6">
+              <CelebrationBanner journeyName={journey.poetic_name || journey.name} variant="completed" />
+            </div>
+          )}
+          {fundingStatus === 'pending_validation' && (
+            <div className="mb-6">
+              <CelebrationBanner variant="pending_validation" />
+            </div>
+          )}
+          {isFunded && fundingStatus === 'active' && (
             <div className="bg-gradient-to-r from-[#F2C94C]/20 to-[#FFBE98]/20 rounded-xl p-4 mb-4 flex items-center gap-3">
               <AlertCircle className="w-5 h-5 text-[#F2C94C]" />
               <p className="text-[#2D2A26] font-medium">{closingMessage}</p>
@@ -321,9 +333,11 @@ const JourneyDetail = () => {
             />
           </div>
           <div className="flex items-center justify-center gap-4 flex-wrap">
-            <p className={`text-2xl font-bold ${isFunded ? 'text-[#F2C94C]' : 'text-[#FFBE98]'}`}>
+            <p className={`text-2xl font-bold ${fundingStatus === 'completed' ? 'text-[#F2C94C]' : isFunded ? 'text-[#F2C94C]' : 'text-[#FFBE98]'}`}>
               {Math.round(progressPercent)}% angariado
             </p>
+            {fundingStatus === 'completed' && <FundedBadge />}
+            {fundingStatus === 'pending_validation' && <PendingBadge />}
             {journey.target_date && (
               <p className="text-sm text-[#6B6661]">
                 Data objetivo: {new Date(journey.target_date).toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric' })}

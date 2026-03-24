@@ -820,6 +820,9 @@ async def get_journey_progress(journey_id: str, request: Request):
         "current_amount": current_amount,
         "percentage": round(percentage, 1),
         "is_funded": is_funded,
+        "funding_status": journey.get("funding_status", "active"),
+        "is_main_trip": journey.get("is_main_trip", False),
+        "is_ambassador_journey": journey.get("is_ambassador_journey", False),
         "status": journey.get("status", "active"),
         "target_date": journey.get("target_date"),
         "closing_message": "Financiamento total quase a fechar." if is_funded else None,
@@ -3497,67 +3500,138 @@ async def migrate_existing_users(request: Request):
 # ==================== AMBASSADOR JOURNEYS ====================
 
 async def check_and_update_journey_funding_status(journey_id: str):
-    """Check if journey reached funding goal and update status automatically"""
+    """Check if journey reached funding goal and update status based on journey type.
+    - Main journey (is_main_trip): sets funding_status to 'pending_validation', notifies admin
+    - Ambassador journeys: sets funding_status to 'completed' automatically (no manual validation)
+    Both types continue to accept contributions after reaching 100%.
+    """
     journey = await db.journeys.find_one({"journey_id": journey_id}, {"_id": 0})
     if not journey:
         return None
     
     current_amount = journey.get("current_amount", 0)
     goal_amount = journey.get("goal_amount", 1)
-    current_status = journey.get("status", "ativa")
+    current_funding_status = journey.get("funding_status", "active")
+    
+    # Skip if already completed or pending_validation
+    if current_funding_status in ("completed", "pending_validation"):
+        return current_funding_status
     
     # Check if funded (100%+)
-    if current_amount >= goal_amount and current_status == "ativa":
-        # Update status to "financiada"
-        await db.journeys.update_one(
-            {"journey_id": journey_id},
-            {"$set": {
-                "status": "financiada",
-                "funded_at": datetime.now(timezone.utc).isoformat(),
-                "is_active": False,  # Remove from active journeys
-                "updated_at": datetime.now(timezone.utc).isoformat()
-            }}
-        )
-        
-        # Create notification for admin
-        await db.notifications.insert_one({
-            "notification_id": f"notif_{uuid.uuid4().hex[:12]}",
-            "type": "journey_funded",
-            "title": "Viagem Financiada!",
-            "message": f"A viagem '{journey.get('name')}' atingiu o objetivo de financiamento.",
-            "journey_id": journey_id,
-            "for_admin": True,
-            "read": False,
-            "created_at": datetime.now(timezone.utc).isoformat()
-        })
-        
-        # If ambassador journey, notify ambassador and send email
-        if journey.get("is_ambassador_journey") and journey.get("ambassador_user_id"):
-            ambassador_user_id = journey["ambassador_user_id"]
-            
-            # Create in-app notification
+    if current_amount >= goal_amount:
+        now_iso = datetime.now(timezone.utc).isoformat()
+        is_main = journey.get("is_main_trip", False)
+        is_ambassador = journey.get("is_ambassador_journey", False)
+
+        if is_main and not is_ambassador:
+            # ── MAIN JOURNEY: pending admin validation ──
+            new_status = "pending_validation"
+            await db.journeys.update_one(
+                {"journey_id": journey_id},
+                {"$set": {
+                    "funding_status": new_status,
+                    "funded_at": now_iso,
+                    "updated_at": now_iso
+                    # NOTE: is_active stays True, contributions still accepted
+                }}
+            )
+            # Notify admin
             await db.notifications.insert_one({
                 "notification_id": f"notif_{uuid.uuid4().hex[:12]}",
-                "type": "your_journey_funded",
-                "title": "A tua viagem foi financiada!",
-                "message": f"Parabéns! A tua viagem '{journey.get('name')}' atingiu o objetivo de financiamento.",
+                "type": "main_journey_funded",
+                "title": "Viagem Principal atingiu 100%!",
+                "message": f"A viagem principal '{journey.get('name')}' atingiu o objetivo. Aguarda a tua validação para ativar a celebração.",
                 "journey_id": journey_id,
-                "user_id": ambassador_user_id,
+                "for_admin": True,
                 "read": False,
-                "created_at": datetime.now(timezone.utc).isoformat()
+                "created_at": now_iso
             })
-            
-            # Send emails to ambassador and admin
-            ambassador = await db.users.find_one({"user_id": ambassador_user_id}, {"_id": 0})
-            await send_journey_funded_emails(journey, ambassador, current_amount)
+            logger.info(f"Main journey {journey_id} reached 100% — set to pending_validation")
         else:
-            # Just send email to admin for non-ambassador journeys
-            await send_journey_funded_emails(journey, None, current_amount)
+            # ── AMBASSADOR JOURNEY: auto-complete ──
+            new_status = "completed"
+            await db.journeys.update_one(
+                {"journey_id": journey_id},
+                {"$set": {
+                    "funding_status": new_status,
+                    "status": "financiada",
+                    "funded_at": now_iso,
+                    "is_active": False,
+                    "updated_at": now_iso
+                }}
+            )
+            # Notify admin
+            await db.notifications.insert_one({
+                "notification_id": f"notif_{uuid.uuid4().hex[:12]}",
+                "type": "journey_funded",
+                "title": "Viagem Financiada!",
+                "message": f"A viagem '{journey.get('name')}' atingiu o objetivo de financiamento.",
+                "journey_id": journey_id,
+                "for_admin": True,
+                "read": False,
+                "created_at": now_iso
+            })
+            # Notify ambassador
+            if journey.get("ambassador_user_id"):
+                ambassador_user_id = journey["ambassador_user_id"]
+                await db.notifications.insert_one({
+                    "notification_id": f"notif_{uuid.uuid4().hex[:12]}",
+                    "type": "your_journey_funded",
+                    "title": "A tua viagem foi financiada!",
+                    "message": f"Parabéns! A tua viagem '{journey.get('name')}' atingiu o objetivo de financiamento.",
+                    "journey_id": journey_id,
+                    "user_id": ambassador_user_id,
+                    "read": False,
+                    "created_at": now_iso
+                })
+                ambassador = await db.users.find_one({"user_id": ambassador_user_id}, {"_id": 0})
+                await send_journey_funded_emails(journey, ambassador, current_amount)
+            else:
+                await send_journey_funded_emails(journey, None, current_amount)
+
+            logger.info(f"Ambassador journey {journey_id} auto-completed")
         
-        logger.info(f"Journey {journey_id} automatically moved to 'financiada' status")
-        return "financiada"
+        return new_status
     
-    return current_status
+    return current_funding_status
+
+
+@api_router.post("/admin/journey/{journey_id}/approve-funding")
+async def admin_approve_journey_funding(journey_id: str, request: Request):
+    """Admin endpoint to approve main journey funding — moves from pending_validation to completed"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Não autenticado")
+    user_data = await db.users.find_one({"user_id": user.user_id}, {"_id": 0})
+    if not user_data or not user_data.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Acesso negado")
+
+    journey = await db.journeys.find_one({"journey_id": journey_id}, {"_id": 0})
+    if not journey:
+        raise HTTPException(status_code=404, detail="Viagem não encontrada")
+    
+    if journey.get("funding_status") != "pending_validation":
+        raise HTTPException(status_code=400, detail=f"Esta viagem não está pendente de validação (status: {journey.get('funding_status', 'active')})")
+
+    now_iso = datetime.now(timezone.utc).isoformat()
+    await db.journeys.update_one(
+        {"journey_id": journey_id},
+        {"$set": {
+            "funding_status": "completed",
+            "status": "financiada",
+            "is_active": False,
+            "approved_at": now_iso,
+            "approved_by": user.user_id,
+            "updated_at": now_iso
+        }}
+    )
+    
+    # Send funded emails
+    current_amount = journey.get("current_amount", 0)
+    await send_journey_funded_emails(journey, None, current_amount)
+
+    logger.info(f"Admin {user.user_id} approved funding for journey {journey_id}")
+    return {"status": "completed", "message": "Financiamento aprovado. Celebração ativada!"}
 
 def get_chapter_number(percentage: float) -> int:
     """Get story chapter number based on funding percentage"""
