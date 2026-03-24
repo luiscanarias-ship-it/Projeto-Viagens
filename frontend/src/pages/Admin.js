@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit2, Trash2, Save, X, BarChart3, Settings, CheckCircle, XCircle, Mail, Users, Award, Gift, Crown, TrendingUp, UserPlus, ChevronRight, Star, FileText, Clock, MapPin, Target, Calendar, Eye, EyeOff, MessageSquare, AlertCircle, ExternalLink, History, Search, Heart, Sparkles, BookOpen } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, X, BarChart3, Settings, CheckCircle, XCircle, Mail, Users, Award, Gift, Crown, TrendingUp, UserPlus, ChevronRight, Star, FileText, Clock, MapPin, Target, Calendar, Eye, EyeOff, MessageSquare, AlertCircle, ExternalLink, History, Search, Heart, Sparkles, BookOpen, Wallet, ArrowUpRight, Banknote } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -64,6 +64,11 @@ const Admin = () => {
   const [adjustmentJourneyId, setAdjustmentJourneyId] = useState(null);
   const [generatingDescs, setGeneratingDescs] = useState(false);
   const [journeyFilter, setJourneyFilter] = useState('todas');
+  // Payouts state
+  const [payoutsData, setPayoutsData] = useState({ payouts: [], summary: { total: 0, pending: 0, processing: 0, completed: 0, total_pending_amount: 0, total_paid_amount: 0 } });
+  const [payoutStatusFilter, setPayoutStatusFilter] = useState('all');
+  const [editingPayout, setEditingPayout] = useState(null);
+  const [payoutForm, setPayoutForm] = useState({ payment_method: '', payment_reference: '', admin_notes: '' });
 
   // Autosave: restore create form data from localStorage or server
   const CREATE_AUTOSAVE_KEY = 'autosave_journey_create';
@@ -155,7 +160,7 @@ const Admin = () => {
     const fetchData = async () => {
       try {
         const headers = getAuthHeaders();
-        const [journeysRes, statsRes, settingsRes, contributionsRes, sponsorsRes, rafflesRes, usersRes, applicationsRes, supportRes] = await Promise.all([
+        const [journeysRes, statsRes, settingsRes, contributionsRes, sponsorsRes, rafflesRes, usersRes, applicationsRes, supportRes, payoutsRes] = await Promise.all([
           axios.get(`${API}/admin/journeys`, { headers, withCredentials: true }).catch(e => ({ data: [] })),
           axios.get(`${API}/admin/stats`, { headers, withCredentials: true }).catch(e => ({ data: {} })),
           axios.get(`${API}/admin/settings`, { headers, withCredentials: true }).catch(e => ({ data: {} })),
@@ -164,7 +169,8 @@ const Admin = () => {
           axios.get(`${API}/admin/journeys-ready-for-raffle`, { headers, withCredentials: true }).catch(e => ({ data: { ready_journeys: [] } })),
           axios.get(`${API}/admin/users/dashboard`, { headers, withCredentials: true }).catch(e => ({ data: null })),
           axios.get(`${API}/admin/ambassador-journeys?status=candidatura`, { headers, withCredentials: true }).catch(() => ({ data: { journeys: [] } })),
-          axios.get(`${API}/admin/support/tickets?status=Aberto`, { headers, withCredentials: true }).catch(() => ({ data: { open_count: 0 } }))
+          axios.get(`${API}/admin/support/tickets?status=Aberto`, { headers, withCredentials: true }).catch(() => ({ data: { open_count: 0 } })),
+          axios.get(`${API}/admin/payouts`, { headers, withCredentials: true }).catch(() => ({ data: { payouts: [], summary: {} } }))
         ]);
         
         // Validate data before setting state
@@ -180,6 +186,9 @@ const Admin = () => {
           setAmbassadorApplications(applicationsRes.data);
         }
         setOpenSupportCount(supportRes.data?.open_count || 0);
+        if (payoutsRes.data?.payouts) {
+          setPayoutsData(payoutsRes.data);
+        }
       } catch (error) {
         console.error('Error fetching admin data:', error);
       } finally {
@@ -750,6 +759,7 @@ const Admin = () => {
             { id: 'candidaturas', label: 'Candidaturas', icon: ambassadorApplications?.by_status?.candidatura?.length || null },
             { id: 'visibility', label: 'Visibilidade', icon: null },
             { id: 'contributions', label: 'Contribuições', icon: pendingContributions.length > 0 ? pendingContributions.length : null },
+            { id: 'payouts', label: 'Payouts', icon: payoutsData.summary.pending > 0 ? payoutsData.summary.pending : null },
             { id: 'users', label: 'Utilizadores', icon: usersDashboard?.metrics?.premium_users || null },
             { id: 'raffles', label: 'Sorteios', icon: rafflesReady?.length || null },
             { id: 'sponsors', label: 'Sponsors', icon: sponsorsReport?.total_qualified_sponsors || null },
@@ -2508,6 +2518,197 @@ const Admin = () => {
                   <p className="text-sm mt-2">
                     Os utilizadores precisam de convidar pelo menos 3 amigos para se qualificarem.
                   </p>
+                </div>
+              )}
+            </motion.div>
+          )}
+
+          {/* Payouts Tab */}
+          {activeTab === 'payouts' && (
+            <motion.div
+              key="payouts"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+            >
+              <h2 className="text-xl font-bold mb-6" data-testid="payouts-title">Pagamentos a Embaixadores</h2>
+              
+              {/* Summary Cards */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                  <p className="text-xs text-amber-700 font-medium">Pendentes</p>
+                  <p className="text-2xl font-bold text-amber-800" data-testid="payouts-pending-count">{payoutsData.summary.pending}</p>
+                </div>
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                  <p className="text-xs text-blue-700 font-medium">Em processamento</p>
+                  <p className="text-2xl font-bold text-blue-800" data-testid="payouts-processing-count">{payoutsData.summary.processing}</p>
+                </div>
+                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+                  <p className="text-xs text-emerald-700 font-medium">Concluídos</p>
+                  <p className="text-2xl font-bold text-emerald-800" data-testid="payouts-completed-count">{payoutsData.summary.completed}</p>
+                </div>
+                <div className="bg-stone-50 border border-stone-200 rounded-xl p-4">
+                  <p className="text-xs text-[#6B6661] font-medium">Por pagar</p>
+                  <p className="text-2xl font-bold text-[#2D2A26]" data-testid="payouts-pending-amount">{payoutsData.summary.total_pending_amount?.toFixed(0) || 0}</p>
+                </div>
+              </div>
+
+              {/* Filter */}
+              <div className="flex gap-2 mb-4">
+                {['all', 'pending', 'processing', 'completed'].map(s => (
+                  <button
+                    key={s}
+                    onClick={() => setPayoutStatusFilter(s)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${payoutStatusFilter === s ? 'bg-[#2D2A26] text-white' : 'bg-white border border-stone-200 text-[#6B6661] hover:bg-stone-50'}`}
+                    data-testid={`payout-filter-${s}`}
+                  >
+                    {s === 'all' ? 'Todos' : s === 'pending' ? 'Pendentes' : s === 'processing' ? 'Em processamento' : 'Concluídos'}
+                  </button>
+                ))}
+              </div>
+
+              {/* Payouts list */}
+              {payoutsData.payouts.length === 0 ? (
+                <div className="bg-white border border-stone-200 rounded-xl p-8 text-center">
+                  <Wallet className="w-10 h-10 text-stone-300 mx-auto mb-3" />
+                  <p className="text-sm text-[#6B6661]">Nenhum payout registado ainda.</p>
+                  <p className="text-xs text-stone-400 mt-1">Os payouts são criados automaticamente quando uma viagem de embaixador atinge 100% de financiamento.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {payoutsData.payouts
+                    .filter(p => payoutStatusFilter === 'all' || p.status === payoutStatusFilter)
+                    .map(payout => (
+                    <div key={payout.payout_id} className="bg-white border border-stone-200 rounded-xl p-4" data-testid={`payout-card-${payout.payout_id}`}>
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-bold text-sm text-[#2D2A26]">{payout.journey_name}</h3>
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${
+                              payout.status === 'pending' ? 'bg-amber-100 text-amber-700' :
+                              payout.status === 'processing' ? 'bg-blue-100 text-blue-700' :
+                              'bg-emerald-100 text-emerald-700'
+                            }`} data-testid={`payout-status-${payout.payout_id}`}>
+                              {payout.status === 'pending' ? 'Pendente' : payout.status === 'processing' ? 'Em processamento' : 'Concluído'}
+                            </span>
+                          </div>
+                          <p className="text-xs text-[#6B6661] mt-1">
+                            Embaixador: <strong>{payout.ambassador_name}</strong>
+                          </p>
+                          <p className="text-xs text-stone-400 mt-0.5">
+                            Criado: {new Date(payout.created_at).toLocaleDateString('pt-PT')}
+                            {payout.completed_at && ` | Pago: ${new Date(payout.completed_at).toLocaleDateString('pt-PT')}`}
+                          </p>
+                          {payout.payment_method && (
+                            <p className="text-xs text-[#6B6661] mt-1">Método: {payout.payment_method} {payout.payment_reference && `| Ref: ${payout.payment_reference}`}</p>
+                          )}
+                          {payout.admin_notes && (
+                            <p className="text-xs text-stone-400 mt-0.5 italic">Notas: {payout.admin_notes}</p>
+                          )}
+                        </div>
+                        <div className="text-right flex-shrink-0">
+                          <p className="text-lg font-bold text-[#2D2A26]">{payout.amount?.toFixed(0)}</p>
+                          <p className="text-[10px] text-[#6B6661]">objetivo: {payout.goal_amount?.toFixed(0)}</p>
+                        </div>
+                      </div>
+                      
+                      {/* Actions */}
+                      {payout.status !== 'completed' && (
+                        <div className="mt-3 pt-3 border-t border-stone-100">
+                          {editingPayout === payout.payout_id ? (
+                            <div className="space-y-2">
+                              <div className="grid grid-cols-2 gap-2">
+                                <input
+                                  type="text"
+                                  placeholder="Método (ex: IBAN, PayPal)"
+                                  value={payoutForm.payment_method}
+                                  onChange={e => setPayoutForm({...payoutForm, payment_method: e.target.value})}
+                                  className="px-2 py-1.5 border border-stone-200 rounded-lg text-xs"
+                                  data-testid={`payout-method-input-${payout.payout_id}`}
+                                />
+                                <input
+                                  type="text"
+                                  placeholder="Referência"
+                                  value={payoutForm.payment_reference}
+                                  onChange={e => setPayoutForm({...payoutForm, payment_reference: e.target.value})}
+                                  className="px-2 py-1.5 border border-stone-200 rounded-lg text-xs"
+                                  data-testid={`payout-ref-input-${payout.payout_id}`}
+                                />
+                              </div>
+                              <input
+                                type="text"
+                                placeholder="Notas (opcional)"
+                                value={payoutForm.admin_notes}
+                                onChange={e => setPayoutForm({...payoutForm, admin_notes: e.target.value})}
+                                className="w-full px-2 py-1.5 border border-stone-200 rounded-lg text-xs"
+                                data-testid={`payout-notes-input-${payout.payout_id}`}
+                              />
+                              <div className="flex gap-2">
+                                {payout.status === 'pending' && (
+                                  <button
+                                    onClick={async () => {
+                                      try {
+                                        await axios.put(`${API}/admin/payouts/${payout.payout_id}/status`, {
+                                          status: 'processing',
+                                          ...payoutForm
+                                        }, { headers: getAuthHeaders() });
+                                        const res = await axios.get(`${API}/admin/payouts`, { headers: getAuthHeaders() });
+                                        setPayoutsData(res.data);
+                                        setEditingPayout(null);
+                                      } catch (e) { alert(e.response?.data?.detail || 'Erro'); }
+                                    }}
+                                    className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-medium hover:bg-blue-700"
+                                    data-testid={`payout-mark-processing-${payout.payout_id}`}
+                                  >
+                                    <ArrowUpRight className="w-3 h-3 inline mr-1" /> Marcar em processamento
+                                  </button>
+                                )}
+                                <button
+                                  onClick={async () => {
+                                    if (!window.confirm('Marcar payout como concluído? Isto notifica o embaixador.')) return;
+                                    try {
+                                      await axios.put(`${API}/admin/payouts/${payout.payout_id}/status`, {
+                                        status: 'completed',
+                                        ...payoutForm
+                                      }, { headers: getAuthHeaders() });
+                                      const res = await axios.get(`${API}/admin/payouts`, { headers: getAuthHeaders() });
+                                      setPayoutsData(res.data);
+                                      setEditingPayout(null);
+                                    } catch (e) { alert(e.response?.data?.detail || 'Erro'); }
+                                  }}
+                                  className="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-medium hover:bg-emerald-700"
+                                  data-testid={`payout-mark-completed-${payout.payout_id}`}
+                                >
+                                  <CheckCircle className="w-3 h-3 inline mr-1" /> Concluir payout
+                                </button>
+                                <button
+                                  onClick={() => setEditingPayout(null)}
+                                  className="px-3 py-1.5 bg-stone-100 text-[#6B6661] rounded-lg text-xs font-medium hover:bg-stone-200"
+                                >
+                                  Cancelar
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => {
+                                setEditingPayout(payout.payout_id);
+                                setPayoutForm({
+                                  payment_method: payout.payment_method || '',
+                                  payment_reference: payout.payment_reference || '',
+                                  admin_notes: payout.admin_notes || ''
+                                });
+                              }}
+                              className="px-3 py-1.5 bg-[#FFBE98] text-[#2D2A26] rounded-lg text-xs font-medium hover:bg-[#FFB080]"
+                              data-testid={`payout-edit-btn-${payout.payout_id}`}
+                            >
+                              <Banknote className="w-3 h-3 inline mr-1" /> Processar pagamento
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
               )}
             </motion.div>

@@ -1,178 +1,185 @@
 <analysis>**original_problem_statement**:
-O utilizador iniciou a sessão com um pedido para melhorar a visibilidade e a taxa de cliques (CTR) dos CTAs de afiliados. Isto evoluiu para uma série de refinamentos de UI significativos:
-1.  **Melhoria Visual dos CTAs**: Uma tentativa inicial de aumentar o contraste com uma cor laranja forte () foi implementada e depois totalmente revertida a pedido do utilizador, que preferia a identidade visual original, mais suave e premium ().
-2.  **Otimização de Copy de CTAs**: O foco mudou para a melhoria da performance dos CTAs através da otimização do texto. O agente implementou um sistema para gerar *copy* dinâmico e contextual, adaptado ao destino e tipo de viagem, e adicionou emojis e gatilhos de urgência para aumentar a conversão.
-3.  **Sistema Ambassador**: O utilizador solicitou a implementação de um sistema de acesso a funcionalidades premium. O acesso é concedido aos utilizadores que se tornam Embaixadores ao convidar 3 amigos que se registam e contribuem para a viagem principal. Isto envolveu uma lógica de backend robusta para validação, *gating* de funcionalidades no frontend e uma UI para mostrar o progresso.
-4.  **Ativação do Growth Loop**: Para apoiar o sistema Ambassador, foi implementado um sistema de notificações no backend (para informar sobre o progresso dos referrals) e os links de afiliados placeholder foram substituídos por URLs reais com tracking.
-5.  **Melhoria da Marca e Otimização**: O último pedido do utilizador foi uma tarefa multifacetada para melhorar a clareza da marca (copy da secção *hero*), a consistência visual (imagens), a otimização para dispositivos móveis (uma prioridade crítica) e a preparação para SEO (URLs públicos, meta tags).
+O utilizador iniciou uma série de tarefas focadas em otimizar a conversão e a robustez financeira da plataforma:
+1.  **Diagnóstico do Site**: O utilizador pediu uma auditoria completa do estado atual da plataforma, incluindo funcionalidades não concluídas e aspetos a melhorar.
+2.  **Celebração de Financiamento Diferenciada**: Foi solicitada a implementação de uma lógica de celebração de financiamento distinta para a viagem principal (que requer validação manual de um admin) e para as viagens de embaixador (que são concluídas automaticamente).
+3.  **Auditoria de Atribuição e Financeira**: O utilizador pediu validações para confirmar que cada contribuição é corretamente associada à sua viagem () e uma análise da camada financeira (reconciliação, validação manual de pagamentos e a lógica de *payouts*). A auditoria revelou que, embora a atribuição funcione bem, o sistema de *payouts* para os embaixadores não existe.
+4.  **Melhoria da UI de Pagamentos (PayPal)**: O utilizador pediu para substituir a UI de pagamento personalizada por PayPal Smart Buttons oficiais e para simplificar os métodos de pagamento, removendo Revolut e Wise.
+5.  **Priorização Inteligente de Pagamentos**: Pedido para integrar IfthenPay (MB WAY, Multibanco) e otimizar a conversão mostrando métodos de pagamento de forma dinâmica com base na geolocalização do utilizador (via API gratuita), priorizando MB WAY para Portugal e PayPal/Cartão para o resto do mundo.
+6.  **Ajustes na UI de Pagamentos**: O utilizador especificou que, por agora, tanto MB WAY como Multibanco (via IfthenPay) deveriam aparecer como Em breve.
+7.  **Melhoria da UX do MB WAY Manual**: Por fim, o utilizador pediu para reativar o MB WAY manual, mas com uma UX melhorada: ocultando o número de telefone por trás de um toggle Mostrar detalhes, mostrando instruções claras e um botão para copiar a referência do pagamento.
 
 **User's preferred language**: Português. O próximo agente DEVE comunicar exclusivamente em português.
 
 **what currently exists?**
-Uma aplicação full-stack (React/FastAPI/MongoDB) de crowdfunding de viagens com um AI Travel Planner. A identidade visual soft peach () foi restaurada e consolidada. O copy dos CTAs é agora altamente contextual e otimizado para conversão.
+Uma aplicação full-stack (React/FastAPI/MongoDB) de crowdfunding de viagens com funcionalidades robustas como um AI Travel Planner, sistema Ambassador para crescimento, e páginas de planos públicos otimizadas para SEO.
 
-Existe um sistema Ambassador completo e funcional que serve como principal motor de crescimento:
--   **Backend**: Endpoints robustos (, ) para gerir o estado de Embaixador, validar referências, e enviar notificações. A lógica de cálculo () está integrada nos fluxos de pagamento (PayPal, Stripe).
--   **Frontend**: O  agora inclui *feature gating* para funcionalidades premium (mapa, dicas secretas), e o componente  exibe o progresso do utilizador.
--   **Monetização**: Os links de afiliados foram atualizados com URLs reais e incluem um  para tracking.
-
-O agente estava prestes a iniciar a implementação da última grande solicitação do utilizador: otimização para mobile, melhoria da secção *hero* e imagens, e preparação para SEO.
+O sistema de pagamentos foi significativamente refatorado:
+-   **PayPal Smart Buttons** são agora o método de pagamento automático principal, incluindo a opção de cartão de débito/crédito.
+-   **Revolut e Wise foram removidos**.
+-   **Priorização por Geolocalização**: O  deteta o país do utilizador (via ) e exibe os métodos de pagamento de forma dinâmica.
+-   **IfthenPay**: A estrutura para MB WAY e Multibanco via IfthenPay existe, mas está desativada com a indicação Em breve, aguardando credenciais.
+-   **MB WAY Manual**: Foi reativado com uma nova interface que oculta o número de telefone por defeito e melhora a experiência do utilizador com instruções claras e um botão para copiar a referência.
+-   **Lógica de Celebração**: O backend e o frontend agora diferenciam o fluxo de conclusão de uma viagem principal (requer aprovação de admin) de uma viagem de embaixador (automática), incluindo notificações e UI de celebração com confetti.
 
 **Last working item**:
--   **Last item agent was working:** O agente estava no início da fase de planeamento para uma nova tarefa multifacetada focada em: (P0) Otimização para mobile, (P1) Melhoria da secção *hero* e consistência de imagens, e (P2) Preparação para SEO. O agente analisou o ficheiro  para obter contexto, mas ainda não iniciou nenhuma modificação no código.
--   **Status:** NOT STARTED
+-   **Last item agent was working:** Melhorar a UX do pagamento manual com MB WAY. O agente implementou a nova UI no  que oculta o número de telefone por defeito, adiciona um botão Mostrar detalhes para o revelar, mostra instruções claras e permite copiar a referência de pagamento.
+-   **Status:** IN PROGRESS
 -   **Agent Testing Done:** N
--   **Which testing method agent to use?** both. Esta tarefa envolve alterações significativas tanto no frontend (mobile UI, imagens) como no backend (rotas SEO). O  será necessário para verificar a implementação completa.
+-   **Which testing method agent to use?** screenshot tool. Uma vez que é uma alteração visual e de interação contida no , um screenshot para verificar a nova UI e a funcionalidade do toggle Mostrar detalhes é suficiente.
 -   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
--   **Issue 1:** (P0) Implementar a nova tarefa multifacetada solicitada pelo utilizador, com foco na marca, otimização para mobile e SEO.
+-   **Issue 1:** (P0) Verificar a nova UX do pagamento manual com MB WAY.
 
 **Issues Detail**:
 -   **Issue 1:**
-    -   **Attempted fixes:** N/A. O trabalho ainda não começou.
+    -   **Attempted fixes:** O agente implementou o código para a nova UI no , reativou o MB WAY como método de pagamento selecionável e atualizou a lógica no backend.
     -   **Next debug checklist:**
-        1.  **Mobile (P0)**: Rever e corrigir ,  e outros componentes para garantir que os botões têm pelo menos 44px de altura, o texto é legível, e a secção *hero* é otimizada para a viewport móvel.
-        2.  **Hero & Images (P1)**: Atualizar o copy da secção *hero* em  conforme especificado. Substituir as imagens inconsistentes em  e  por novas imagens que sigam as diretrizes de estilo (tons quentes, pessoas reais, emoção).
-        3.  **SEO (P2)**:
-            -   Backend: Criar um novo endpoint para servir planos de viagem através de um *slug* (ex: ). Modificar o modelo  para incluir os campos  e .
-            -   Frontend: Criar uma nova página/rota (ex: ) que busca os dados do plano e os renderiza com meta tags ( ou similar).
-            -   Backend: Adicionar um endpoint .
-    -   **Why fix this issue and what will be achieved with the fix?** Para criar uma plataforma mais coesa, premium e escalável, pronta para a aquisição de utilizadores e crescimento a longo prazo, abordando áreas críticas de usabilidade (mobile) e visibilidade (SEO).
-    -   **Status:** NOT STARTED
+        1.  Navegar para uma página de viagem e iniciar uma contribuição para abrir o .
+        2.  Selecionar um valor e avançar para o passo 2.
+        3.  Selecionar MB WAY.
+        4.  Avançar para o passo 3.
+        5.  **Verificar**: O ecrã mostra o valor, a referência do pagamento e as instruções, mas **não** o número de telefone.
+        6.  **Testar**: Clicar no botão/link Mostrar detalhes e confirmar que o número de telefone aparece.
+        7.  **Testar**: Clicar no botão Copiar referência e verificar a sua funcionalidade.
+        8.  Usar o  para capturar este ecrã do passo 3 com e sem os detalhes visíveis.
+    -   **Why fix this issue and what will be achieved with the fix?** Para concluir o último pedido do utilizador, que visa melhorar a segurança e a experiência do utilizador ao fazer pagamentos manuais com MB WAY, preparando a plataforma para uso real.
+    -   **Status:** IN PROGRESS
     -   **Is recurring issue?** N
-    -   **Should Test frontend/backend/both after fix?** both
+    -   **Should Test frontend/backend/both after fix?** frontend
     -   **Blocked on other issue:** N/A
 
 **In progress Task List**:
--   **Task 1:** (P0) Otimização para Mobile
-    -   **Where to resume:** Começar por analisar  e  para ajustar tamanhos de botões, espaçamentos e a altura da secção *hero* em ecrãs pequenos.
-    -   **What will be achieved with this?** Uma experiência de utilizador significativamente melhorada em dispositivos móveis.
-    -   **Status:** NOT STARTED
-    -   **Should Test frontend/backend/both after fix?** frontend
-    -   **Blocked on something:** N/A
--   **Task 2:** (P1) Melhoria do Hero e Sistema de Imagens
-    -   **Where to resume:** Após a otimização para mobile, modificar o texto em  e usar  para substituir as imagens.
-    -   **What will be achieved with this?** Uma identidade de marca mais forte e uma maior ligação emocional com os utilizadores.
-    -   **Status:** NOT STARTED
-    -   **Should Test frontend/backend/both after fix?** frontend
-    -   **Blocked on something:** N/A
--   **Task 3:** (P2) Preparação para SEO
-    -   **Where to resume:** Após as alterações de frontend, focar no backend para criar os novos endpoints e modificar os modelos da base de dados.
-    -   **What will be achieved with this?** Permitir o crescimento de tráfego orgânico através dos motores de busca.
-    -   **Status:** NOT STARTED
-    -   **Should Test frontend/backend/both after fix?** both
-    -   **Blocked on something:** N/A
+-   Nenhuma.
 
 **Upcoming and Future Tasks**
--   **(P1) Celebração de Sonho 100% Financiado:** Criar uma vista especial ou animação para quando uma viagem atinge 100% do seu objetivo.
--   **(P2) Concluir Refatoração do Backend:** Continuar a refatoração do ficheiro monolítico , movendo os endpoints para múltiplos ficheiros  modulares na pasta .
--   **(Future/Backlog) Geração Automática de Plano:** Gerar e exibir automaticamente um plano de viagem na página Viagem Principal.
--   **(Future/Backlog) Sistema de Gamificação:** Implementar um sistema de pontos e sorteios para incentivar a participação.
--   **(Future/Backlog) Implementar Smart Map e AI Assistant reais**: Substituir os placeholders por integrações funcionais (ex: Google Maps/Mapbox).
--   **(Future/Backlog) Refatoração do Frontend:** Dividir o componente  (atualmente com >1000 linhas) em subcomponentes mais pequenos.
+-   **(P1) Implementar Sistema de Payouts (CRÍTICO)**: Criar a lógica e a UI de admin para rastrear e processar os pagamentos aos embaixadores cujas viagens atingiram 100% de financiamento. Isto inclui uma nova coleção  na DB e uma nova secção no painel de admin.
+-   **(P1) Celebração de Sonho 100% Financiado**: Concluir a UI especial ou animação para quando uma viagem atinge 100% e é marcada como .
+-   **(P2) Ativar IfthenPay**: Substituir os placeholders e a lógica manual por uma integração real com IfthenPay quando o utilizador fornecer as credenciais.
+-   **(P2) Implementar Smart Map e AI Assistant reais**: Substituir os placeholders com blur por integrações funcionais (ex: Google Maps/Mapbox, um chat de IA).
+-   **(P2) Refatoração do Backend ()**: Continuar a refatoração do ficheiro monolítico, movendo endpoints para s modulares em .
+-   **(P2) Refatoração do Frontend ()**: Dividir o componente ( linhas) em subcomponentes mais pequenos e geríveis.
+-   **(Future/Backlog)** Gerar e exibir automaticamente um plano de viagem na página Viagem Principal.
+-   **(Future/Backlog)** Implementar um sistema de gamificação (pontos, sorteios).
+-   **(Future/Backlog)** Implementar notificações push/email automáticas.
+-   **(Future/Backlog)** Gerar Open Graph images para partilha social de planos de viagem públicos.
 
 **Completed work in this session**
--   **Sistema Ambassador (Crescimento)**: Implementado um sistema completo onde os utilizadores desbloqueiam funcionalidades premium ao convidar 3 amigos que contribuem. Inclui lógica de backend robusta, endpoints de API e UI de frontend para *gating* e progresso.
--   **Sistema de Notificações**: Criado um sistema de backend para notificar os utilizadores sobre o progresso dos seus referrals.
--   **Monetização Ativada**: Todos os links de afiliados placeholder em  foram substituídos por URLs reais, incluindo um  para tracking.
--   **Otimização de Copy de CTAs**: Refinada toda a *copy* dos CTAs para ser contextual (baseada no destino/tipo de viagem), incluir emojis e gatilhos de urgência, melhorando o potencial de conversão.
--   **Restauração da Identidade Visual**: Implementada e depois revertida uma alteração de design agressiva, restaurando a paleta de cores soft peach () preferida pelo utilizador em todos os componentes (, , ).
+-   **Priorização Geo-Dinâmica de Pagamentos**: Implementado um  que deteta o país do utilizador e mostra os métodos de pagamento mais relevantes (MB WAY para PT, PayPal para internacional).
+-   **Integração de PayPal Smart Buttons**: Substituída a UI de pagamento personalizada pela UI oficial do PayPal SDK, incluindo o botão de Debit or Credit Card.
+-   **Simplificação de Pagamentos**: Removidos os métodos de pagamento Revolut e Wise do frontend e backend.
+-   **Lógica de Celebração de Financiamento Diferenciada**: Implementado um fluxo de conclusão de viagem que distingue entre a viagem principal (requer validação de admin) e as de embaixador (automáticas), com  e confetti.
+-   **Auditorias Financeiras e de Atribuição**: Verificado com sucesso que todas as contribuições são corretamente atribuídas a uma  e identificado que a lógica de *payouts* está em falta.
+-   **Melhoria da UX do MB WAY Manual**: Reativado o MB WAY com uma nova interface mais segura e intuitiva.
+-   **Integração do Script GetYourGuide**: Adicionado o script de analytics globalmente.
+-   **Sistema de Links Dinâmicos GYG**: Implementado um sistema que gera links de afiliado contextuais.
+-   **Otimização Mobile, Hero e SEO**: Implementadas melhorias significativas na homepage, incluindo otimização mobile, novo copy e imagens, e endpoints de SEO.
 
 **Earlier issues found/mentioned but not fixed**
--   Nenhum.
+-   **Issue 1: Dívida Técnica Crítica**
+    -   **Debug checklist:** Os ficheiros  (+6800 linhas) e  (+1100 linhas) são extremamente grandes, tornando a manutenção difícil e arriscada. A tarefa de refatoração para arquiteturas modulares está no backlog (P2).
+    -   **Why to solve this issue and what will be achieved with this?** Melhorar a manutenibilidade, escalabilidade e velocidade de desenvolvimento.
+    -   **Should Test frontend/backend/both after fix:** both
+    -   **Is recurring issue?** Y
+
+-   **Issue 2: Melhorias de SEO e Meta Tags**
+    -   **Debug checklist:** O diagnóstico revelou que a  no  é genérica, o  é o default do React, e não há  para partilha social.
+    -   **Why to solve this issue and what will be achieved with this?** Melhorar a apresentação da marca em motores de busca e redes sociais, aumentando o tráfego orgânico.
+    -   **Should Test frontend/backend/both after fix:** frontend
+    -   **Is recurring issue?** N
+
+-   **Issue 3: Inconsistências de Dados e UX**
+    -   **Debug checklist:** Existem viagens duplicadas com acentuação diferente (Japão vs Japao). O endpoint  não existe. O progresso do embaixador para um admin pode ser confuso ( com 0 referências).
+    -   **Why to solve this issue and what will be achieved with this?** Melhorar a consistência dos dados, a monitorização da aplicação e a clareza da interface de utilizador.
+    -   **Should Test frontend/backend/both after fix:** both
+    -   **Is recurring issue?** N
 
 **Known issue recurrence from previous fork**
--   **Issue:** Bug de scroll na página .
--   **Recurrence count:** Pelo menos 2.
--   **Status:** RESOLVED (Foi corrigido na sessão anterior a esta e não voltou a ocorrer).
+-   Nenhuma. O bug de scroll reportado anteriormente foi resolvido e não voltou a ocorrer.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Feature Gating no Frontend**: Utilização do estado do utilizador (is_ambassador) para renderizar condicionalmente componentes premium (ex: Mapa desfocado vs. funcional).
--   **Backend-driven User Status**: O estado Ambassador é calculado e validado exclusivamente no backend (), garantindo a integridade do sistema.
--   **Growth Loop com Notificações**: O sistema notifica os utilizadores sobre o progresso dos seus convites, criando um ciclo de engagement para incentivar a conclusão do objetivo.
--   **Geração de Copy Contextual**: A função  no frontend que cria texto de CTA dinâmico e persuasivo com base nos parâmetros da viagem.
--   **Design System Reversion**: O processo de reverter sistematicamente alterações de CSS ( -> ) em múltiplos ficheiros para restaurar uma identidade de marca.
+-   **Priorização de UI baseada em Geolocalização**: Utilização de uma API externa () para obter o país do utilizador e renderizar condicionalmente componentes React para otimizar a experiência de pagamento.
+-   **Lógica de Estado Finito Diferenciada**: O campo  (, , ) no backend, que controla diferentes fluxos de negócio com base no tipo de viagem ().
+-   **Integração de SDK de Terceiros**: Utilização do wrapper  para renderizar os PayPal Smart Buttons oficiais no frontend.
+-   **Component-level feature flags/toggles**: Uso de estado React () para esconder/mostrar informações sensíveis dentro de um componente, melhorando a UX e a segurança.
+-   **Animação com **: Biblioteca usada para criar uma celebração visual quando uma viagem é concluída.
 
 **key DB schema**
--   **users**: Campos adicionados/modificados:  (string, ex: 'embaixador'),  (string),  (int),  (int),  (datetime).
--   **notifications (NOVA COLEÇÃO)**: , ,  (string),  (string),  (dict),  (bool),  (datetime).
--   **contributions**: O seu estado  é fundamental para a função .
+-   **journeys**: Adicionado o campo  (string, valores: 'active', 'pending_validation', 'completed').
+-   **contributions**: O esquema permanece robusto, com  a ser a chave para a atribuição correta dos pagamentos.
 
 **changes in tech stack**
--   Nenhuma.
+-   Adicionadas as dependências de frontend .
 
 **All files of reference**
--   : Contém toda a lógica de backend para o sistema Ambassador e notificações.
--   : O componente central que integra a maioria das novas funcionalidades de frontend.
--   : O novo componente de UI para o progresso do Ambassador.
--   : O próximo ficheiro a ser modificado para a tarefa atual (Mobile, Hero, SEO).
+-   : Contém toda a lógica de pagamentos, incluindo a nova priorização por geolocalização e a UX melhorada do MB WAY.
+-   : Contém a nova lógica para  e o endpoint de aprovação de admin.
+-   : Integra a nova UI de celebração com base no .
+-   : Contém o novo botão para o admin aprovar o financiamento da viagem principal.
+-   : Ficheiro de configuração onde os métodos de pagamento foram atualizados.
+-   : Contém o histórico completo de requisitos e funcionalidades.
 
 **Areas that need refactoring**:
--   ** (CRÍTICO)**: O ficheiro continua a crescer (agora com ~6700 linhas) e a sua complexidade torna a manutenção difícil. A refatoração para s modulares é uma dívida técnica urgente.
--   ** (CRÍTICO)**: Com mais de 1000 linhas, este componente é extremamente difícil de gerir. Precisa urgentemente de ser dividido em subcomponentes (ex: , , ).
+-   ** (CRÍTICO)**: Continua a ser um monolito com mais de 6800 linhas. A sua refatoração é a dívida técnica mais urgente.
+-   ** (CRÍTICO)**: Com mais de 1100 linhas, este componente precisa de ser dividido para facilitar a manutenção.
 
 **key api endpoints**
--   **NOVOS**:
-    -   : Retorna o progresso do utilizador para se tornar Embaixador.
-    -   : Retorna as funcionalidades premium desbloqueadas.
-    -   : Gera um link de referência.
-    -   : Obtém as notificações do utilizador.
-    -   : Marca uma notificação como lida.
--   **MODIFICADOS**:
-    -   : Adicionada verificação anti-self-referral e criação de notificação.
-    -    & : Invocam .
-    -   : Retorna URLs reais e o .
+-   **NOVO**:
+    -   : Endpoint para o admin aprovar manualmente o financiamento da viagem principal, mudando o status para .
+-   **MODIFICADO**:
+    -   : A resposta agora inclui o campo .
+    -   : A lógica de validação de  foi atualizada para remover  e  (e temporariamente , que depois foi re-adicionado).
 
 **Critical Info for New Agent**
--   A tarefa atual, solicitada pelo utilizador, é multifacetada e deve ser abordada na seguinte ordem de prioridade: **P0 Mobile, P1 Hero/Images, P2 SEO**.
--   A identidade visual da marca é a soft peach (). Evite cores agressivas ou alterações drásticas de design sem confirmação.
--   O sistema Ambassador é o principal motor de crescimento. A sua lógica de backend é robusta e deve ser preservada. As alterações devem focar-se em melhorar a experiência do utilizador no frontend.
--   A refatoração de  e  é uma dívida técnica crítica. Embora não seja a tarefa atual, qualquer oportunidade de extrair pequenas partes de forma segura deve ser considerada.
+-   **Prioridade Imediata**: A primeira ação deve ser verificar a implementação da nova UX do MB WAY. Foi a última alteração feita e não foi testada.
+-   **Sistema de Payouts Inexistente**: A auditoria financeira confirmou que não existe um sistema para rastrear ou gerir os pagamentos aos embaixadores. Esta é uma falha crítica para a escalabilidade e fiabilidade financeira da plataforma. A implementação de um sistema de tracking de  é a próxima grande tarefa (P1).
+-   **IfthenPay em Standby**: A estrutura para IfthenPay (MB WAY e Multibanco automáticos) está pronta no código (), mas desativada. O plano é ativá-la quando o utilizador fornecer as credenciais. Não tente implementar a integração completa ainda.
+-   **Dívida Técnica**: Esteja ciente da complexidade dos ficheiros  e . Tente isolar as alterações e evite adicionar mais lógica a estes ficheiros se possível.
 
 **documents and test reports created in this job**
--   /app/test_reports/iteration_55.json
--   /app/test_reports/iteration_54.json
--   /app/test_reports/iteration_53.json
--   /app/test_reports/iteration_52.json
--   /app/test_reports/iteration_51.json
+-   /app/test_reports/iteration_61.json
+-   /app/test_reports/iteration_60.json
+-   /app/test_reports/iteration_59.json
+-   /app/test_reports/iteration_58.json
+-   /app/test_reports/iteration_57.json
+-   /app/test_reports/iteration_56.json
 -   /app/memory/PRD.md
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User**: Pede para reverter as alterações de cor agressivas () e restaurar a identidade visual original soft peach (), mantendo as melhorias estruturais (hover, sombras). Pede também para corrigir a . (Concluído)
-2.  **User**: Pede para otimizar o *copy* dos CTAs para aumentar a relevância contextual e a conversão, sem alterar o layout. (Concluído)
-3.  **User**: Pede para implementar o sistema Ambassador completo, com acesso a funcionalidades premium baseado em 3 referências válidas. (Concluído)
-4.  **User**: Pergunta onde estão as dicas secretas, indicando que a funcionalidade de *gating* pode não estar suficientemente clara. (Concluído, levou à próxima tarefa)
-5.  **User**: Pede para ativar o growth loop implementando notificações de progresso do referral, substituindo links de afiliados placeholder, e tornando os benefícios de ser Embaixador mais visíveis. (Concluído)
-6.  **User**: Pede para melhorar a clareza da marca (copy da secção *hero*), a consistência visual (imagens), a otimização para mobile e a preparação para SEO. (Tarefa Atual)
-7.  **Assistant**: Propõe um plano para a tarefa acima, perguntando sobre a prioridade das imagens e a estratégia de indexação para SEO. (Pendente de resposta)
-8.  **User**: Responde ao plano, definindo prioridades: imagens para Home + páginas de viagem; indexar páginas de viagem e apenas planos de IA selecionados; e confirma a abordagem paralela (P0 Mobile, P1 Hero, P2 SEO). (Iniciou a Tarefa Atual)
-9.  **User (from previous fork)**: Inicia a sessão com um pedido para corrigir um bug de scroll, que foi rapidamente resolvido, mudando o foco para melhorias de UI/UX. (Contexto Inicial)
-10. **User (from previous fork)**: Aprova o plano inicial do agente para corrigir a regressão dos CTAs. (Contexto Inicial)
+1.  **User**: Pede para reativar o MB WAY manual, mas com uma UX melhorada: ocultar o número de telefone, adicionar um botão de cópia de referência e um toggle para mostrar detalhes. (EM PROGRESSO - Implementado, pendente de verificação)
+2.  **User**: Pede para que tanto MB WAY como Multibanco fiquem com a indicação Em breve. (Concluído, mas depois revertido para MB WAY no pedido seguinte)
+3.  **User**: Pede para implementar priorização de pagamentos por geolocalização, usando IfthenPay (MB WAY, Multibanco) para Portugal e PayPal/Apple Pay/Google Pay para o resto do mundo. (Concluído, com IfthenPay em modo Em breve)
+4.  **User**: Aprova o plano de geolocalização, especificando que IfthenPay está pendente de credenciais, Apple/Google Pay será via PayPal, e a geolocalização deve usar uma API gratuita. (Concluído)
+5.  **User**: Pede para substituir a UI do PayPal por Smart Buttons oficiais e remover Revolut/Wise. (Concluído)
+6.  **User**: Fornece o preview URL quando solicitado. (Respondido)
+7.  **User**: Pede uma auditoria completa da camada financeira, focando na reconciliação e no processo de *payout*. (Concluído, revelou a falta do sistema de *payouts*)
+8.  **User**: Pede uma auditoria para validar se as contribuições são corretamente atribuídas por viagem. (Concluído, sistema confirmado como funcional)
+9.  **User**: Pede um resumo dos métodos de pagamento disponíveis. (Concluído)
+10. **User**: Pergunta a diferença entre Anunciar novo sonho e Criar nova viagem no painel de admin. (Respondido)
 
 **Project Health Check:**
 -   **Broken**: None
--   **Mocked**: None
+-   **Mocked**: IfthenPay (MB WAY e Multibanco) estão presentes na UI como placeholders Em breve.
 
 **3rd Party Integrations**
--   React
--   FastAPI
--   MongoDB
--   Stripe (pagamentos)
--   PayPal (pagamentos)
--   Google Auth (via Emergent-managed)
+-   **PayPal**: Ativo, via  (Smart Buttons).
+-   **Stripe**: Configurado no backend mas desativado como método de pagamento válido.
+-   **ipapi.co**: Ativo, usado para geolocalização gratuita no frontend ().
+-   **GetYourGuide**: Script de analytics integrado globalmente.
+-   **canvas-confetti**: Ativo, usado para a UI de celebração.
+-   **Google Auth**: Ativo, via Emergent-managed.
 
 **Testing status**
--   **Testing agent used after significant changes**: YES. O  foi usado de forma consistente após cada implementação major (alterações de CTA, sistema Ambassador, notificações).
+-   **Testing agent used after significant changes**: YES. O agente usou o  de forma consistente e com sucesso após cada implementação significativa (celebração, geo-pagamentos, etc.).
 -   **Troubleshoot agent used after agent stuck in loop**: NO
--   **Test files created**: []
+-   **Test files created**: 
 -   **Known regressions**: Nenhuma.
 
 **Credentials to test flow:**
 -   **Admin**: admin@4luis.com / Admin1
 
 **What agent forgot to execute**
-O agente não se esqueceu de nada. Estava a seguir o plano aprovado pelo utilizador e a iniciar a próxima tarefa prioritária (Otimização Mobile, Imagens e SEO) quando a sessão terminou.</analysis>
+O agente implementou a última mudança na UX do MB WAY mas não executou nenhum teste ou verificação (screenshot, etc.) para confirmar que a nova interface funciona como esperado antes de parar. A verificação desta funcionalidade é a primeira tarefa para o próximo agente.</analysis>

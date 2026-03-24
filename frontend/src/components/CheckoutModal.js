@@ -131,6 +131,9 @@ const CheckoutModal = ({
   const [userCountry, setUserCountry] = useState(null);
   const isPortugal = userCountry === 'PT';
 
+  // MBWay details toggle
+  const [showMbwayDetails, setShowMbwayDetails] = useState(false);
+
   // Fetch crypto prices from CoinGecko
   const fetchCryptoPrices = useCallback(async () => {
     setLoadingPrices(true);
@@ -566,30 +569,35 @@ const CheckoutModal = ({
 
                   {/* ═══ SMART PAYMENT METHODS — Geo-prioritized ═══ */}
 
-                  {/* PRIMARY: Portugal → MBWay | International → PayPal/Card */}
+                  {/* PRIMARY: Portugal → MBWay + PayPal | International → PayPal */}
                   {isPortugal ? (
                     <>
-                      {/* MBWay + Multibanco — Coming soon for Portugal */}
-                      <div className="grid grid-cols-2 gap-1.5">
-                        <div
-                          className="p-2.5 rounded-xl border-2 border-stone-100 bg-stone-50/50 text-center opacity-60 cursor-not-allowed"
-                          data-testid="mbway-primary-btn"
-                        >
-                          <Smartphone className="w-5 h-5 text-[#6B6661] mx-auto" />
-                          <span className="text-xs font-medium block mt-1">MBWay</span>
-                          <span className="text-[9px] text-[#6B6661]">Em breve</span>
+                      {/* MBWay — selectable for Portugal */}
+                      <button
+                        onClick={() => handleMethodSelect('mbway')}
+                        disabled={loading}
+                        className={`w-full rounded-xl border-2 overflow-hidden transition-all ${
+                          selectedMethod === 'mbway'
+                            ? 'border-[#FFBE98] bg-[#FFBE98]/5'
+                            : 'border-emerald-500/30 bg-gradient-to-b from-emerald-500/[0.03] to-white hover:border-emerald-500/50'
+                        }`}
+                        data-testid="mbway-primary-btn"
+                      >
+                        <div className="px-3 py-2.5 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center">
+                              <Smartphone className="w-4 h-4 text-emerald-600" />
+                            </div>
+                            <div className="text-left">
+                              <span className="text-sm font-bold text-[#2D2A26] block">MBWay</span>
+                              <span className="text-[10px] text-[#6B6661]">Pagamento direto</span>
+                            </div>
+                          </div>
+                          <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full flex items-center gap-1">
+                            <MapPin className="w-3 h-3" /> Portugal
+                          </span>
                         </div>
-                        <div
-                          className="p-2.5 rounded-xl border-2 border-stone-100 bg-stone-50/50 text-center opacity-60 cursor-not-allowed"
-                          data-testid="multibanco-soon-btn"
-                        >
-                          <CreditCard className="w-5 h-5 text-[#6B6661] mx-auto" />
-                          <span className="text-xs font-medium block mt-1">Multibanco</span>
-                          <span className="text-[9px] text-[#6B6661]">Em breve</span>
-                        </div>
-                      </div>
-
-                      {/* PayPal + Card — Primary for Portugal (while MBWay/Multibanco not active) */}
+                      </button>
                       {paypalClientId && (
                         <div className="border-2 border-[#0070BA]/30 rounded-xl overflow-hidden bg-gradient-to-b from-[#0070BA]/[0.03] to-white" data-testid="paypal-section">
                           <div className="px-3 py-2 flex items-center justify-between">
@@ -702,14 +710,29 @@ const CheckoutModal = ({
                       <span className="text-[9px] text-[#6B6661]">BTC, ETH, USDT</span>
                     </button>
 
-                    {/* MBWay — "Em breve" for international users too */}
+                    {/* MBWay — secondary for international users */}
                     {!isPortugal && (
-                      <div
-                        className="p-2.5 rounded-xl border-2 border-stone-100 bg-stone-50/50 text-center opacity-60 cursor-not-allowed"
+                      <button
+                        onClick={() => handleMethodSelect('mbway')}
+                        disabled={loading}
+                        className={`p-2.5 rounded-xl border-2 transition-all text-center ${
+                          selectedMethod === 'mbway'
+                            ? 'border-[#FFBE98] bg-[#FFBE98]/10'
+                            : 'border-stone-200 hover:border-stone-300'
+                        }`}
                         data-testid="mbway-secondary-btn"
                       >
                         <Smartphone className="w-5 h-5 text-[#6B6661] mx-auto" />
                         <span className="text-xs font-medium block mt-1">MBWay</span>
+                        <span className="text-[9px] text-[#6B6661]">Portugal</span>
+                      </button>
+                    )}
+
+                    {/* Multibanco — coming soon (Portugal only) */}
+                    {isPortugal && (
+                      <div className="p-2.5 rounded-xl border-2 border-stone-100 bg-stone-50/50 text-center opacity-60 cursor-not-allowed" data-testid="multibanco-soon-btn">
+                        <CreditCard className="w-5 h-5 text-[#6B6661] mx-auto" />
+                        <span className="text-xs font-medium block mt-1">Multibanco</span>
                         <span className="text-[9px] text-[#6B6661]">Em breve</span>
                       </div>
                     )}
@@ -844,8 +867,91 @@ const CheckoutModal = ({
                     </>
                   )}
 
-                  {/* ===== NON-CRYPTO STEP 3 ===== */}
-                  {selectedMethod !== 'crypto' && (
+                  {/* ===== MBWAY STEP 3 ===== */}
+                  {selectedMethod === 'mbway' && (
+                    <div className="space-y-3">
+                      {/* Amount */}
+                      <div className="bg-stone-50 rounded-xl p-3 text-center">
+                        <p className="text-[10px] text-[#6B6661] uppercase tracking-wide">Valor a enviar via MBWay</p>
+                        <p className="text-2xl font-bold text-[#2D2A26] mt-0.5">€{selectedAmount}</p>
+                      </div>
+
+                      {/* Reference */}
+                      <div className="bg-emerald-50 border-2 border-emerald-200 rounded-xl px-3 py-3">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-[10px] text-emerald-700 font-medium leading-none mb-1">Referência de pagamento</p>
+                            <p className="text-xl font-bold text-[#2D2A26] tracking-wider leading-tight" data-testid="mbway-reference">{contribution.payment_reference}</p>
+                          </div>
+                          <button
+                            onClick={() => copyToClipboard(contribution.payment_reference, 'ref')}
+                            className="px-3 py-2 bg-emerald-100 hover:bg-emerald-200 rounded-lg flex items-center gap-1.5 text-xs font-semibold text-emerald-700 transition-colors"
+                            data-testid="copy-reference-btn"
+                          >
+                            {copiedField === 'ref' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                            {copiedField === 'ref' ? 'Copiado!' : 'Copiar'}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Instructions */}
+                      <div className="space-y-2">
+                        <div className="flex items-start gap-2.5">
+                          <span className="w-5 h-5 rounded-full bg-[#2D2A26] text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">1</span>
+                          <p className="text-xs text-[#2D2A26]">Abre a app <strong>MBWay</strong> no teu telemóvel</p>
+                        </div>
+                        <div className="flex items-start gap-2.5">
+                          <span className="w-5 h-5 rounded-full bg-[#2D2A26] text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">2</span>
+                          <p className="text-xs text-[#2D2A26]">Envia exatamente <strong>€{selectedAmount}</strong> para o número indicado abaixo</p>
+                        </div>
+                        <div className="flex items-start gap-2.5">
+                          <span className="w-5 h-5 rounded-full bg-[#2D2A26] text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">3</span>
+                          <p className="text-xs text-[#2D2A26]">Na descrição, inclui a referência <strong>{contribution.payment_reference}</strong></p>
+                        </div>
+                      </div>
+
+                      {/* Show details toggle — phone hidden by default */}
+                      <div className="border border-stone-200 rounded-xl overflow-hidden">
+                        <button
+                          onClick={() => setShowMbwayDetails(!showMbwayDetails)}
+                          className="w-full px-3 py-2 flex items-center justify-between text-xs text-[#6B6661] hover:bg-stone-50 transition-colors"
+                          data-testid="show-mbway-details-toggle"
+                        >
+                          <span>{showMbwayDetails ? 'Ocultar detalhes' : 'Mostrar detalhes de envio'}</span>
+                          <ArrowRight className={`w-3.5 h-3.5 transition-transform ${showMbwayDetails ? 'rotate-90' : ''}`} />
+                        </button>
+                        {showMbwayDetails && (
+                          <div className="px-3 pb-2.5 border-t border-stone-100 pt-2 space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[11px] text-[#6B6661]">Número MBWay:</span>
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-sm font-bold text-[#2D2A26]" data-testid="mbway-phone">{MBWAY_MANUAL.phone}</span>
+                                <button onClick={() => copyToClipboard(MBWAY_MANUAL.phoneClean, 'phone')} className="p-1 hover:bg-stone-100 rounded" data-testid="copy-phone-btn">
+                                  {copiedField === 'phone' ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3 text-[#6B6661]" />}
+                                </button>
+                              </div>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-[11px] text-[#6B6661]">Nome:</span>
+                              <span className="text-sm font-medium text-[#2D2A26]">Luís Canárias</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Open MBWay deep link (mobile) */}
+                      <a
+                        href={`mbway://transfer?phone=${MBWAY_MANUAL.phoneClean}&amount=${selectedAmount}`}
+                        className="w-full py-3 bg-emerald-600 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 hover:bg-emerald-700 transition-colors"
+                        data-testid="open-mbway-btn"
+                      >
+                        <Smartphone className="w-4 h-4" /> Abrir MBWay
+                      </a>
+                    </div>
+                  )}
+
+                  {/* ===== NON-CRYPTO / NON-MBWAY STEP 3 (fallback) ===== */}
+                  {selectedMethod && selectedMethod !== 'crypto' && selectedMethod !== 'mbway' && (
                     <div className="space-y-2.5">
                       {/* Amount summary */}
                       <div className="bg-stone-50 rounded-xl p-3 text-center">

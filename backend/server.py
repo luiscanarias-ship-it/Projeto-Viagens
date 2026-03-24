@@ -373,7 +373,7 @@ async def create_contribution(request: Request):
         )
     
     # Validate payment method (Stripe temporarily disabled)
-    valid_methods = ["crypto", "paypal"]
+    valid_methods = ["crypto", "paypal", "mbway"]
     if payment_method not in valid_methods:
         raise HTTPException(
             status_code=400, 
@@ -3589,11 +3589,122 @@ async def check_and_update_journey_funding_status(journey_id: str):
             else:
                 await send_journey_funded_emails(journey, None, current_amount)
 
+            # ── Create payout record for ambassador ──
+            if journey.get("ambassador_user_id"):
+                existing_payout = await db.payouts.find_one({"journey_id": journey_id}, {"_id": 0})
+                if not existing_payout:
+                    payout_id = f"payout_{uuid.uuid4().hex[:12]}"
+                    await db.payouts.insert_one({
+                        "payout_id": payout_id,
+                        "journey_id": journey_id,
+                        "journey_name": journey.get("name", ""),
+                        "ambassador_user_id": journey["ambassador_user_id"],
+                        "ambassador_name": journey.get("ambassador_name", ""),
+                        "amount": float(current_amount),
+                        "goal_amount": float(goal_amount),
+                        "status": "pending",
+                        "payment_method": None,
+                        "payment_reference": None,
+                        "admin_notes": None,
+                        "created_at": now_iso,
+                        "updated_at": now_iso,
+                        "completed_at": None
+                    })
+                    logger.info(f"Payout {payout_id} created for ambassador journey {journey_id}")
+
             logger.info(f"Ambassador journey {journey_id} auto-completed")
         
         return new_status
     
     return current_funding_status
+
+
+# ==================== PAYOUT ENDPOINTS ====================
+
+@api_router.get("/admin/payouts")
+async def get_admin_payouts(request: Request, status: Optional[str] = None):
+    """Get all payouts with optional status filter"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Não autenticado")
+    user_data = await db.users.find_one({"user_id": user.user_id}, {"_id": 0})
+    if not user_data or not user_data.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Acesso negado")
+
+    query = {}
+    if status:
+        query["status"] = status
+    
+    payouts = await db.payouts.find(query, {"_id": 0}).sort("created_at", -1).to_list(100)
+    
+    # Compute summary
+    all_payouts = await db.payouts.find({}, {"_id": 0}).to_list(500)
+    summary = {
+        "total": len(all_payouts),
+        "pending": sum(1 for p in all_payouts if p["status"] == "pending"),
+        "processing": sum(1 for p in all_payouts if p["status"] == "processing"),
+        "completed": sum(1 for p in all_payouts if p["status"] == "completed"),
+        "total_pending_amount": sum(p["amount"] for p in all_payouts if p["status"] in ("pending", "processing")),
+        "total_paid_amount": sum(p["amount"] for p in all_payouts if p["status"] == "completed")
+    }
+    
+    return {"payouts": payouts, "summary": summary}
+
+
+@api_router.put("/admin/payouts/{payout_id}/status")
+async def update_payout_status(payout_id: str, request: Request):
+    """Update payout status (pending → processing → completed)"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Não autenticado")
+    user_data = await db.users.find_one({"user_id": user.user_id}, {"_id": 0})
+    if not user_data or not user_data.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Acesso negado")
+
+    body = await request.json()
+    new_status = body.get("status")
+    if new_status not in ("pending", "processing", "completed"):
+        raise HTTPException(status_code=400, detail="Status inválido")
+
+    payout = await db.payouts.find_one({"payout_id": payout_id}, {"_id": 0})
+    if not payout:
+        raise HTTPException(status_code=404, detail="Payout não encontrado")
+
+    now_iso = datetime.now(timezone.utc).isoformat()
+    update_fields = {
+        "status": new_status,
+        "updated_at": now_iso,
+        "updated_by": user.user_id
+    }
+    
+    if body.get("payment_method"):
+        update_fields["payment_method"] = body["payment_method"]
+    if body.get("payment_reference"):
+        update_fields["payment_reference"] = body["payment_reference"]
+    if body.get("admin_notes"):
+        update_fields["admin_notes"] = body["admin_notes"]
+    if new_status == "completed":
+        update_fields["completed_at"] = now_iso
+
+    await db.payouts.update_one(
+        {"payout_id": payout_id},
+        {"$set": update_fields}
+    )
+    
+    # Notify ambassador when payout is completed
+    if new_status == "completed" and payout.get("ambassador_user_id"):
+        await db.notifications.insert_one({
+            "notification_id": f"notif_{uuid.uuid4().hex[:12]}",
+            "type": "payout_completed",
+            "title": "Pagamento processado!",
+            "message": f"O pagamento da viagem '{payout.get('journey_name')}' foi processado com sucesso.",
+            "user_id": payout["ambassador_user_id"],
+            "read": False,
+            "created_at": now_iso
+        })
+
+    logger.info(f"Payout {payout_id} updated to {new_status} by {user.user_id}")
+    return {"status": new_status, "message": f"Payout atualizado para {new_status}"}
 
 
 @api_router.post("/admin/journey/{journey_id}/approve-funding")
