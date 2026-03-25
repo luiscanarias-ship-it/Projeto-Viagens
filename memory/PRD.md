@@ -106,6 +106,14 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 ## Key Pages
 - / (Home), /journey/:id, /plan-trip, /travel-planner, /plano/:slug, /about, /dashboard, /admin
 
+### Smart Map Premium Feature (2026-03-25)
+- **Backend**: 3 new endpoints: POST /api/ai/geocode-plan (Photon/Nominatim with MongoDB cache), POST /api/ai/optimize-route (GPT-5.2 route optimization), POST /api/ai/improve-location (per-location AI suggestions)
+- **Frontend**: SmartMap.js component with Leaflet map, CartoDB light tiles, custom peach SVG markers grouped by day, route polylines, sidebar with click-to-center, day filters (Todos/Dia 1/Dia 2), "Otimizar percurso" AI button, per-location "Melhorar este ponto" (Menos filas, Mais barato, Melhor horário), "Aplicar ao roteiro"
+- **Geocoding**: Photon (Komoot) primary + Nominatim fallback, Portuguese verb stripping for better results, MongoDB cache for performance, retry logic for rate limits
+- **PremiumGate**: Shows "Desbloqueia o mapa interativo" for non-ambassadors
+- **Lazy loaded**: React.lazy + Suspense for performance
+- **Mobile**: Full-screen map with bottom sheet for locations
+
 ### AI Assistant Premium Feature (2026-03-25)
 - **Backend**: New endpoint POST /api/ai/assistant with ambassador-level gating (401 for unauth, 403 for non-ambassador)
 - **Frontend**: AIAssistant component embedded in TravelPlanner inside PremiumGate
