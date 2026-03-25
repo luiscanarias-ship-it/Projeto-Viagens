@@ -7463,6 +7463,51 @@ async def delete_offer(offer_id: str, request: Request):
     return {"message": "Oferta eliminada"}
 
 
+# ==================== PDF GUIDE ENDPOINT ====================
+
+@api_router.post("/ai/travel-plan/pdf")
+async def generate_pdf_guide(request: Request):
+    """Generate offline travel guide PDF — Ambassador only"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Autenticação necessária")
+    
+    user_doc = await db.users.find_one({"user_id": user.user_id}, {"_id": 0, "level": 1})
+    level = user_doc.get("level", "sonhador") if user_doc else "sonhador"
+    if level != "embaixador" and not user.is_admin:
+        raise HTTPException(status_code=403, detail="Funcionalidade exclusiva para Embaixadores")
+    
+    body = await request.json()
+    plan = body.get("plan")
+    if not plan:
+        raise HTTPException(status_code=400, detail="Plano não fornecido")
+    
+    sections = body.get("sections", {
+        "flights": True, "hotel": True, "map": True,
+        "itinerary": True, "tips": True, "transport": True
+    })
+    geocode_data = body.get("geocode_data")
+    
+    from pdf_generator import generate_travel_guide_pdf
+    
+    try:
+        buf = generate_travel_guide_pdf(plan, geocode_data=geocode_data, sections=sections)
+        destination = plan.get("destination", "viagem").replace(" ", "-").lower()
+        filename = f"guia-{destination}-4luis.pdf"
+        
+        return Response(
+            content=buf.read(),
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": f'attachment; filename="{filename}"',
+                "Cache-Control": "no-cache"
+            }
+        )
+    except Exception as e:
+        logger.error(f"PDF generation error: {e}")
+        raise HTTPException(status_code=500, detail="Erro ao gerar o guia PDF")
+
+
 # ==================== SEO ENDPOINTS ====================
 
 @api_router.get("/og-image/{slug}")

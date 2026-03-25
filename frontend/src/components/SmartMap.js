@@ -79,7 +79,7 @@ const FitBounds = ({ locations }) => {
   return null;
 };
 
-const SmartMap = ({ plan, token, onApplyRefinement }) => {
+const SmartMap = ({ plan, token, onApplyRefinement, onGeoDataLoaded }) => {
   const [geoData, setGeoData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [selectedDay, setSelectedDay] = useState(0); // 0 = all
@@ -125,6 +125,7 @@ const SmartMap = ({ plan, token, onApplyRefinement }) => {
       if (res.ok) {
         const data = await res.json();
         setGeoData(data);
+        if (onGeoDataLoaded) onGeoDataLoaded(data);
       }
     } catch (e) {
       console.error('Geocode error:', e);

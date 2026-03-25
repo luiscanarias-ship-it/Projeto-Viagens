@@ -1,0 +1,67 @@
+{
+  "summary": "Iteration 70 - Offline PDF Guide Feature Testing Complete. Fixed critical bug in PDF endpoint (was checking 'ambassador_level' instead of 'level'). All backend API tests passed (7/7). All frontend UI tests passed. The OfflineGuideDownload component is properly gated inside PremiumGate for ambassadors only.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "passed_tests": [
+    "Backend: POST /api/ai/travel-plan/pdf returns 401 without authentication",
+    "Backend: POST /api/ai/travel-plan/pdf returns 200 with valid PDF for admin/ambassador",
+    "Backend: Content-Disposition header has correct filename (guia-{destination}-4luis.pdf)",
+    "Backend: PDF endpoint respects 'sections' parameter (can exclude sections)",
+    "Backend: PDF endpoint includes static map when geocode_data is provided",
+    "Backend: POST /api/ai/travel-plan/pdf returns 400 when plan is missing",
+    "Backend: POST /api/ai/travel-plan/pdf returns 403 for non-ambassador user",
+    "Frontend: data-testid='offline-guide' component exists when ambassador views generated plan",
+    "Frontend: data-testid='download-pdf-btn' button exists with text 'Descarregar guia offline'",
+    "Frontend: data-testid='customize-sections-toggle' toggle for section customization exists",
+    "Frontend: Section toggle for 'flights' exists (data-testid='section-toggle-flights')",
+    "Frontend: Section toggle for 'hotel' exists (data-testid='section-toggle-hotel')",
+    "Frontend: Section toggle for 'map' exists (data-testid='section-toggle-map')",
+    "Frontend: Section toggle for 'itinerary' exists (data-testid='section-toggle-itinerary')",
+    "Frontend: Section toggle for 'tips' exists (data-testid='section-toggle-tips')",
+    "Frontend: Section toggle for 'transport' exists (data-testid='section-toggle-transport')",
+    "Frontend: OfflineGuideDownload is inside PremiumGate (verified in TravelPlanner.js lines 1076-1078)"
+  ],
+  "failed_tests": [],
+  "bugs_fixed": [
+    {
+      "file": "/app/backend/server.py",
+      "line": 7475,
+      "issue": "PDF endpoint was checking 'ambassador_level' field but user model uses 'level' field",
+      "fix": "Changed from user_doc.get('ambassador_level') to user_doc.get('level') and updated condition to check level != 'embaixador'"
+    }
+  ],
+  "test_report_links": [
+    "/app/backend/tests/test_offline_pdf_guide_iter70.py",
+    "/app/test_reports/pytest/offline_pdf_guide_iter70_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "PDF generation uses ReportLab library with proper 4Luis branding (PEACH color #FFBE98)",
+    "Static map generation uses staticmap library with CartoDB tiles",
+    "All 6 sections are customizable: flights, hotel, map, itinerary, tips, transport",
+    "PremiumGate component properly blurs content and shows lock icon for non-ambassadors",
+    "OfflineGuideDownload component has all required data-testid attributes for testing",
+    "PDF filename follows pattern: guia-{destination}-4luis.pdf",
+    "geocodeData state is properly passed from TravelPlanner to OfflineGuideDownload"
+  ],
+  "updated_files": [
+    "/app/backend/server.py (fixed ambassador level check in PDF endpoint)",
+    "/app/backend/tests/test_offline_pdf_guide_iter70.py (new test file)"
+  ],
+  "success_rate": {
+    "backend": "100% (7/7 tests passed)",
+    "frontend": "100% (all UI features verified working)"
+  },
+  "test_credentials": "Admin (ambassador level): admin@4luis.com / Admin1",
+  "seed_data_creation": "None - used existing plan generation",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Iteration 70 verified Offline PDF Guide feature. Key findings: (1) PDF endpoint at POST /api/ai/travel-plan/pdf generates valid PDF with 4Luis branding. (2) PDF is ambassador-only (returns 403 for sonhador level users). (3) Sections can be customized via 'sections' parameter. (4) Static map is included when geocode_data is provided. (5) OfflineGuideDownload component is inside PremiumGate in TravelPlanner.js. (6) All 6 section toggles have data-testid attributes. (7) Fixed bug: endpoint was checking wrong field 'ambassador_level' instead of 'level'."
+}

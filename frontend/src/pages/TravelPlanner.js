@@ -11,6 +11,7 @@ import axios from 'axios';
 import { AmbassadorProgress, PremiumGate, InlineReferralCTA } from '../components/AmbassadorProgress';
 import AIAssistant from '../components/AIAssistant';
 import TravelContext from '../components/TravelContext';
+import OfflineGuideDownload from '../components/OfflineGuideDownload';
 const SmartMap = React.lazy(() => import('../components/SmartMap'));
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -498,6 +499,7 @@ const TravelPlanner = () => {
   const [rateLimitExpiry, setRateLimitExpiry] = useState(null);
   const [rateLimitMinutes, setRateLimitMinutes] = useState(0);
   const [planSlug, setPlanSlug] = useState(null);
+  const [geocodeData, setGeocodeData] = useState(null);
   const [hiddenSections, setHiddenSections] = useState(() => {
     try { return JSON.parse(localStorage.getItem('planner_hidden') || '[]'); } catch { return []; }
   });
@@ -1053,7 +1055,7 @@ const TravelPlanner = () => {
                   {/* Premium: Smart Map */}
                   <PremiumGate isAmbassador={isAmbassador} label="Desbloqueia o mapa interativo">
                     <Suspense fallback={<div className="bg-white rounded-xl border border-[#FFBE98]/20 p-8 flex items-center justify-center gap-2"><Loader2 className="w-5 h-5 animate-spin text-[#FFBE98]" /><span className="text-xs text-[#6B6661]">A carregar mapa...</span></div>}>
-                      <SmartMap plan={plan} token={token} onApplyRefinement={handleRefine} />
+                      <SmartMap plan={plan} token={token} onApplyRefinement={handleRefine} onGeoDataLoaded={setGeocodeData} />
                     </Suspense>
                   </PremiumGate>
 
@@ -1069,6 +1071,12 @@ const TravelPlanner = () => {
 
                   {/* Primary: Ajustar */}
                   <RefinePanel onSubmit={handleRefine} loading={refining} success={refineSuccess} />
+
+                  {/* Premium: Offline Guide PDF */}
+                  <PremiumGate isAmbassador={isAmbassador} label="Descarrega o guia offline em PDF">
+                    <OfflineGuideDownload plan={plan} token={token} geocodeData={geocodeData} />
+                  </PremiumGate>
+
                   {/* Secondary: Copy + Share link */}
                   <div className="flex items-center gap-2">
                     <button onClick={handleCopy} data-testid="copy-btn"
