@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, Suspense } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   MapPin, Calendar, Compass, Sparkles, Loader2,
@@ -858,11 +858,28 @@ const TravelPlanner = () => {
 
                 {/* Referral CTA at peak motivation (after seeing the guide) */}
                 {token && !isAmbassador && <InlineReferralCTA token={token} />}
+
+                {/* Premium hint */}
+                {!isAmbassador && (
+                  <p className="text-[10px] text-[#6B6661]/60 mt-3 flex items-center gap-1.5 justify-center" data-testid="premium-hint">
+                    <Lock className="w-3 h-3 text-[#FFBE98]/50" />
+                    Algumas funcionalidades sao exclusivas para Embaixadores
+                  </p>
+                )}
               </div>
 
               {/* Travel Context: Flight + Hotel + Transport */}
               <div className="px-5 pt-4">
                 <TravelContext plan={plan} />
+              </div>
+
+              {/* Smart Map (central element — high priority) */}
+              <div className="pt-3 pb-1" data-testid="smart-map-section">
+                <PremiumGate isAmbassador={isAmbassador} label="Desbloqueia o mapa interativo">
+                  <Suspense fallback={<div className="bg-white rounded-xl border border-[#FFBE98]/20 p-8 flex items-center justify-center gap-2 mx-5"><Loader2 className="w-5 h-5 animate-spin text-[#FFBE98]" /><span className="text-xs text-[#6B6661]">A carregar mapa...</span></div>}>
+                    <SmartMap plan={plan} token={token} onApplyRefinement={handleRefine} onGeoDataLoaded={setGeocodeData} affiliateLinks={links} onTrackAffiliate={trackClick} />
+                  </Suspense>
+                </PremiumGate>
               </div>
 
               {/* Tab Navigation */}
@@ -983,6 +1000,13 @@ const TravelPlanner = () => {
                   link={links.skyscanner?.url} platform="skyscanner" onTrack={trackClick} trust={false} />
               </div>
 
+              {/* AI Assistant (embedded after itinerary) */}
+              <div className="px-5 py-3" data-testid="ai-assistant-section">
+                <PremiumGate isAmbassador={isAmbassador} label="Desbloqueia o assistente completo">
+                  <AIAssistant plan={plan} token={token} onApplyRefinement={handleRefine} affiliateLinks={links} onTrackAffiliate={trackClick} />
+                </PremiumGate>
+              </div>
+
               <div className="h-px bg-stone-100 mx-5" />
 
               {/* ── TAB: Checklist ── */}
@@ -1100,18 +1124,6 @@ const TravelPlanner = () => {
               {/* ── Actions Footer ── */}
               <div className="px-5 py-4 border-t border-stone-100 bg-[#FFBE98]/[0.03]" data-testid="actions-footer">
                 <div className="space-y-3">
-                  {/* Premium: Smart Map */}
-                  <PremiumGate isAmbassador={isAmbassador} label="Desbloqueia o mapa interativo">
-                    <Suspense fallback={<div className="bg-white rounded-xl border border-[#FFBE98]/20 p-8 flex items-center justify-center gap-2"><Loader2 className="w-5 h-5 animate-spin text-[#FFBE98]" /><span className="text-xs text-[#6B6661]">A carregar mapa...</span></div>}>
-                      <SmartMap plan={plan} token={token} onApplyRefinement={handleRefine} onGeoDataLoaded={setGeocodeData} affiliateLinks={links} onTrackAffiliate={trackClick} />
-                    </Suspense>
-                  </PremiumGate>
-
-                  {/* Premium: AI Assistant */}
-                  <PremiumGate isAmbassador={isAmbassador} label="Desbloqueia o assistente completo">
-                    <AIAssistant plan={plan} token={token} onApplyRefinement={handleRefine} affiliateLinks={links} onTrackAffiliate={trackClick} />
-                  </PremiumGate>
-
                   {/* Ambassador Progress */}
                   {token && !isAmbassador && (
                     <AmbassadorProgress token={token} compact={false} />
@@ -1128,12 +1140,12 @@ const TravelPlanner = () => {
                   {/* Secondary: Copy + Share link */}
                   <div className="flex items-center gap-2">
                     <button onClick={handleCopy} data-testid="copy-btn"
-                      className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold text-[#6B6661] border border-stone-200 bg-white hover:bg-stone-50 hover:border-stone-300 px-3 py-2 rounded-xl transition-all duration-200">
+                      className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold text-[#6B6661] border border-stone-200 bg-white hover:bg-stone-50 hover:border-stone-300 px-3 py-2.5 rounded-xl transition-all duration-200 min-h-[44px]">
                       {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
                       {copied ? 'Copiado!' : 'Copiar plano'}
                     </button>
                     <button onClick={handleShare} data-testid="share-btn"
-                      className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold text-[#6B6661] border border-stone-200 bg-white hover:bg-stone-50 hover:border-stone-300 px-3 py-2 rounded-xl transition-all duration-200">
+                      className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold text-[#6B6661] border border-stone-200 bg-white hover:bg-stone-50 hover:border-stone-300 px-3 py-2.5 rounded-xl transition-all duration-200 min-h-[44px]">
                       {shared ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Share2 className="w-3.5 h-3.5" />}
                       {shared ? 'Link copiado!' : 'Partilhar link'}
                     </button>
@@ -1146,16 +1158,37 @@ const TravelPlanner = () => {
                 </div>
                 {error && (
                   <div className={`text-xs text-center mt-2 px-3 py-2 rounded-lg w-full ${
-                    error.includes('✈️') ? 'bg-sky-50 text-sky-700' : 'bg-red-50 text-red-500'
+                    error.includes('\u2708\ufe0f') ? 'bg-sky-50 text-sky-700' : 'bg-red-50 text-red-500'
                   }`} data-testid="refine-error">
                     {error}
-                    {error.includes('✈️') && (
+                    {error.includes('\u2708\ufe0f') && (
                       <p className="text-[10px] mt-1 opacity-70">Podes continuar a ajustar, copiar ou partilhar o plano atual.</p>
                     )}
                   </div>
                 )}
               </div>
-            </div>
+
+              {/* ── Final Conversion Block ── */}
+              <div className="px-5 py-8 border-t border-stone-100 bg-gradient-to-b from-[#2D2A26] to-[#3D3A36] text-center rounded-b-2xl" data-testid="conversion-block">
+                <p className="text-lg font-bold text-white mb-1">Gostaste deste roteiro?</p>
+                <p className="text-sm text-white/50 mb-5">Cria o teu ou desbloqueia todas as funcionalidades</p>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5">
+                  <Link to="/travel-planner" onClick={() => { setPlan(null); window.scrollTo(0, 0); }}
+                    className="flex items-center gap-2 bg-[#FFBE98] text-[#2D2A26] font-bold text-sm px-6 py-3.5 rounded-2xl hover:bg-[#E6A07C] transition-all min-h-[48px] w-full sm:w-auto justify-center"
+                    data-testid="final-cta-create">
+                    <Sparkles className="w-4 h-4" /> Criar o meu roteiro
+                  </Link>
+                  {!isAmbassador && (
+                    <Link to="/embaixador"
+                      className="flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white font-semibold text-sm px-6 py-3.5 rounded-2xl border border-white/15 hover:bg-white/20 transition-all min-h-[48px] w-full sm:w-auto justify-center"
+                      data-testid="final-cta-ambassador">
+                      <Star className="w-4 h-4 text-[#FFBE98]" /> Tornar-me Embaixador
+                    </Link>
+                  )}
+                </div>
+              </div>
+
+            </div> {/* end travel-document card */}
 
             {/* Disclaimer */}
             <p className="text-center text-xs text-[#6B6661]/60 pt-4">
