@@ -14,6 +14,15 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 
 ## What's Been Implemented
 
+### Copy Optimization (2026-03-25)
+- Informal tone ("tu") applied consistently across all contribution flow
+- Step 1: "Quanto queres contribuir?" + "100% seguro · Sem registo obrigatório"
+- Step 2: "Como preferes pagar" + PayPal "Pagamento rápido e seguro" + MBWay "Leva menos de 30 segundos"
+- Step 3: "Segue estes 3 passos simples" + "Usa exatamente este valor para validação automática"
+- CTA: "Ajuda a realizar este sonho" + "Já contribuí para este sonho"
+- Post-payment: "Já fazes parte deste sonho" + "Queres partilhar com amigos?"
+- Trust microcopy: "100% seguro · Sem registo obrigatório · Confirmação em poucos minutos"
+
 ### Step 3 Payment Confirmation Redesign (2026-03-25)
 - New "Quase lá!" header with progress indicator
 - Payment summary (destination, amount, method)

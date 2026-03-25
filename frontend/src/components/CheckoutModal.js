@@ -467,7 +467,7 @@ const CheckoutModal = ({
           <div className="bg-gradient-to-r from-[#FFBE98]/20 to-[#E6F4F1]/30 px-4 py-3 border-b border-stone-100">
             <div className="flex items-center justify-between mb-2">
               <div>
-                <h2 className="font-bold text-[#2D2A26] text-sm">Contribuir para a Viagem Principal</h2>
+                <h2 className="font-bold text-[#2D2A26] text-sm">Ajuda a realizar este sonho</h2>
                 <p className="text-xs text-[#6B6661]">Destino: {journeyName}</p>
               </div>
               <button
@@ -525,7 +525,7 @@ const CheckoutModal = ({
                   exit={{ opacity: 0, x: -20 }}
                   className="space-y-4"
                 >
-                  <p className="text-sm text-[#6B6661]">Escolhe o valor da tua contribuição:</p>
+                  <p className="text-sm text-[#6B6661]">Quanto queres contribuir?</p>
                   
                   <div className="grid grid-cols-3 gap-1.5">
                     {amounts.map((amt) => (
@@ -592,8 +592,9 @@ const CheckoutModal = ({
                   {/* Selected amount + payment label in one line */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <p className="text-sm text-[#6B6661]">Metodo de pagamento para</p>
+                      <p className="text-sm text-[#6B6661]">Como preferes pagar</p>
                       <span className="font-bold text-[#2D2A26]">€{selectedAmount}</span>
+                      <span className="text-[10px] text-[#6B6661]">?</span>
                     </div>
                     <button
                       onClick={goToStep1}
@@ -626,7 +627,7 @@ const CheckoutModal = ({
                             </div>
                             <div className="text-left">
                               <span className="text-sm font-bold text-[#2D2A26] block">MBWay</span>
-                              <span className="text-[10px] text-[#6B6661]">Pagamento direto</span>
+                              <span className="text-[10px] text-[#6B6661]">Leva menos de 30 segundos</span>
                             </div>
                           </div>
                           <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full flex items-center gap-1">
@@ -639,15 +640,15 @@ const CheckoutModal = ({
                           <div className="px-3 py-2 flex items-center justify-between">
                             <div className="flex items-center gap-1.5">
                               <ShieldCheck className="w-4 h-4 text-[#0070BA]" />
-                              <span className="text-[11px] font-bold text-[#0070BA]">Recomendado</span>
+                              <span className="text-[11px] font-bold text-[#0070BA]">Pagamento rápido e seguro</span>
                             </div>
                             <span className="text-[10px] text-[#0070BA]/60 flex items-center gap-1">
-                              <Lock className="w-3 h-3" /> Pagamento seguro
+                              <Lock className="w-3 h-3" /> 100% seguro
                             </span>
                           </div>
                           <div className="px-3 pb-2">
                             <p className="text-[10px] text-[#6B6661] mb-2 flex items-center gap-1">
-                              <Globe className="w-3 h-3" /> PayPal, Cartão, Apple Pay, Google Pay
+                              <Globe className="w-3 h-3" /> Sem introduzir dados manualmente
                             </p>
                             {paypalError && (
                               <p className="text-xs text-red-500 mb-2">{paypalError}</p>
@@ -680,15 +681,15 @@ const CheckoutModal = ({
                           <div className="px-3 py-2 flex items-center justify-between">
                             <div className="flex items-center gap-1.5">
                               <ShieldCheck className="w-4 h-4 text-[#0070BA]" />
-                              <span className="text-[11px] font-bold text-[#0070BA]">Recomendado</span>
+                              <span className="text-[11px] font-bold text-[#0070BA]">Pagamento rápido e seguro</span>
                             </div>
                             <span className="text-[10px] text-[#0070BA]/60 flex items-center gap-1">
-                              <Lock className="w-3 h-3" /> Pagamento seguro
+                              <Lock className="w-3 h-3" /> 100% seguro
                             </span>
                           </div>
                           <div className="px-3 pb-2">
                             <p className="text-[10px] text-[#6B6661] mb-2 flex items-center gap-1">
-                              <Globe className="w-3 h-3" /> PayPal, Cartão, Apple Pay, Google Pay
+                              <Globe className="w-3 h-3" /> Sem introduzir dados manualmente
                             </p>
                             {paypalError && (
                               <p className="text-xs text-red-500 mb-2">{paypalError}</p>
@@ -831,7 +832,7 @@ const CheckoutModal = ({
                   {/* 1. Header */}
                   <div className="text-center" data-testid="step3-header">
                     <h3 className="text-lg font-bold text-[#2D2A26]">Quase lá!</h3>
-                    <p className="text-xs text-[#6B6661] mt-0.5">Falta apenas concluir o pagamento</p>
+                    <p className="text-xs text-[#6B6661] mt-0.5">Segue estes 3 passos simples</p>
                   </div>
 
                   {/* 2. Payment Summary */}
@@ -973,7 +974,7 @@ const CheckoutModal = ({
                   {/* 5. Warning */}
                   <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2" data-testid="step3-warning">
                     <p className="text-[11px] text-amber-800 text-center">
-                      Usa exatamente este valor para conseguirmos validar automaticamente o teu apoio.
+                      Usa exatamente este valor para validação automática
                     </p>
                   </div>
 
@@ -1025,7 +1026,7 @@ const CheckoutModal = ({
                     className="w-full bg-[#2D2A26] text-white py-3 rounded-xl font-semibold hover:bg-[#4A4640] transition-all text-sm min-h-[44px]"
                     data-testid="confirm-payment-btn"
                   >
-                    Já fiz o pagamento
+                    Já contribuí para este sonho
                   </button>
 
                   {/* 8. Social Proof */}
@@ -1057,11 +1058,11 @@ const CheckoutModal = ({
                     </p>
                   )}
 
-                  {/* 10. Footer (Trust) */}
-                  <div className="text-center pt-1" data-testid="trust-footer">
+                  {/* 10. Footer (Trust + Reassurance) */}
+                  <div className="text-center pt-1 space-y-0.5" data-testid="trust-footer">
                     <p className="text-[10px] text-[#6B6661]/70 flex items-center justify-center gap-1">
                       <ShieldCheck className="w-3 h-3" />
-                      Pagamento verificado manualmente em poucos minutos. Receberás confirmação por email.
+                      100% seguro · Sem registo obrigatório · Confirmação em poucos minutos
                     </p>
                   </div>
                 </motion.div>
@@ -1144,21 +1145,20 @@ const CheckoutModal = ({
                   
                   <div>
                     <h3 className="text-xl font-bold text-[#2D2A26]" data-testid="thank-you-title">
-                      Acabaste de ajudar este sonho a ganhar forma.
+                      Já fazes parte deste sonho
                     </h3>
                     {contribution?.status === 'COMPLETED' ? (
                       <p className="text-sm text-green-600 mt-2 font-medium">
                         Pagamento confirmado automaticamente via PayPal.<br />
-                        Obrigado pelo teu apoio de {contribution.amount}EUR!
+                        Obrigado pelo teu apoio de {contribution.amount}€!
                       </p>
                     ) : (
                       <p className="text-sm text-[#6B6661] mt-2">
-                        Obrigado. A tua contribuicao foi registada<br />
-                        e sera confirmada assim que o pagamento for recebido.
+                        A tua contribuição foi registada e será confirmada em poucos minutos.
                       </p>
                     )}
                     <p className="text-xs text-[#FFBE98] mt-3 italic" data-testid="post-contrib-proof">
-                      Cada contribuicao aproxima este sonho da realidade.
+                      Queres partilhar com amigos e ajudar ainda mais?
                     </p>
                   </div>
 
@@ -1172,7 +1172,7 @@ const CheckoutModal = ({
                   {user?.anonymous_alias && (
                     <div className="border-t border-stone-100 pt-4 space-y-2">
                       <p className="text-sm text-[#6B6661]">
-                        Convida amigos a fazer parte deste sonho
+                        Partilha com quem também acredita neste sonho
                       </p>
                       <div className="flex justify-center" data-testid="thank-you-share">
                         <ShareMenu
@@ -1227,11 +1227,11 @@ const CheckoutModal = ({
                 className="w-full bg-[#2D2A26] text-white py-3 px-6 rounded-xl font-medium hover:bg-[#4A4640] transition-all flex items-center justify-center gap-2"
                 data-testid="step1-continue-btn"
               >
-                Continuar com €{selectedAmount}
+                Continuar com €{selectedAmount} <Heart className="w-3.5 h-3.5" />
                 <ArrowRight className="w-4 h-4" />
               </button>
               <p className="text-[10px] leading-relaxed text-[#6B6661]/70 text-center mt-2">
-                As contribuições são voluntárias e destinam-se a apoiar viagens de sonho.
+                100% seguro · Sem registo obrigatório
               </p>
             </div>
           )}

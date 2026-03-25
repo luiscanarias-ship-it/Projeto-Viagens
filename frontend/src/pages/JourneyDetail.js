@@ -257,7 +257,7 @@ const JourneyDetail = () => {
                 data-testid="sticky-contribute-btn"
               >
                 <Heart className="w-4 h-4" />
-                Contribuir para este sonho
+                Ajudar a realizar este sonho
               </button>
             </div>
           </motion.div>
@@ -662,7 +662,7 @@ const JourneyDetail = () => {
                 className="w-full py-3 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-[#FFAB7D] transition-colors"
                 data-testid="exit-intent-contribute-btn"
               >
-                <Heart className="w-4 h-4" /> Contribuir para este sonho
+                <Heart className="w-4 h-4" /> Ajudar a realizar este sonho
               </button>
               <button
                 onClick={() => setShowExitIntent(false)}
