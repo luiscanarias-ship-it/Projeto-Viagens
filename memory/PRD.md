@@ -106,6 +106,14 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 ## Key Pages
 - / (Home), /journey/:id, /plan-trip, /travel-planner, /plano/:slug, /about, /dashboard, /admin
 
+### AI Assistant Premium Feature (2026-03-25)
+- **Backend**: New endpoint POST /api/ai/assistant with ambassador-level gating (401 for unauth, 403 for non-ambassador)
+- **Frontend**: AIAssistant component embedded in TravelPlanner inside PremiumGate
+- **Quick Actions**: 4 suggestion buttons (cheaper, unique experiences, day distribution, weather)
+- **Responses**: Structured JSON with bullet-point suggestions, actionable items, "Aplicar ao roteiro" button
+- **Integration**: Uses existing GPT-5.2 via emergentintegrations, connects to existing refine endpoint for applying suggestions
+- **PremiumGate**: Shows "Desbloqueia o assistente completo" for non-ambassadors with blur overlay
+
 ### Referral/Ambassador System Optimization (2026-03-25)
 - **PaymentSuccess redesign**: Added referral CTA with WhatsApp button, ambassador progress bar, unlock preview, and register CTA for non-logged users
 - **Messaging consistency**: Replaced all generic "Partilhar"/"Copiar link" with action-oriented "Convidar amigos"/"Copiar convite" across Dashboard, ShareMenu, AmbassadorProgress, CheckoutModal
