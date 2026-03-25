@@ -137,6 +137,15 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - **ShareMenu header**: "Partilhar via" → "Convidar via"
 - **WhatsApp primary CTA**: Direct WhatsApp share button with pre-filled message including referral link in PaymentSuccess and AmbassadorProgress
 
+### Analytics Dashboard (2026-03-25)
+- **Endpoint**: GET /api/admin/analytics — aggregates funnel, affiliates, shares, referrals, top plans in one call
+- **Funnel section**: Registos, Contribuições (completed + pending), Total Angariado, Embaixadores (com taxa conversão)
+- **Affiliate Performance**: Bar chart by category (Hotéis, Experiências, Voos, eSIM, Transportes, Seguros) with total clicks
+- **Share Metrics**: Bar chart by type (WhatsApp, Copy link, Partilha nativa, Link direto) with total
+- **Referral System**: Referrals válidos, Referrers ativos, Média por referrer, Taxa embaixador
+- **Top Plans**: Mais partilhados, Mais clicks afiliados, Mais conversões (journeys by amount)
+- **UI**: First tab in Admin (default), clean cards with animated bars, peach brand accents
+
 ### Traffic Acquisition & Organic Growth (2026-03-25)
 - **SEO**: index.html updated with lang="pt", proper meta description, OG defaults (og:title, og:description, og:type, og:site_name, twitter:card), theme-color "#FFBE98"
 - **robots.txt**: Created with Disallow for /admin, /dashboard, /api/, /login, /auth/ and Sitemap reference
