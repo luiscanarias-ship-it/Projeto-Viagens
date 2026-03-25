@@ -7,10 +7,18 @@ import 'leaflet/dist/leaflet.css';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
-// Day colors — peach palette variations
+// Day colors — high contrast, distinct per day
 const DAY_COLORS = [
-  '#FFBE98', '#E6A07C', '#D4886A', '#C27058', '#B05846',
-  '#E8B4A0', '#D4A088', '#C08C70', '#AC7858', '#986440'
+  '#E85D3A', // vermelho-coral (Dia 1)
+  '#2D7DD2', // azul forte (Dia 2)
+  '#45B764', // verde vivo (Dia 3)
+  '#9B59B6', // roxo (Dia 4)
+  '#F39C12', // laranja-dourado (Dia 5)
+  '#E91E63', // rosa-magenta (Dia 6)
+  '#00ACC1', // ciano (Dia 7)
+  '#8D6E63', // castanho (Dia 8)
+  '#3F51B5', // indigo (Dia 9)
+  '#FF6F00', // amber escuro (Dia 10)
 ];
 
 const createDayIcon = (day, index, isActive) => {
