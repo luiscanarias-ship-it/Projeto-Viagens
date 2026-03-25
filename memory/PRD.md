@@ -144,6 +144,11 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - "Viagem Principal" button keeps its own permanent peach style
 - "Explorar Viagens" keeps neutral style (scroll-only, no distinct route)
 
+### Offline Travel Guide PDF (2026-03-25)
+- **Backend**: POST /api/ai/travel-plan/pdf — Ambassador-only. Generates clean PDF using ReportLab with 4Luis branding (peach header, Helvetica fonts). Includes: flight info (outbound/return tables), hotel details, airport-to-hotel transport, static map image (staticmap + CartoDB tiles), day-by-day itinerary (color-coded), weather/packing/checklist, local tips. Sections customizable via `sections` param.
+- **Frontend**: OfflineGuideDownload.js component inside PremiumGate. Download button "Descarregar guia offline" + toggle to customize which sections to include (6 options). Downloads as blob and triggers browser download.
+- **Map**: Static map generated server-side using `staticmap` library with CircleMarkers for locations, airport (blue), hotel (amber).
+
 ### Shareable Public Plans (2026-03-25)
 - **Backend**: GET /api/plan/{slug} returns full public plan data. GET /api/og-image/{slug} generates dynamic 1200x630 PNG using PIL (gradient peach→dark, destination, duration, summary, branding). POST /api/ai/travel-plan returns slug in response. PATCH /api/plan/{slug}/visibility for toggling.
 - **Frontend**: PublicPlan.js — full overhaul with hero (destination, duration, summary), share bar (WhatsApp, Copy link, Web Share API), map preview teaser (gated for ambassadors), weather, packing, itinerary, checklist, local tips (limited to 3 + lock message). CTAs: "Criar o meu roteiro com IA" and "Contribuir para esta viagem" (conditional on journey_id). OG image URL set dynamically.
