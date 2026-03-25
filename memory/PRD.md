@@ -144,6 +144,14 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - "Viagem Principal" button keeps its own permanent peach style
 - "Explorar Viagens" keeps neutral style (scroll-only, no distinct route)
 
+### UX/Conversion Optimization (2026-03-25)
+- **TopBookingBar**: Upgraded from compact chips to premium visual cards with icons, descriptions, and CTA buttons. Hotel card highlighted with peach gradient.
+- **Planning Hub**: New "Planeamento da viagem" section after itinerary with 6 grouped links (voos, hoteis, seguro, eSIM, atividades, transportes) in 2-column grid.
+- **SmartMap Affiliates**: Map pin popups now include "Reservar experiencia aqui" GetYourGuide link.
+- **AI Assistant Monetization**: After AI responses mentioning hotels/activities/tickets, contextual affiliate CTAs appear automatically.
+- **PDF Affiliate Links**: "Links Uteis" section added to offline PDF with clickable affiliate URLs (booking, skyscanner, getyourguide, insurance, airalo).
+- **Preserved**: All existing affiliate logic (ContextualCTA, InlineActivityCTA, TextWithCTA, EsimMicroCard, TipBookingLink, StickyBar) unchanged.
+
 ### Offline Travel Guide PDF (2026-03-25)
 - **Backend**: POST /api/ai/travel-plan/pdf — Ambassador-only. Generates clean PDF using ReportLab with 4Luis branding (peach header, Helvetica fonts). Includes: flight info (outbound/return tables), hotel details, airport-to-hotel transport, static map image (staticmap + CartoDB tiles), day-by-day itinerary (color-coded), weather/packing/checklist, local tips. Sections customizable via `sections` param.
 - **Frontend**: OfflineGuideDownload.js component inside PremiumGate. Download button "Descarregar guia offline" + toggle to customize which sections to include (6 options). Downloads as blob and triggers browser download.
