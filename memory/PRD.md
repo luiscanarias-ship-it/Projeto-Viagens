@@ -14,6 +14,20 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 
 ## What's Been Implemented
 
+### Step 3 Payment Confirmation Redesign (2026-03-25)
+- New "Quase lá!" header with progress indicator
+- Payment summary (destination, amount, method)
+- Numbered instructions dynamic by method (MBWay, Crypto)
+- Critical reference block with "Copiar" button and feedback
+- Warning message for exact value validation
+- Collapsed optional details (phone hidden by default)
+- "Já fiz o pagamento" → confirmation form (name optional, email required)
+- PUT /api/contributions/{id}/confirm-details endpoint
+- Social proof (contributor count, progress %)
+- Ambassador motivation hook
+- Trust footer with manual validation message
+- Mobile optimized (min-height 44px buttons, vertical layout)
+
 ### PostHog Analytics Removed (2026-03-24)
 - Removed PostHog session recording: conflicted with PayPal cross-origin iframes
 - Was causing "Uncaught runtime errors" overlay blocking payment methods
