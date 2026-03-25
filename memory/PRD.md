@@ -14,6 +14,16 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 
 ## What's Been Implemented
 
+### MB WAY Simplified Screen (2026-03-25)
+- Removed multi-step instructions, large warning box, hidden phone toggle
+- Phone number (+351 XXX XXX XXX) now immediately visible with "Copiar número" button
+- Reference shown inline below phone as secondary element
+- Single instruction line: "Abre a app MB WAY e envia o valor"
+- Single primary CTA: "Já enviei o pagamento"
+- Secondary "Abrir MB WAY" link (discrete)
+- Trust message: "Confirmação em poucos minutos"
+- No scroll required — all fits in viewport
+
 ### Email Notifications for Contributions (2026-03-25)
 - **Pending email**: Enviado quando user confirma que fez o pagamento (endpoint confirm-details)
   - Subject: "Pagamento de {amount}€ em validação - 4Luis"
