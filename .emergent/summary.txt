@@ -1,185 +1,138 @@
-<analysis>**original_problem_statement**:
-O utilizador iniciou uma série de tarefas focadas em otimizar a conversão e a robustez financeira da plataforma:
-1.  **Diagnóstico do Site**: O utilizador pediu uma auditoria completa do estado atual da plataforma, incluindo funcionalidades não concluídas e aspetos a melhorar.
-2.  **Celebração de Financiamento Diferenciada**: Foi solicitada a implementação de uma lógica de celebração de financiamento distinta para a viagem principal (que requer validação manual de um admin) e para as viagens de embaixador (que são concluídas automaticamente).
-3.  **Auditoria de Atribuição e Financeira**: O utilizador pediu validações para confirmar que cada contribuição é corretamente associada à sua viagem () e uma análise da camada financeira (reconciliação, validação manual de pagamentos e a lógica de *payouts*). A auditoria revelou que, embora a atribuição funcione bem, o sistema de *payouts* para os embaixadores não existe.
-4.  **Melhoria da UI de Pagamentos (PayPal)**: O utilizador pediu para substituir a UI de pagamento personalizada por PayPal Smart Buttons oficiais e para simplificar os métodos de pagamento, removendo Revolut e Wise.
-5.  **Priorização Inteligente de Pagamentos**: Pedido para integrar IfthenPay (MB WAY, Multibanco) e otimizar a conversão mostrando métodos de pagamento de forma dinâmica com base na geolocalização do utilizador (via API gratuita), priorizando MB WAY para Portugal e PayPal/Cartão para o resto do mundo.
-6.  **Ajustes na UI de Pagamentos**: O utilizador especificou que, por agora, tanto MB WAY como Multibanco (via IfthenPay) deveriam aparecer como Em breve.
-7.  **Melhoria da UX do MB WAY Manual**: Por fim, o utilizador pediu para reativar o MB WAY manual, mas com uma UX melhorada: ocultando o número de telefone por trás de um toggle Mostrar detalhes, mostrando instruções claras e um botão para copiar a referência do pagamento.
+<analysis>**original_problem_statement**: O utilizador pediu uma série de melhorias focadas na conversão e robustez da plataforma: criação de um sistema de Payouts para embaixadores, resolução de bugs de analytics (PostHog), redesenho total do fluxo de checkout (Steps 1 a 3) com foco em UX/Copywriting para pagamento MB WAY e PayPal, implementação de notificações por email para confirmações de contribuição, atualização das credenciais reais de PayPal, ajustes no painel de admin, e por fim, destacar o item de navegação ativo no menu principal.
 
-**User's preferred language**: Português. O próximo agente DEVE comunicar exclusivamente em português.
+**User's preferred language**: Português. O próximo agente DEVE comunicar e responder exclusivamente em português.
 
-**what currently exists?**
-Uma aplicação full-stack (React/FastAPI/MongoDB) de crowdfunding de viagens com funcionalidades robustas como um AI Travel Planner, sistema Ambassador para crescimento, e páginas de planos públicos otimizadas para SEO.
-
-O sistema de pagamentos foi significativamente refatorado:
--   **PayPal Smart Buttons** são agora o método de pagamento automático principal, incluindo a opção de cartão de débito/crédito.
--   **Revolut e Wise foram removidos**.
--   **Priorização por Geolocalização**: O  deteta o país do utilizador (via ) e exibe os métodos de pagamento de forma dinâmica.
--   **IfthenPay**: A estrutura para MB WAY e Multibanco via IfthenPay existe, mas está desativada com a indicação Em breve, aguardando credenciais.
--   **MB WAY Manual**: Foi reativado com uma nova interface que oculta o número de telefone por defeito e melhora a experiência do utilizador com instruções claras e um botão para copiar a referência.
--   **Lógica de Celebração**: O backend e o frontend agora diferenciam o fluxo de conclusão de uma viagem principal (requer aprovação de admin) de uma viagem de embaixador (automática), incluindo notificações e UI de celebração com confetti.
+**what currently exists?** 
+Uma aplicação full-stack (React/FastAPI/MongoDB) de crowdfunding de viagens. O fluxo de pagamentos () foi intensamente otimizado: apresenta PayPal Smart Buttons e uma interface MB WAY manual super limpa e direta (sem scroll, com botões de Copiar). Há um sistema de Payouts integrado no Admin para rastrear viagens de embaixadores concluídas. O sistema envia emails automatizados de Pagamento em Validação e Pagamento Confirmado via Resend, perfeitamente alinhados com o sistema de gamificação de Embaixadores. O script PostHog foi removido para evitar conflitos de iframes () com o PayPal.
 
 **Last working item**:
--   **Last item agent was working:** Melhorar a UX do pagamento manual com MB WAY. O agente implementou a nova UI no  que oculta o número de telefone por defeito, adiciona um botão Mostrar detalhes para o revelar, mostra instruções claras e permite copiar a referência de pagamento.
--   **Status:** IN PROGRESS
--   **Agent Testing Done:** N
--   **Which testing method agent to use?** screenshot tool. Uma vez que é uma alteração visual e de interação contida no , um screenshot para verificar a nova UI e a funcionalidade do toggle Mostrar detalhes é suficiente.
--   **User Testing Done:** N
+    - **Last item agent was working**: O agente estava prestes a implementar o destaque visual do item de navegação ativo no menu superior (ex: quando o utilizador está em Planear Viagem, esse link deve ficar destacado). O agente executou um comando bash para procurar o componente de navegação, mas não implementou o código.
+    - **Status**: IN PROGRESS
+    - **Agent Testing Done**: N
+    - **Which testing method agent to use?**: screenshot tool. Para verificar se a opção ativa no menu de navegação está corretamente destacada (em harmonia com a cor pêssego  da plataforma).
+    - **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
--   **Issue 1:** (P0) Verificar a nova UX do pagamento manual com MB WAY.
+  Issue 1: Destacar visualmente o link ativo no menu de navegação superior (P0)
+  
+  Issues Detail:
+  - Issue 1: 
+     - Attempted fixes: O agente apenas iniciou a pesquisa para localizar o componente de navegação global.
+     - Next debug checklist: Localizar o componente principal de Navbar/Header. Usar  do  ou  para aplicar condicionalmente um estilo de destaque (ex: cor de texto  ou um underline subtil) na rota atual para que o utilizador saiba em que página se encontra.
+     - Why fix this issue and what will be achieved with the fix? Melhora a navegação e a experiência do utilizador, sendo um pedido direto para alinhar o design geral do site.
+     - Status: IN PROGRESS
+     - Is recurring issue? N
+     - Should Test frontend/backend/both after fix? frontend
+     - Blocked on other issue: NA
 
-**Issues Detail**:
--   **Issue 1:**
-    -   **Attempted fixes:** O agente implementou o código para a nova UI no , reativou o MB WAY como método de pagamento selecionável e atualizou a lógica no backend.
-    -   **Next debug checklist:**
-        1.  Navegar para uma página de viagem e iniciar uma contribuição para abrir o .
-        2.  Selecionar um valor e avançar para o passo 2.
-        3.  Selecionar MB WAY.
-        4.  Avançar para o passo 3.
-        5.  **Verificar**: O ecrã mostra o valor, a referência do pagamento e as instruções, mas **não** o número de telefone.
-        6.  **Testar**: Clicar no botão/link Mostrar detalhes e confirmar que o número de telefone aparece.
-        7.  **Testar**: Clicar no botão Copiar referência e verificar a sua funcionalidade.
-        8.  Usar o  para capturar este ecrã do passo 3 com e sem os detalhes visíveis.
-    -   **Why fix this issue and what will be achieved with the fix?** Para concluir o último pedido do utilizador, que visa melhorar a segurança e a experiência do utilizador ao fazer pagamentos manuais com MB WAY, preparando a plataforma para uso real.
-    -   **Status:** IN PROGRESS
-    -   **Is recurring issue?** N
-    -   **Should Test frontend/backend/both after fix?** frontend
-    -   **Blocked on other issue:** N/A
-
-**In progress Task List**:
--   Nenhuma.
+**In progress Task List**: 
+  Nenhuma tarefa iniciada para além do Issue 1 acima.
 
 **Upcoming and Future Tasks**
--   **(P1) Implementar Sistema de Payouts (CRÍTICO)**: Criar a lógica e a UI de admin para rastrear e processar os pagamentos aos embaixadores cujas viagens atingiram 100% de financiamento. Isto inclui uma nova coleção  na DB e uma nova secção no painel de admin.
--   **(P1) Celebração de Sonho 100% Financiado**: Concluir a UI especial ou animação para quando uma viagem atinge 100% e é marcada como .
--   **(P2) Ativar IfthenPay**: Substituir os placeholders e a lógica manual por uma integração real com IfthenPay quando o utilizador fornecer as credenciais.
--   **(P2) Implementar Smart Map e AI Assistant reais**: Substituir os placeholders com blur por integrações funcionais (ex: Google Maps/Mapbox, um chat de IA).
--   **(P2) Refatoração do Backend ()**: Continuar a refatoração do ficheiro monolítico, movendo endpoints para s modulares em .
--   **(P2) Refatoração do Frontend ()**: Dividir o componente ( linhas) em subcomponentes mais pequenos e geríveis.
--   **(Future/Backlog)** Gerar e exibir automaticamente um plano de viagem na página Viagem Principal.
--   **(Future/Backlog)** Implementar um sistema de gamificação (pontos, sorteios).
--   **(Future/Backlog)** Implementar notificações push/email automáticas.
--   **(Future/Backlog)** Gerar Open Graph images para partilha social de planos de viagem públicos.
+    - (P1) Celebração de Sonho 100% Financiado: Concluir a UI especial ou animação (ex: canvas-confetti) para quando uma viagem atinge 100% (marcada como ).
+    - (P2) Ativar IfthenPay: Substituir MB WAY manual por integração real com a IfthenPay quando o utilizador fornecer as chaves da API.
+    - (P2) Implementar Smart Map e AI Assistant reais: Substituir os placeholders no frontend.
+    - (P2) Refatoração de Dívida Técnica (CRÍTICA): Modularizar o  (>7000 linhas) em rotas () e dividir componentes massivos de frontend como o  (>1100 linhas) e .
+    - (Future/Backlog) Gamificação, notificações push, open graph images para SEO.
 
 **Completed work in this session**
--   **Priorização Geo-Dinâmica de Pagamentos**: Implementado um  que deteta o país do utilizador e mostra os métodos de pagamento mais relevantes (MB WAY para PT, PayPal para internacional).
--   **Integração de PayPal Smart Buttons**: Substituída a UI de pagamento personalizada pela UI oficial do PayPal SDK, incluindo o botão de Debit or Credit Card.
--   **Simplificação de Pagamentos**: Removidos os métodos de pagamento Revolut e Wise do frontend e backend.
--   **Lógica de Celebração de Financiamento Diferenciada**: Implementado um fluxo de conclusão de viagem que distingue entre a viagem principal (requer validação de admin) e as de embaixador (automáticas), com  e confetti.
--   **Auditorias Financeiras e de Atribuição**: Verificado com sucesso que todas as contribuições são corretamente atribuídas a uma  e identificado que a lógica de *payouts* está em falta.
--   **Melhoria da UX do MB WAY Manual**: Reativado o MB WAY com uma nova interface mais segura e intuitiva.
--   **Integração do Script GetYourGuide**: Adicionado o script de analytics globalmente.
--   **Sistema de Links Dinâmicos GYG**: Implementado um sistema que gera links de afiliado contextuais.
--   **Otimização Mobile, Hero e SEO**: Implementadas melhorias significativas na homepage, incluindo otimização mobile, novo copy e imagens, e endpoints de SEO.
+- Bug Fix de Pagamento: Adicionado  à lista  no backend que estava a causar rejeição de contribuições (DONE)
+- Sistema de Payouts (Backend & Frontend): Implementado endpoints e criação automática de payouts no momento de 100% de financiamento, incluindo uma nova aba Payouts no Admin (DONE)
+- Bug Fix Crítico PostHog: Removido script PostHog do  devido a conflitos cross-origin com iframes do PayPal (DONE)
+- UI/UX Checkout Redesign: Redesenho agressivo do Step 1, Step 2 e Step 3 do CheckoutModal para aumentar a conversão (layout side-by-side, sem scroll, botões de copiar imediatos, cor pêssego e setas animadas) (DONE)
+- Copywriting Otimizado: Refatoração de texto e microcopy para tom informal (tu) e emocional em todo o fluxo (DONE)
+- Notificações de Email (Resend): Implementação completa dos templates HTML e lógica de disparo para emails Pending (após step 3) e Confirmed (após validação do Admin) (DONE)
+- Atualização PayPal: Chaves Live Client ID atualizadas de acordo com fornecimento do utilizador (DONE)
+- Admin UI Tweak: Refatoração das tabs do dashboard de Admin () para que caibam todas numa só linha sem necessitar de scroll horizontal (DONE)
 
 **Earlier issues found/mentioned but not fixed**
--   **Issue 1: Dívida Técnica Crítica**
-    -   **Debug checklist:** Os ficheiros  (+6800 linhas) e  (+1100 linhas) são extremamente grandes, tornando a manutenção difícil e arriscada. A tarefa de refatoração para arquiteturas modulares está no backlog (P2).
-    -   **Why to solve this issue and what will be achieved with this?** Melhorar a manutenibilidade, escalabilidade e velocidade de desenvolvimento.
-    -   **Should Test frontend/backend/both after fix:** both
-    -   **Is recurring issue?** Y
-
--   **Issue 2: Melhorias de SEO e Meta Tags**
-    -   **Debug checklist:** O diagnóstico revelou que a  no  é genérica, o  é o default do React, e não há  para partilha social.
-    -   **Why to solve this issue and what will be achieved with this?** Melhorar a apresentação da marca em motores de busca e redes sociais, aumentando o tráfego orgânico.
-    -   **Should Test frontend/backend/both after fix:** frontend
-    -   **Is recurring issue?** N
-
--   **Issue 3: Inconsistências de Dados e UX**
-    -   **Debug checklist:** Existem viagens duplicadas com acentuação diferente (Japão vs Japao). O endpoint  não existe. O progresso do embaixador para um admin pode ser confuso ( com 0 referências).
-    -   **Why to solve this issue and what will be achieved with this?** Melhorar a consistência dos dados, a monitorização da aplicação e a clareza da interface de utilizador.
-    -   **Should Test frontend/backend/both after fix:** both
-    -   **Is recurring issue?** N
+   - Issue 1: Dívida Técnica Crítica (Monólitos gigantes)
+     - Debug checklist:  e certos componentes React precisam de ser fragmentados. 
+     - Why to solve this issue and what will be achieved with this? Reduz risco de quebrar lógica em ficheiros gigantescos e facilita manutenção.
+     - Should Test frontend/backend/both after fix: both
+     - Is recurring issue? Y
+   - Issue 2: SEO e Meta Tags Genéricas
+     - Debug checklist: O  usa favicon do React e falta tag .
+     - Why to solve this issue and what will be achieved with this? Melhor visibilidade partilhada em redes sociais.
+     - Should Test frontend/backend/both after fix: frontend
+     - Is recurring issue? N
 
 **Known issue recurrence from previous fork**
--   Nenhuma. O bug de scroll reportado anteriormente foi resolvido e não voltou a ocorrer.
+  - Issue recurrence in previous fork: Nenhuma.
+  - Recurrence count: 0
+  - Status: RESOLVED
 
 **Code Architecture**
-
+- Frontend: React (SPA), Tailwind CSS, Framer Motion, Axios.
+- Backend: FastAPI, Motor (Async MongoDB). Monolítico (a maioria da lógica em ).
+- Integrações geridas em  e .
 
 **Key Technical Concepts**
--   **Priorização de UI baseada em Geolocalização**: Utilização de uma API externa () para obter o país do utilizador e renderizar condicionalmente componentes React para otimizar a experiência de pagamento.
--   **Lógica de Estado Finito Diferenciada**: O campo  (, , ) no backend, que controla diferentes fluxos de negócio com base no tipo de viagem ().
--   **Integração de SDK de Terceiros**: Utilização do wrapper  para renderizar os PayPal Smart Buttons oficiais no frontend.
--   **Component-level feature flags/toggles**: Uso de estado React () para esconder/mostrar informações sensíveis dentro de um componente, melhorando a UX e a segurança.
--   **Animação com **: Biblioteca usada para criar uma celebração visual quando uma viagem é concluída.
+Frontend responsivo focado em micro-interações de conversão (copiar para área de transferência temporário, setas de alerta animadas, progresso de embaixador no checkout). Envio de emails transacionais com templates HTML no backend usando Resend. Gestão de estado complexa no Modal de Pagamentos.
 
 **key DB schema**
--   **journeys**: Adicionado o campo  (string, valores: 'active', 'pending_validation', 'completed').
--   **contributions**: O esquema permanece robusto, com  a ser a chave para a atribuição correta dos pagamentos.
+  - : {payout_id, journey_id, ambassador_user_id, amount, status, created_at, processed_at} (Nova Coleção)
+  - : {contribution_id, status, contributor_name, contributor_email, payment_reference, payment_method}
+  - : {user_id, valid_referrals_count, embaixador_level}
 
 **changes in tech stack**
--   Adicionadas as dependências de frontend .
+  - Remoção de PostHog Analytics do frontend. Utilização intensa da API da Resend para emails transacionais de pagamentos.
 
-**All files of reference**
--   : Contém toda a lógica de pagamentos, incluindo a nova priorização por geolocalização e a UX melhorada do MB WAY.
--   : Contém a nova lógica para  e o endpoint de aprovação de admin.
--   : Integra a nova UI de celebração com base no .
--   : Contém o novo botão para o admin aprovar o financiamento da viagem principal.
--   : Ficheiro de configuração onde os métodos de pagamento foram atualizados.
--   : Contém o histórico completo de requisitos e funcionalidades.
+**All files of reference** 
+  - : Extremamente modificado (Copy, UI, UX dos métodos de pagamento).
+  - : Atualizados endpoints  e  para invocar os emails. Adicionada lógica do Payout.
+  - : Novas funções de envio de emails de contribuição Pendente e Confirmada.
+  - : Alterado o menu de tabs e adicionada listagem de Payouts.
+  - : Script de terceiros apagado para consertar o fluxo de cartões/PayPal.
 
-**Areas that need refactoring**:
--   ** (CRÍTICO)**: Continua a ser um monolito com mais de 6800 linhas. A sua refatoração é a dívida técnica mais urgente.
--   ** (CRÍTICO)**: Com mais de 1100 linhas, este componente precisa de ser dividido para facilitar a manutenção.
+**Areas that need refactoring**: 
+  -  e . Têm mais de 1100 a 7000 linhas respetivamente. Alterações devem ser muito precisas usando  para não perder contexto.
 
 **key api endpoints**
--   **NOVO**:
-    -   : Endpoint para o admin aprovar manualmente o financiamento da viagem principal, mudando o status para .
--   **MODIFICADO**:
-    -   : A resposta agora inclui o campo .
-    -   : A lógica de validação de  foi atualizada para remover  e  (e temporariamente , que depois foi re-adicionado).
+  - PUT  (Despoleta email pending)
+  - PUT  (Valida pagamentos manuais e envia email de sucesso com referral info)
+  - GET  (Lista as compensações financeiras para embaixadores)
 
-**Critical Info for New Agent**
--   **Prioridade Imediata**: A primeira ação deve ser verificar a implementação da nova UX do MB WAY. Foi a última alteração feita e não foi testada.
--   **Sistema de Payouts Inexistente**: A auditoria financeira confirmou que não existe um sistema para rastrear ou gerir os pagamentos aos embaixadores. Esta é uma falha crítica para a escalabilidade e fiabilidade financeira da plataforma. A implementação de um sistema de tracking de  é a próxima grande tarefa (P1).
--   **IfthenPay em Standby**: A estrutura para IfthenPay (MB WAY e Multibanco automáticos) está pronta no código (), mas desativada. O plano é ativá-la quando o utilizador fornecer as credenciais. Não tente implementar a integração completa ainda.
--   **Dívida Técnica**: Esteja ciente da complexidade dos ficheiros  e . Tente isolar as alterações e evite adicionar mais lógica a estes ficheiros se possível.
+**Critical Info for New Agent** 
+- A cor principal da marca (pêssego) é . Deves utilizá-la para destaques como solicitado no menu de navegação e noutros elementos visuais.
+- O utilizador dá indicações muito estritas de UI (textos exatos, bolding de fontes, não quer scrollings e layout side-by-side). Respeita rigorosamente o design pretendido no que construíres.
+- A integração PayPal com cartões (Smart Buttons) está ativa e funcional com as Live Keys do cliente. Não reintroduzir PostHog sem verificar a propriedade .
 
-**documents and test reports created in this job**
--   /app/test_reports/iteration_61.json
--   /app/test_reports/iteration_60.json
--   /app/test_reports/iteration_59.json
--   /app/test_reports/iteration_58.json
--   /app/test_reports/iteration_57.json
--   /app/test_reports/iteration_56.json
--   /app/memory/PRD.md
+**documents and test reports created in this job** 
+  - /app/test_reports/iteration_62.json
+  - /app/test_reports/iteration_63.json
+  - /app/memory/PRD.md
 
-**Last 10 User Messages and any pending HUMAN messages**
-1.  **User**: Pede para reativar o MB WAY manual, mas com uma UX melhorada: ocultar o número de telefone, adicionar um botão de cópia de referência e um toggle para mostrar detalhes. (EM PROGRESSO - Implementado, pendente de verificação)
-2.  **User**: Pede para que tanto MB WAY como Multibanco fiquem com a indicação Em breve. (Concluído, mas depois revertido para MB WAY no pedido seguinte)
-3.  **User**: Pede para implementar priorização de pagamentos por geolocalização, usando IfthenPay (MB WAY, Multibanco) para Portugal e PayPal/Apple Pay/Google Pay para o resto do mundo. (Concluído, com IfthenPay em modo Em breve)
-4.  **User**: Aprova o plano de geolocalização, especificando que IfthenPay está pendente de credenciais, Apple/Google Pay será via PayPal, e a geolocalização deve usar uma API gratuita. (Concluído)
-5.  **User**: Pede para substituir a UI do PayPal por Smart Buttons oficiais e remover Revolut/Wise. (Concluído)
-6.  **User**: Fornece o preview URL quando solicitado. (Respondido)
-7.  **User**: Pede uma auditoria completa da camada financeira, focando na reconciliação e no processo de *payout*. (Concluído, revelou a falta do sistema de *payouts*)
-8.  **User**: Pede uma auditoria para validar se as contribuições são corretamente atribuídas por viagem. (Concluído, sistema confirmado como funcional)
-9.  **User**: Pede um resumo dos métodos de pagamento disponíveis. (Concluído)
-10. **User**: Pergunta a diferença entre Anunciar novo sonho e Criar nova viagem no painel de admin. (Respondido)
+**Last 10 User Messages and any pending HUMAN messages** 
+ 1. User: Remove the word Pagamento, replace via MBWay, adjust phone size/alignment, number the steps, adjust instructions. (Completed)
+ 2. User: Align success screen and emails to promote ambassador referral hook. (Completed)
+ 3. User: Add border (peach bold) to the 3 payment methods, remove Outras opções divider, adjust layout in step 2. (Completed)
+ 4. User: Make instruction Depois de efetuares... bold in all methods. (Completed)
+ 5. User: Asks what real data is needed to associate manual MBWay. (Answered)
+ 6. User: Asks what real data is needed for PayPal. (Answered)
+ 7. User: Asks which PayPal Client ID is currently configured. (Answered)
+ 8. User: Provides new Live Client ID and Secret for PayPal. (Completed)
+ 9. User: Reduce button size in Admin dashboard tabs to avoid horizontal scroll. (Completed)
+ 10. User: **(PENDING)** Quando o utilizador escolhe uma opção de navegação no topo (ex: Planear Viagem), esta deve ficar destacada de forma harmoniosa para saber em que secção está.
 
 **Project Health Check:**
--   **Broken**: None
--   **Mocked**: IfthenPay (MB WAY e Multibanco) estão presentes na UI como placeholders Em breve.
+- Broken: None.
+- Mocked: IfthenPay, Smart Map, AI Chat.
 
-**3rd Party Integrations**
--   **PayPal**: Ativo, via  (Smart Buttons).
--   **Stripe**: Configurado no backend mas desativado como método de pagamento válido.
--   **ipapi.co**: Ativo, usado para geolocalização gratuita no frontend ().
--   **GetYourGuide**: Script de analytics integrado globalmente.
--   **canvas-confetti**: Ativo, usado para a UI de celebração.
--   **Google Auth**: Ativo, via Emergent-managed.
+**3rd Party Integrations** 
+ - PayPal (Payments) — requires User API Key (Currently Active & Provided)
+ - Resend (Emails) — active with environment variables
+ - ipapi.co (Geolocation) — active
+ - GetYourGuide (Affiliate script) — active
 
 **Testing status**
--   **Testing agent used after significant changes**: YES. O agente usou o  de forma consistente e com sucesso após cada implementação significativa (celebração, geo-pagamentos, etc.).
--   **Troubleshoot agent used after agent stuck in loop**: NO
--   **Test files created**: 
--   **Known regressions**: Nenhuma.
+  - Testing agent used after significant changes: YES (usado em massa na Iteration 62 e 63, todos os 30+ testes backend e fluxos UI passaram 100%).
+  - Troubleshoot agent used after agent stuck in loop: NO
+  - Test files created: None explicitly created in this specific fork, reused prior backend tests setup.
+  - Known regressions: None.
 
 **Credentials to test flow:**
--   **Admin**: admin@4luis.com / Admin1
+  - Admin: admin@4luis.com / Admin1
 
 **What agent forgot to execute**
-O agente implementou a última mudança na UX do MB WAY mas não executou nenhum teste ou verificação (screenshot, etc.) para confirmar que a nova interface funciona como esperado antes de parar. A verificação desta funcionalidade é a primeira tarefa para o próximo agente.</analysis>
+O agente localizou que devia fazer o highlight da navegação mas encerrou a sessão antes sequer de visualizar os ficheiros do Menu/Header para adicionar as tags do React Router ou Tailwind de active path. Esta é a tua prioridade imediata (P0).</analysis>

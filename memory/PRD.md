@@ -106,6 +106,13 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 ## Key Pages
 - / (Home), /journey/:id, /plan-trip, /travel-planner, /plano/:slug, /about, /dashboard, /admin
 
+### Active Navigation Highlight (2026-03-25)
+- Desktop: active link gets text-[#FFBE98] + subtle 2px underline using `useLocation`
+- Mobile: active link gets text-[#FFBE98] + left border accent
+- Applies to: Home, Planear Viagem, Meu Painel, Administração
+- "Viagem Principal" button keeps its own permanent peach style
+- "Explorar Viagens" keeps neutral style (scroll-only, no distinct route)
+
 ## Prioritized Backlog
 ### P1
 - Celebracao "Sonho 100% Financiado": UI especial/animacao quando viagem atinge 100%

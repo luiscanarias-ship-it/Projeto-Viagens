@@ -54,7 +54,7 @@
     "frontend": "100% (28/28 tests passed)"
   },
   "test_credentials": {
-    "app_url": "https://geo-payouts-preview.preview.emergentagent.com"
+    "app_url": "https://active-nav-highlight.preview.emergentagent.com"
   },
   "seed_data_creation": "None",
   "retest_needed": false,

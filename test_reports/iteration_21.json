@@ -52,7 +52,7 @@
   "test_credentials": {
     "admin_email": "admin@4luis.com",
     "admin_password": "Admin1",
-    "app_url": "https://geo-payouts-preview.preview.emergentagent.com",
+    "app_url": "https://active-nav-highlight.preview.emergentagent.com",
     "sender_email": "mail@4luis.com"
   },
   "seed_data_creation": "Test journeys created and deleted during backend tests",

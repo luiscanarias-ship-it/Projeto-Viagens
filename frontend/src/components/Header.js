@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Globe, Menu, X, User, LogOut, Settings, Heart, Mail } from 'lucide-react';
 import axios from 'axios';
@@ -23,10 +23,30 @@ const Header = () => {
   const { user, logout } = useAuth();
   const { language, changeLanguage, t, isTranslating } = useLanguage();
   const navigate = useNavigate();
+  const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [contactEmail, setContactEmail] = useState('contacto@4luis.com');
+
+  const isActive = (path) => {
+    if (path === '/') return location.pathname === '/';
+    return location.pathname.startsWith(path);
+  };
+
+  const navLinkClass = (path) =>
+    `transition-colors text-sm font-medium whitespace-nowrap relative ${
+      isActive(path)
+        ? 'text-[#FFBE98] after:absolute after:bottom-[-4px] after:left-0 after:right-0 after:h-[2px] after:bg-[#FFBE98] after:rounded-full'
+        : 'text-[#2D2A26] hover:text-[#FFBE98]'
+    }`;
+
+  const mobileNavClass = (path) =>
+    `block py-3 font-medium w-full text-left ${
+      isActive(path)
+        ? 'text-[#FFBE98] border-l-2 border-[#FFBE98] pl-3'
+        : 'text-[#2D2A26]'
+    }`;
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -68,7 +88,7 @@ const Header = () => {
           <nav className="hidden md:flex items-center gap-5">
             <Link 
               to="/" 
-              className="text-[#2D2A26] hover:text-[#FFBE98] transition-colors text-sm font-medium whitespace-nowrap"
+              className={navLinkClass('/')}
               data-testid="nav-home"
             >
               {t('nav.home')}
@@ -105,7 +125,7 @@ const Header = () => {
             </Link>
             <Link 
               to="/plan-trip" 
-              className="text-[#2D2A26] hover:text-[#FFBE98] transition-colors text-sm font-medium whitespace-nowrap"
+              className={navLinkClass('/plan-trip')}
               data-testid="nav-plan-trip"
             >
               Planear Viagem
@@ -114,7 +134,7 @@ const Header = () => {
             {user && (
               <Link 
                 to="/dashboard" 
-                className="text-[#2D2A26] hover:text-[#FFBE98] transition-colors text-sm font-medium whitespace-nowrap"
+                className={navLinkClass('/dashboard')}
                 data-testid="nav-dashboard"
               >
                 {t('nav.dashboard')}
@@ -124,7 +144,7 @@ const Header = () => {
             {user?.is_admin && (
               <Link 
                 to="/admin" 
-                className="text-[#2D2A26] hover:text-[#FFBE98] transition-colors text-sm font-medium whitespace-nowrap"
+                className={navLinkClass('/admin')}
                 data-testid="nav-admin"
               >
                 {t('nav.admin')}
@@ -274,7 +294,7 @@ const Header = () => {
               <Link
                 to="/"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block py-3 text-[#2D2A26] font-medium"
+                className={mobileNavClass('/')}
               >
                 {t('nav.home')}
               </Link>
@@ -317,7 +337,7 @@ const Header = () => {
               <Link
                 to="/plan-trip"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block py-3 text-[#2D2A26] font-medium"
+                className={mobileNavClass('/plan-trip')}
                 data-testid="mobile-nav-plan-trip"
               >
                 Planear Viagem
@@ -326,7 +346,7 @@ const Header = () => {
                 <Link
                   to="/dashboard"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="block py-3 text-[#2D2A26] font-medium"
+                  className={mobileNavClass('/dashboard')}
                 >
                   {t('nav.dashboard')}
                 </Link>
@@ -335,7 +355,7 @@ const Header = () => {
                 <Link
                   to="/admin"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="block py-3 text-[#2D2A26] font-medium"
+                  className={mobileNavClass('/admin')}
                 >
                   {t('nav.admin')}
                 </Link>
