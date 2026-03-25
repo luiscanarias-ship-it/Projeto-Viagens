@@ -37,6 +37,7 @@ const Header = () => {
   const isActive = (key) => {
     if (key === 'journeys') return location.pathname === '/' && activeSection === 'journeys';
     if (key === '/') return location.pathname === '/' && activeSection !== 'journeys';
+    if (key === '/plan-trip') return location.pathname.startsWith('/plan-trip') || location.pathname.startsWith('/travel-planner');
     return location.pathname.startsWith(key);
   };
 

@@ -1,0 +1,55 @@
+{
+  "summary": "Iteration 75 - Navigation Active Highlight & Microcopy CTAs Testing. All tests passed (100%). Navigation active highlight working correctly on desktop and mobile. Microcopy CTAs with 'Evita filas', 'Reservar experiências' etc. present in TravelPlanner.js.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "passed_tests": [
+    "Backend: GET /api/journeys returns 200 with valid journey data",
+    "Desktop Nav: 'Início' has peach color (#FFBE98) + underline on / (home page)",
+    "Desktop Nav: 'Planear Viagem' has peach color (#FFBE98) + underline on /plan-trip",
+    "Desktop Nav: 'Planear Viagem' has peach color (#FFBE98) + underline on /travel-planner",
+    "Desktop Nav: 'Viagem Principal' keeps permanent peach button style (bg-[#FFBE98])",
+    "Desktop Nav: Non-active links are dark (#2D2A26) on all pages",
+    "Admin Login: admin@4luis.com / Admin1 login successful",
+    "Admin Nav: 'Meu Painel' link visible after login",
+    "Admin Nav: 'Administração' link visible after login (admin user)",
+    "Admin Nav: 'Meu Painel' has peach color + underline on /dashboard",
+    "Admin Nav: 'Administração' has peach color + underline on /admin",
+    "Mobile Nav: 'Início' has peach text + left border on / (home page)",
+    "Mobile Nav: 'Planear Viagem' has peach text + left border on /plan-trip",
+    "/plan-trip page loads correctly with affiliate cards (flights section visible)",
+    "Microcopy CTAs: 'Evita filas — reservar entrada' present in ACTIVITY_PATTERNS",
+    "Microcopy CTAs: 'Muito procurado — garantir vaga' present in ACTIVITY_PATTERNS",
+    "Microcopy CTAs: 'Esgota rapido — garantir bilhete' present in ACTIVITY_PATTERNS",
+    "Microcopy CTAs: 'Reservar experiências (evita filas)' present in getCTACopy function"
+  ],
+  "failed_tests": [],
+  "test_report_links": [
+    "/app/test_reports/iteration_75.json"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Header.js isActive function (lines 37-42) correctly handles '/' for home, '/plan-trip' for both /plan-trip and /travel-planner routes",
+    "Header.js navLinkClass (lines 46-49) applies 'text-[#FFBE98] after:absolute after:bottom-[-4px]...' for active state",
+    "Header.js mobileNavClass (lines 51-56) applies 'text-[#FFBE98] border-l-2 border-[#FFBE98] pl-3' for active mobile state",
+    "Header.js 'Viagem Principal' button (line 130) has permanent 'bg-[#FFBE98]' style, not affected by active state",
+    "TravelPlanner.js ACTIVITY_PATTERNS (lines 36-49) contains microcopy CTAs like 'Evita filas', 'Muito procurado', 'Esgota rapido'",
+    "TravelPlanner.js getCTACopy function (lines 188-246) generates contextual CTA copy with 'Reservar experiências (evita filas)' etc."
+  ],
+  "updated_files": [],
+  "success_rate": {
+    "backend": "100% (1/1 endpoint tested)",
+    "frontend": "100% (17/17 tests passed)"
+  },
+  "test_credentials": "Admin: admin@4luis.com / Admin1",
+  "seed_data_creation": "",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Iteration 75 verified navigation active highlight and microcopy CTAs. Key findings: (1) Desktop navigation uses isActive() function with useLocation() to determine active state. Active links get 'text-[#FFBE98]' (peach color) + underline via 'after:absolute after:bottom-[-4px]...'. (2) Mobile navigation uses mobileNavClass() with 'text-[#FFBE98] border-l-2 border-[#FFBE98] pl-3' for active state. (3) 'Viagem Principal' button has permanent peach style (bg-[#FFBE98]) and is not affected by active state logic. (4) '/plan-trip' check also covers '/travel-planner' routes via startsWith(). (5) Microcopy CTAs in TravelPlanner.js include 'Evita filas', 'Muito procurado', 'Esgota rapido', 'Reservar experiências' etc. in ACTIVITY_PATTERNS and getCTACopy function. (6) IfthenPay payment integration is MOCKED."
+}
