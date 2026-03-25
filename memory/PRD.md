@@ -144,6 +144,13 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - "Viagem Principal" button keeps its own permanent peach style
 - "Explorar Viagens" keeps neutral style (scroll-only, no distinct route)
 
+### Shareable Public Plans (2026-03-25)
+- **Backend**: GET /api/plan/{slug} returns full public plan data. GET /api/og-image/{slug} generates dynamic 1200x630 PNG using PIL (gradient peach→dark, destination, duration, summary, branding). POST /api/ai/travel-plan returns slug in response. PATCH /api/plan/{slug}/visibility for toggling.
+- **Frontend**: PublicPlan.js — full overhaul with hero (destination, duration, summary), share bar (WhatsApp, Copy link, Web Share API), map preview teaser (gated for ambassadors), weather, packing, itinerary, checklist, local tips (limited to 3 + lock message). CTAs: "Criar o meu roteiro com IA" and "Contribuir para esta viagem" (conditional on journey_id). OG image URL set dynamically.
+- **SEO**: Updated SEO.js to support og:image, og:type, twitter:card, twitter:image. All meta tags set dynamically per page.
+- **Sitemap**: /api/sitemap.xml includes all public plan URLs.
+- **Share flow**: TravelPlanner.js now shows public link after generation, handleShare uses slug URL instead of plain text.
+
 ### Contextual AI - Exploration Mode (2026-03-25)
 - **Backend**: POST /api/ai/improve-location supports 6 interaction types: what_to_see, where_to_eat, how_to_next (exploration) + less_queues, cheaper, best_time (optimization)
 - **Frontend**: SmartMap pin popup now shows 2 sections: "Explorar:" (O que ver aqui, Onde comer, Como chegar ao proximo) and "Otimizar:" (Menos filas, Mais barato, Melhor horario)
