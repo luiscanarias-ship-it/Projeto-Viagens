@@ -6690,6 +6690,109 @@ Responde APENAS com um JSON valido com esta estrutura exata (sem markdown, sem `
         raise HTTPException(status_code=500, detail="Não foi possível gerar o plano. Tente novamente.")
 
 
+
+@api_router.post("/ai/assistant")
+async def ai_assistant(request: Request):
+    """AI Assistant for premium ambassador users - contextual itinerary advice"""
+    from emergentintegrations.llm.chat import LlmChat, UserMessage
+
+    api_key = os.environ.get("EMERGENT_LLM_KEY")
+    if not api_key:
+        raise HTTPException(status_code=500, detail="Chave de IA nao configurada")
+
+    # Verify ambassador status
+    try:
+        user = await get_current_user(request)
+        if not user:
+            raise HTTPException(status_code=401, detail="Autenticacao necessaria")
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=401, detail="Autenticacao necessaria")
+
+    user_doc = await db.users.find_one({"user_id": user.user_id}, {"_id": 0, "level": 1})
+    if not user_doc or user_doc.get("level") != "embaixador":
+        raise HTTPException(status_code=403, detail="Funcionalidade exclusiva para Embaixadores")
+
+    data = await request.json()
+    plan = data.get("plan")
+    message = data.get("message", "").strip()[:500]
+    history = data.get("history", [])[-6:]  # Keep last 6 messages for context
+
+    if not plan or not message:
+        raise HTTPException(status_code=400, detail="Plano e mensagem sao obrigatorios")
+
+    plan_json = json.dumps(plan, ensure_ascii=False)
+
+    history_text = ""
+    if history:
+        history_text = "\nHistorico de conversa:\n"
+        for h in history:
+            role = "Utilizador" if h.get("role") == "user" else "Assistente"
+            history_text += f"{role}: {h.get('content', '')}\n"
+
+    prompt = f"""Es o assistente pessoal de viagem premium da 4Luis. Analisa o plano de viagem e responde ao pedido do utilizador.
+
+PLANO ATUAL:
+{plan_json}
+
+{history_text}
+PEDIDO DO UTILIZADOR:
+"{message}"
+
+REGRAS OBRIGATORIAS:
+1. Responde APENAS sobre o itinerario/viagem. Se a pergunta nao for relacionada, diz educadamente que so ajudas com a viagem.
+2. Respostas CURTAS e ESTRUTURADAS - usa bullet points.
+3. Maximo 4-6 bullet points por resposta.
+4. Cada bullet deve ser ACCIONAVEL (algo que o viajante pode fazer).
+5. Se o utilizador pedir para alterar o roteiro, gera sugestoes concretas.
+6. Inclui dicas locais quando relevante ("dicas secretas").
+7. Responde SEMPRE em portugues de Portugal.
+8. NAO uses paragrafos longos. Cada ponto deve ter no maximo 1-2 frases.
+
+Responde APENAS com JSON valido (sem markdown):
+{{
+  "response": "Frase resumo curta (1 linha)",
+  "suggestions": ["Sugestao 1 accionavel", "Sugestao 2 accionavel", "Sugestao 3"],
+  "can_apply": true ou false (se as sugestoes podem ser aplicadas ao roteiro),
+  "apply_prompt": "Instrucao curta para o refine endpoint, se can_apply=true, senao null"
+}}"""
+
+    chat = LlmChat(
+        api_key=api_key,
+        session_id=f"assistant_{user.user_id}_{uuid.uuid4().hex[:6]}",
+        system_message="Es um assistente de viagem premium. Respostas curtas, estruturadas, accionaveis. APENAS JSON valido."
+    ).with_model("openai", "gpt-5.2")
+
+    try:
+        response = await asyncio.wait_for(chat.send_message(UserMessage(text=prompt)), timeout=30)
+        clean = response.strip()
+        if clean.startswith("```"):
+            clean = clean.split("\n", 1)[-1].rsplit("```", 1)[0].strip()
+
+        result = json.loads(clean)
+        return {
+            "response": result.get("response", ""),
+            "suggestions": result.get("suggestions", []),
+            "can_apply": result.get("can_apply", False),
+            "apply_prompt": result.get("apply_prompt")
+        }
+    except asyncio.TimeoutError:
+        raise HTTPException(status_code=504, detail="O assistente demorou demasiado. Tenta novamente.")
+    except json.JSONDecodeError:
+        # Fallback: return raw text as single suggestion
+        return {
+            "response": clean[:200] if clean else "Nao consegui processar. Tenta reformular.",
+            "suggestions": [],
+            "can_apply": False,
+            "apply_prompt": None
+        }
+    except Exception as e:
+        logger.error(f"AI Assistant error: {e}")
+        raise HTTPException(status_code=500, detail="Erro no assistente. Tenta novamente.")
+
+
+
 @api_router.post("/ai/travel-plan/refine")
 async def refine_travel_plan(request: Request):
     """Refine an existing AI travel plan with additional user instructions"""

@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import { AmbassadorProgress, PremiumGate, InlineReferralCTA } from '../components/AmbassadorProgress';
+import AIAssistant from '../components/AIAssistant';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -1050,17 +1051,9 @@ const TravelPlanner = () => {
                     </div>
                   </PremiumGate>
 
-                  {/* Premium: AI Assistant (gated placeholder) */}
-                  <PremiumGate isAmbassador={isAmbassador} label="Assistente IA para Embaixadores">
-                    <div className="bg-stone-50 rounded-xl p-4 flex items-center gap-3 border border-stone-100" data-testid="ai-assistant-preview">
-                      <div className="w-10 h-10 bg-violet-50 rounded-xl flex items-center justify-center shrink-0">
-                        <Sparkles className="w-5 h-5 text-violet-500" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-bold text-[#2D2A26]">Assistente IA durante a viagem</p>
-                        <p className="text-[11px] text-[#6B6661]">Pergunte qualquer coisa sobre o seu destino em tempo real</p>
-                      </div>
-                    </div>
+                  {/* Premium: AI Assistant */}
+                  <PremiumGate isAmbassador={isAmbassador} label="Desbloqueia o assistente completo">
+                    <AIAssistant plan={plan} token={token} onApplyRefinement={handleRefine} />
                   </PremiumGate>
 
                   {/* Ambassador Progress */}
