@@ -375,7 +375,7 @@ const Dashboard = () => {
                     <div className="flex-1">
                       <div className="flex items-center justify-between">
                         <p className={`font-medium ${validReferrals >= 3 ? 'text-green-700' : 'text-[#2D2A26]'}`}>
-                          Referrals válidos
+                          Amigos que contribuiram
                         </p>
                         <span className={`text-lg font-bold ${validReferrals >= 3 ? 'text-green-600' : 'text-[#F2C94C]'}`}>
                           {validReferrals} / 3
@@ -419,12 +419,15 @@ const Dashboard = () => {
                         </div>
                       ))}
                       {/* Empty slots for remaining */}
-                      {Array.from({ length: Math.max(0, 3 - dashboardData.invites.referral_details.length) }).map((_, idx) => (
-                        <div key={`empty-${idx}`} className="flex items-center gap-2 text-sm">
-                          <div className="w-4 h-4 rounded-full bg-stone-200" />
-                          <span className="text-[#6B6661]">Falta 1 amigo</span>
-                        </div>
-                      ))}
+                      {Array.from({ length: Math.max(0, 3 - dashboardData.invites.referral_details.length) }).map((_, idx) => {
+                        const slotNum = dashboardData.invites.referral_details.length + idx + 1;
+                        return (
+                          <div key={`empty-${idx}`} className="flex items-center gap-2 text-sm">
+                            <div className="w-4 h-4 rounded-full bg-stone-200" />
+                            <span className="text-[#6B6661]">Convida o {slotNum}o amigo</span>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                   {/* Empty slots when no referrals at all */}
@@ -433,7 +436,7 @@ const Dashboard = () => {
                       {[1, 2, 3].map(i => (
                         <div key={i} className="flex items-center gap-2 text-sm">
                           <div className="w-4 h-4 rounded-full bg-stone-200" />
-                          <span className="text-[#6B6661]">Falta 1 amigo</span>
+                          <span className="text-[#6B6661]">Convida o {i}o amigo</span>
                         </div>
                       ))}
                     </div>
@@ -494,7 +497,7 @@ const Dashboard = () => {
               <ShareMenu
                 inviteLink={buildInviteLink(dashboardData.user_alias)}
                 senderName={user?.name}
-                buttonLabel="Partilhar convite"
+                buttonLabel="Convidar amigos"
                 buttonClassName="w-full flex items-center justify-center gap-2 py-2.5 bg-[#FFBE98] text-[#2D2A26] rounded-lg text-sm font-semibold hover:bg-[#FFBE98]/80 transition-colors"
               />
               <p className="text-[10px] text-center text-[#6B6661]/60 mt-3">
@@ -550,12 +553,12 @@ const Dashboard = () => {
                       data-testid="copy-link-btn"
                     >
                       {copiedLink ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
-                      {copiedLink ? 'Copiado!' : 'Copiar link'}
+                      {copiedLink ? 'Copiado!' : 'Copiar convite'}
                     </button>
                     <ShareMenu
                       inviteLink={sponsorLinkUrl}
                       senderName={user?.name}
-                      buttonLabel="Partilhar"
+                      buttonLabel="Convidar amigos"
                       buttonClassName="flex-1 px-4 py-3 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-medium hover:bg-[#FFAB7D] transition-all flex items-center justify-center gap-2"
                     />
                   </div>

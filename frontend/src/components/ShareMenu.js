@@ -94,7 +94,7 @@ const ShareMenu = ({ inviteLink, senderName, customMessage, buttonLabel = "Parti
           data-testid="share-menu-dropdown"
         >
           <div className="flex items-center justify-between px-4 pt-3 pb-2">
-            <p className="text-sm font-bold text-[#2D2A26]">Partilhar via</p>
+            <p className="text-sm font-bold text-[#2D2A26]">Convidar via</p>
             <button onClick={() => setIsOpen(false)} className="p-1 hover:bg-stone-100 rounded-full">
               <X className="w-3.5 h-3.5 text-[#6B6661]" />
             </button>
@@ -130,7 +130,7 @@ const ShareMenu = ({ inviteLink, senderName, customMessage, buttonLabel = "Parti
               <div className="w-9 h-9 bg-[#2D2A26] rounded-full flex items-center justify-center text-white flex-shrink-0">
                 {copied ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
               </div>
-              <span className="text-sm font-medium text-[#2D2A26]">{copied ? 'Copiado!' : 'Copiar link'}</span>
+              <span className="text-sm font-medium text-[#2D2A26]">{copied ? 'Copiado!' : 'Copiar convite'}</span>
             </button>
           </div>
         </div>

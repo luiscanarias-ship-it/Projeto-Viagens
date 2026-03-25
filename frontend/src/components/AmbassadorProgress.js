@@ -229,11 +229,11 @@ export const AmbassadorProgress = ({ token, compact = false, showValueSection = 
             <button onClick={copyLink} data-testid="copy-referral-link"
               className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold bg-white border border-stone-200 hover:border-stone-300 px-3 py-2 rounded-xl transition-all duration-200 hover:shadow-sm hover:-translate-y-0.5">
               {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5 text-[#6B6661]" />}
-              {copied ? 'Copiado!' : 'Copiar link'}
+              {copied ? 'Copiado!' : 'Copiar convite'}
             </button>
             <button onClick={shareLink} data-testid="share-referral-whatsapp"
               className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold bg-[#25D366] text-white px-3 py-2 rounded-xl transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
-              <Share2 className="w-3.5 h-3.5" />WhatsApp
+              <Share2 className="w-3.5 h-3.5" />Convidar por WhatsApp
             </button>
           </div>
         ) : (
@@ -331,11 +331,11 @@ export const InlineReferralCTA = ({ token }) => {
               <button onClick={copyLink}
                 className="flex items-center gap-1 text-[11px] font-semibold bg-white border border-stone-200 hover:border-stone-300 px-3 py-1.5 rounded-lg transition-all hover:shadow-sm">
                 {copied ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
-                {copied ? 'Copiado!' : 'Copiar link'}
+                {copied ? 'Copiado!' : 'Copiar convite'}
               </button>
               <button onClick={shareLink}
                 className="flex items-center gap-1 text-[11px] font-semibold bg-[#25D366] text-white px-3 py-1.5 rounded-lg transition-all hover:shadow-md">
-                <Share2 className="w-3 h-3" />WhatsApp
+                <Share2 className="w-3 h-3" />Convidar por WhatsApp
               </button>
             </div>
           ) : (
