@@ -6796,32 +6796,50 @@ async def geocode_plan(request: Request):
         # Extract location names from activity strings
         location_names = []
         # Portuguese verbs/prepositions to strip for better geocoding
-        strip_words = r'\b(visitar|explorar|passear|almoco|almocar|jantar|jantar|conhecer|ir|ver|fazer|tomar|comprar|experimentar|descobrir|na|no|nas|nos|em|de|do|da|dos|das|pela|pelo|pelas|pelos|para|rua|bairro|zona)\b'
+        strip_words = r'\b(visitar|explorar|passear|almoco|almocar|jantar|conhecer|ir|ver|fazer|tomar|comprar|experimentar|descobrir|subida|passeio|deslocacao|regresso|tempo|tarde|manha|livre|reservar|centro|historico|com|sem)\b'
         for activity in activities:
             name = activity if isinstance(activity, str) else activity.get("title", activity.get("name", str(activity)))
             clean = re.sub(r'\[CTA:\w+:[^\]]+\]', '', name).strip()
             clean = re.sub(r'^\d{1,2}[h:]\d{0,2}\s*[-–—]\s*', '', clean).strip()
-            # Remove common verbs/prepositions for better geocoding
+            # Remove parenthetical notes
+            clean = re.sub(r'\([^)]*\)', '', clean).strip()
+            # Remove everything after colon (usually descriptions)
+            if ':' in clean:
+                parts = clean.split(':')
+                # Keep the part with capitalized words (likely location)
+                best = max(parts, key=lambda p: sum(1 for w in p.split() if w and w[0].isupper()))
+                clean = best.strip()
+            # Remove common verbs/prepositions
             geo_name = re.sub(strip_words, '', clean, flags=re.IGNORECASE).strip()
             geo_name = re.sub(r'\s+', ' ', geo_name).strip(' -–—,')
+            # Extract capitalized words (proper nouns = likely locations)
+            proper_nouns = [w for w in geo_name.split() if w and w[0].isupper() and len(w) > 1]
+            if proper_nouns:
+                geo_name = ' '.join(proper_nouns[:4])
+            elif len(geo_name) > 2:
+                geo_name = ' '.join(geo_name.split()[:3])
             if len(geo_name) > 2:
-                location_names.append((clean[:80], geo_name[:80]))
+                location_names.append((clean[:80], geo_name[:60]))
         logger.info(f"Day {day.get('day')}: {len(activities)} activities -> {len(location_names)} geocodable names")
 
         # Geocode concurrently (batch of tasks)
+        # For complex destinations like "sul de frança + costa amalfitana", use day title as context
+        day_title = day.get("title", "")
+
         async def geocode_with_delay(display_name, geo_name, idx):
             await asyncio.sleep(idx * 0.5)
-            # Try cleaned geo_name first
-            result = await geocode_location(geo_name, destination)
+            # Use day title as geo context if it's a meaningful place name
+            geo_context = day_title if day_title and any(c.isupper() for c in day_title) else destination
+            # Try cleaned geo_name with context
+            result = await geocode_location(geo_name, geo_context)
             if not result:
-                # Try first 4 words only (main landmark is usually at the start)
-                short_name = ' '.join(geo_name.split()[:4]).strip(' ,')
-                if short_name != geo_name:
-                    result = await geocode_location(short_name, destination)
-            if not result and geo_name != display_name:
-                # Fallback to first 4 words of original
-                short_display = ' '.join(display_name.split()[:4]).strip(' ,')
-                result = await geocode_location(short_display, destination)
+                # Try just geo_name without context
+                result = await geocode_location(geo_name, "")
+            if not result:
+                # Try first 3 words only
+                short_name = ' '.join(geo_name.split()[:3]).strip(' ,')
+                if short_name != geo_name and len(short_name) > 2:
+                    result = await geocode_location(short_name, geo_context)
             return result
 
         tasks = [geocode_with_delay(display, geo, i) for i, (display, geo) in enumerate(location_names)]
