@@ -7502,7 +7502,61 @@ async def generate_pdf_guide(request: Request):
         aff_links = AFFILIATE_LINKS
     
     try:
-        buf = generate_travel_guide_pdf(plan, geocode_data=geocode_data, sections=sections, affiliate_links=aff_links)
+        # Generate OG image for PDF cover
+        og_image_bytes = None
+        slug = body.get("slug")
+        if slug:
+            try:
+                import io as _io
+                from PIL import Image as PILImage, ImageDraw, ImageFont
+                plan_for_og = plan
+                destination_name = plan_for_og.get("destination", "Viagem")
+                dates_og = plan_for_og.get("dates", "")
+                num_days_og = len(plan_for_og.get("itinerary", []))
+                summary_og = plan_for_og.get("summary", "")[:100]
+
+                w_og, h_og = 1200, 630
+                img = PILImage.new("RGB", (w_og, h_og))
+                draw = ImageDraw.Draw(img)
+                for y in range(h_og):
+                    ratio = y / h_og
+                    r = int(45 + ratio * 40)
+                    g = int(42 + ratio * 22)
+                    b = int(38 + ratio * 15)
+                    draw.line([(0, y), (w_og, y)], fill=(r, g, b))
+                for y in range(4):
+                    draw.line([(0, y), (w_og, y)], fill=(255, 190, 152))
+                try:
+                    f_big = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf", 64)
+                    f_med = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf", 28)
+                    f_sml = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf", 22)
+                    f_logo = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf", 26)
+                except Exception:
+                    f_big = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeSansBold.ttf", 64)
+                    f_med = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeSansBold.ttf", 28)
+                    f_sml = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeSans.ttf", 22)
+                    f_logo = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeSansBold.ttf", 26)
+                draw.text((60, 36), "4Luis", fill=(255, 190, 152), font=f_logo)
+                dest_y = h_og // 2 - 80
+                draw.text((60, dest_y), destination_name, fill=(255, 255, 255), font=f_big)
+                info_parts = []
+                if num_days_og > 0:
+                    info_parts.append(f"{num_days_og} dias")
+                if dates_og:
+                    info_parts.append(dates_og)
+                if info_parts:
+                    draw.text((60, dest_y + 80), "  ·  ".join(info_parts), fill=(255, 190, 152), font=f_med)
+                if summary_og:
+                    draw.text((60, dest_y + 125), summary_og, fill=(180, 178, 175), font=f_sml)
+                draw.text((60, h_og - 50), "Guia de viagem criado com IA", fill=(255, 190, 152), font=f_sml)
+                draw.text((w_og - 170, h_og - 50), "4luis.com", fill=(200, 200, 200), font=f_med)
+                og_buf = _io.BytesIO()
+                img.save(og_buf, format="PNG")
+                og_image_bytes = og_buf.getvalue()
+            except Exception as e:
+                logger.warning(f"PDF cover image generation failed: {e}")
+
+        buf = generate_travel_guide_pdf(plan, geocode_data=geocode_data, sections=sections, affiliate_links=aff_links, og_image_bytes=og_image_bytes)
         destination = plan.get("destination", "viagem").replace(" ", "-").lower()
         filename = f"guia-{destination}-4luis.pdf"
         
@@ -7523,8 +7577,8 @@ async def generate_pdf_guide(request: Request):
 
 @api_router.get("/og-image/{slug}")
 async def generate_og_image(slug: str):
-    """Generate dynamic Open Graph image for social sharing"""
-    from PIL import Image, ImageDraw, ImageFont
+    """Generate dynamic Open Graph image for social sharing + PDF cover"""
+    from PIL import Image, ImageDraw, ImageFont, ImageFilter
     import io
 
     plan_doc = await db.travel_plans.find_one(
@@ -7538,62 +7592,81 @@ async def generate_og_image(slug: str):
     destination = p.get("destination", plan_doc.get("destination", "Viagem"))
     dates = p.get("dates", "")
     num_days = len(p.get("itinerary", []))
-    summary = p.get("summary", "")[:120]
+    summary = p.get("summary", "")[:100]
 
     # Create OG image (1200x630 — Facebook/LinkedIn standard)
     w, h = 1200, 630
     img = Image.new("RGB", (w, h))
     draw = ImageDraw.Draw(img)
 
-    # Gradient background: warm peach to dark
+    # Premium gradient: dark charcoal base with warm peach accent
     for y in range(h):
-        r = int(255 - (y / h) * 210)
-        g = int(190 - (y / h) * 148)
-        b = int(152 - (y / h) * 114)
+        ratio = y / h
+        # Top: dark charcoal → mid: slightly warmer → bottom: dark with peach hint
+        if ratio < 0.5:
+            r = int(45 + ratio * 20)
+            g = int(42 + ratio * 15)
+            b = int(38 + ratio * 10)
+        else:
+            r = int(55 + (ratio - 0.5) * 60)
+            g = int(49 + (ratio - 0.5) * 30)
+            b = int(43 + (ratio - 0.5) * 20)
         draw.line([(0, y), (w, y)], fill=(r, g, b))
 
-    # Semi-transparent overlay at bottom
-    overlay = Image.new("RGBA", (w, 280), (45, 42, 38, 200))
-    img.paste(Image.alpha_composite(Image.new("RGBA", (w, 280), (0, 0, 0, 0)), overlay), (0, h - 280))
+    # Decorative peach accent stripe (top)
+    for y in range(4):
+        draw.line([(0, y), (w, y)], fill=(255, 190, 152))
 
     # Load fonts
     try:
-        font_bold = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf", 56)
-        font_medium = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf", 28)
-        font_small = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf", 22)
-        font_logo = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf", 32)
+        font_dest = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf", 64)
+        font_sub = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf", 28)
+        font_body = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf", 22)
+        font_small = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf", 18)
+        font_logo = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf", 26)
+        font_badge = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf", 14)
     except Exception:
-        font_bold = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeSansBold.ttf", 56)
-        font_medium = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeSans.ttf", 28)
-        font_small = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeSans.ttf", 22)
-        font_logo = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeSansBold.ttf", 32)
+        font_dest = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeSansBold.ttf", 64)
+        font_sub = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeSansBold.ttf", 28)
+        font_body = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeSans.ttf", 22)
+        font_small = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeSans.ttf", 18)
+        font_logo = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeSansBold.ttf", 26)
+        font_badge = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeSansBold.ttf", 14)
 
-    # Logo + badge
-    draw.text((60, 40), "4Luis", fill=(255, 255, 255), font=font_logo)
-    draw.text((170, 48), "AI Travel Planner", fill=(255, 255, 255, 180), font=font_small)
+    # Logo (top-left)
+    draw.text((60, 36), "4Luis", fill=(255, 190, 152), font=font_logo)
 
-    # Decorative pin icon (simple circle)
-    draw.ellipse([60, 160, 100, 200], fill=(255, 255, 255))
+    # AI badge (top-right area)
+    badge_text = "AI Travel Planner"
+    draw.rounded_rectangle([w - 260, 36, w - 60, 64], radius=14, fill=(255, 190, 152, 40), outline=(255, 190, 152, 80))
+    draw.text((w - 245, 40), badge_text, fill=(255, 190, 152), font=font_badge)
 
-    # Destination title
-    draw.text((60, h - 250), destination, fill=(255, 255, 255), font=font_bold)
+    # Main destination text (centered vertically)
+    dest_y = h // 2 - 80
+    draw.text((60, dest_y), destination, fill=(255, 255, 255), font=font_dest)
 
-    # Duration and dates
-    info_text = ""
+    # Duration + dates
+    info_parts = []
     if num_days > 0:
-        info_text += f"{num_days} dias"
+        info_parts.append(f"{num_days} dias")
     if dates:
-        info_text += f"  |  {dates}" if info_text else dates
+        info_parts.append(dates)
+    info_text = "  ·  ".join(info_parts)
     if info_text:
-        draw.text((60, h - 180), info_text, fill=(255, 190, 152), font=font_medium)
+        draw.text((60, dest_y + 80), info_text, fill=(255, 190, 152), font=font_sub)
 
     # Summary
     if summary:
-        draw.text((60, h - 135), summary, fill=(200, 200, 200), font=font_small)
+        draw.text((60, dest_y + 125), summary, fill=(180, 178, 175), font=font_body)
 
-    # Bottom bar
-    draw.text((60, h - 55), "Planeia a tua viagem com IA", fill=(255, 190, 152), font=font_small)
-    draw.text((w - 200, h - 55), "4luis.com", fill=(255, 255, 255), font=font_medium)
+    # Bottom bar: gradient overlay
+    for y in range(h - 80, h):
+        alpha = int((y - (h - 80)) / 80 * 100)
+        draw.line([(0, y), (w, y)], fill=(30, 28, 25))
+
+    # Bottom labels
+    draw.text((60, h - 50), "Planeia a tua viagem com IA", fill=(255, 190, 152), font=font_small)
+    draw.text((w - 170, h - 50), "4luis.com", fill=(200, 200, 200), font=font_sub)
 
     # Export as PNG
     buf = io.BytesIO()
@@ -7614,6 +7687,152 @@ async def get_public_plan(slug: str):
     if not plan_doc:
         raise HTTPException(status_code=404, detail="Plano não encontrado")
     return plan_doc
+
+
+@api_router.get("/ssr/plano/{slug}")
+async def ssr_public_plan(slug: str, request: Request):
+    """Server-side rendered HTML for social crawlers and SEO bots"""
+    plan_doc = await db.travel_plans.find_one(
+        {"slug": slug, "is_public": True},
+        {"_id": 0, "cache_key": 0}
+    )
+    if not plan_doc:
+        raise HTTPException(status_code=404, detail="Plano não encontrado")
+
+    p = plan_doc.get("plan", {})
+    destination = p.get("destination", plan_doc.get("destination", "Viagem"))
+    num_days = len(p.get("itinerary", []))
+    summary = p.get("summary", "")[:200]
+    dates = p.get("dates", "")
+    weather = p.get("weather", "")
+
+    frontend_url = os.environ.get("FRONTEND_URL", str(request.base_url).rstrip("/"))
+    base_url = frontend_url.replace(":3000", "").rstrip("/")
+    canonical_url = f"{base_url}/plano/{slug}"
+    og_image_url = f"{base_url}/api/og-image/{slug}"
+
+    title = f"{destination} em {num_days} dias | 4Luis"
+    description = summary or f"Plano de viagem para {destination} com {num_days} dias. Roteiro completo gerado por IA."
+
+    # Build itinerary HTML
+    itinerary_html = ""
+    for day in p.get("itinerary", []):
+        day_num = day.get("day", "?")
+        day_title = day.get("title", "")
+        activities = day.get("activities", [])
+        itinerary_html += f'<div style="margin-bottom:16px"><h3 style="color:#FFBE98;font-size:14px;margin:0">Dia {day_num} — {day_title}</h3><ul style="margin:4px 0 0 0;padding-left:20px">'
+        for a in activities:
+            import re
+            clean = re.sub(r'\[CTA:\w+:[^\]]+\]', '', str(a)).strip()
+            itinerary_html += f'<li style="color:#6B6661;font-size:13px;line-height:1.5">{clean}</li>'
+        itinerary_html += "</ul></div>"
+
+    # Tips HTML
+    tips_html = ""
+    for tip in p.get("local_tips", [])[:5]:
+        import re
+        clean = re.sub(r'\[CTA:\w+:[^\]]+\]', '', str(tip)).strip()
+        tips_html += f'<li style="color:#6B6661;font-size:13px;line-height:1.6">{clean}</li>'
+
+    # Flight info
+    flight_html = ""
+    fi = p.get("flight_info", {})
+    if fi.get("outbound"):
+        ob = fi["outbound"]
+        flight_html += f'<p style="font-size:13px;color:#2D2A26"><strong>Ida:</strong> {ob.get("flight_number","")} — {ob.get("departure_airport","")} → {ob.get("arrival_airport","")}</p>'
+
+    # Hotel info
+    hotel_html = ""
+    hi = p.get("hotel_info", {})
+    if hi.get("name"):
+        hotel_html += f'<p style="font-size:13px;color:#2D2A26"><strong>Hotel:</strong> {hi["name"]}'
+        if hi.get("address"):
+            hotel_html += f' — {hi["address"]}'
+        hotel_html += "</p>"
+
+    # Schema.org structured data
+    schema_json = {
+        "@context": "https://schema.org",
+        "@type": "TouristTrip",
+        "name": f"Roteiro {destination} — {num_days} dias",
+        "description": description,
+        "touristType": "Cultural",
+        "url": canonical_url,
+        "image": og_image_url,
+    }
+    if dates:
+        parts = dates.split(" a ")
+        if len(parts) == 2:
+            schema_json["startDate"] = parts[0].strip()
+            schema_json["endDate"] = parts[1].strip()
+
+    import json as json_mod
+    schema_tag = f'<script type="application/ld+json">{json_mod.dumps(schema_json, ensure_ascii=False)}</script>'
+
+    html = f"""<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>{title}</title>
+    <meta name="description" content="{description}"/>
+    <link rel="canonical" href="{canonical_url}"/>
+    <meta property="og:title" content="{title}"/>
+    <meta property="og:description" content="{description}"/>
+    <meta property="og:image" content="{og_image_url}"/>
+    <meta property="og:image:width" content="1200"/>
+    <meta property="og:image:height" content="630"/>
+    <meta property="og:url" content="{canonical_url}"/>
+    <meta property="og:type" content="article"/>
+    <meta property="og:site_name" content="4Luis"/>
+    <meta name="twitter:card" content="summary_large_image"/>
+    <meta name="twitter:title" content="{title}"/>
+    <meta name="twitter:description" content="{description}"/>
+    <meta name="twitter:image" content="{og_image_url}"/>
+    {schema_tag}
+    <style>
+        body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0; background: #FAFAF9; color: #2D2A26; }}
+        .hero {{ background: linear-gradient(to bottom, #2D2A26, #3D3A36, #FAFAF9); padding: 60px 24px 40px; }}
+        .container {{ max-width: 640px; margin: 0 auto; padding: 0 16px 60px; }}
+        .badge {{ display: inline-block; background: rgba(255,255,255,0.1); color: #FFBE98; font-size: 12px; padding: 4px 12px; border-radius: 999px; margin-bottom: 12px; }}
+        h1 {{ color: white; font-size: 32px; margin: 0 0 8px; }}
+        .meta {{ color: #FFBE98; font-size: 14px; margin: 0 0 8px; }}
+        .summary {{ color: rgba(255,255,255,0.7); font-size: 14px; line-height: 1.5; margin: 0; }}
+        .card {{ background: white; border-radius: 16px; border: 1px solid #E5E5E5; padding: 20px; margin-top: 12px; }}
+        h2 {{ font-size: 16px; color: #2D2A26; margin: 24px 0 12px; }}
+        .cta {{ display: inline-block; background: #FFBE98; color: #2D2A26; font-weight: bold; padding: 12px 24px; border-radius: 12px; text-decoration: none; margin-top: 16px; }}
+        .cta:hover {{ background: #E6A07C; }}
+        .footer {{ text-align: center; color: #6B6661; font-size: 12px; padding: 24px 0; }}
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div style="max-width:640px;margin:0 auto">
+            <span class="badge">Plano gerado por IA</span>
+            <h1>{destination}</h1>
+            <p class="meta">{num_days} dias{' | ' + dates if dates else ''}</p>
+            {f'<p class="summary">{summary}</p>' if summary else ''}
+        </div>
+    </div>
+    <div class="container">
+        {f'<div class="card">{flight_html}{hotel_html}</div>' if flight_html or hotel_html else ''}
+        {f'<div class="card"><p style="font-size:13px;color:#6B6661">{weather}</p></div>' if weather else ''}
+        <div class="card">
+            <h2>Roteiro dia a dia</h2>
+            {itinerary_html}
+        </div>
+        {f'<div class="card"><h2>Dicas locais</h2><ul style="padding-left:20px">{tips_html}</ul></div>' if tips_html else ''}
+        <div style="text-align:center;padding:24px 0">
+            <a class="cta" href="{base_url}/travel-planner">Criar o meu roteiro com IA</a>
+        </div>
+        <p class="footer">Plano gerado por 4Luis AI Travel Planner — 4luis.com</p>
+    </div>
+    <script>window.location.href="{canonical_url}";</script>
+</body>
+</html>"""
+
+    return Response(content=html, media_type="text/html",
+                    headers={"Cache-Control": "public, max-age=3600"})
 
 @api_router.patch("/plan/{slug}/visibility")
 async def toggle_plan_visibility(slug: str, request: Request):

@@ -14,7 +14,7 @@ const SECTION_OPTIONS = [
   { key: 'transport', label: 'Transportes', icon: Train },
 ];
 
-const OfflineGuideDownload = ({ plan, token, geocodeData }) => {
+const OfflineGuideDownload = ({ plan, token, geocodeData, planSlug }) => {
   const [downloading, setDownloading] = useState(false);
   const [done, setDone] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
@@ -36,7 +36,8 @@ const OfflineGuideDownload = ({ plan, token, geocodeData }) => {
       const res = await axios.post(`${API}/ai/travel-plan/pdf`, {
         plan,
         sections,
-        geocode_data: geocodeData || null
+        geocode_data: geocodeData || null,
+        slug: planSlug || null
       }, {
         headers: { Authorization: `Bearer ${token}` },
         responseType: 'blob',

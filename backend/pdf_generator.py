@@ -12,7 +12,7 @@ from reportlab.lib.colors import HexColor, white, black
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
-    HRFlowable, KeepTogether, Image as RLImage
+    HRFlowable, KeepTogether, Image as RLImage, PageBreak
 )
 from reportlab.lib.enums import TA_LEFT, TA_CENTER
 from staticmap import StaticMap, CircleMarker
@@ -276,7 +276,7 @@ def _build_tips_section(plan):
     return elements
 
 
-def generate_travel_guide_pdf(plan, geocode_data=None, sections=None, affiliate_links=None):
+def generate_travel_guide_pdf(plan, geocode_data=None, sections=None, affiliate_links=None, og_image_bytes=None):
     """
     Generate a complete offline travel guide PDF.
     
@@ -285,6 +285,7 @@ def generate_travel_guide_pdf(plan, geocode_data=None, sections=None, affiliate_
         geocode_data: dict - Optional geocode data for static map
         sections: dict - Which sections to include {flights, hotel, map, itinerary, tips, transport}
         affiliate_links: dict - Optional affiliate link URLs {booking: {url}, skyscanner: {url}, ...}
+        og_image_bytes: bytes - Optional OG image for PDF cover page
     
     Returns:
         BytesIO buffer containing the PDF
@@ -309,23 +310,30 @@ def generate_travel_guide_pdf(plan, geocode_data=None, sections=None, affiliate_
     
     elements = []
     
-    # ─── Header / Cover ───
+    # ─── Cover Page (using OG image) ───
     destination = plan.get("destination", "Viagem")
     dates = plan.get("dates", "")
     num_days = len(plan.get("itinerary", []))
     summary = plan.get("summary", "")
     
-    # Brand header
-    elements.append(Paragraph("4Luis", ParagraphStyle("brand", fontName="Helvetica-Bold", fontSize=14, textColor=PEACH)))
-    elements.append(Spacer(1, 1*mm))
+    if og_image_bytes:
+        try:
+            cover_buf = io.BytesIO(og_image_bytes)
+            # Full-width cover image
+            page_w = A4[0] - 36*mm  # account for margins
+            img_ratio = 630 / 1200
+            cover_h = page_w * img_ratio
+            elements.append(RLImage(cover_buf, width=page_w, height=cover_h))
+            elements.append(Spacer(1, 8*mm))
+        except Exception:
+            pass
+
+    # Cover text
+    elements.append(Paragraph(destination, ParagraphStyle("cover_title", fontName="Helvetica-Bold", fontSize=28, textColor=DARK, spaceAfter=2*mm, leading=34)))
     
-    # Peach divider
-    elements.append(HRFlowable(width="100%", thickness=2, color=PEACH, spaceAfter=4*mm))
-    
-    # Title
-    elements.append(Paragraph(destination, STYLES["title"]))
-    
-    # Subtitle
+    cover_subtitle = "Guia de viagem criado com IA"
+    elements.append(Paragraph(cover_subtitle, ParagraphStyle("cover_sub", fontName="Helvetica", fontSize=12, textColor=PEACH, spaceAfter=4*mm)))
+
     subtitle_parts = []
     if num_days > 0:
         subtitle_parts.append(f"{num_days} dias")
@@ -334,10 +342,23 @@ def generate_travel_guide_pdf(plan, geocode_data=None, sections=None, affiliate_
     if subtitle_parts:
         elements.append(Paragraph(" | ".join(subtitle_parts), STYLES["subtitle"]))
     
-    # Summary
     if summary:
         elements.append(Paragraph(_clean_text(summary), STYLES["body"]))
     
+    elements.append(Spacer(1, 6*mm))
+    elements.append(Paragraph("4Luis", ParagraphStyle("cover_brand", fontName="Helvetica-Bold", fontSize=14, textColor=PEACH)))
+    elements.append(Paragraph("4luis.com", STYLES["small"]))
+    
+    elements.append(PageBreak())
+    
+    # ─── Content Header ───
+    elements.append(Paragraph("4Luis", ParagraphStyle("brand", fontName="Helvetica-Bold", fontSize=14, textColor=PEACH)))
+    elements.append(Spacer(1, 1*mm))
+    elements.append(HRFlowable(width="100%", thickness=2, color=PEACH, spaceAfter=4*mm))
+    elements.append(Paragraph(destination, STYLES["title"]))
+    if subtitle_parts:
+        elements.append(Paragraph(" | ".join(subtitle_parts), STYLES["subtitle"]))
+
     elements.append(Spacer(1, 4*mm))
     elements.append(HRFlowable(width="100%", thickness=0.5, color=HexColor("#E5E5E5"), spaceAfter=2*mm))
     

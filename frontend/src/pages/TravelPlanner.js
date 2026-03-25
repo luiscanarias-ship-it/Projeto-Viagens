@@ -1122,7 +1122,7 @@ const TravelPlanner = () => {
 
                   {/* Premium: Offline Guide PDF */}
                   <PremiumGate isAmbassador={isAmbassador} label="Descarrega o guia offline em PDF">
-                    <OfflineGuideDownload plan={plan} token={token} geocodeData={geocodeData} />
+                    <OfflineGuideDownload plan={plan} token={token} geocodeData={geocodeData} planSlug={planSlug} />
                   </PremiumGate>
 
                   {/* Secondary: Copy + Share link */}
