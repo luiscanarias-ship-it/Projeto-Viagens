@@ -39,6 +39,7 @@ from email_service import (
     send_ambassador_unlocked_email, send_journey_funded_emails,
     send_weekly_summary_emails, send_dream_funded_announcement,
     send_new_journey_email,
+    send_contribution_confirmed_email, send_contribution_pending_email,
     _build_email_progress_bar, _build_email_cta_button, _build_standard_email
 )
 
@@ -811,6 +812,16 @@ async def confirm_contribution_details(contribution_id: str, request: Request):
         {"contribution_id": contribution_id},
         {"$set": update_fields}
     )
+
+    # Send pending confirmation email
+    updated_contribution = {**contribution, **update_fields}
+    journey = await db.journeys.find_one({"journey_id": contribution["journey_id"]}, {"_id": 0})
+    if journey:
+        try:
+            await send_contribution_pending_email(updated_contribution, journey)
+            logger.info(f"Pending email sent for contribution {contribution_id}")
+        except Exception as e:
+            logger.error(f"Failed to send pending email: {e}")
 
     return {
         "status": "ok",
@@ -3027,6 +3038,15 @@ async def validate_contribution(contribution_id: str, request: Request):
         
         # Check story chapter progression
         await check_and_update_story_chapter(contribution["journey_id"])
+        
+        # Send confirmation email to contributor
+        journey = await db.journeys.find_one({"journey_id": contribution["journey_id"]}, {"_id": 0})
+        if journey:
+            try:
+                await send_contribution_confirmed_email(contribution, journey)
+                logger.info(f"Confirmation email sent for contribution {contribution_id}")
+            except Exception as e:
+                logger.error(f"Failed to send confirmation email: {e}")
         
         # MOTOR EMBAIXADOR: Update user progression
         if contribution.get("user_id"):

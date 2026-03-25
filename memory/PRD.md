@@ -14,6 +14,16 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 
 ## What's Been Implemented
 
+### Email Notifications for Contributions (2026-03-25)
+- **Pending email**: Enviado quando user confirma que fez o pagamento (endpoint confirm-details)
+  - Subject: "Pagamento de {amount}€ em validação - 4Luis"
+  - Content: detalhes do pagamento, método, referência, mensagem de reassurance
+- **Confirmed email**: Enviado quando admin valida a contribuição (endpoint validate)
+  - Subject: "Já fazes parte deste sonho"
+  - Content: confirmação, valor, social proof (contributors_count), progress bar, CTA "Convidar amigos" com referral code e remaining_referrals
+- Templates mobile-friendly com brand colors (soft peach #FFBE98)
+- Integração via Resend (já configurado)
+
 ### Copy Optimization (2026-03-25)
 - Informal tone ("tu") applied consistently across all contribution flow
 - Step 1: "Quanto queres contribuir?" + "100% seguro · Sem registo obrigatório"

@@ -464,3 +464,162 @@ async def send_new_journey_email(journey: dict):
                 logger.error(f"New journey email failed for {email}: {e}")
     logger.info(f"New journey email sent to {sent_count} users for {journey_id}")
     return {"sent": sent_count}
+
+
+
+# ==================== CONTRIBUTION CONFIRMATION EMAILS ====================
+
+def get_contribution_confirmed_email_html(
+    contributor_name: str,
+    amount: float,
+    journey_name: str,
+    contributors_count: int,
+    percentage: float,
+    journey_id: str,
+    referral_code: str = None,
+    remaining_referrals: int = None
+) -> str:
+    social_proof = f"""
+    <div style="background: #FFF7ED; border-radius: 12px; padding: 16px; text-align: center; margin: 20px 0;">
+        <p style="margin: 0; color: #2D2A26; font-size: 15px;">
+            Já somos <strong>{contributors_count}</strong> pessoas a apoiar este sonho
+        </p>
+    </div>
+    """
+
+    progress_bar = _build_email_progress_bar(percentage) if percentage > 0 else ""
+
+    ambassador_section = ""
+    if referral_code and remaining_referrals is not None and remaining_referrals > 0:
+        invite_url = f"{FRONTEND_URL}/?ref={referral_code}"
+        ambassador_section = f"""
+        <div style="background: linear-gradient(135deg, #FFBE9810, #FFBE9830); border-radius: 12px; padding: 20px; margin: 20px 0; text-align: center; border: 1px solid #FFBE9840;">
+            <p style="margin: 0 0 4px 0; color: #2D2A26; font-size: 15px; font-weight: 600;">Queres aproximar-te de te tornares Embaixador?</p>
+            <p style="margin: 0 0 16px 0; color: #6B6661; font-size: 13px;">Faltam-te <strong>{remaining_referrals}</strong> amigos para desbloquear vantagens</p>
+            {_build_email_cta_button(invite_url, "Convidar amigos")}
+        </div>
+        """
+    elif referral_code:
+        invite_url = f"{FRONTEND_URL}/?ref={referral_code}"
+        ambassador_section = f"""
+        <div style="background: linear-gradient(135deg, #FFBE9810, #FFBE9830); border-radius: 12px; padding: 20px; margin: 20px 0; text-align: center; border: 1px solid #FFBE9840;">
+            <p style="margin: 0 0 12px 0; color: #2D2A26; font-size: 15px; font-weight: 600;">Partilha com amigos e ajuda ainda mais</p>
+            {_build_email_cta_button(invite_url, "Convidar amigos")}
+        </div>
+        """
+
+    content = f"""
+    <div style="text-align: center;">
+        <h1 style="margin: 0 0 8px 0; color: #2D2A26; font-size: 24px;">Já fazes parte deste sonho</h1>
+        <p style="margin: 0 0 24px 0; color: #6B6661; font-size: 16px; line-height: 1.6;">
+            Obrigado, {contributor_name}! Estás agora a ajudar a tornar esta viagem realidade.
+        </p>
+
+        <div style="background-color: #E6F4F1; border-radius: 12px; padding: 24px; text-align: center; margin-bottom: 20px;">
+            <p style="margin: 0 0 4px 0; color: #6B6661; font-size: 13px;">A tua contribuição</p>
+            <p style="margin: 0; color: #2D2A26; font-size: 36px; font-weight: bold;">{amount}€</p>
+            <p style="margin: 6px 0 0 0; color: #6B6661; font-size: 14px;">para "{journey_name}"</p>
+            <p style="margin: 12px 0 0 0; color: #10B981; font-size: 13px; font-weight: 600;">Pagamento confirmado</p>
+        </div>
+
+        {social_proof}
+        {progress_bar}
+        {ambassador_section}
+    </div>
+    """
+    return get_email_base_template(content, "A tua contribuição foi confirmada")
+
+
+def get_contribution_pending_email_html(
+    contributor_name: str,
+    amount: float,
+    journey_name: str,
+    payment_reference: str,
+    payment_method: str
+) -> str:
+    method_label = "MB WAY" if payment_method == "mbway" else payment_method.upper()
+    content = f"""
+    <div style="text-align: center;">
+        <h1 style="margin: 0 0 8px 0; color: #2D2A26; font-size: 24px;">Recebemos a tua confirmação</h1>
+        <p style="margin: 0 0 24px 0; color: #6B6661; font-size: 16px; line-height: 1.6;">
+            Obrigado, {contributor_name}! Vamos validar o teu pagamento em poucos minutos.
+        </p>
+
+        <div style="background-color: #FFF7ED; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+            <p style="margin: 0 0 4px 0; color: #6B6661; font-size: 13px;">Detalhes</p>
+            <p style="margin: 0 0 4px 0; color: #2D2A26; font-size: 24px; font-weight: bold;">{amount}€</p>
+            <p style="margin: 0 0 4px 0; color: #6B6661; font-size: 13px;">Método: {method_label}</p>
+            <p style="margin: 0; color: #6B6661; font-size: 13px;">Referência: <strong style="color: #2D2A26;">{payment_reference}</strong></p>
+        </div>
+
+        <p style="margin: 0 0 8px 0; color: #6B6661; font-size: 14px;">
+            Receberás outro email assim que o pagamento for confirmado.
+        </p>
+        <p style="margin: 0; color: #10B981; font-size: 13px; font-weight: 600;">
+            Confirmação em poucos minutos
+        </p>
+    </div>
+    """
+    return get_email_base_template(content, "Pagamento em validação")
+
+
+async def send_contribution_confirmed_email(contribution: dict, journey: dict):
+    """Send email when admin confirms a contribution"""
+    email = contribution.get("contributor_email")
+    if not email:
+        return
+
+    # Get progress data
+    progress = await db.contributions.count_documents({
+        "journey_id": journey.get("journey_id"),
+        "status": "confirmed"
+    })
+    goal = journey.get("goal_amount", 1)
+    current = journey.get("current_amount", 0)
+    percentage = round((current / goal) * 100, 1) if goal > 0 else 0
+
+    # Get referral info if user exists
+    referral_code = None
+    remaining_referrals = None
+    if contribution.get("user_id"):
+        user = await db.users.find_one({"user_id": contribution["user_id"]}, {"_id": 0})
+        if user:
+            referral_code = user.get("referral_code")
+            valid_refs = user.get("valid_referrals_count", 0)
+            remaining_referrals = max(0, 3 - valid_refs)
+
+    html = get_contribution_confirmed_email_html(
+        contributor_name=contribution.get("contributor_name", "Sonhador"),
+        amount=contribution.get("amount"),
+        journey_name=journey.get("name", ""),
+        contributors_count=progress,
+        percentage=percentage,
+        journey_id=journey.get("journey_id", ""),
+        referral_code=referral_code,
+        remaining_referrals=remaining_referrals
+    )
+    await send_email_resend(
+        to_email=email,
+        subject="Já fazes parte deste sonho",
+        html_content=html
+    )
+
+
+async def send_contribution_pending_email(contribution: dict, journey: dict):
+    """Send email when user confirms they made the payment (pending validation)"""
+    email = contribution.get("contributor_email")
+    if not email:
+        return
+
+    html = get_contribution_pending_email_html(
+        contributor_name=contribution.get("contributor_name", "Sonhador"),
+        amount=contribution.get("amount"),
+        journey_name=journey.get("name", ""),
+        payment_reference=contribution.get("payment_reference", "N/A"),
+        payment_method=contribution.get("payment_method", "")
+    )
+    await send_email_resend(
+        to_email=email,
+        subject=f"Pagamento de {contribution.get('amount')}€ em validação - 4Luis",
+        html_content=html
+    )
