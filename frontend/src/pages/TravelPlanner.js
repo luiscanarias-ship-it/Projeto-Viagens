@@ -10,6 +10,7 @@ import {
 import axios from 'axios';
 import { AmbassadorProgress, PremiumGate, InlineReferralCTA } from '../components/AmbassadorProgress';
 import AIAssistant from '../components/AIAssistant';
+import TravelContext from '../components/TravelContext';
 const SmartMap = React.lazy(() => import('../components/SmartMap'));
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -834,6 +835,11 @@ const TravelPlanner = () => {
 
                 {/* Referral CTA at peak motivation (after seeing the guide) */}
                 {token && !isAmbassador && <InlineReferralCTA token={token} />}
+              </div>
+
+              {/* Travel Context: Flight + Hotel + Transport */}
+              <div className="px-5 pt-4">
+                <TravelContext plan={plan} />
               </div>
 
               {/* Tab Navigation */}

@@ -6612,11 +6612,53 @@ REGRAS PARA CTAs CONTEXTUAIS:
 - Exemplos: "Visite o teamLab Borderless [CTA:activity:Ver bilhetes]", "Reserve alojamento no centro [CTA:hotel:Ver hoteis]", "Garanta internet no destino [CTA:esim:Ver eSIM]"
 - NAO repitas o mesmo tipo de CTA mais de 2 vezes
 
+INFORMACAO ADICIONAL OBRIGATORIA:
+- Inclui informacao de voo sugerida (ida e volta) com numeros de voo reais ou realisticos para a rota
+- Inclui hotel sugerido (real, que exista) no centro ou zona turistica principal
+- Inclui instrucoes de transporte aeroporto-hotel com opcao publica e alternativa taxi
+
 Responde APENAS com um JSON valido com esta estrutura exata (sem markdown, sem ```):
 {{
   "destination": "{destination}",
   "dates": "{start_date} a {end_date}",
   "summary": "Resumo curto da viagem (1-2 frases)",
+  "flight_info": {{
+    "outbound": {{
+      "flight_number": "Numero de voo (ex: TAP TP548)",
+      "departure_airport": "Aeroporto partida (nome - codigo IATA)",
+      "departure_time": "Hora partida (ex: 08:30)",
+      "arrival_airport": "Aeroporto chegada (nome - codigo IATA)",
+      "arrival_time": "Hora chegada"
+    }},
+    "return": {{
+      "flight_number": "Numero voo regresso",
+      "departure_airport": "Aeroporto regresso",
+      "departure_time": "Hora partida",
+      "arrival_airport": "Aeroporto chegada",
+      "arrival_time": "Hora chegada"
+    }}
+  }},
+  "hotel_info": {{
+    "name": "Nome hotel real no centro",
+    "address": "Morada completa",
+    "phone": "Telefone ou null",
+    "area": "Bairro/zona (1-2 palavras)"
+  }},
+  "airport_to_hotel": {{
+    "best_option": {{
+      "mode": "Metro/Comboio/Bus",
+      "details": "Descricao curta do percurso pratico",
+      "duration": "35 min",
+      "cost": "2-5 EUR"
+    }},
+    "alternative": {{
+      "mode": "Taxi/Uber",
+      "details": "Descricao curta",
+      "duration": "20 min",
+      "cost": "30-50 EUR"
+    }},
+    "tip": "Dica pratica"
+  }},
   "itinerary": [
     {{
       "day": 1,
@@ -6878,7 +6920,30 @@ async def geocode_plan(request: Request):
             "locations": day_locations
         })
 
-    return {"days": locations_by_day, "destination": destination}
+    # Also geocode airport and hotel if present
+    special_pins = {}
+    flight_info = plan.get("flight_info")
+    hotel_info = plan.get("hotel_info")
+
+    if flight_info:
+        arrival = flight_info.get("outbound", {}).get("arrival_airport", "")
+        if arrival:
+            airport_name = re.sub(r'\s*-\s*[A-Z]{3}$', '', arrival).strip()
+            coords = await geocode_location(airport_name, "", bias_lat, bias_lng)
+            if coords:
+                special_pins["airport"] = {"name": arrival, "lat": coords["lat"], "lng": coords["lng"], "type": "airport"}
+
+    if hotel_info:
+        hotel_name = hotel_info.get("name", "")
+        hotel_addr = hotel_info.get("address", "")
+        if hotel_name:
+            coords = await geocode_location(f"{hotel_name}, {hotel_addr}", destination, bias_lat, bias_lng)
+            if not coords:
+                coords = await geocode_location(hotel_name, destination, bias_lat, bias_lng)
+            if coords:
+                special_pins["hotel"] = {"name": hotel_name, "lat": coords["lat"], "lng": coords["lng"], "type": "hotel"}
+
+    return {"days": locations_by_day, "destination": destination, "special_pins": special_pins}
 
 
 @api_router.post("/ai/optimize-route")
@@ -6978,7 +7043,10 @@ async def improve_location(request: Request):
     type_labels = {
         "less_queues": "como evitar filas",
         "cheaper": "alternativas mais baratas",
-        "best_time": "melhor horario para visitar"
+        "best_time": "melhor horario para visitar",
+        "what_to_see": "o que ver e nao perder neste local",
+        "where_to_eat": "onde comer bem perto deste local (restaurantes reais, com precos)",
+        "how_to_next": f"como chegar deste local ao proximo ponto do roteiro (transporte pratico)"
     }
     focus = type_labels.get(improvement_type, improvement_type)
 
@@ -7236,6 +7304,11 @@ Responde APENAS com um JSON valido com esta estrutura exata (sem markdown, sem `
 
         plan = json.loads(clean)
         logger.info(f"AI Travel Plan refine success: destination={destination}")
+
+        # Preserve flight/hotel/transport data from previous plan (not affected by refinements)
+        for key in ("flight_info", "hotel_info", "airport_to_hotel"):
+            if key not in plan and key in previous_plan:
+                plan[key] = previous_plan[key]
 
         return {"plan": plan, "refined": True}
     except asyncio.TimeoutError:

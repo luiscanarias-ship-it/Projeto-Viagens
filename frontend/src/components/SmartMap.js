@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { MapContainer, TileLayer, Marker, Polyline, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Loader2, ArrowRight, Clock, DollarSign, Users, ChevronUp, ChevronDown, X, Navigation, Check, Maximize2, Minimize2 } from 'lucide-react';
+import { Sparkles, Loader2, ArrowRight, Clock, DollarSign, Users, ChevronUp, ChevronDown, X, Navigation, Check, Maximize2, Minimize2, Plane, Building2, Train, Car } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -35,6 +35,26 @@ const createDayIcon = (day, index, isActive) => {
     iconSize: [size, size + 10],
     iconAnchor: [size / 2, size + 10],
     popupAnchor: [0, -(size + 5)]
+  });
+};
+
+const createSpecialIcon = (type) => {
+  const isAirport = type === 'airport';
+  const color = isAirport ? '#1565C0' : '#E65100';
+  const symbol = isAirport
+    ? '<path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0011.5 2 1.5 1.5 0 0010 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" fill="white" transform="translate(7,6) scale(0.9)"/>'
+    : '<path d="M7 14c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm0-8C4.24 6 2 8.24 2 11c0 3.75 5 9 5 9s5-5.25 5-9c0-2.76-2.24-5-5-5z" fill="white" transform="translate(11,6) scale(1.1)"/>';
+  const svg = `<svg width="40" height="50" viewBox="0 0 40 50" xmlns="http://www.w3.org/2000/svg">
+    <path d="M20 0C9 0 0 9 0 20c0 15 20 30 20 30s20-15 20-30C40 9 31 0 20 0z" fill="${color}" stroke="white" stroke-width="2.5"/>
+    <circle cx="20" cy="20" r="13" fill="${color}" stroke="white" stroke-width="1.5"/>
+    ${symbol}
+  </svg>`;
+  return L.divIcon({
+    html: svg,
+    className: 'smart-map-marker',
+    iconSize: [40, 50],
+    iconAnchor: [20, 50],
+    popupAnchor: [0, -45]
   });
 };
 
@@ -115,11 +135,18 @@ const SmartMap = ({ plan, token, onApplyRefinement }) => {
 
   useEffect(() => { fetchGeoData(); }, [fetchGeoData]);
 
-  // All locations flat
+  // Special pins (airport, hotel)
+  const specialPins = useMemo(() => {
+    if (!geoData?.special_pins) return [];
+    return Object.values(geoData.special_pins).filter(p => p && p.lat && p.lng);
+  }, [geoData]);
+
+  // All locations flat (including special pins for bounds)
   const allLocations = useMemo(() => {
     if (!geoData?.days) return [];
-    return geoData.days.flatMap(d => d.locations);
-  }, [geoData]);
+    const dayLocs = geoData.days.flatMap(d => d.locations);
+    return [...dayLocs, ...specialPins];
+  }, [geoData, specialPins]);
 
   // Filtered locations by day
   const filteredDays = useMemo(() => {
@@ -252,7 +279,7 @@ const SmartMap = ({ plan, token, onApplyRefinement }) => {
           </div>
           <div>
             <p className="text-xs font-bold text-[#2D2A26]">Mapa interativo</p>
-            <p className="text-[9px] text-[#6B6661]">{allLocations.length} locais em {totalDays} dias</p>
+            <p className="text-[9px] text-[#6B6661]">{allLocations.length} locais{specialPins.length > 0 ? ` + ${specialPins.length === 1 ? '1 referência' : `${specialPins.length} referências`}` : ''} em {totalDays} dias</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -302,6 +329,32 @@ const SmartMap = ({ plan, token, onApplyRefinement }) => {
         {/* Sidebar — desktop or fullscreen */}
         {(!isMobile || isFullscreen) && (
           <div className="w-52 border-r border-stone-100 overflow-y-auto" data-testid="map-sidebar">
+            {/* Special pins legend */}
+            {specialPins.length > 0 && (
+              <div className="border-b border-stone-100">
+                <div className="px-3 py-1.5 bg-stone-50 sticky top-0">
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-[#6B6661]">Referências</span>
+                </div>
+                {specialPins.map(pin => (
+                  <button
+                    key={`sidebar-${pin.type}`}
+                    onClick={() => { setFlyTarget([pin.lat, pin.lng]); setActiveLocation(pin); }}
+                    className={`w-full text-left px-3 py-2 flex items-start gap-2 hover:bg-[#FFBE98]/5 transition-colors ${activeLocation?.type === pin.type ? 'bg-[#FFBE98]/10' : ''}`}
+                    data-testid={`sidebar-special-${pin.type}`}
+                  >
+                    {pin.type === 'airport' ? (
+                      <Plane className="w-3.5 h-3.5 text-blue-600 shrink-0 mt-0.5" />
+                    ) : (
+                      <Building2 className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
+                    )}
+                    <div className="min-w-0">
+                      <span className="text-[10px] font-bold text-[#2D2A26] block">{pin.type === 'airport' ? 'Aeroporto' : 'Hotel'}</span>
+                      <span className="text-[9px] text-[#6B6661] block truncate">{pin.name}</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
             {filteredDays.map(dayGroup => (
               <div key={dayGroup.day} className="border-b border-stone-50 last:border-b-0">
                 <div className="px-3 py-1.5 bg-stone-50 sticky top-0">
@@ -400,6 +453,74 @@ const SmartMap = ({ plan, token, onApplyRefinement }) => {
                   </Popup>
                 </Marker>
               ))
+            )}
+
+            {/* Special Pins: Airport & Hotel */}
+            {specialPins.map(pin => (
+              <Marker
+                key={`special-${pin.type}`}
+                position={[pin.lat, pin.lng]}
+                icon={createSpecialIcon(pin.type)}
+                zIndexOffset={1000}
+              >
+                <Popup className="smart-map-popup" maxWidth={250}>
+                  <div className="p-1">
+                    {pin.type === 'airport' ? (
+                      <>
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <div className="w-5 h-5 bg-blue-100 rounded flex items-center justify-center"><Plane className="w-3 h-3 text-blue-600" /></div>
+                          <p className="text-xs font-bold text-[#2D2A26]">Aeroporto</p>
+                        </div>
+                        <p className="text-[10px] text-[#6B6661] mb-1.5">{pin.name}</p>
+                        {plan?.airport_to_hotel?.best_option && (
+                          <div className="bg-emerald-50 rounded-md p-1.5 mb-1">
+                            <p className="text-[9px] font-bold text-emerald-700 mb-0.5 flex items-center gap-1">
+                              <Train className="w-2.5 h-2.5" />Para o hotel
+                            </p>
+                            <p className="text-[9px] text-emerald-800">{plan.airport_to_hotel.best_option.mode} — {plan.airport_to_hotel.best_option.duration} — {plan.airport_to_hotel.best_option.cost}</p>
+                          </div>
+                        )}
+                        {plan?.airport_to_hotel?.alternative && (
+                          <div className="bg-stone-50 rounded-md p-1.5">
+                            <p className="text-[9px] font-bold text-stone-600 mb-0.5 flex items-center gap-1">
+                              <Car className="w-2.5 h-2.5" />Alternativa
+                            </p>
+                            <p className="text-[9px] text-stone-600">{plan.airport_to_hotel.alternative.mode} — {plan.airport_to_hotel.alternative.duration} — {plan.airport_to_hotel.alternative.cost}</p>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <div className="w-5 h-5 bg-amber-100 rounded flex items-center justify-center"><Building2 className="w-3 h-3 text-amber-600" /></div>
+                          <p className="text-xs font-bold text-[#2D2A26]">Hotel</p>
+                        </div>
+                        <p className="text-[10px] font-semibold text-[#2D2A26]">{pin.name}</p>
+                        {plan?.hotel_info?.address && (
+                          <p className="text-[9px] text-[#6B6661] mt-0.5">{plan.hotel_info.address}</p>
+                        )}
+                        {plan?.hotel_info?.area && (
+                          <p className="text-[9px] text-amber-600 font-medium mt-0.5">{plan.hotel_info.area}</p>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </Popup>
+              </Marker>
+            ))}
+
+            {/* Airport → Hotel route line */}
+            {geoData?.special_pins?.airport && geoData?.special_pins?.hotel && (
+              <Polyline
+                positions={[
+                  [geoData.special_pins.airport.lat, geoData.special_pins.airport.lng],
+                  [geoData.special_pins.hotel.lat, geoData.special_pins.hotel.lng]
+                ]}
+                color="#6B7280"
+                weight={2.5}
+                opacity={0.5}
+                dashArray="6 8"
+              />
             )}
           </MapContainer>
 
@@ -503,6 +624,31 @@ const SmartMap = ({ plan, token, onApplyRefinement }) => {
             className="overflow-hidden border-t border-stone-100"
           >
             <div className="max-h-[40vh] overflow-y-auto" data-testid="mobile-sheet">
+              {/* Special pins in mobile */}
+              {specialPins.length > 0 && (
+                <div>
+                  <div className="px-4 py-1.5 bg-stone-50 sticky top-0 z-10">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#6B6661]">Referências</span>
+                  </div>
+                  {specialPins.map(pin => (
+                    <button
+                      key={`m-special-${pin.type}`}
+                      onClick={() => { setFlyTarget([pin.lat, pin.lng]); setActiveLocation(pin); setMobileSheet(false); }}
+                      className="w-full text-left px-4 py-2.5 flex items-center gap-3 border-b border-stone-50 active:bg-[#FFBE98]/5"
+                    >
+                      {pin.type === 'airport' ? (
+                        <Plane className="w-4 h-4 text-blue-600 shrink-0" />
+                      ) : (
+                        <Building2 className="w-4 h-4 text-amber-600 shrink-0" />
+                      )}
+                      <div>
+                        <span className="text-xs font-bold text-[#2D2A26]">{pin.type === 'airport' ? 'Aeroporto' : 'Hotel'}</span>
+                        <span className="text-[10px] text-[#6B6661] block">{pin.name}</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
               {filteredDays.map(dayGroup => (
                 <div key={dayGroup.day}>
                   <div className="px-4 py-1.5 bg-stone-50 sticky top-0 z-10">
