@@ -753,7 +753,7 @@ const Admin = () => {
         )}
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+        <div className="flex flex-wrap gap-1.5 mb-6">
           {[
             { id: 'journeys', label: 'Viagens', icon: null },
             { id: 'candidaturas', label: 'Candidaturas', icon: ambassadorApplications?.by_status?.candidatura?.length || null },
@@ -769,7 +769,7 @@ const Admin = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-6 py-3 rounded-xl font-medium transition-all whitespace-nowrap flex items-center gap-2 ${
+              className={`px-3 py-2 rounded-lg text-xs font-medium transition-all whitespace-nowrap flex items-center gap-1.5 ${
                 activeTab === tab.id
                   ? 'bg-[#FFBE98] text-[#2D2A26]'
                   : 'bg-white border border-stone-200 text-[#6B6661] hover:bg-stone-50'
@@ -778,7 +778,7 @@ const Admin = () => {
             >
               {tab.label}
               {tab.icon && (
-                <span className="w-5 h-5 bg-[#FFBE98] text-[#2D2A26] text-xs rounded-full flex items-center justify-center">
+                <span className="w-4 h-4 bg-[#FFBE98] text-[#2D2A26] text-[10px] rounded-full flex items-center justify-center">
                   {tab.icon}
                 </span>
               )}
