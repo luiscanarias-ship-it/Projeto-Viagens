@@ -850,20 +850,36 @@ const CheckoutModal = ({
                     </div>
                   </div>
 
-                  {/* 3. Method-specific Instructions */}
+                  {/* 3. Instructions + Reference Side by Side (MBWay) */}
                   {selectedMethod === 'mbway' && (
-                    <div className="space-y-2" data-testid="mbway-instructions">
-                      <div className="flex items-start gap-2.5">
-                        <span className="w-5 h-5 rounded-full bg-[#2D2A26] text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">1</span>
-                        <p className="text-xs text-[#2D2A26]">Abre a app <strong>MB WAY</strong></p>
+                    <div className="flex gap-3 items-start" data-testid="mbway-instructions">
+                      {/* Left: Instructions */}
+                      <div className="flex-1 space-y-2 min-w-0">
+                        <div className="flex items-start gap-2">
+                          <span className="w-5 h-5 rounded-full bg-[#2D2A26] text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">1</span>
+                          <p className="text-xs text-[#2D2A26]">Abre a app <strong>MB WAY</strong></p>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="w-5 h-5 rounded-full bg-[#2D2A26] text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">2</span>
+                          <p className="text-xs text-[#2D2A26]">Envia exatamente <strong>{selectedAmount}€</strong></p>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="w-5 h-5 rounded-full bg-[#2D2A26] text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">3</span>
+                          <p className="text-xs text-[#2D2A26]">Usa esta referência</p>
+                        </div>
                       </div>
-                      <div className="flex items-start gap-2.5">
-                        <span className="w-5 h-5 rounded-full bg-[#2D2A26] text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">2</span>
-                        <p className="text-xs text-[#2D2A26]">Envia exatamente <strong>{selectedAmount}€</strong></p>
-                      </div>
-                      <div className="flex items-start gap-2.5">
-                        <span className="w-5 h-5 rounded-full bg-[#2D2A26] text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">3</span>
-                        <p className="text-xs text-[#2D2A26]">Usa esta referência:</p>
+                      {/* Right: Reference Block */}
+                      <div className="bg-emerald-50 border-2 border-emerald-200 rounded-xl px-3 py-2.5 flex-shrink-0 text-center" data-testid="reference-block">
+                        <p className="text-[9px] text-emerald-700 font-medium mb-0.5">Referência</p>
+                        <p className="text-lg font-bold text-[#2D2A26] tracking-wider leading-tight" data-testid="payment-reference">{contribution.payment_reference}</p>
+                        <button
+                          onClick={() => copyToClipboard(contribution.payment_reference, 'ref')}
+                          className="mt-1.5 px-2.5 py-1 bg-emerald-100 hover:bg-emerald-200 rounded-lg flex items-center gap-1 text-[11px] font-semibold text-emerald-700 transition-colors mx-auto"
+                          data-testid="copy-reference-btn"
+                        >
+                          {copiedField === 'ref' ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                          {copiedField === 'ref' ? 'Copiado!' : 'Copiar'}
+                        </button>
                       </div>
                     </div>
                   )}
@@ -928,8 +944,8 @@ const CheckoutModal = ({
                     </div>
                   )}
 
-                  {/* 4. Reference Block (CRITICAL) — for MBWay & non-crypto */}
-                  {selectedMethod !== 'crypto' && (
+                  {/* 4. Reference Block — for non-crypto, non-mbway (fallback) */}
+                  {selectedMethod !== 'crypto' && selectedMethod !== 'mbway' && (
                     <div className="bg-emerald-50 border-2 border-emerald-200 rounded-xl px-3 py-3" data-testid="reference-block">
                       <p className="text-[10px] text-emerald-700 font-medium text-center mb-1">Referência de pagamento</p>
                       <div className="flex items-center justify-center gap-3">
