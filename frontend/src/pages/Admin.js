@@ -8,6 +8,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import JourneyEditForm from '../components/JourneyEditForm';
 import EmailPreviewModal from '../components/EmailPreviewModal';
 import AdminSupportSection from '../components/AdminSupportSection';
+import AnalyticsDashboard from '../components/AnalyticsDashboard';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -17,7 +18,7 @@ const Admin = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   
-  const [activeTab, setActiveTab] = useState('journeys');
+  const [activeTab, setActiveTab] = useState('analytics');
   const [journeys, setJourneys] = useState([]);
   const [contributions, setContributions] = useState([]);
   const [contributionSearch, setContributionSearch] = useState('');
@@ -755,6 +756,7 @@ const Admin = () => {
         {/* Tabs */}
         <div className="flex flex-wrap gap-1.5 mb-6">
           {[
+            { id: 'analytics', label: 'Analytics', icon: null },
             { id: 'journeys', label: 'Viagens', icon: null },
             { id: 'candidaturas', label: 'Candidaturas', icon: ambassadorApplications?.by_status?.candidatura?.length || null },
             { id: 'visibility', label: 'Visibilidade', icon: null },
@@ -788,6 +790,17 @@ const Admin = () => {
 
         {/* Tab Content */}
         <AnimatePresence mode="wait">
+          {/* Analytics Tab */}
+          {activeTab === 'analytics' && (
+            <motion.div
+              key="analytics"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+            >
+              <AnalyticsDashboard token={token} />
+            </motion.div>
+          )}
           {/* Journeys Tab */}
           {activeTab === 'journeys' && (
             <motion.div

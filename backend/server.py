@@ -7466,6 +7466,145 @@ async def get_referral_stats(request: Request):
         "ambassador_conversion_rate": round(ambassadors / max(total_users, 1) * 100, 1)
     }
 
+@api_router.get("/admin/analytics")
+async def get_analytics_dashboard(request: Request):
+    """Aggregated analytics dashboard — one call for the full picture"""
+    await require_admin(request)
+    
+    # --- FUNNEL ---
+    total_users = await db.users.count_documents({})
+    ambassadors = await db.users.count_documents({"is_ambassador": True})
+    total_contributions = await db.contributions.count_documents({})
+    completed_contributions = await db.contributions.count_documents({"status": "completed"})
+    pending_contributions = await db.contributions.count_documents({"status": {"$in": ["pending", "pending_validation"]}})
+    
+    amount_pipeline = [
+        {"$match": {"status": "completed"}},
+        {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
+    ]
+    amount_result = await db.contributions.aggregate(amount_pipeline).to_list(1)
+    total_raised = amount_result[0]["total"] if amount_result else 0
+    
+    # --- AFFILIATE PERFORMANCE ---
+    aff_pipeline = [
+        {"$group": {"_id": "$platform", "clicks": {"$sum": 1}}},
+        {"$sort": {"clicks": -1}}
+    ]
+    aff_stats = await db.affiliate_clicks.aggregate(aff_pipeline).to_list(100)
+    total_aff_clicks = sum(s["clicks"] for s in aff_stats)
+    
+    # --- SHARE METRICS ---
+    share_pipeline = [
+        {"$group": {"_id": "$type", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}}
+    ]
+    share_stats = await db.share_events.aggregate(share_pipeline).to_list(100)
+    total_shares = sum(s["count"] for s in share_stats)
+    
+    # --- REFERRAL SYSTEM ---
+    ref_pipeline = [
+        {"$match": {"valid_referrals_count": {"$gt": 0}}},
+        {"$group": {
+            "_id": None,
+            "total_valid": {"$sum": "$valid_referrals_count"},
+            "referrers": {"$sum": 1}
+        }}
+    ]
+    ref_result = await db.users.aggregate(ref_pipeline).to_list(1)
+    total_valid_referrals = ref_result[0]["total_valid"] if ref_result else 0
+    active_referrers = ref_result[0]["referrers"] if ref_result else 0
+    avg_referrals = round(total_valid_referrals / max(active_referrers, 1), 1)
+    
+    # --- TOP PLANS (most shared, most clicked) ---
+    top_shared_pipeline = [
+        {"$match": {"slug": {"$exists": True, "$ne": ""}}},
+        {"$group": {"_id": "$slug", "shares": {"$sum": 1}}},
+        {"$sort": {"shares": -1}},
+        {"$limit": 5}
+    ]
+    top_shared = await db.share_events.aggregate(top_shared_pipeline).to_list(5)
+    
+    # Enrich top plans with destination name
+    top_plans = []
+    for ts in top_shared:
+        slug = ts["_id"]
+        if not slug:
+            continue
+        plan = await db.travel_plans.find_one({"slug": slug}, {"_id": 0, "destination": 1})
+        top_plans.append({
+            "slug": slug,
+            "destination": plan.get("destination", slug) if plan else slug,
+            "shares": ts["shares"]
+        })
+    
+    # Top affiliate plans
+    top_aff_pipeline = [
+        {"$match": {"slug": {"$exists": True, "$ne": ""}}},
+        {"$group": {"_id": "$slug", "clicks": {"$sum": 1}}},
+        {"$sort": {"clicks": -1}},
+        {"$limit": 5}
+    ]
+    top_aff_plans = await db.affiliate_clicks.aggregate(top_aff_pipeline).to_list(5)
+    top_affiliate_plans = []
+    for ta in top_aff_plans:
+        slug = ta["_id"]
+        if not slug:
+            continue
+        plan = await db.travel_plans.find_one({"slug": slug}, {"_id": 0, "destination": 1})
+        top_affiliate_plans.append({
+            "slug": slug,
+            "destination": plan.get("destination", slug) if plan else slug,
+            "clicks": ta["clicks"]
+        })
+    
+    # Top contributing journeys
+    top_journey_pipeline = [
+        {"$match": {"status": "completed"}},
+        {"$group": {"_id": "$journey_id", "total": {"$sum": "$amount"}, "count": {"$sum": 1}}},
+        {"$sort": {"total": -1}},
+        {"$limit": 5}
+    ]
+    top_journeys = await db.contributions.aggregate(top_journey_pipeline).to_list(5)
+    top_converting = []
+    for tj in top_journeys:
+        jid = tj["_id"]
+        journey = await db.journeys.find_one({"journey_id": jid}, {"_id": 0, "name": 1})
+        top_converting.append({
+            "journey_id": jid,
+            "name": journey.get("name", jid) if journey else jid,
+            "amount": tj["total"],
+            "contributions": tj["count"]
+        })
+    
+    return {
+        "funnel": {
+            "total_users": total_users,
+            "total_contributions": total_contributions,
+            "completed_contributions": completed_contributions,
+            "pending_contributions": pending_contributions,
+            "total_raised": total_raised,
+            "ambassadors": ambassadors,
+            "ambassador_rate": round(ambassadors / max(total_users, 1) * 100, 1)
+        },
+        "affiliates": {
+            "total_clicks": total_aff_clicks,
+            "by_platform": {s["_id"]: s["clicks"] for s in aff_stats}
+        },
+        "shares": {
+            "total": total_shares,
+            "by_type": {s["_id"]: s["count"] for s in share_stats}
+        },
+        "referrals": {
+            "total_valid": total_valid_referrals,
+            "active_referrers": active_referrers,
+            "avg_per_referrer": avg_referrals,
+            "ambassador_conversion": round(ambassadors / max(total_users, 1) * 100, 1)
+        },
+        "top_plans_shared": top_plans,
+        "top_plans_affiliate": top_affiliate_plans,
+        "top_converting_journeys": top_converting
+    }
+
 
 
 # ==================== OFFERS SYSTEM (ADMIN ONLY) ====================
