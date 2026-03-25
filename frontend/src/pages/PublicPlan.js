@@ -121,7 +121,7 @@ const PublicPlan = () => {
         <Globe className="w-12 h-12 text-stone-300 mb-4" />
         <p className="text-[#6B6661] mb-4">{error || 'Plano nao encontrado.'}</p>
         <Link to="/travel-planner" className="text-[#FFBE98] hover:text-[#E6A07C] font-medium">
-          Criar o seu proprio plano
+          Criar o teu proprio plano
         </Link>
       </div>
     );

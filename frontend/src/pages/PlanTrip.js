@@ -36,13 +36,13 @@ const PlanTrip = () => {
       icon: Hotel,
       iconBg: 'bg-[#FFBE98]/10',
       iconColor: 'text-[#FFBE98]',
-      title: 'Reservar alojamento com confiança',
-      description: 'Selecionámos as melhores plataformas para encontrar o alojamento ideal.',
+      title: 'Encontra o hotel com melhor localização',
+      description: 'Ficar no centro faz toda a diferença. Escolhe entre as opções que recomendamos — com cancelamento gratuito.',
       ctas: [
-        { id: 'booking', icon: Hotel, label: 'Ver opções recomendadas', primary: true },
-        { id: 'hotels', icon: Star, label: 'Ver ofertas com benefícios', primary: false }
+        { id: 'booking', icon: Hotel, label: 'Ver hotéis no centro', primary: true },
+        { id: 'hotels', icon: Star, label: 'Ofertas com benefícios exclusivos', primary: false }
       ],
-      micro: 'Cancelamento flexível',
+      micro: 'Cancelamento gratuito · Preços sobem rapidamente',
       badge: 'Recomendado pela 4Luis'
     },
     {
@@ -50,12 +50,12 @@ const PlanTrip = () => {
       icon: Plane,
       iconBg: 'bg-sky-50',
       iconColor: 'text-sky-500',
-      title: 'Encontrar voos ao melhor preço',
-      description: 'Compare centenas de opções e escolha o melhor voo para a sua viagem.',
+      title: 'Compara voos e poupa no preço',
+      description: 'Os preços mudam constantemente. Compara agora e garante o melhor voo para as tuas datas.',
       ctas: [
-        { id: 'skyscanner', icon: Plane, label: 'Pesquisar voos', primary: true }
+        { id: 'skyscanner', icon: Plane, label: 'Comparar voos (melhor preço)', primary: true }
       ],
-      micro: 'Sem custos adicionais para si',
+      micro: 'Sem custos adicionais para ti',
       badge: 'Recomendado pela 4Luis'
     },
     {
@@ -63,57 +63,58 @@ const PlanTrip = () => {
       icon: Compass,
       iconBg: 'bg-emerald-50',
       iconColor: 'text-emerald-500',
-      title: 'Descobrir experiências únicas',
-      description: 'Reserve atividades, tours e experiências no seu destino.',
+      title: 'Evita filas — reserva experiências',
+      description: 'As melhores atividades esgotam rápido. Reserva com antecedência e evita filas à entrada.',
       ctas: [
-        { id: 'getyourguide', icon: Compass, label: 'Descobrir atividades', primary: true }
+        { id: 'getyourguide', icon: Compass, label: 'Reservar experiências (sem filas)', primary: true }
       ],
-      micro: 'Cancelamento flexível',
-      badge: 'Melhores opções disponíveis'
+      micro: 'Cancelamento flexível · Muito procurado',
+      badge: 'Recomendado pela 4Luis'
     },
     {
       id: 'transport',
       icon: Car,
       iconBg: 'bg-violet-50',
       iconColor: 'text-violet-500',
-      title: 'Aluguer de carro ao melhor preço',
-      description: 'Compare opções e encontre o carro ideal para a sua viagem.',
+      title: 'Do aeroporto ao hotel sem stress',
+      description: 'Compara transfers e aluguer de carro. Chega ao destino sem complicações.',
       ctas: [
-        { id: 'cars', icon: Car, label: 'Pesquisar carros', primary: true }
+        { id: 'cars', icon: Car, label: 'Ver opções de transporte', primary: true }
       ],
-      micro: 'Sem custos adicionais para si'
+      micro: 'Sem custos adicionais para ti'
     },
     {
       id: 'esim',
       icon: Wifi,
       iconBg: 'bg-teal-50',
       iconColor: 'text-teal-500',
-      title: 'Internet em viagem sem complicações',
-      description: 'Evite roaming caro e fique sempre ligado.',
+      title: 'Internet mal aterras — sem roaming',
+      description: 'Ativa o eSIM antes de viajar e fica ligado desde o momento em que chegas.',
       ctas: [
-        { id: 'airalo', icon: Wifi, label: 'Ver opções económicas', primary: true },
-        { id: 'holafly', icon: Wifi, label: 'Ver dados ilimitados', primary: false }
-      ]
+        { id: 'airalo', icon: Wifi, label: 'Comprar eSIM (ativa antes de ir)', primary: true },
+        { id: 'holafly', icon: Wifi, label: 'Dados ilimitados', primary: false }
+      ],
+      micro: 'Funciona mal aterras · Sem surpresas na fatura'
     },
     {
       id: 'insurance',
       icon: Shield,
       iconBg: 'bg-amber-50',
       iconColor: 'text-amber-500',
-      title: 'Viajar com segurança',
-      description: 'Proteja a sua viagem com seguro adequado.',
+      title: 'Os imprevistos acontecem — protege-te',
+      description: 'Cancelamentos, emergências médicas, bagagem perdida. O seguro cobre tudo por pouco.',
       ctas: [
-        { id: 'insurance', icon: Shield, label: 'Ver planos de seguro', primary: true }
+        { id: 'insurance', icon: Shield, label: 'Fazer seguro de viagem', primary: true }
       ],
-      micro: 'Recomendado pela 4Luis'
+      micro: 'Recomendado pela 4Luis · Cobertura completa'
     },
     {
       id: 'map',
       icon: MapPin,
       iconBg: 'bg-red-50',
       iconColor: 'text-red-500',
-      title: 'Explorar o destino',
-      description: 'Descubra pontos de interesse e planeie as suas rotas.',
+      title: 'Explora o destino antes de ir',
+      description: 'Descobre os pontos de interesse e planeia as tuas rotas com antecedência.',
       ctas: [
         { id: 'googlemaps', icon: MapPin, label: 'Abrir Google Maps', primary: true, isMap: true }
       ]
@@ -137,7 +138,7 @@ const PlanTrip = () => {
               Planeia a tua viagem com IA
             </h1>
             <p className="text-base text-[#6B6661] max-w-lg mx-auto">
-              Tudo o que precisas para a tua viagem de sonho
+              Tudo o que precisas para transformar o teu sonho em viagem
             </p>
           </motion.div>
         </div>
@@ -168,7 +169,7 @@ const PlanTrip = () => {
                   Planeia a tua viagem com IA
                 </h2>
                 <p className="text-sm text-[#6B6661] leading-relaxed mb-5">
-                  Receba um roteiro completo, dicas locais e sugestões de reserva — tudo personalizado para o seu destino e datas.
+                  Recebe um roteiro completo, dicas locais e sugestões de reserva — tudo personalizado para o teu destino e datas.
                 </p>
                 <button
                   onClick={() => navigate(`/travel-planner${destinationParam ? `?destination=${encodeURIComponent(destinationParam)}` : ''}`)}
@@ -248,8 +249,11 @@ const PlanTrip = () => {
 
         {/* Footer note */}
         <p className="text-center text-xs text-[#6B6661]/50 pt-8">
-          Alguns dos links nesta página são de parceiros. Ao usar estes links,<br/>
-          ajuda a 4Luis a continuar a apoiar viagens de sonho.
+          Alguns dos links nesta página são de parceiros. Ao usares estes links,<br/>
+          ajudas a 4Luis a continuar a apoiar viagens de sonho.
+        </p>
+        <p className="text-center text-xs text-[#FFBE98]/60 italic mt-2 pb-4">
+          Este pode ser o início da tua próxima grande viagem
         </p>
       </div>
     </div>

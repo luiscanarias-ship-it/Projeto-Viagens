@@ -193,35 +193,35 @@ const getCTACopy = (destination, tripTypes = []) => {
     cultural: {
       hotel: { text: `\ud83c\udfe8 Hotéis no centro histórico de ${dest}`, sublabel: 'Melhor localização \u00b7 Cancelamento gratuito', label: `Ver hotéis no centro de ${dest}` },
       activitiesMid: { text: `\ud83c\udfcc Experiências imperdíveis em ${dest}`, sublabel: 'Evita filas \u00b7 Bilhetes sem espera', label: 'Reservar experiências (evita filas)' },
-      flights: { text: `\u2708\ufe0f Encontrar voos para estas datas (melhor preço)`, sublabel: 'Preços sobem rapidamente \u00b7 Compare agora', label: 'Comparar voos' },
+      flights: { text: `\u2708\ufe0f Encontrar voos para estas datas (melhor preço)`, sublabel: 'Preços sobem rapidamente \u00b7 Compara agora', label: 'Comparar voos' },
       insurance: { text: `\ud83d\udee1\ufe0f Os imprevistos acontecem \u2014 faz o teu seguro`, sublabel: 'Cancelamento + assistência médica', label: 'Fazer seguro' },
-      activitiesDicas: { text: `\ud83c\udfcc Descubra ${dest} com guias culturais locais`, sublabel: 'Muito procurado \u00b7 Reservar com antecedência', label: 'Reservar com antecedência' },
+      activitiesDicas: { text: `\ud83c\udfcc Descobre ${dest} com guias culturais locais`, sublabel: 'Muito procurado \u00b7 Reservar com antecedência', label: 'Reservar com antecedência' },
     },
     gastronomica: {
       hotel: { text: `\ud83c\udfe8 Hotéis perto dos melhores restaurantes de ${dest}`, sublabel: 'Melhor localização \u00b7 Cancelamento gratuito', label: `Ver hotéis em ${dest}` },
       activitiesMid: { text: `\ud83c\udf7d\ufe0f Experiências gastronómicas em ${dest}`, sublabel: 'Muito procurado \u00b7 Sabores autênticos', label: 'Reservar experiências' },
-      flights: { text: `\u2708\ufe0f Voos para estas datas (melhor preço)`, sublabel: 'Preços sobem rapidamente \u00b7 Compare agora', label: 'Comparar voos' },
+      flights: { text: `\u2708\ufe0f Voos para estas datas (melhor preço)`, sublabel: 'Preços sobem rapidamente \u00b7 Compara agora', label: 'Comparar voos' },
       insurance: { text: `\ud83d\udee1\ufe0f Os imprevistos acontecem \u2014 faz o teu seguro`, sublabel: 'Cancelamento + assistência médica', label: 'Fazer seguro' },
       activitiesDicas: { text: `\ud83c\udf7d\ufe0f Tours gastronómicos e sabores de ${dest}`, sublabel: 'Muito procurado \u00b7 Reservar com antecedência', label: 'Reservar com antecedência' },
     },
     romantica: {
       hotel: { text: `\ud83c\udfe8 Hotéis românticos recomendados em ${dest}`, sublabel: 'Melhor localização \u00b7 Cancelamento gratuito', label: `Ver hotéis em ${dest}` },
       activitiesMid: { text: `\u2764\ufe0f Experiências românticas deste roteiro`, sublabel: 'Muito procurado \u00b7 Momentos únicos a dois', label: 'Reservar experiências' },
-      flights: { text: `\u2708\ufe0f Voos para a vossa escapadela (melhor preço)`, sublabel: 'Preços sobem rapidamente \u00b7 Compare agora', label: 'Comparar voos' },
+      flights: { text: `\u2708\ufe0f Voos para a vossa escapadela (melhor preço)`, sublabel: 'Preços sobem rapidamente \u00b7 Compara agora', label: 'Comparar voos' },
       insurance: { text: `\ud83d\udee1\ufe0f Os imprevistos acontecem \u2014 faz o teu seguro`, sublabel: 'Cancelamento + assistência médica', label: 'Fazer seguro' },
       activitiesDicas: { text: `\u2764\ufe0f Experiências a dois em ${dest}`, sublabel: 'Muito procurado \u00b7 Reservar com antecedência', label: 'Reservar com antecedência' },
     },
     aventura: {
       hotel: { text: `\ud83c\udfe8 Alojamento para aventureiros em ${dest}`, sublabel: 'Melhor localização \u00b7 Cancelamento gratuito', label: `Ver hotéis em ${dest}` },
       activitiesMid: { text: `\ud83c\udfd4\ufe0f Atividades ao ar livre deste roteiro`, sublabel: 'Vagas limitadas \u00b7 Reservar com antecedência', label: 'Reservar atividades' },
-      flights: { text: `\u2708\ufe0f Voos para a aventura (melhor preço)`, sublabel: 'Preços sobem rapidamente \u00b7 Compare agora', label: 'Comparar voos' },
+      flights: { text: `\u2708\ufe0f Voos para a aventura (melhor preço)`, sublabel: 'Preços sobem rapidamente \u00b7 Compara agora', label: 'Comparar voos' },
       insurance: { text: `\ud83d\udee1\ufe0f Seguro essencial para aventura \u2014 não arrisques`, sublabel: 'Cobertura para atividades radicais', label: 'Fazer seguro' },
       activitiesDicas: { text: `\ud83c\udfd4\ufe0f Aventuras imperdíveis em ${dest}`, sublabel: 'Vagas limitadas \u00b7 Reservar com antecedência', label: 'Reservar com antecedência' },
     },
     familia: {
       hotel: { text: `\ud83c\udfe8 Hotéis family-friendly em ${dest}`, sublabel: 'Melhor localização \u00b7 Cancelamento gratuito', label: `Ver hotéis em ${dest}` },
       activitiesMid: { text: `\ud83c\udfa0 Atividades para toda a família`, sublabel: 'Evita filas \u00b7 Bilhetes sem espera', label: 'Reservar experiências (evita filas)' },
-      flights: { text: `\u2708\ufe0f Voos para a família (melhor preço)`, sublabel: 'Preços sobem rapidamente \u00b7 Compare agora', label: 'Comparar voos' },
+      flights: { text: `\u2708\ufe0f Voos para a família (melhor preço)`, sublabel: 'Preços sobem rapidamente \u00b7 Compara agora', label: 'Comparar voos' },
       insurance: { text: `\ud83d\udee1\ufe0f Os imprevistos acontecem \u2014 protege a família`, sublabel: 'Cobertura para toda a família', label: 'Fazer seguro' },
       activitiesDicas: { text: `\ud83c\udfa0 Atividades para crianças em ${dest}`, sublabel: 'Muito procurado \u00b7 Reservar com antecedência', label: 'Reservar com antecedência' },
     },
@@ -230,9 +230,9 @@ const getCTACopy = (destination, tripTypes = []) => {
   const defaults = {
     hotel: { text: `\ud83c\udfe8 Hotéis bem localizados em ${dest}`, sublabel: 'Melhor localização \u00b7 Cancelamento gratuito', label: `Ver hotéis no centro de ${dest}` },
     activitiesMid: { text: `\ud83c\udfab Experiências imperdíveis em ${dest}`, sublabel: 'Evita filas \u00b7 Bilhetes sem espera', label: 'Reservar experiências (evita filas)' },
-    flights: { text: `\u2708\ufe0f Encontrar voos para estas datas (melhor preço)`, sublabel: 'Preços sobem rapidamente \u00b7 Compare agora', label: 'Comparar voos' },
+    flights: { text: `\u2708\ufe0f Encontrar voos para estas datas (melhor preço)`, sublabel: 'Preços sobem rapidamente \u00b7 Compara agora', label: 'Comparar voos' },
     insurance: { text: `\ud83d\udee1\ufe0f Os imprevistos acontecem \u2014 faz o teu seguro`, sublabel: 'Cancelamento + assistência médica', label: 'Fazer seguro' },
-    activitiesDicas: { text: `\ud83c\udfab Experiências e atividades em ${dest}`, sublabel: 'Muito procurado \u00b7 Reservar com antecedência', label: 'Reservar com antecedência' },
+    activitiesDicas: { text: `\ud83c\udfab Experiências e atividades em ${dest}`, sublabel: 'Muito procurado \u00b7 Reserva com antecedência', label: 'Reservar com antecedência' },
   };
 
   const specific = typeSpecific[primary] || {};
@@ -389,7 +389,7 @@ const StickyBar = ({ links, onTrack, visible, destination }) => {
           data-testid="sticky-booking-bar">
           <div className="max-w-2xl mx-auto px-3 sm:px-4 py-2.5">
             <p className="text-[10px] font-medium text-[#6B6661] text-center mb-1.5 flex items-center justify-center gap-1">
-              <Sparkles className="w-3 h-3 text-[#FFBE98]" />Planeie e reserve a sua viagem
+              <Sparkles className="w-3 h-3 text-[#FFBE98]" />Planeia e reserva a tua viagem
             </p>
             <div className="flex items-center gap-1.5 sm:gap-2">
               {items.map(item => (
@@ -438,7 +438,7 @@ const RefinePanel = ({ onSubmit, loading, success }) => {
     return (
       <button onClick={handleOpen} data-testid="refine-btn"
         className="flex items-center justify-center gap-2 bg-[#FFBE98] text-white text-sm font-semibold px-5 py-2.5 rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:bg-[#E6A07C] transition-all duration-200 w-full">
-        <SlidersHorizontal className="w-4 h-4" />Ajustar o seu plano
+        <SlidersHorizontal className="w-4 h-4" />Ajustar o teu plano
       </button>
     );
   }
@@ -446,7 +446,7 @@ const RefinePanel = ({ onSubmit, loading, success }) => {
   return (
     <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="overflow-hidden w-full" data-testid="refine-panel-open">
       <div className="space-y-2">
-        <label className="text-xs font-medium text-[#6B6661] block">Quer acrescentar algo ao plano?</label>
+        <label className="text-xs font-medium text-[#6B6661] block">Queres acrescentar algo ao plano?</label>
         <div className="flex gap-2 items-center">
           <input ref={inputRef} type="text" value={text} onChange={e => setText(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleSubmit()}
@@ -816,7 +816,7 @@ const TravelPlanner = () => {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
             className="bg-white rounded-2xl border border-stone-100 p-10 shadow-sm text-center">
             <Loader2 className="w-8 h-8 animate-spin text-[#FFBE98] mx-auto mb-4" />
-            <p className="text-sm font-semibold text-[#2D2A26]">A gerar o seu guia de viagem...</p>
+            <p className="text-sm font-semibold text-[#2D2A26]">A gerar o teu guia de viagem...</p>
             <p className="text-xs text-[#6B6661] mt-1">Isto pode demorar até 30 segundos</p>
           </motion.div>
         )}
@@ -838,7 +838,7 @@ const TravelPlanner = () => {
                       <span className="w-1.5 h-1.5 rounded-full bg-[#FFBE98] animate-bounce" style={{ animationDelay: '300ms' }} />
                     </div>
                     <span className="text-sm font-semibold bg-gradient-to-r from-[#FFBE98] via-[#E6A07C] to-[#FFBE98] bg-[length:200%_100%] bg-clip-text text-transparent animate-[shimmer_2s_linear_infinite]">
-                      A ajustar o seu plano com IA
+                      A ajustar o teu plano com IA
                     </span>
                   </div>
                   <p className="text-xs text-[#6B6661] mt-0.5">Isto pode demorar até 30 segundos.</p>
@@ -850,7 +850,7 @@ const TravelPlanner = () => {
             <div className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden" data-testid="travel-document">
               {/* Document header */}
               <div className="bg-gradient-to-r from-[#FFBE98]/10 to-[#E6A07C]/5 px-5 py-5 border-b border-stone-100/50">
-                <p className="text-[10px] font-semibold text-[#FFBE98] uppercase tracking-wider mb-1">O seu guia de viagem</p>
+                <p className="text-[10px] font-semibold text-[#FFBE98] uppercase tracking-wider mb-1">O teu guia de viagem</p>
                 <h2 className="text-xl font-bold text-[#2D2A26]" data-testid="plan-destination">{plan.destination}</h2>
                 <p className="text-sm text-[#6B6661] mt-0.5">{plan.dates}</p>
                 {plan.summary && <p className="text-sm text-[#2D2A26]/80 mt-2 italic leading-relaxed">{plan.summary}</p>}
