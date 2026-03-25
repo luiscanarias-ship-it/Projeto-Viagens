@@ -144,6 +144,12 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - "Viagem Principal" button keeps its own permanent peach style
 - "Explorar Viagens" keeps neutral style (scroll-only, no distinct route)
 
+### Server-Side SEO + PDF Cover (2026-03-25)
+- **SSR Endpoint**: GET /api/ssr/plano/{slug} — Full HTML page with all OG meta tags (og:title, og:description, og:image, og:url, og:type), Twitter cards, schema.org TouristTrip structured data, canonical URL, and complete itinerary content visible without JavaScript. Crawlers (Facebook, WhatsApp, Twitter, Google, etc.) get pre-rendered HTML.
+- **Crawler Proxy**: setupProxy.js detects 15+ crawler user agents and redirects /plano/{slug} to /api/ssr/plano/{slug} for SSR.
+- **OG Image Upgrade**: Premium dark gradient design with 4Luis branding, destination, duration, dates, summary. 1200x630 PNG.
+- **PDF Cover Page**: First page of offline PDF now includes the OG image (full-width), destination title, "Guia de viagem criado com IA" subtitle, dates, and 4Luis branding. Followed by PageBreak then existing content (unchanged).
+
 ### UX/Conversion Optimization (2026-03-25)
 - **TopBookingBar**: Upgraded from compact chips to premium visual cards with icons, descriptions, and CTA buttons. Hotel card highlighted with peach gradient.
 - **Planning Hub**: New "Planeamento da viagem" section after itinerary with 6 grouped links (voos, hoteis, seguro, eSIM, atividades, transportes) in 2-column grid.
