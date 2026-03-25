@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { MapContainer, TileLayer, Marker, Polyline, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Loader2, ArrowRight, Clock, DollarSign, Users, ChevronUp, ChevronDown, X, Navigation, Check, Maximize2, Minimize2, Plane, Building2, Train, Car } from 'lucide-react';
+import { Sparkles, Loader2, ArrowRight, Clock, DollarSign, Users, ChevronUp, ChevronDown, X, Navigation, Check, Maximize2, Minimize2, Plane, Building2, Train, Car, Eye, UtensilsCrossed, MapPinned } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -425,13 +425,33 @@ const SmartMap = ({ plan, token, onApplyRefinement }) => {
                     click: () => handleLocationClick(loc)
                   }}
                 >
-                  <Popup className="smart-map-popup" maxWidth={220}>
+                  <Popup className="smart-map-popup" maxWidth={240}>
                     <div className="p-1">
                       <p className="text-xs font-bold text-[#2D2A26] mb-0.5">{loc.name}</p>
                       <p className="text-[9px] mb-2" style={{ color: DAY_COLORS[(loc.day - 1) % DAY_COLORS.length] }}>
                         Dia {loc.day} — Ponto {i + 1}
                       </p>
-                      <p className="text-[9px] font-semibold text-[#6B6661] mb-1">Melhorar este ponto:</p>
+                      {/* Exploration mode */}
+                      <p className="text-[9px] font-semibold text-[#2D2A26] mb-1">Explorar:</p>
+                      <div className="flex flex-wrap gap-1 mb-2">
+                        {[
+                          { id: 'what_to_see', label: 'O que ver aqui', icon: Eye },
+                          { id: 'where_to_eat', label: 'Onde comer', icon: UtensilsCrossed },
+                          { id: 'how_to_next', label: 'Como chegar ao proximo', icon: MapPinned }
+                        ].map(opt => (
+                          <button
+                            key={opt.id}
+                            onClick={() => handleImprove(loc, opt.id)}
+                            disabled={!!improvingLocation}
+                            className="flex items-center gap-1 text-[8px] font-medium bg-[#FFBE98]/8 hover:bg-[#FFBE98]/20 border border-[#FFBE98]/20 text-[#2D2A26] px-1.5 py-0.5 rounded transition-colors"
+                            data-testid={`explore-${opt.id}`}
+                          >
+                            <opt.icon className="w-2.5 h-2.5 text-[#FFBE98]" />{opt.label}
+                          </button>
+                        ))}
+                      </div>
+                      {/* Optimization */}
+                      <p className="text-[9px] font-semibold text-[#6B6661] mb-1">Otimizar:</p>
                       <div className="flex flex-wrap gap-1">
                         {[
                           { id: 'less_queues', label: 'Menos filas', icon: Users },
