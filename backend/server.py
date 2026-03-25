@@ -6559,7 +6559,7 @@ async def generate_travel_plan(request: Request):
     
     logger.info(f"AI Travel Plan request: destination={destination}, dates={start_date} to {end_date}, type={trip_type}")
     
-    # Rate limiting: max 5 requests per user per hour
+    # Rate limiting: max 5 requests per user per hour (exempt admins and ambassadors)
     user = None
     try:
         user = await get_current_user(request)
@@ -6569,13 +6569,20 @@ async def generate_travel_plan(request: Request):
     user_key = user.user_id if user else request.client.host
     now = datetime.now(timezone.utc)
     
-    if user_key in ai_travel_plan_cache:
+    # Check if user is admin or ambassador — skip rate limit
+    is_premium = False
+    if user:
+        user_doc = await db.users.find_one({"user_id": user.user_id}, {"_id": 0, "is_admin": 1, "level": 1})
+        if user_doc and (user_doc.get("is_admin") or user_doc.get("level") == "embaixador"):
+            is_premium = True
+    
+    if not is_premium and user_key in ai_travel_plan_cache:
         requests_list = ai_travel_plan_cache[user_key]
         # Clean old entries (older than 1 hour)
         requests_list = [t for t in requests_list if (now - datetime.fromisoformat(t)).total_seconds() < 3600]
         ai_travel_plan_cache[user_key] = requests_list
         if len(requests_list) >= 5:
-            raise HTTPException(status_code=429, detail="Já criaste vários planos! ✈️ Podes gerar um novo dentro de 1 hora.")
+            raise HTTPException(status_code=429, detail="Ja criaste varios planos! Podes gerar um novo dentro de 1 hora.")
     
     # Increment rate limit counter BEFORE the AI call to prevent race conditions
     if user_key not in ai_travel_plan_cache:

@@ -84,20 +84,6 @@ const SmartMap = ({ plan, token, onApplyRefinement }) => {
     }
   }, [isFullscreen]);
 
-  // Invalidate map size and fit bounds when toggling fullscreen
-  useEffect(() => {
-    if (mapRef.current) {
-      setTimeout(() => {
-        mapRef.current.invalidateSize();
-        // Refit bounds to show all locations
-        if (filteredLocations.length > 0) {
-          const bounds = filteredLocations.map(l => [l.lat, l.lng]);
-          mapRef.current.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 });
-        }
-      }, 300);
-    }
-  }, [isFullscreen, filteredLocations]);
-
   // Geocode plan locations
   const fetchGeoData = useCallback(async () => {
     if (!plan?.itinerary || !token) return;
@@ -137,6 +123,19 @@ const SmartMap = ({ plan, token, onApplyRefinement }) => {
   const filteredLocations = useMemo(() => {
     return filteredDays.flatMap(d => d.locations);
   }, [filteredDays]);
+
+  // Invalidate map size and fit bounds when toggling fullscreen
+  useEffect(() => {
+    if (mapRef.current) {
+      setTimeout(() => {
+        mapRef.current.invalidateSize();
+        if (filteredLocations.length > 0) {
+          const bounds = filteredLocations.map(l => [l.lat, l.lng]);
+          mapRef.current.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 });
+        }
+      }, 300);
+    }
+  }, [isFullscreen, filteredLocations]);
 
   // Map center
   const mapCenter = useMemo(() => {
