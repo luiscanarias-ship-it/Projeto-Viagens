@@ -9,6 +9,7 @@ import uuid
 from datetime import datetime, timezone, timedelta
 import httpx
 import json
+import re
 import stripe
 
 # Import shared modules
@@ -6688,6 +6689,298 @@ Responde APENAS com um JSON valido com esta estrutura exata (sem markdown, sem `
     except Exception as e:
         logger.error(f"AI travel plan error: {e}")
         raise HTTPException(status_code=500, detail="Não foi possível gerar o plano. Tente novamente.")
+
+
+
+# ── Smart Map: Geocoding with Nominatim + Photon fallback + Cache ──
+geocode_cache = {}
+
+async def geocode_location(location_name: str, destination_context: str = "") -> dict:
+    """Geocode a location using Nominatim with Photon fallback. Returns {lat, lng} or None."""
+    cache_key = f"{location_name}|{destination_context}".lower().strip()
+    if cache_key in geocode_cache:
+        return geocode_cache[cache_key]
+
+    cached = await db.geocode_cache.find_one({"cache_key": cache_key}, {"_id": 0})
+    if cached:
+        result = {"lat": cached["lat"], "lng": cached["lng"]}
+        geocode_cache[cache_key] = result
+        return result
+
+    search_query = f"{location_name}, {destination_context}" if destination_context else location_name
+
+    # Try Photon (Komoot) first — more lenient rate limits
+    for attempt in range(2):
+        try:
+            async with httpx.AsyncClient(timeout=10) as client:
+                resp = await client.get(
+                    "https://photon.komoot.io/api/",
+                    params={"q": search_query, "limit": 1},
+                    headers={"User-Agent": "4Luis-TravelApp/1.0"}
+                )
+                if resp.status_code == 200:
+                    data = resp.json()
+                    features = data.get("features", [])
+                    if features:
+                        coords = features[0]["geometry"]["coordinates"]
+                        result = {"lat": float(coords[1]), "lng": float(coords[0])}
+                        geocode_cache[cache_key] = result
+                        await db.geocode_cache.update_one(
+                            {"cache_key": cache_key},
+                            {"$set": {"cache_key": cache_key, "lat": result["lat"], "lng": result["lng"], "query": search_query}},
+                            upsert=True
+                        )
+                        return result
+                elif resp.status_code == 429 and attempt == 0:
+                    await asyncio.sleep(1.5)
+                    continue
+        except Exception as e:
+            logger.warning(f"Photon geocode attempt {attempt+1} failed for '{search_query}': {e}")
+            if attempt == 0:
+                await asyncio.sleep(1)
+        break
+
+    # Fallback to Nominatim
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            resp = await client.get(
+                "https://nominatim.openstreetmap.org/search",
+                params={"q": search_query, "format": "json", "limit": 1, "addressdetails": 0},
+                headers={"User-Agent": "4Luis-TravelApp/1.0"}
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                if data and len(data) > 0:
+                    result = {"lat": float(data[0]["lat"]), "lng": float(data[0]["lon"])}
+                    geocode_cache[cache_key] = result
+                    await db.geocode_cache.update_one(
+                        {"cache_key": cache_key},
+                        {"$set": {"cache_key": cache_key, "lat": result["lat"], "lng": result["lng"], "query": search_query}},
+                        upsert=True
+                    )
+                    return result
+    except Exception as e:
+        logger.warning(f"Nominatim geocode failed for '{search_query}': {e}")
+
+    return None
+
+
+@api_router.post("/ai/geocode-plan")
+async def geocode_plan(request: Request):
+    """Geocode all locations in a travel plan using Nominatim with caching."""
+    try:
+        user = await get_current_user(request)
+        if not user:
+            raise HTTPException(status_code=401, detail="Autenticacao necessaria")
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=401, detail="Autenticacao necessaria")
+
+    user_doc = await db.users.find_one({"user_id": user.user_id}, {"_id": 0, "level": 1})
+    if not user_doc or user_doc.get("level") != "embaixador":
+        raise HTTPException(status_code=403, detail="Funcionalidade exclusiva para Embaixadores")
+
+    data = await request.json()
+    plan = data.get("plan")
+    if not plan or not plan.get("itinerary"):
+        raise HTTPException(status_code=400, detail="Plano com itinerario e obrigatorio")
+
+    destination = plan.get("destination", "")
+    locations_by_day = []
+    logger.info(f"Geocoding plan for {destination}, {len(plan['itinerary'])} days")
+
+    # Geocode all locations with concurrent batching per day
+    for day in plan["itinerary"]:
+        activities = day.get("activities", [])
+        # Extract location names from activity strings
+        location_names = []
+        # Portuguese verbs/prepositions to strip for better geocoding
+        strip_words = r'\b(visitar|explorar|passear|almoco|almocar|jantar|jantar|conhecer|ir|ver|fazer|tomar|comprar|experimentar|descobrir|na|no|nas|nos|em|de|do|da|dos|das|pela|pelo|pelas|pelos|para|rua|bairro|zona)\b'
+        for activity in activities:
+            name = activity if isinstance(activity, str) else activity.get("title", activity.get("name", str(activity)))
+            clean = re.sub(r'\[CTA:\w+:[^\]]+\]', '', name).strip()
+            clean = re.sub(r'^\d{1,2}[h:]\d{0,2}\s*[-–—]\s*', '', clean).strip()
+            # Remove common verbs/prepositions for better geocoding
+            geo_name = re.sub(strip_words, '', clean, flags=re.IGNORECASE).strip()
+            geo_name = re.sub(r'\s+', ' ', geo_name).strip(' -–—,')
+            if len(geo_name) > 2:
+                location_names.append((clean[:80], geo_name[:80]))
+        logger.info(f"Day {day.get('day')}: {len(activities)} activities -> {len(location_names)} geocodable names")
+
+        # Geocode concurrently (batch of tasks)
+        async def geocode_with_delay(display_name, geo_name, idx):
+            await asyncio.sleep(idx * 0.5)
+            # Try cleaned geo_name first
+            result = await geocode_location(geo_name, destination)
+            if not result:
+                # Try first 4 words only (main landmark is usually at the start)
+                short_name = ' '.join(geo_name.split()[:4]).strip(' ,')
+                if short_name != geo_name:
+                    result = await geocode_location(short_name, destination)
+            if not result and geo_name != display_name:
+                # Fallback to first 4 words of original
+                short_display = ' '.join(display_name.split()[:4]).strip(' ,')
+                result = await geocode_location(short_display, destination)
+            return result
+
+        tasks = [geocode_with_delay(display, geo, i) for i, (display, geo) in enumerate(location_names)]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        day_locations = []
+        for i, ((display_name, geo_name), coords) in enumerate(zip(location_names, results)):
+            if isinstance(coords, Exception):
+                logger.warning(f"Geocode exception for '{display_name}': {coords}")
+            elif isinstance(coords, dict) and coords:
+                day_locations.append({
+                    "name": display_name,
+                    "lat": coords["lat"],
+                    "lng": coords["lng"],
+                    "day": day.get("day", 1),
+                    "day_title": day.get("title", f"Dia {day.get('day', 1)}")
+                })
+
+        locations_by_day.append({
+            "day": day.get("day", 1),
+            "title": day.get("title", f"Dia {day.get('day', 1)}"),
+            "locations": day_locations
+        })
+
+    return {"days": locations_by_day, "destination": destination}
+
+
+@api_router.post("/ai/optimize-route")
+async def optimize_route(request: Request):
+    """AI-powered route optimization - reorder locations by proximity."""
+    from emergentintegrations.llm.chat import LlmChat, UserMessage
+
+    api_key = os.environ.get("EMERGENT_LLM_KEY")
+    if not api_key:
+        raise HTTPException(status_code=500, detail="Chave de IA nao configurada")
+
+    try:
+        user = await get_current_user(request)
+        if not user:
+            raise HTTPException(status_code=401, detail="Autenticacao necessaria")
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=401, detail="Autenticacao necessaria")
+
+    user_doc = await db.users.find_one({"user_id": user.user_id}, {"_id": 0, "level": 1})
+    if not user_doc or user_doc.get("level") != "embaixador":
+        raise HTTPException(status_code=403, detail="Funcionalidade exclusiva para Embaixadores")
+
+    data = await request.json()
+    locations = data.get("locations", [])
+    day = data.get("day")
+    destination = data.get("destination", "")
+
+    if not locations:
+        raise HTTPException(status_code=400, detail="Locais sao obrigatorios")
+
+    locs_text = "\n".join([f"- {l['name']} (lat:{l['lat']}, lng:{l['lng']})" for l in locations])
+
+    prompt = f"""Otimiza a ordem de visita destes locais no Dia {day} em {destination} para minimizar deslocacoes.
+
+LOCAIS ATUAIS (na ordem atual):
+{locs_text}
+
+REGRAS:
+1. Reordena por proximidade geografica e logica de visita
+2. Considera horarios tipicos (museus de manha, restaurantes ao almoco, etc)
+3. Responde APENAS com JSON valido (sem markdown):
+
+{{
+  "optimized_order": ["Nome local 1", "Nome local 2", ...],
+  "savings": "Descricao curta da melhoria (ex: 'Reduz 2km de deslocacoes')",
+  "tips": ["Dica 1 sobre a rota", "Dica 2"]
+}}"""
+
+    chat = LlmChat(
+        api_key=api_key,
+        session_id=f"route_{user.user_id}_{uuid.uuid4().hex[:6]}",
+        system_message="Es um otimizador de percursos turisticos. APENAS JSON valido."
+    ).with_model("openai", "gpt-5.2")
+
+    try:
+        response = await asyncio.wait_for(chat.send_message(UserMessage(text=prompt)), timeout=30)
+        clean = response.strip()
+        if clean.startswith("```"):
+            clean = clean.split("\n", 1)[-1].rsplit("```", 1)[0].strip()
+        result = json.loads(clean)
+        return result
+    except Exception as e:
+        logger.error(f"Route optimization error: {e}")
+        raise HTTPException(status_code=500, detail="Erro ao otimizar percurso. Tenta novamente.")
+
+
+@api_router.post("/ai/improve-location")
+async def improve_location(request: Request):
+    """AI suggestions for improving a specific location visit."""
+    from emergentintegrations.llm.chat import LlmChat, UserMessage
+
+    api_key = os.environ.get("EMERGENT_LLM_KEY")
+    if not api_key:
+        raise HTTPException(status_code=500, detail="Chave de IA nao configurada")
+
+    try:
+        user = await get_current_user(request)
+        if not user:
+            raise HTTPException(status_code=401, detail="Autenticacao necessaria")
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=401, detail="Autenticacao necessaria")
+
+    user_doc = await db.users.find_one({"user_id": user.user_id}, {"_id": 0, "level": 1})
+    if not user_doc or user_doc.get("level") != "embaixador":
+        raise HTTPException(status_code=403, detail="Funcionalidade exclusiva para Embaixadores")
+
+    data = await request.json()
+    location = data.get("location", "")
+    improvement_type = data.get("type", "")  # "less_queues", "cheaper", "best_time"
+    destination = data.get("destination", "")
+    day = data.get("day", 1)
+
+    type_labels = {
+        "less_queues": "como evitar filas",
+        "cheaper": "alternativas mais baratas",
+        "best_time": "melhor horario para visitar"
+    }
+    focus = type_labels.get(improvement_type, improvement_type)
+
+    prompt = f"""Da sugestoes para melhorar a visita a "{location}" em {destination} (Dia {day}).
+FOCO: {focus}
+
+REGRAS:
+1. Maximo 3 sugestoes, CURTAS e accionaveis
+2. Inclui dicas locais quando possivel
+3. Responde APENAS com JSON valido (sem markdown):
+
+{{
+  "response": "Frase resumo (1 linha)",
+  "suggestions": ["Sugestao 1", "Sugestao 2", "Sugestao 3"],
+  "can_apply": true,
+  "apply_prompt": "Instrucao curta para atualizar '{location}' no Dia {day} com estas melhorias"
+}}"""
+
+    chat = LlmChat(
+        api_key=api_key,
+        session_id=f"improve_{user.user_id}_{uuid.uuid4().hex[:6]}",
+        system_message="Es um consultor de viagem local. Respostas curtas e accionaveis. APENAS JSON valido."
+    ).with_model("openai", "gpt-5.2")
+
+    try:
+        response = await asyncio.wait_for(chat.send_message(UserMessage(text=prompt)), timeout=25)
+        clean = response.strip()
+        if clean.startswith("```"):
+            clean = clean.split("\n", 1)[-1].rsplit("```", 1)[0].strip()
+        result = json.loads(clean)
+        return result
+    except Exception as e:
+        logger.error(f"Improve location error: {e}")
+        raise HTTPException(status_code=500, detail="Erro ao gerar sugestoes.")
 
 
 

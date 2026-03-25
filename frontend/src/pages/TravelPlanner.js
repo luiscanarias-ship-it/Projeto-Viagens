@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -10,6 +10,7 @@ import {
 import axios from 'axios';
 import { AmbassadorProgress, PremiumGate, InlineReferralCTA } from '../components/AmbassadorProgress';
 import AIAssistant from '../components/AIAssistant';
+const SmartMap = React.lazy(() => import('../components/SmartMap'));
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -1038,17 +1039,11 @@ const TravelPlanner = () => {
               {/* ── Actions Footer ── */}
               <div className="px-5 py-4 border-t border-stone-100 bg-[#FFBE98]/[0.03]" data-testid="actions-footer">
                 <div className="space-y-3">
-                  {/* Premium: Smart Map (gated) */}
-                  <PremiumGate isAmbassador={isAmbassador} label="Mapa interativo para Embaixadores">
-                    <div className="bg-stone-50 rounded-xl p-4 flex items-center gap-3 border border-stone-100" data-testid="smart-map-preview">
-                      <div className="w-10 h-10 bg-sky-50 rounded-xl flex items-center justify-center shrink-0">
-                        <Map className="w-5 h-5 text-sky-500" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-bold text-[#2D2A26]">Mapa interativo do roteiro</p>
-                        <p className="text-[11px] text-[#6B6661]">Todos os locais do seu roteiro num mapa visual</p>
-                      </div>
-                    </div>
+                  {/* Premium: Smart Map */}
+                  <PremiumGate isAmbassador={isAmbassador} label="Desbloqueia o mapa interativo">
+                    <Suspense fallback={<div className="bg-white rounded-xl border border-[#FFBE98]/20 p-8 flex items-center justify-center gap-2"><Loader2 className="w-5 h-5 animate-spin text-[#FFBE98]" /><span className="text-xs text-[#6B6661]">A carregar mapa...</span></div>}>
+                      <SmartMap plan={plan} token={token} onApplyRefinement={handleRefine} />
+                    </Suspense>
                   </PremiumGate>
 
                   {/* Premium: AI Assistant */}
