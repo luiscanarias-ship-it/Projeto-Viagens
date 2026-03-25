@@ -79,7 +79,7 @@ const FitBounds = ({ locations }) => {
   return null;
 };
 
-const SmartMap = ({ plan, token, onApplyRefinement, onGeoDataLoaded }) => {
+const SmartMap = ({ plan, token, onApplyRefinement, onGeoDataLoaded, affiliateLinks, onTrackAffiliate }) => {
   const [geoData, setGeoData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [selectedDay, setSelectedDay] = useState(0); // 0 = all
@@ -470,6 +470,17 @@ const SmartMap = ({ plan, token, onApplyRefinement, onGeoDataLoaded }) => {
                           </button>
                         ))}
                       </div>
+                      {/* Affiliate quick actions */}
+                      {affiliateLinks?.getyourguide?.url && (
+                        <div className="mt-2 pt-2 border-t border-stone-100">
+                          <a href={affiliateLinks.getyourguide.url} target="_blank" rel="noopener noreferrer"
+                            onClick={() => onTrackAffiliate?.('getyourguide')}
+                            className="flex items-center gap-1.5 text-[8px] font-bold text-[#FFBE98] bg-[#FFBE98]/8 hover:bg-[#FFBE98]/15 border border-[#FFBE98]/15 px-2 py-1 rounded transition-colors w-full justify-center"
+                            data-testid={`map-cta-getyourguide`}>
+                            Reservar experiencia aqui
+                          </a>
+                        </div>
+                      )}
                     </div>
                   </Popup>
                 </Marker>

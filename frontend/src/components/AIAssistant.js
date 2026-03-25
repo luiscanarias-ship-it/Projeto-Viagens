@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Send, Loader2, ArrowRight, DollarSign, Star, Calendar, CloudSun, RotateCcw } from 'lucide-react';
+import { Sparkles, Send, Loader2, ArrowRight, DollarSign, Star, Calendar, CloudSun, RotateCcw, ExternalLink, Hotel, Ticket } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -11,7 +11,7 @@ const QUICK_ACTIONS = [
   { id: 'weather', label: 'Ajustar ao clima', icon: CloudSun, message: 'Ajusta o roteiro considerando o clima previsto para as datas da viagem.' },
 ];
 
-const AIAssistant = ({ plan, token, onApplyRefinement }) => {
+const AIAssistant = ({ plan, token, onApplyRefinement, affiliateLinks, onTrackAffiliate }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -171,6 +171,28 @@ const AIAssistant = ({ plan, token, onApplyRefinement }) => {
                         <Sparkles className="w-3 h-3" />
                         Aplicar ao roteiro
                       </button>
+                    </div>
+                  )}
+
+                  {/* Contextual affiliate CTA based on conversation intent */}
+                  {msg.role === 'assistant' && affiliateLinks && (
+                    <div className="ml-7 pt-1.5 flex flex-wrap gap-1.5" data-testid="assistant-affiliate-ctas">
+                      {(msg.content?.toLowerCase().includes('hotel') || msg.content?.toLowerCase().includes('alojamento')) && affiliateLinks.booking?.url && (
+                        <a href={affiliateLinks.booking.url} target="_blank" rel="noopener noreferrer"
+                          onClick={() => onTrackAffiliate?.('booking')}
+                          className="inline-flex items-center gap-1 text-[9px] font-semibold text-[#FFBE98] bg-[#FFBE98]/8 hover:bg-[#FFBE98]/15 border border-[#FFBE98]/15 px-2.5 py-1 rounded-lg transition-colors"
+                          data-testid="assistant-cta-booking">
+                          <Hotel className="w-3 h-3" />Ver hoteis alternativos<ExternalLink className="w-2.5 h-2.5 opacity-60" />
+                        </a>
+                      )}
+                      {(msg.content?.toLowerCase().includes('bilhete') || msg.content?.toLowerCase().includes('experiencia') || msg.content?.toLowerCase().includes('atividade') || msg.content?.toLowerCase().includes('fila')) && affiliateLinks.getyourguide?.url && (
+                        <a href={affiliateLinks.getyourguide.url} target="_blank" rel="noopener noreferrer"
+                          onClick={() => onTrackAffiliate?.('getyourguide')}
+                          className="inline-flex items-center gap-1 text-[9px] font-semibold text-[#FFBE98] bg-[#FFBE98]/8 hover:bg-[#FFBE98]/15 border border-[#FFBE98]/15 px-2.5 py-1 rounded-lg transition-colors"
+                          data-testid="assistant-cta-getyourguide">
+                          <Ticket className="w-3 h-3" />Ver opcoes<ExternalLink className="w-2.5 h-2.5 opacity-60" />
+                        </a>
+                      )}
                     </div>
                   )}
                 </div>

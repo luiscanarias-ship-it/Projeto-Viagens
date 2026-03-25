@@ -276,7 +276,7 @@ def _build_tips_section(plan):
     return elements
 
 
-def generate_travel_guide_pdf(plan, geocode_data=None, sections=None):
+def generate_travel_guide_pdf(plan, geocode_data=None, sections=None, affiliate_links=None):
     """
     Generate a complete offline travel guide PDF.
     
@@ -284,12 +284,15 @@ def generate_travel_guide_pdf(plan, geocode_data=None, sections=None):
         plan: dict - The AI-generated travel plan
         geocode_data: dict - Optional geocode data for static map
         sections: dict - Which sections to include {flights, hotel, map, itinerary, tips, transport}
+        affiliate_links: dict - Optional affiliate link URLs {booking: {url}, skyscanner: {url}, ...}
     
     Returns:
         BytesIO buffer containing the PDF
     """
     if sections is None:
         sections = {"flights": True, "hotel": True, "map": True, "itinerary": True, "tips": True, "transport": True}
+    if affiliate_links is None:
+        affiliate_links = {}
     
     buf = io.BytesIO()
     
@@ -356,6 +359,26 @@ def generate_travel_guide_pdf(plan, geocode_data=None, sections=None):
     
     if sections.get("tips"):
         elements.extend(_build_tips_section(plan))
+    
+    # ─── Affiliate Links (clickable in PDF) ───
+    if affiliate_links:
+        elements.append(_section_header("Links Uteis"))
+        destination = plan.get("destination", "")
+        link_items = [
+            ("booking", f"Hoteis em {destination}", "Melhor localizacao · Cancelamento gratis"),
+            ("skyscanner", "Comparar voos", "Melhor preco para estas datas"),
+            ("getyourguide", f"Atividades em {destination}", "Evita filas · Cancelamento gratis"),
+            ("insurance", "Seguro de viagem", "Protege a tua viagem"),
+            ("airalo", "eSIM internacional", "Internet sem roaming"),
+        ]
+        for key, label, desc in link_items:
+            url = affiliate_links.get(key, {}).get("url", "")
+            if url:
+                elements.append(Paragraph(
+                    f'<b>{label}</b> — {desc}<br/>'
+                    f'<a href="{url}" color="#FFBE98">{url[:60]}{"..." if len(url) > 60 else ""}</a>',
+                    ParagraphStyle("link", fontName="Helvetica", fontSize=8, textColor=GREY, leading=12, spaceAfter=2*mm)
+                ))
     
     # ─── Footer ───
     elements.append(Spacer(1, 8*mm))

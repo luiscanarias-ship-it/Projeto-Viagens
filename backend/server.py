@@ -7490,8 +7490,19 @@ async def generate_pdf_guide(request: Request):
     
     from pdf_generator import generate_travel_guide_pdf
     
+    # Get affiliate links for PDF
+    aff_links = {}
     try:
-        buf = generate_travel_guide_pdf(plan, geocode_data=geocode_data, sections=sections)
+        aff_response = await db.settings.find_one({"key": "affiliate_links"}, {"_id": 0})
+        if aff_response:
+            aff_links = aff_response.get("value", {})
+        else:
+            aff_links = AFFILIATE_LINKS
+    except Exception:
+        aff_links = AFFILIATE_LINKS
+    
+    try:
+        buf = generate_travel_guide_pdf(plan, geocode_data=geocode_data, sections=sections, affiliate_links=aff_links)
         destination = plan.get("destination", "viagem").replace(" ", "-").lower()
         filename = f"guia-{destination}-4luis.pdf"
         

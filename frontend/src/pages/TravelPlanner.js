@@ -144,25 +144,43 @@ const InlineActivityCTA = ({ match, link, onTrack, activityText, destination }) 
   );
 };
 
-/* ── Top Booking Bar (compact, after summary) ── */
-const TopBookingBar = ({ links, onTrack, destination }) => (
-  <div className="pt-3 space-y-1.5" data-testid="top-booking-bar">
-    <div className="flex items-center gap-2 flex-wrap">
-      {[
-        { id: 'booking', icon: Hotel, label: destination ? `\ud83c\udfe8 Hotéis bem localizados em ${destination}` : '\ud83c\udfe8 Alojamento', trust: true },
-        { id: 'skyscanner', icon: Plane, label: '\u2708\ufe0f Voos para estas datas (melhor preço)', trust: false },
-        { id: 'getyourguide', icon: Ticket, label: destination ? `\ud83c\udf9f\ufe0f Experiências em ${destination} (evita filas)` : '\ud83c\udf9f\ufe0f Atividades', trust: true },
-      ].map(item => (
-        <a key={item.id} href={links[item.id]?.url || '#'} target="_blank" rel="noopener noreferrer"
-          onClick={() => onTrack(item.id)} data-testid={`top-booking-${item.id}`}
-          className="flex items-center gap-1.5 text-[11px] font-semibold text-[#2D2A26] bg-stone-50 hover:text-[#FFBE98] px-3 py-2 rounded-xl transition-all duration-200 border border-stone-200/60 hover:border-[#FFBE98]/30 hover:shadow-md hover:-translate-y-0.5 group">
-          <item.icon className="w-4 h-4 text-[#FFBE98]" />
-          {item.label}
-          {item.trust && <span className="text-[8px] font-bold text-[#FFBE98]/80 bg-[#FFBE98]/10 px-1.5 py-0.5 rounded-full">4Luis</span>}
-          <ExternalLink className="w-2.5 h-2.5 opacity-0 group-hover:opacity-70 transition-opacity" />
-        </a>
-      ))}
-    </div>
+/* ── Top Booking Bar (premium visual cards) ── */
+const TopBookingBar = ({ links, onTrack, destination, ctaCopy }) => (
+  <div className="pt-4 space-y-2" data-testid="top-booking-bar">
+    {[
+      { id: 'booking', icon: Hotel, copy: ctaCopy?.hotel, trust: true },
+      { id: 'skyscanner', icon: Plane, copy: ctaCopy?.flights, trust: false },
+      { id: 'getyourguide', icon: Ticket, copy: ctaCopy?.activitiesMid, trust: true },
+    ].map(item => (
+      <a key={item.id} href={links[item.id]?.url || '#'} target="_blank" rel="noopener noreferrer"
+        onClick={() => onTrack(item.id)} data-testid={`top-booking-${item.id}`}
+        className={`flex items-center gap-3 rounded-xl p-3 transition-all duration-200 group border ${
+          item.trust
+            ? 'bg-gradient-to-r from-[#FFBE98]/8 to-transparent border-[#FFBE98]/15 hover:shadow-lg hover:border-[#FFBE98]/25'
+            : 'bg-white border-stone-200/60 hover:shadow-md hover:border-stone-300'
+        }`}>
+        <div className={`flex items-center justify-center shrink-0 rounded-xl bg-white shadow-sm group-hover:shadow-md transition-shadow ${
+          item.trust ? 'w-10 h-10' : 'w-9 h-9'
+        }`}>
+          <item.icon className={`${item.trust ? 'w-5 h-5' : 'w-4 h-4'} text-[#FFBE98]`} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className={`font-bold text-[#2D2A26] ${item.trust ? 'text-[13px]' : 'text-xs'}`}>
+            {item.copy?.text || (item.id === 'booking' ? `Hoteis em ${destination}` : item.id === 'skyscanner' ? 'Voos' : 'Atividades')}
+          </p>
+          {item.copy?.sublabel && (
+            <p className="text-[10px] text-[#6B6661] mt-0.5">{item.copy.sublabel}</p>
+          )}
+        </div>
+        <span className={`shrink-0 flex items-center gap-1 rounded-xl transition-all duration-200 ${
+          item.trust
+            ? 'bg-[#2D2A26] text-white text-[11px] font-bold px-4 py-2 shadow-sm group-hover:shadow-lg group-hover:-translate-y-0.5'
+            : 'bg-stone-50 text-[#2D2A26] text-[10px] font-semibold px-3 py-1.5 border border-stone-200 group-hover:border-stone-300'
+        }`}>
+          {item.copy?.label || 'Ver'}<ExternalLink className="w-3 h-3" />
+        </span>
+      </a>
+    ))}
   </div>
 );
 
@@ -836,7 +854,7 @@ const TravelPlanner = () => {
                 <h2 className="text-xl font-bold text-[#2D2A26]" data-testid="plan-destination">{plan.destination}</h2>
                 <p className="text-sm text-[#6B6661] mt-0.5">{plan.dates}</p>
                 {plan.summary && <p className="text-sm text-[#2D2A26]/80 mt-2 italic leading-relaxed">{plan.summary}</p>}
-                <TopBookingBar links={links} onTrack={trackClick} destination={plan.destination} />
+                <TopBookingBar links={links} onTrack={trackClick} destination={plan.destination} ctaCopy={ctaCopy} />
 
                 {/* Referral CTA at peak motivation (after seeing the guide) */}
                 {token && !isAmbassador && <InlineReferralCTA token={token} />}
@@ -1049,19 +1067,49 @@ const TravelPlanner = () => {
                   link={links.getyourguide?.url} platform="getyourguide" onTrack={trackClick} trust={true} />
               </div>
 
+              {/* ── Planning Hub: Grouped Links ── */}
+              <div className="px-5 py-5 bg-gradient-to-b from-stone-50/50 to-white border-t border-stone-100" data-testid="planning-hub">
+                <div className="flex items-center gap-2 mb-3">
+                  <Sparkles className="w-4 h-4 text-[#FFBE98]" />
+                  <h3 className="font-bold text-[#2D2A26] text-sm">Planeamento da viagem</h3>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { id: 'skyscanner', icon: Plane, label: 'Comparar voos', sub: 'Melhor preco' },
+                    { id: 'booking', icon: Hotel, label: plan?.destination ? `Hoteis em ${plan.destination}` : 'Ver hoteis', sub: 'Cancelamento gratis' },
+                    { id: 'insurance', icon: Shield, label: 'Fazer seguro', sub: 'Protege a viagem' },
+                    { id: 'airalo', icon: Wifi, label: 'Comprar eSIM', sub: 'Sem roaming' },
+                    { id: 'getyourguide', icon: Ticket, label: 'Reservar atividades', sub: 'Evita filas' },
+                    { id: 'cars', icon: Car, label: 'Transportes', sub: 'Transfers e aluguer' },
+                  ].map(item => (
+                    <a key={item.id} href={links[item.id]?.url || '#'} target="_blank" rel="noopener noreferrer"
+                      onClick={() => trackClick(item.id)} data-testid={`hub-${item.id}`}
+                      className="flex items-center gap-2.5 bg-white border border-stone-200/70 rounded-xl px-3 py-2.5 hover:border-[#FFBE98]/30 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group">
+                      <div className="w-8 h-8 bg-[#FFBE98]/8 rounded-lg flex items-center justify-center shrink-0 group-hover:bg-[#FFBE98]/15 transition-colors">
+                        <item.icon className="w-4 h-4 text-[#FFBE98]" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-[#2D2A26] truncate">{item.label}</p>
+                        <p className="text-[9px] text-[#6B6661]">{item.sub}</p>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+
               {/* ── Actions Footer ── */}
               <div className="px-5 py-4 border-t border-stone-100 bg-[#FFBE98]/[0.03]" data-testid="actions-footer">
                 <div className="space-y-3">
                   {/* Premium: Smart Map */}
                   <PremiumGate isAmbassador={isAmbassador} label="Desbloqueia o mapa interativo">
                     <Suspense fallback={<div className="bg-white rounded-xl border border-[#FFBE98]/20 p-8 flex items-center justify-center gap-2"><Loader2 className="w-5 h-5 animate-spin text-[#FFBE98]" /><span className="text-xs text-[#6B6661]">A carregar mapa...</span></div>}>
-                      <SmartMap plan={plan} token={token} onApplyRefinement={handleRefine} onGeoDataLoaded={setGeocodeData} />
+                      <SmartMap plan={plan} token={token} onApplyRefinement={handleRefine} onGeoDataLoaded={setGeocodeData} affiliateLinks={links} onTrackAffiliate={trackClick} />
                     </Suspense>
                   </PremiumGate>
 
                   {/* Premium: AI Assistant */}
                   <PremiumGate isAmbassador={isAmbassador} label="Desbloqueia o assistente completo">
-                    <AIAssistant plan={plan} token={token} onApplyRefinement={handleRefine} />
+                    <AIAssistant plan={plan} token={token} onApplyRefinement={handleRefine} affiliateLinks={links} onTrackAffiliate={trackClick} />
                   </PremiumGate>
 
                   {/* Ambassador Progress */}
