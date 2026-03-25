@@ -966,23 +966,25 @@ const TravelPlanner = () => {
                 </div>
                 <HideableSection id="checklist" hiddenSections={hiddenSections} toggleSection={toggleSection}>
                   {plan.checklist && (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                      {Object.entries(plan.checklist).map(([key, items]) => (
-                        <div key={key} className="bg-stone-50/50 rounded-xl p-2.5">
-                          <p className="text-[10px] font-bold text-[#2D2A26] uppercase tracking-wide mb-1.5">
-                            {key === 'documents' ? 'Documentos' : key === 'hygiene' ? 'Higiene' : 'Tecnologia'}
-                          </p>
-                          {items?.map((item, i) => (
-                            <p key={i} className="text-xs text-[#6B6661] flex items-center gap-1.5 py-0.5">
-                              <CheckCircle2 className="w-3 h-3 text-emerald-400 shrink-0" />
-                              <TextWithCTA text={item} links={links} onTrack={trackClick} variant="inline" destination={plan.destination} />
+                    <div>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        {Object.entries(plan.checklist).map(([key, items]) => (
+                          <div key={key} className="bg-stone-50/50 rounded-xl p-2.5">
+                            <p className="text-[10px] font-bold text-[#2D2A26] uppercase tracking-wide mb-1.5">
+                              {key === 'documents' ? 'Documentos' : key === 'hygiene' ? 'Higiene' : 'Tecnologia'}
                             </p>
-                          ))}
-                          {key === 'tech' && (
-                            <EsimMicroCard link={links.airalo?.url} onTrack={trackClick} destination={plan.destination} />
-                          )}
-                        </div>
-                      ))}
+                            {items?.map((item, i) => (
+                              <p key={i} className="text-xs text-[#6B6661] flex items-center gap-1.5 py-0.5">
+                                <CheckCircle2 className="w-3 h-3 text-emerald-400 shrink-0" />
+                                <TextWithCTA text={item} links={links} onTrack={trackClick} variant="inline" destination={plan.destination} />
+                              </p>
+                            ))}
+                          </div>
+                        ))}
+                      </div>
+                      {plan.checklist.tech && (
+                        <EsimMicroCard link={links.airalo?.url} onTrack={trackClick} destination={plan.destination} />
+                      )}
                     </div>
                   )}
                 </HideableSection>

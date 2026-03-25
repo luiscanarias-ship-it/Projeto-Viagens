@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { MapContainer, TileLayer, Marker, Polyline, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Loader2, ArrowRight, Clock, DollarSign, Users, ChevronUp, ChevronDown, X, Navigation, Check } from 'lucide-react';
+import { Sparkles, Loader2, ArrowRight, Clock, DollarSign, Users, ChevronUp, ChevronDown, X, Navigation, Check, Maximize2, Minimize2 } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -39,6 +39,18 @@ const FlyTo = ({ center, zoom }) => {
   return null;
 };
 
+// Auto fit bounds on data change
+const FitBounds = ({ locations }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (locations.length > 0) {
+      const bounds = locations.map(l => [l.lat, l.lng]);
+      map.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 });
+    }
+  }, [locations, map]);
+  return null;
+};
+
 const SmartMap = ({ plan, token, onApplyRefinement }) => {
   const [geoData, setGeoData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -51,7 +63,9 @@ const SmartMap = ({ plan, token, onApplyRefinement }) => {
   const [optimizeResult, setOptimizeResult] = useState(null);
   const [mobileSheet, setMobileSheet] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const mapRef = useRef(null);
+  const mapContainerRef = useRef(null);
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
@@ -59,6 +73,30 @@ const SmartMap = ({ plan, token, onApplyRefinement }) => {
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
   }, []);
+
+  // Fullscreen: ESC to close + body scroll lock
+  useEffect(() => {
+    if (isFullscreen) {
+      document.body.style.overflow = 'hidden';
+      const handleEsc = (e) => { if (e.key === 'Escape') setIsFullscreen(false); };
+      window.addEventListener('keydown', handleEsc);
+      return () => { document.body.style.overflow = ''; window.removeEventListener('keydown', handleEsc); };
+    }
+  }, [isFullscreen]);
+
+  // Invalidate map size and fit bounds when toggling fullscreen
+  useEffect(() => {
+    if (mapRef.current) {
+      setTimeout(() => {
+        mapRef.current.invalidateSize();
+        // Refit bounds to show all locations
+        if (filteredLocations.length > 0) {
+          const bounds = filteredLocations.map(l => [l.lat, l.lng]);
+          mapRef.current.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 });
+        }
+      }, 300);
+    }
+  }, [isFullscreen, filteredLocations]);
 
   // Geocode plan locations
   const fetchGeoData = useCallback(async () => {
@@ -193,9 +231,14 @@ const SmartMap = ({ plan, token, onApplyRefinement }) => {
   const totalDays = geoData.days.length;
 
   return (
-    <div className="bg-white rounded-xl border border-[#FFBE98]/20 overflow-hidden" data-testid="smart-map">
+    <div
+      ref={mapContainerRef}
+      className={isFullscreen ? 'fixed inset-0 z-[9999] bg-white flex flex-col' : ''}
+      data-testid="smart-map"
+    >
+    <div className={`bg-white ${isFullscreen ? 'flex flex-col h-full' : 'rounded-xl border border-[#FFBE98]/20'} overflow-hidden`}>
       {/* Header */}
-      <div className="px-4 py-3 bg-gradient-to-r from-sky-50/50 to-[#FFBE98]/5 border-b border-stone-100 flex items-center justify-between">
+      <div className="px-4 py-3 bg-gradient-to-r from-sky-50/50 to-[#FFBE98]/5 border-b border-stone-100 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 bg-sky-100 rounded-lg flex items-center justify-center">
             <Navigation className="w-3.5 h-3.5 text-sky-600" />
@@ -205,15 +248,25 @@ const SmartMap = ({ plan, token, onApplyRefinement }) => {
             <p className="text-[9px] text-[#6B6661]">{allLocations.length} locais em {totalDays} dias</p>
           </div>
         </div>
-        <button
-          onClick={handleOptimize}
-          disabled={optimizing}
-          className="flex items-center gap-1.5 text-[10px] font-semibold bg-violet-50 hover:bg-violet-100 text-violet-600 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
-          data-testid="optimize-route-btn"
-        >
-          {optimizing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
-          Otimizar percurso
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleOptimize}
+            disabled={optimizing}
+            className="flex items-center gap-1.5 text-[10px] font-semibold bg-violet-50 hover:bg-violet-100 text-violet-600 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+            data-testid="optimize-route-btn"
+          >
+            {optimizing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+            Otimizar percurso
+          </button>
+          <button
+            onClick={() => setIsFullscreen(!isFullscreen)}
+            className="flex items-center justify-center w-8 h-8 bg-stone-100 hover:bg-stone-200 rounded-lg transition-colors"
+            data-testid="map-fullscreen-toggle"
+            title={isFullscreen ? 'Sair do ecra inteiro' : 'Ecra inteiro'}
+          >
+            {isFullscreen ? <Minimize2 className="w-4 h-4 text-[#6B6661]" /> : <Maximize2 className="w-4 h-4 text-[#6B6661]" />}
+          </button>
+        </div>
       </div>
 
       {/* Day filters */}
@@ -238,9 +291,9 @@ const SmartMap = ({ plan, token, onApplyRefinement }) => {
       </div>
 
       {/* Map + Sidebar layout */}
-      <div className={`flex ${isMobile ? 'flex-col' : 'flex-row'}`} style={{ height: isMobile ? '70vh' : '400px' }}>
-        {/* Sidebar — desktop only */}
-        {!isMobile && (
+      <div className={`flex ${isMobile && !isFullscreen ? 'flex-col' : 'flex-row'} ${isFullscreen ? 'flex-1 min-h-0' : ''}`} style={isFullscreen ? {} : { height: isMobile ? '70vh' : '400px' }}>
+        {/* Sidebar — desktop or fullscreen */}
+        {(!isMobile || isFullscreen) && (
           <div className="w-52 border-r border-stone-100 overflow-y-auto" data-testid="map-sidebar">
             {filteredDays.map(dayGroup => (
               <div key={dayGroup.day} className="border-b border-stone-50 last:border-b-0">
@@ -273,8 +326,8 @@ const SmartMap = ({ plan, token, onApplyRefinement }) => {
             center={mapCenter}
             zoom={13}
             className="w-full h-full"
-            zoomControl={!isMobile}
-            ref={mapRef}
+            zoomControl={true}
+            ref={(map) => { mapRef.current = map; }}
             style={{ background: '#FAFAF9' }}
           >
             <TileLayer
@@ -283,6 +336,7 @@ const SmartMap = ({ plan, token, onApplyRefinement }) => {
             />
 
             {flyTarget && <FlyTo center={flyTarget} zoom={15} />}
+            <FitBounds locations={filteredLocations} />
 
             {/* Day routes */}
             {filteredDays.map(dayGroup => {
@@ -467,6 +521,7 @@ const SmartMap = ({ plan, token, onApplyRefinement }) => {
           </motion.div>
         )}
       </AnimatePresence>
+    </div>
     </div>
   );
 };
