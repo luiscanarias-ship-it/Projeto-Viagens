@@ -567,16 +567,6 @@ const CheckoutModal = ({
                     </p>
                   )}
 
-                  {selectedAmount && (
-                    <p className="text-center text-xs text-[#6B6661]/70 italic">
-                      {selectedAmount >= 50
-                        ? 'Com este apoio estas a aproximar muito este sonho da realidade.'
-                        : selectedAmount >= 20
-                          ? 'A tua contribuicao ajuda este sonho a dar um grande passo.'
-                          : 'A tua contribuicao ajuda este sonho a ganhar forma.'}
-                    </p>
-                  )}
-
                 </motion.div>
               )}
 
@@ -1004,7 +994,7 @@ const CheckoutModal = ({
                       <div className="text-center pt-1 space-y-0.5" data-testid="trust-footer">
                         <p className="text-[10px] text-[#6B6661]/70 flex items-center justify-center gap-1">
                           <ShieldCheck className="w-3 h-3" />
-                          100% seguro · Sem registo obrigatório · Confirmação em poucos minutos
+                          100% seguro · Confirmação em poucos minutos
                         </p>
                       </div>
                     </>
@@ -1168,14 +1158,14 @@ const CheckoutModal = ({
             <div className="px-4 pb-3 pt-2 border-t border-stone-100 bg-white">
               <button
                 onClick={() => setStep(2)}
-                className="w-full bg-[#2D2A26] text-white py-3 px-6 rounded-xl font-medium hover:bg-[#4A4640] transition-all flex items-center justify-center gap-2"
+                className="w-full bg-[#FFBE98] text-[#2D2A26] py-3 px-6 rounded-xl font-semibold hover:bg-[#FFB080] transition-all flex items-center justify-center gap-2"
                 data-testid="step1-continue-btn"
               >
                 Continuar com €{selectedAmount} <Heart className="w-3.5 h-3.5" />
                 <ArrowRight className="w-4 h-4" />
               </button>
               <p className="text-[10px] leading-relaxed text-[#6B6661]/70 text-center mt-2">
-                100% seguro · Sem registo obrigatório
+                Promoções, descontos e vouchers para quem contribui
               </p>
             </div>
           )}
