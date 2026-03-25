@@ -113,6 +113,14 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - **PremiumGate**: Shows "Desbloqueia o mapa interativo" for non-ambassadors
 - **Lazy loaded**: React.lazy + Suspense for performance
 - **Mobile**: Full-screen map with bottom sheet for locations
+- **Special Pins** (2026-03-25): Airport (blue) and Hotel (orange) SVG pins geocoded from flight_info/hotel_info. Sidebar "Referências" section. Dashed polyline airport→hotel. Airport popup shows transport info. Hotel popup shows name/address/area.
+
+### Travel Context Feature (2026-03-25)
+- **Backend**: AI prompt updated to generate flight_info (outbound/return with flight_number, airports, times), hotel_info (name, address, area, phone), airport_to_hotel (best_option, alternative, tip)
+- **Backend**: Refine endpoint preserves flight_info, hotel_info, airport_to_hotel from previous plan (merge after AI response)
+- **Backend**: Geocode endpoint returns special_pins with airport and hotel lat/lng
+- **Frontend**: TravelContext.js component showing flight cards (outbound in blue, return in amber), hotel card, and airport-to-hotel transport with best option + alternative
+- **Frontend**: Integrated in TravelPlanner.js between header and tab navigation
 
 ### AI Assistant Premium Feature (2026-03-25)
 - **Backend**: New endpoint POST /api/ai/assistant with ambassador-level gating (401 for unauth, 403 for non-ambassador)
@@ -141,7 +149,6 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - Celebracao "Sonho 100% Financiado": UI especial/animacao quando viagem atinge 100%
 ### P2
 - Ativar IfthenPay quando credenciais forem fornecidas
-- Smart Map e AI Assistant reais (substituir placeholders)
 - Refatoracao backend server.py -> APIRouters modulares
 - Refatoracao frontend TravelPlanner.js -> subcomponentes
 ### Backlog
