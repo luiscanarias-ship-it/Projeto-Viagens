@@ -6695,9 +6695,9 @@ Responde APENAS com um JSON valido com esta estrutura exata (sem markdown, sem `
 # ── Smart Map: Geocoding with Nominatim + Photon fallback + Cache ──
 geocode_cache = {}
 
-async def geocode_location(location_name: str, destination_context: str = "") -> dict:
-    """Geocode a location using Nominatim with Photon fallback. Returns {lat, lng} or None."""
-    cache_key = f"{location_name}|{destination_context}".lower().strip()
+async def geocode_location(location_name: str, destination_context: str = "", bias_lat: float = None, bias_lng: float = None) -> dict:
+    """Geocode a location using Photon with geo bias. Returns {lat, lng} or None."""
+    cache_key = f"{location_name}|{destination_context}|{bias_lat}|{bias_lng}".lower().strip()
     if cache_key in geocode_cache:
         return geocode_cache[cache_key]
 
@@ -6709,21 +6709,46 @@ async def geocode_location(location_name: str, destination_context: str = "") ->
 
     search_query = f"{location_name}, {destination_context}" if destination_context else location_name
 
-    # Try Photon (Komoot) first — more lenient rate limits
+    # Build Photon params with geographic bias
+    photon_params = {"q": search_query, "limit": 3}
+    if bias_lat is not None and bias_lng is not None:
+        photon_params["lat"] = bias_lat
+        photon_params["lon"] = bias_lng
+
+    # Try Photon (Komoot) with bias
     for attempt in range(2):
         try:
             async with httpx.AsyncClient(timeout=10) as client:
                 resp = await client.get(
                     "https://photon.komoot.io/api/",
-                    params={"q": search_query, "limit": 1},
+                    params=photon_params,
                     headers={"User-Agent": "4Luis-TravelApp/1.0"}
                 )
                 if resp.status_code == 200:
                     data = resp.json()
                     features = data.get("features", [])
-                    if features:
+                    # Pick closest result to bias point if bias provided
+                    best = None
+                    if features and bias_lat is not None:
+                        import math
+                        for f in features:
+                            c = f["geometry"]["coordinates"]
+                            dist = math.sqrt((c[1] - bias_lat)**2 + (c[0] - bias_lng)**2)
+                            if dist < 5:  # ~500km threshold in degrees
+                                if best is None or dist < best[1]:
+                                    best = (f, dist)
+                        if best:
+                            coords = best[0]["geometry"]["coordinates"]
+                            result = {"lat": float(coords[1]), "lng": float(coords[0])}
+                        else:
+                            result = None
+                    elif features:
                         coords = features[0]["geometry"]["coordinates"]
                         result = {"lat": float(coords[1]), "lng": float(coords[0])}
+                    else:
+                        result = None
+
+                    if result:
                         geocode_cache[cache_key] = result
                         await db.geocode_cache.update_one(
                             {"cache_key": cache_key},
@@ -6739,28 +6764,6 @@ async def geocode_location(location_name: str, destination_context: str = "") ->
             if attempt == 0:
                 await asyncio.sleep(1)
         break
-
-    # Fallback to Nominatim
-    try:
-        async with httpx.AsyncClient(timeout=10) as client:
-            resp = await client.get(
-                "https://nominatim.openstreetmap.org/search",
-                params={"q": search_query, "format": "json", "limit": 1, "addressdetails": 0},
-                headers={"User-Agent": "4Luis-TravelApp/1.0"}
-            )
-            if resp.status_code == 200:
-                data = resp.json()
-                if data and len(data) > 0:
-                    result = {"lat": float(data[0]["lat"]), "lng": float(data[0]["lon"])}
-                    geocode_cache[cache_key] = result
-                    await db.geocode_cache.update_one(
-                        {"cache_key": cache_key},
-                        {"$set": {"cache_key": cache_key, "lat": result["lat"], "lng": result["lng"], "query": search_query}},
-                        upsert=True
-                    )
-                    return result
-    except Exception as e:
-        logger.warning(f"Nominatim geocode failed for '{search_query}': {e}")
 
     return None
 
@@ -6789,6 +6792,12 @@ async def geocode_plan(request: Request):
     destination = plan.get("destination", "")
     locations_by_day = []
     logger.info(f"Geocoding plan for {destination}, {len(plan['itinerary'])} days")
+
+    # Step 1: Geocode the destination itself for geographic bias
+    dest_coords = await geocode_location(destination, "")
+    bias_lat = dest_coords["lat"] if dest_coords else None
+    bias_lng = dest_coords["lng"] if dest_coords else None
+    logger.info(f"Destination bias: {bias_lat}, {bias_lng}")
 
     # Geocode all locations with concurrent batching per day
     for day in plan["itinerary"]:
@@ -6823,23 +6832,21 @@ async def geocode_plan(request: Request):
         logger.info(f"Day {day.get('day')}: {len(activities)} activities -> {len(location_names)} geocodable names")
 
         # Geocode concurrently (batch of tasks)
-        # For complex destinations like "sul de frança + costa amalfitana", use day title as context
         day_title = day.get("title", "")
 
         async def geocode_with_delay(display_name, geo_name, idx):
             await asyncio.sleep(idx * 0.5)
-            # Use day title as geo context if it's a meaningful place name
             geo_context = day_title if day_title and any(c.isupper() for c in day_title) else destination
-            # Try cleaned geo_name with context
-            result = await geocode_location(geo_name, geo_context)
+            # Always use bias coordinates from destination
+            result = await geocode_location(geo_name, geo_context, bias_lat, bias_lng)
             if not result:
-                # Try just geo_name without context
-                result = await geocode_location(geo_name, "")
+                # Try without context but with bias
+                result = await geocode_location(geo_name, "", bias_lat, bias_lng)
             if not result:
                 # Try first 3 words only
                 short_name = ' '.join(geo_name.split()[:3]).strip(' ,')
                 if short_name != geo_name and len(short_name) > 2:
-                    result = await geocode_location(short_name, geo_context)
+                    result = await geocode_location(short_name, geo_context, bias_lat, bias_lng)
             return result
 
         tasks = [geocode_with_delay(display, geo, i) for i, (display, geo) in enumerate(location_names)]
