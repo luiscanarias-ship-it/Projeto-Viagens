@@ -137,7 +137,16 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - **ShareMenu header**: "Partilhar via" → "Convidar via"
 - **WhatsApp primary CTA**: Direct WhatsApp share button with pre-filled message including referral link in PaymentSuccess and AmbassadorProgress
 
-### Active Navigation Highlight (2026-03-25, verified 2026-03-25)
+### Traffic Acquisition & Organic Growth (2026-03-25)
+- **SEO**: index.html updated with lang="pt", proper meta description, OG defaults (og:title, og:description, og:type, og:site_name, twitter:card), theme-color "#FFBE98"
+- **robots.txt**: Created with Disallow for /admin, /dashboard, /api/, /login, /auth/ and Sitemap reference
+- **Sitemap**: Dynamic /api/sitemap.xml includes static pages + active journeys + public travel plans (auto-updates)
+- **OG Images**: Dynamic 1200x630 PNG generation per plan via /api/og-image/{slug}
+- **SSR**: Crawler proxy (setupProxy.js) redirects 15+ bot user agents to /api/ssr/plano/{slug} for pre-rendered HTML
+- **Share Tracking**: New POST /api/track-share endpoint tracking whatsapp/copy/native/link events. Integrated in TravelPlanner.js and PublicPlan.js
+- **Admin Analytics**: GET /api/admin/share-stats (share events by type), GET /api/admin/referral-stats (users, ambassadors, referral conversion rate), GET /api/admin/affiliate-stats (clicks by platform)
+- **Performance**: SmartMap lazy loaded via React.lazy + Suspense
+- **Sharing**: WhatsApp, native Web Share API, and copy-to-clipboard on PublicPlan and TravelPlanner
 - Desktop: active link gets text-[#FFBE98] + subtle 2px underline using `useLocation`
 - Mobile: active link gets text-[#FFBE98] + left border accent
 - Applies to: Home, Planear Viagem (also covers /travel-planner), Meu Painel, Administração
