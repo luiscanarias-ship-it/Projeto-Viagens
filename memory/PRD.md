@@ -144,6 +144,11 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - "Viagem Principal" button keeps its own permanent peach style
 - "Explorar Viagens" keeps neutral style (scroll-only, no distinct route)
 
+### Public Plan Hero Redesign (2026-03-25)
+- **Hero**: Full-viewport (100vh) with OG image as blurred background (blur 20px, brightness 0.3). Title: "{Destination} em {X} dias {flag}" with country flag emoji mapping (25+ countries). Subtitle emocional: "Roteiro inteligente para viver o melhor da cidade sem perder tempo nem cair em armadilhas". Badge "Gerado com IA". Two CTAs: "Explorar roteiro" (smooth scroll) + "Criar o meu" (glass button → /travel-planner). Animated scroll indicator.
+- **Share Bar**: Sticky at top-20 (below fixed header) with backdrop blur. Shows destination + days + WhatsApp/Copy/Share buttons.
+- **Content**: All existing sections preserved below hero (map teaser, weather, packing, itinerary, checklist, tips, CTAs).
+
 ### Server-Side SEO + PDF Cover (2026-03-25)
 - **SSR Endpoint**: GET /api/ssr/plano/{slug} — Full HTML page with all OG meta tags (og:title, og:description, og:image, og:url, og:type), Twitter cards, schema.org TouristTrip structured data, canonical URL, and complete itinerary content visible without JavaScript. Crawlers (Facebook, WhatsApp, Twitter, Google, etc.) get pre-rendered HTML.
 - **Crawler Proxy**: setupProxy.js detects 15+ crawler user agents and redirects /plano/{slug} to /api/ssr/plano/{slug} for SSR.
