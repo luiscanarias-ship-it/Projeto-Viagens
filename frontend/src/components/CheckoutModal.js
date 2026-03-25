@@ -859,7 +859,7 @@ const CheckoutModal = ({
 
                       {/* Arrow indicator pointing to CTA */}
                       <div className="flex items-center justify-center gap-1 text-[#FFBE98]" data-testid="step3-arrow-hint">
-                        <span className="text-[11px] text-[#6B6661]">Depois de efetuares o pagamento, carrega aqui</span>
+                        <span className="text-[11px] text-[#6B6661] font-bold">Depois de efetuares o pagamento, carrega aqui</span>
                       </div>
                       <div className="flex justify-center gap-3 animate-bounce">
                         <ArrowRight className="w-4 h-4 text-[#FFBE98] rotate-90" />
@@ -976,6 +976,15 @@ const CheckoutModal = ({
                         <p className="text-[11px] text-amber-800 text-center">
                           Usa exatamente este valor para validação automática
                         </p>
+                      </div>
+
+                      {/* Arrow indicator pointing to CTA */}
+                      <div className="text-center" data-testid="step3-arrow-hint-crypto">
+                        <span className="text-[11px] text-[#6B6661] font-bold">Depois de efetuares o pagamento, carrega aqui</span>
+                      </div>
+                      <div className="flex justify-center gap-3 animate-bounce">
+                        <ArrowRight className="w-4 h-4 text-[#FFBE98] rotate-90" />
+                        <ArrowRight className="w-4 h-4 text-[#FFBE98] rotate-90" />
                       </div>
 
                       <button
