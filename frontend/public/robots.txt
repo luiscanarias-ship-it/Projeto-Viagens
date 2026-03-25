@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /api/
+Disallow: /login
+Disallow: /auth/
+
+Sitemap: https://4luis.com/api/sitemap.xml

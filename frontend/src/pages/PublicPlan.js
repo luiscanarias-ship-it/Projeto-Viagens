@@ -63,6 +63,10 @@ const PublicPlan = () => {
     fetchPlan();
   }, [slug]);
 
+  const trackShare = (type) => {
+    axios.post(`${API}/track-share`, { type, page: 'public-plan', slug: slug || '' }).catch(() => {});
+  };
+
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
@@ -76,6 +80,7 @@ const PublicPlan = () => {
       document.execCommand('copy');
       document.body.removeChild(ta);
     }
+    trackShare('copy');
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -90,6 +95,7 @@ const PublicPlan = () => {
           text: `Ve este roteiro para ${dest} gerado por IA!`,
           url: window.location.href
         });
+        trackShare('native');
         return;
       } catch (e) {
         if (e.name === 'AbortError') return;
@@ -105,6 +111,7 @@ const PublicPlan = () => {
     const dest = p?.destination || 'esta viagem';
     const text = `Ve este roteiro incrivel para ${dest}! ${window.location.href}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    trackShare('whatsapp');
   };
 
   if (loading) {

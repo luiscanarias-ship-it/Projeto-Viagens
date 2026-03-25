@@ -610,6 +610,13 @@ const TravelPlanner = () => {
     }).catch(() => {});
   };
 
+  const trackShare = (type) => {
+    const token = localStorage.getItem('token');
+    axios.post(`${API}/track-share`, { type, page: 'travel-planner', slug: planSlug || '' }, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    }).catch(() => {});
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true); setError(''); setPlan(null);
@@ -704,6 +711,7 @@ const TravelPlanner = () => {
       document.body.removeChild(ta);
       setCopied(true);
     }
+    trackShare('copy');
     setTimeout(() => setCopied(false), 2000);
   };
   const handleShare = async () => {
@@ -713,6 +721,7 @@ const TravelPlanner = () => {
     if (navigator.share) {
       try {
         await navigator.share({ title: `Plano de viagem: ${plan.destination}`, text: shareText, url: shareUrl });
+        trackShare('native');
         return;
       } catch (e) {
         if (e.name === 'AbortError') return;
@@ -725,6 +734,7 @@ const TravelPlanner = () => {
       ta.value = shareUrl; ta.style.position = 'fixed'; ta.style.opacity = '0';
       document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
     }
+    trackShare('link');
     setShared(true);
     setTimeout(() => setShared(false), 2500);
   };

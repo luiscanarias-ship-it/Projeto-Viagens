@@ -7370,6 +7370,34 @@ async def track_affiliate_click(request: Request):
     
     return {"status": "tracked"}
 
+@api_router.post("/track-share")
+async def track_share(request: Request):
+    """Track share events for analytics"""
+    data = await request.json()
+    share_type = data.get("type")
+    page = data.get("page")
+    slug = data.get("slug")
+    if not share_type or share_type not in ("whatsapp", "copy", "native", "link"):
+        raise HTTPException(status_code=400, detail="Invalid share type")
+    
+    user = None
+    try:
+        user = await get_current_user(request)
+    except Exception:
+        pass
+    
+    share_doc = {
+        "share_id": f"share_{uuid.uuid4().hex[:12]}",
+        "type": share_type,
+        "page": page or "",
+        "slug": slug or "",
+        "user_id": user.user_id if user else None,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.share_events.insert_one(share_doc)
+    
+    return {"status": "tracked"}
+
 @api_router.get("/admin/affiliate-stats")
 async def get_affiliate_stats(request: Request):
     """Admin endpoint — affiliate click analytics"""
@@ -7385,6 +7413,57 @@ async def get_affiliate_stats(request: Request):
     return {
         "total_clicks": total,
         "by_platform": {s["_id"]: s["clicks"] for s in stats}
+    }
+
+@api_router.get("/admin/share-stats")
+async def get_share_stats(request: Request):
+    """Admin endpoint — share event analytics"""
+    await require_admin(request)
+    
+    pipeline = [
+        {"$group": {"_id": "$type", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}}
+    ]
+    stats = await db.share_events.aggregate(pipeline).to_list(100)
+    total = sum(s["count"] for s in stats)
+    
+    return {
+        "total_shares": total,
+        "by_type": {s["_id"]: s["count"] for s in stats}
+    }
+
+@api_router.get("/admin/referral-stats")
+async def get_referral_stats(request: Request):
+    """Admin endpoint — referral conversion analytics"""
+    await require_admin(request)
+    
+    total_users = await db.users.count_documents({})
+    ambassadors = await db.users.count_documents({"is_ambassador": True})
+    
+    pipeline = [
+        {"$match": {"referred_by": {"$exists": True, "$ne": None}}},
+        {"$group": {"_id": None, "total_referred": {"$sum": 1}}}
+    ]
+    referred = await db.users.aggregate(pipeline).to_list(1)
+    total_referred = referred[0]["total_referred"] if referred else 0
+    
+    referral_pipeline = [
+        {"$match": {"valid_referrals_count": {"$gt": 0}}},
+        {"$group": {
+            "_id": None,
+            "total_valid_referrals": {"$sum": "$valid_referrals_count"},
+            "referrers_count": {"$sum": 1}
+        }}
+    ]
+    ref_stats = await db.users.aggregate(referral_pipeline).to_list(1)
+    
+    return {
+        "total_users": total_users,
+        "ambassadors": ambassadors,
+        "total_referred_users": total_referred,
+        "total_valid_referrals": ref_stats[0]["total_valid_referrals"] if ref_stats else 0,
+        "active_referrers": ref_stats[0]["referrers_count"] if ref_stats else 0,
+        "ambassador_conversion_rate": round(ambassadors / max(total_users, 1) * 100, 1)
     }
 
 
