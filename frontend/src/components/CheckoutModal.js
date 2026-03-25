@@ -819,70 +819,79 @@ const CheckoutModal = ({
                   exit={{ opacity: 0, x: -20 }}
                   className="space-y-3"
                 >
-                  {/* ===== MBWAY — Simplified ===== */}
+                  {/* ===== MBWAY — Clean, high-conversion ===== */}
                   {selectedMethod === 'mbway' && (
                     <>
                       {/* Header */}
-                      <p className="text-center text-xs text-[#6B6661]" data-testid="step3-header">Concluir pagamento</p>
+                      <p className="text-xs text-[#6B6661] text-center tracking-wide" data-testid="step3-header">Pagamento</p>
 
-                      {/* Amount */}
-                      <div className="text-center" data-testid="step3-summary">
-                        <p className="text-xl font-bold text-[#2D2A26]">Enviar {selectedAmount}€ por MB WAY</p>
+                      {/* Amount — large, centered */}
+                      <div className="text-center py-1" data-testid="step3-summary">
+                        <p className="text-3xl font-bold text-[#2D2A26]">Enviar {selectedAmount}€</p>
+                        <p className="text-sm text-[#6B6661] mt-0.5">via MB WAY</p>
                       </div>
 
-                      {/* Phone number — PRIMARY, always visible */}
-                      <div className="bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-center" data-testid="mbway-phone-block">
-                        <p className="text-2xl font-bold text-[#2D2A26] tracking-wide" data-testid="mbway-phone">{MBWAY_MANUAL.phone}</p>
+                      {/* Phone number — PRIMARY */}
+                      <div className="text-center py-2" data-testid="mbway-phone-block">
+                        <p className="text-2xl font-bold text-[#2D2A26] tracking-wider" data-testid="mbway-phone">{MBWAY_MANUAL.phone}</p>
                         <button
                           onClick={() => copyToClipboard(MBWAY_MANUAL.phoneClean, 'phone')}
-                          className="mt-2 px-4 py-1.5 bg-[#2D2A26] text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 mx-auto hover:bg-[#4A4640] transition-colors"
+                          className="mt-2 px-4 py-1.5 bg-stone-100 hover:bg-stone-200 rounded-lg text-xs font-medium text-[#2D2A26] flex items-center gap-1.5 mx-auto transition-colors"
                           data-testid="copy-phone-btn"
                         >
-                          {copiedField === 'phone' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                          {copiedField === 'phone' ? 'Número copiado!' : 'Copiar número'}
+                          {copiedField === 'phone' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                          {copiedField === 'phone' ? 'Copiado' : 'Copiar número'}
                         </button>
                       </div>
 
-                      {/* Reference — secondary */}
-                      <div className="flex items-center justify-between px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-xl" data-testid="reference-block">
+                      {/* Reference */}
+                      <div className="flex items-center justify-between px-3 py-2.5 bg-stone-50 rounded-xl" data-testid="reference-block">
                         <div>
-                          <p className="text-[10px] text-emerald-700 leading-none">Referência</p>
+                          <p className="text-[10px] text-[#6B6661]">Referência</p>
                           <p className="text-sm font-bold text-[#2D2A26] tracking-wider" data-testid="payment-reference">{contribution.payment_reference}</p>
                         </div>
                         <button
                           onClick={() => copyToClipboard(contribution.payment_reference, 'ref')}
-                          className="px-2.5 py-1 bg-emerald-100 hover:bg-emerald-200 rounded-lg flex items-center gap-1 text-[11px] font-semibold text-emerald-700 transition-colors"
+                          className="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 rounded-lg flex items-center gap-1.5 text-xs font-medium text-[#2D2A26] transition-colors"
                           data-testid="copy-reference-btn"
                         >
-                          {copiedField === 'ref' ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                          {copiedField === 'ref' ? 'Copiado!' : 'Copiar'}
+                          {copiedField === 'ref' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                          {copiedField === 'ref' ? 'Copiado' : 'Copiar referência'}
                         </button>
                       </div>
 
-                      {/* Single instruction */}
+                      {/* Validation message */}
+                      <p className="text-[11px] text-[#6B6661] text-center">Usa esta referência no pagamento para validação</p>
+
+                      {/* Instruction */}
                       <p className="text-xs text-[#6B6661] text-center">Abre a app MB WAY e envia o valor</p>
 
-                      {/* Primary CTA */}
+                      {/* Primary CTA — peach brand */}
                       <button
                         onClick={() => setShowConfirmForm(true)}
-                        className="w-full bg-[#2D2A26] text-white py-3 rounded-xl font-semibold hover:bg-[#4A4640] transition-all text-sm min-h-[44px]"
+                        className="w-full bg-[#FFBE98] text-[#2D2A26] py-3 rounded-xl font-semibold hover:bg-[#FFB080] transition-all text-sm min-h-[44px] shadow-sm"
                         data-testid="confirm-payment-btn"
                       >
-                        Já enviei o pagamento
+                        Já enviei {selectedAmount}€
                       </button>
 
-                      {/* Secondary: Open MBWay */}
+                      {/* Secondary CTA — Open MBWay (visible, peach accent) */}
                       <a
                         href={`mbway://transfer?phone=${MBWAY_MANUAL.phoneClean}&amount=${selectedAmount}`}
-                        className="block text-center text-xs text-[#6B6661] hover:text-[#2D2A26] transition-colors py-1"
+                        className="w-full py-2 bg-[#FFBE98]/20 hover:bg-[#FFBE98]/40 text-[#2D2A26] rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 transition-colors"
                         data-testid="open-mbway-btn"
                       >
-                        <Smartphone className="w-3.5 h-3.5 inline mr-1" />Abrir MB WAY
+                        <Smartphone className="w-3.5 h-3.5" /> Abrir MB WAY
                       </a>
 
+                      {/* Emotional reinforcement */}
+                      {!user?.is_ambassador && (
+                        <p className="text-[11px] text-[#FFBE98] text-center italic" data-testid="ambassador-hook">Estás a ajudar a tornar este sonho realidade</p>
+                      )}
+
                       {/* Trust */}
-                      <p className="text-[10px] text-[#6B6661]/60 text-center" data-testid="trust-footer">
-                        <ShieldCheck className="w-3 h-3 inline mr-0.5" />Confirmação em poucos minutos
+                      <p className="text-[10px] text-[#6B6661]/50 text-center flex items-center justify-center gap-1" data-testid="trust-footer">
+                        <Check className="w-3 h-3" /> Confirmação em poucos minutos
                       </p>
                     </>
                   )}
