@@ -144,6 +144,12 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - "Viagem Principal" button keeps its own permanent peach style
 - "Explorar Viagens" keeps neutral style (scroll-only, no distinct route)
 
+### Contextual AI - Exploration Mode (2026-03-25)
+- **Backend**: POST /api/ai/improve-location supports 6 interaction types: what_to_see, where_to_eat, how_to_next (exploration) + less_queues, cheaper, best_time (optimization)
+- **Frontend**: SmartMap pin popup now shows 2 sections: "Explorar:" (O que ver aqui, Onde comer, Como chegar ao proximo) and "Otimizar:" (Menos filas, Mais barato, Melhor horario)
+- **Integration**: Clicking any button triggers AI call, results displayed in overlay with "Aplicar ao roteiro" option
+- **Citymapper-inspired**: "Como chegar ao proximo" provides simple transport comparison (time + mode)
+
 ## Prioritized Backlog
 ### P1
 - Celebracao "Sonho 100% Financiado": UI especial/animacao quando viagem atinge 100%
