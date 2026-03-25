@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, Check, Copy, Bitcoin, Smartphone, CreditCard,
-  Wallet, ArrowRight, Heart, Sparkles, ShieldCheck, Lock, Globe, MapPin
+  Wallet, ArrowRight, Heart, Sparkles, ShieldCheck, Lock, Globe, MapPin,
+  ChevronDown, Users, Flame, Award, Mail
 } from 'lucide-react';
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 import QRCode from 'qrcode';
@@ -100,7 +101,8 @@ const CheckoutModal = ({
   journeyId,
   contributionDescriptions,
   getAuthHeaders,
-  user 
+  user,
+  progressData
 }) => {
   // Checkout state
   const [step, setStep] = useState(1);
@@ -133,6 +135,12 @@ const CheckoutModal = ({
 
   // MBWay details toggle
   const [showMbwayDetails, setShowMbwayDetails] = useState(false);
+
+  // Step 3 confirmation form
+  const [showConfirmForm, setShowConfirmForm] = useState(false);
+  const [confirmName, setConfirmName] = useState(user?.name || '');
+  const [confirmEmail, setConfirmEmail] = useState(user?.email || '');
+  const [confirmingPayment, setConfirmingPayment] = useState(false);
 
   // Fetch crypto prices from CoinGecko
   const fetchCryptoPrices = useCallback(async () => {
@@ -392,6 +400,34 @@ const CheckoutModal = ({
   // Handle close
   const handleClose = () => {
     onClose();
+  };
+
+  // Handle payment confirmation with user details
+  const handleConfirmPayment = async () => {
+    if (!confirmEmail) return;
+    setConfirmingPayment(true);
+    try {
+      await axios.put(`${API}/contributions/${contribution.contribution_id}/confirm-details`, {
+        contributor_name: confirmName || null,
+        contributor_email: confirmEmail
+      });
+      setShowConfirmation(true);
+      setShowConfirmForm(false);
+    } catch (error) {
+      console.error('Error confirming:', error);
+      setShowConfirmation(true);
+      setShowConfirmForm(false);
+    } finally {
+      setConfirmingPayment(false);
+    }
+  };
+
+  // Method display label
+  const getMethodLabel = (method) => {
+    if (method === 'mbway') return 'MB WAY';
+    if (method === 'crypto') return `Crypto (${selectedCrypto?.toUpperCase() || 'BTC'})`;
+    if (method === 'paypal') return 'PayPal';
+    return method;
   };
 
   // Go back to step 1
@@ -783,214 +819,297 @@ const CheckoutModal = ({
                 </motion.div>
               )}
 
-              {/* STEP 3: Payment Instructions */}
-              {step === 3 && !showConfirmation && contribution && (
+              {/* STEP 3: Payment Instructions & Confirmation */}
+              {step === 3 && !showConfirmation && !showConfirmForm && contribution && (
                 <motion.div
                   key="step3"
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
-                  className="space-y-2.5"
+                  className="space-y-3"
                 >
-                  {/* ===== CRYPTO STEP 3 ===== */}
-                  {selectedMethod === 'crypto' && cryptoData && (
-                    <>
-                      {/* Incentive banner */}
-                      <div className="bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-1.5 text-center">
-                        <p className="text-xs font-semibold text-emerald-700">Pagamento instantâneo e sem taxas bancárias</p>
-                      </div>
+                  {/* 1. Header */}
+                  <div className="text-center" data-testid="step3-header">
+                    <h3 className="text-lg font-bold text-[#2D2A26]">Quase lá!</h3>
+                    <p className="text-xs text-[#6B6661] mt-0.5">Falta apenas concluir o pagamento</p>
+                  </div>
 
-                      {/* QR Code centered */}
+                  {/* 2. Payment Summary */}
+                  <div className="bg-stone-50 rounded-xl p-3 space-y-1" data-testid="step3-summary">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-[#6B6661]">Destino</span>
+                      <span className="text-xs font-semibold text-[#2D2A26]">{journeyName}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-[#6B6661]">Valor</span>
+                      <span className="text-sm font-bold text-[#2D2A26]">{selectedAmount}€</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-[#6B6661]">Método</span>
+                      <span className="text-xs font-semibold text-[#2D2A26]">{getMethodLabel(selectedMethod)}</span>
+                    </div>
+                  </div>
+
+                  {/* 3. Method-specific Instructions */}
+                  {selectedMethod === 'mbway' && (
+                    <div className="space-y-2" data-testid="mbway-instructions">
+                      <div className="flex items-start gap-2.5">
+                        <span className="w-5 h-5 rounded-full bg-[#2D2A26] text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">1</span>
+                        <p className="text-xs text-[#2D2A26]">Abre a app <strong>MB WAY</strong></p>
+                      </div>
+                      <div className="flex items-start gap-2.5">
+                        <span className="w-5 h-5 rounded-full bg-[#2D2A26] text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">2</span>
+                        <p className="text-xs text-[#2D2A26]">Envia exatamente <strong>{selectedAmount}€</strong></p>
+                      </div>
+                      <div className="flex items-start gap-2.5">
+                        <span className="w-5 h-5 rounded-full bg-[#2D2A26] text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">3</span>
+                        <p className="text-xs text-[#2D2A26]">Usa esta referência:</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedMethod === 'crypto' && cryptoData && (
+                    <div className="space-y-2" data-testid="crypto-instructions">
+                      {/* QR */}
                       <div className="flex justify-center">
                         <div className="bg-white p-2 rounded-xl shadow-sm border border-stone-100">
                           {qrImageUrl ? (
-                            <img src={qrImageUrl} alt="QR Code" width={140} height={140} />
+                            <img src={qrImageUrl} alt="QR Code" width={120} height={120} />
                           ) : (
-                            <div className="w-[140px] h-[140px] flex items-center justify-center">
-                              <div className="w-6 h-6 border-2 border-[#FFBE98] border-t-transparent rounded-full animate-spin" />
+                            <div className="w-[120px] h-[120px] flex items-center justify-center">
+                              <div className="w-5 h-5 border-2 border-[#FFBE98] border-t-transparent rounded-full animate-spin" />
                             </div>
                           )}
                         </div>
                       </div>
-
-                      {/* Amount box */}
-                      <div className="bg-stone-50 rounded-xl p-3 text-center">
-                        <p className="text-[10px] text-[#6B6661] uppercase tracking-wide">Valor a enviar</p>
-                        <p className="text-xl font-bold text-[#2D2A26] mt-0.5">
-                          {cryptoAmountCalc} {cryptoData.symbol}
-                        </p>
-                        <p className="text-sm text-[#6B6661]">
-                          ≈ {selectedAmount} €
-                        </p>
+                      {/* Amount */}
+                      <div className="bg-stone-50 rounded-lg p-2 text-center">
+                        <p className="text-xs text-[#6B6661]">Envia exatamente</p>
+                        <p className="text-base font-bold text-[#2D2A26]">{cryptoAmountCalc} {cryptoData.symbol}</p>
+                        <p className="text-[10px] text-[#6B6661]">≈ {selectedAmount}€</p>
                       </div>
-
-                      {/* 3 visual steps */}
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2.5">
-                          <span className="w-5 h-5 rounded-full bg-[#2D2A26] text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0">1</span>
-                          <p className="text-xs text-[#2D2A26]">Copia o endereço ou abre a tua carteira</p>
-                        </div>
-                        <div className="flex items-center gap-2.5">
-                          <span className="w-5 h-5 rounded-full bg-[#2D2A26] text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0">2</span>
-                          <p className="text-xs text-[#2D2A26]">Envia exatamente <strong>{cryptoAmountCalc} {cryptoData.symbol}</strong></p>
-                        </div>
-                        <div className="flex items-center gap-2.5">
-                          <span className="w-5 h-5 rounded-full bg-[#2D2A26] text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0">3</span>
-                          <p className="text-xs text-[#2D2A26]">Depois clica em <strong>Já efetuei o pagamento</strong></p>
-                        </div>
+                      {/* Steps */}
+                      <div className="flex items-start gap-2.5">
+                        <span className="w-5 h-5 rounded-full bg-[#2D2A26] text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">1</span>
+                        <p className="text-xs text-[#2D2A26]">Copia o endereço ou lê o QR</p>
                       </div>
-
-                      {/* Action buttons: Copy + Open Wallet */}
+                      <div className="flex items-start gap-2.5">
+                        <span className="w-5 h-5 rounded-full bg-[#2D2A26] text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">2</span>
+                        <p className="text-xs text-[#2D2A26]">Envia exatamente <strong>{cryptoAmountCalc} {cryptoData.symbol}</strong></p>
+                      </div>
+                      <div className="flex items-start gap-2.5">
+                        <span className="w-5 h-5 rounded-full bg-[#2D2A26] text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">3</span>
+                        <p className="text-xs text-[#2D2A26]">Depois clica <strong>Já fiz o pagamento</strong></p>
+                      </div>
+                      {/* Copy + Wallet */}
                       <div className="flex gap-2">
                         <button
                           onClick={() => copyToClipboard(cryptoData.address, 'address')}
-                          className="flex-1 py-2.5 bg-[#2D2A26] text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-[#4A4640] transition-colors"
+                          className="flex-1 py-2 bg-[#2D2A26] text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-[#4A4640] transition-colors"
+                          data-testid="crypto-copy-address"
                         >
                           {copiedField === 'address' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                           {copiedField === 'address' ? 'Copiado!' : 'Copiar endereço'}
                         </button>
                         <a
                           href={cryptoURI}
-                          className="flex-1 py-2.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-emerald-700 transition-colors"
+                          className="flex-1 py-2 bg-emerald-600 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-emerald-700 transition-colors"
+                          data-testid="crypto-open-wallet"
                         >
-                          <Wallet className="w-3.5 h-3.5" />
-                          Abrir carteira
+                          <Wallet className="w-3.5 h-3.5" /> Abrir carteira
                         </a>
                       </div>
-
                       {/* Network warning */}
-                      <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-                        <p className="text-[11px] text-amber-800">
-                          Enviar apenas pela rede <strong>{cryptoData.network}</strong>. Outras redes podem resultar na perda dos fundos.
+                      <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-1.5">
+                        <p className="text-[10px] text-amber-800">
+                          Envia apenas pela rede <strong>{cryptoData.network}</strong>. Outras redes resultam em perda de fundos.
                         </p>
                       </div>
-                    </>
+                    </div>
                   )}
 
-                  {/* ===== MBWAY STEP 3 ===== */}
-                  {selectedMethod === 'mbway' && (
-                    <div className="space-y-3">
-                      {/* Amount */}
-                      <div className="bg-stone-50 rounded-xl p-3 text-center">
-                        <p className="text-[10px] text-[#6B6661] uppercase tracking-wide">Valor a enviar via MBWay</p>
-                        <p className="text-2xl font-bold text-[#2D2A26] mt-0.5">€{selectedAmount}</p>
-                      </div>
-
-                      {/* Reference */}
-                      <div className="bg-emerald-50 border-2 border-emerald-200 rounded-xl px-3 py-3">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-[10px] text-emerald-700 font-medium leading-none mb-1">Referência de pagamento</p>
-                            <p className="text-xl font-bold text-[#2D2A26] tracking-wider leading-tight" data-testid="mbway-reference">{contribution.payment_reference}</p>
-                          </div>
-                          <button
-                            onClick={() => copyToClipboard(contribution.payment_reference, 'ref')}
-                            className="px-3 py-2 bg-emerald-100 hover:bg-emerald-200 rounded-lg flex items-center gap-1.5 text-xs font-semibold text-emerald-700 transition-colors"
-                            data-testid="copy-reference-btn"
-                          >
-                            {copiedField === 'ref' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                            {copiedField === 'ref' ? 'Copiado!' : 'Copiar'}
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Instructions */}
-                      <div className="space-y-2">
-                        <div className="flex items-start gap-2.5">
-                          <span className="w-5 h-5 rounded-full bg-[#2D2A26] text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">1</span>
-                          <p className="text-xs text-[#2D2A26]">Abre a app <strong>MBWay</strong> no teu telemóvel</p>
-                        </div>
-                        <div className="flex items-start gap-2.5">
-                          <span className="w-5 h-5 rounded-full bg-[#2D2A26] text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">2</span>
-                          <p className="text-xs text-[#2D2A26]">Envia exatamente <strong>€{selectedAmount}</strong> para o número indicado abaixo</p>
-                        </div>
-                        <div className="flex items-start gap-2.5">
-                          <span className="w-5 h-5 rounded-full bg-[#2D2A26] text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">3</span>
-                          <p className="text-xs text-[#2D2A26]">Na descrição, inclui a referência <strong>{contribution.payment_reference}</strong></p>
-                        </div>
-                      </div>
-
-                      {/* Show details toggle — phone hidden by default */}
-                      <div className="border border-stone-200 rounded-xl overflow-hidden">
+                  {/* 4. Reference Block (CRITICAL) — for MBWay & non-crypto */}
+                  {selectedMethod !== 'crypto' && (
+                    <div className="bg-emerald-50 border-2 border-emerald-200 rounded-xl px-3 py-3" data-testid="reference-block">
+                      <p className="text-[10px] text-emerald-700 font-medium text-center mb-1">Referência de pagamento</p>
+                      <div className="flex items-center justify-center gap-3">
+                        <p className="text-2xl font-bold text-[#2D2A26] tracking-wider" data-testid="payment-reference">{contribution.payment_reference}</p>
                         <button
-                          onClick={() => setShowMbwayDetails(!showMbwayDetails)}
-                          className="w-full px-3 py-2 flex items-center justify-between text-xs text-[#6B6661] hover:bg-stone-50 transition-colors"
-                          data-testid="show-mbway-details-toggle"
+                          onClick={() => copyToClipboard(contribution.payment_reference, 'ref')}
+                          className="px-3 py-1.5 bg-emerald-100 hover:bg-emerald-200 rounded-lg flex items-center gap-1.5 text-xs font-semibold text-emerald-700 transition-colors"
+                          data-testid="copy-reference-btn"
                         >
-                          <span>{showMbwayDetails ? 'Ocultar detalhes' : 'Mostrar detalhes de envio'}</span>
-                          <ArrowRight className={`w-3.5 h-3.5 transition-transform ${showMbwayDetails ? 'rotate-90' : ''}`} />
+                          {copiedField === 'ref' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                          {copiedField === 'ref' ? 'Copiado!' : 'Copiar'}
                         </button>
-                        {showMbwayDetails && (
-                          <div className="px-3 pb-2.5 border-t border-stone-100 pt-2 space-y-2">
-                            <div className="flex items-center justify-between">
-                              <span className="text-[11px] text-[#6B6661]">Número MBWay:</span>
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-sm font-bold text-[#2D2A26]" data-testid="mbway-phone">{MBWAY_MANUAL.phone}</span>
-                                <button onClick={() => copyToClipboard(MBWAY_MANUAL.phoneClean, 'phone')} className="p-1 hover:bg-stone-100 rounded" data-testid="copy-phone-btn">
-                                  {copiedField === 'phone' ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3 text-[#6B6661]" />}
-                                </button>
-                              </div>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-[11px] text-[#6B6661]">Nome:</span>
-                              <span className="text-sm font-medium text-[#2D2A26]">Luís Canárias</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Crypto reference */}
+                  {selectedMethod === 'crypto' && (
+                    <div className="bg-stone-50 border border-stone-200 rounded-xl px-3 py-2" data-testid="crypto-reference-block">
+                      <p className="text-[10px] text-[#6B6661] text-center mb-0.5">Referência</p>
+                      <p className="text-center text-sm font-bold text-[#2D2A26]" data-testid="payment-reference">{contribution.payment_reference}</p>
+                    </div>
+                  )}
+
+                  {/* 5. Warning */}
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2" data-testid="step3-warning">
+                    <p className="text-[11px] text-amber-800 text-center">
+                      Usa exatamente este valor para conseguirmos validar automaticamente o teu apoio.
+                    </p>
+                  </div>
+
+                  {/* 6. Optional Details (Collapsed) — MBWay */}
+                  {selectedMethod === 'mbway' && (
+                    <div className="border border-stone-200 rounded-xl overflow-hidden" data-testid="optional-details">
+                      <button
+                        onClick={() => setShowMbwayDetails(!showMbwayDetails)}
+                        className="w-full px-3 py-2.5 flex items-center justify-between text-xs text-[#6B6661] hover:bg-stone-50 transition-colors"
+                        data-testid="show-mbway-details-toggle"
+                      >
+                        <span>{showMbwayDetails ? 'Ocultar detalhes' : 'Ver dados de envio'}</span>
+                        <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showMbwayDetails ? 'rotate-180' : ''}`} />
+                      </button>
+                      {showMbwayDetails && (
+                        <div className="px-3 pb-2.5 border-t border-stone-100 pt-2 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[11px] text-[#6B6661]">Número MB WAY:</span>
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-sm font-bold text-[#2D2A26]" data-testid="mbway-phone">{MBWAY_MANUAL.phone}</span>
+                              <button onClick={() => copyToClipboard(MBWAY_MANUAL.phoneClean, 'phone')} className="p-1 hover:bg-stone-100 rounded" data-testid="copy-phone-btn">
+                                {copiedField === 'phone' ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3 text-[#6B6661]" />}
+                              </button>
                             </div>
                           </div>
-                        )}
-                      </div>
-
-                      {/* Open MBWay deep link (mobile) */}
-                      <a
-                        href={`mbway://transfer?phone=${MBWAY_MANUAL.phoneClean}&amount=${selectedAmount}`}
-                        className="w-full py-3 bg-emerald-600 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 hover:bg-emerald-700 transition-colors"
-                        data-testid="open-mbway-btn"
-                      >
-                        <Smartphone className="w-4 h-4" /> Abrir MBWay
-                      </a>
+                          <div className="flex items-center justify-between">
+                            <span className="text-[11px] text-[#6B6661]">Nome:</span>
+                            <span className="text-sm font-medium text-[#2D2A26]">Luís Canárias</span>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
 
-                  {/* ===== NON-CRYPTO / NON-MBWAY STEP 3 (fallback) ===== */}
-                  {selectedMethod && selectedMethod !== 'crypto' && selectedMethod !== 'mbway' && (
-                    <div className="space-y-2.5">
-                      {/* Amount summary */}
-                      <div className="bg-stone-50 rounded-xl p-3 text-center">
-                        <p className="text-[10px] text-[#6B6661] uppercase tracking-wide">Valor a enviar</p>
-                        <p className="text-2xl font-bold text-[#2D2A26] mt-0.5">€{selectedAmount}</p>
-                      </div>
-
-                    </div>
+                  {/* MBWay deep link (mobile) */}
+                  {selectedMethod === 'mbway' && (
+                    <a
+                      href={`mbway://transfer?phone=${MBWAY_MANUAL.phoneClean}&amount=${selectedAmount}`}
+                      className="w-full py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-medium flex items-center justify-center gap-2 hover:bg-emerald-700 transition-colors"
+                      data-testid="open-mbway-btn"
+                    >
+                      <Smartphone className="w-4 h-4" /> Abrir MB WAY
+                    </a>
                   )}
 
-                  {/* Reference code */}
-                  <div className="bg-red-50 border-2 border-red-300 rounded-xl px-3 py-2.5">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-[10px] text-[#6B6661] leading-none mb-0.5">Referência:</p>
-                        <p className="text-lg font-bold text-[#2D2A26] tracking-wider leading-tight">{contribution.payment_reference}</p>
-                      </div>
-                      <button
-                        onClick={() => copyToClipboard(contribution.payment_reference, 'ref')}
-                        className="px-2.5 py-1.5 bg-[#FFBE98]/20 rounded-lg hover:bg-[#FFBE98]/30 flex items-center gap-1 text-xs"
-                      >
-                        {copiedField === 'ref' ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5 text-[#FFBE98]" />}
-                        <span className="text-[#FFBE98]">{copiedField === 'ref' ? 'OK' : 'Copiar'}</span>
-                      </button>
-                    </div>
-                    <p className="text-xs text-red-600 font-bold mt-1">Inclui esta referência na descrição do pagamento!</p>
-                  </div>
-
-                  {/* Return reminder */}
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-center">
-                    <p className="text-xs text-blue-700">Depois de enviar o pagamento, volte aqui e clique <strong>"Já efetuei o pagamento"</strong></p>
-                  </div>
-
-                  {/* Confirm button */}
+                  {/* 7. User Confirmation (CRITICAL ACTION) */}
                   <button
-                    onClick={() => setShowConfirmation(true)}
-                    className="w-full bg-[#2D2A26] text-white py-2.5 px-6 rounded-xl font-medium hover:bg-[#4A4640] transition-all text-sm"
+                    onClick={() => setShowConfirmForm(true)}
+                    className="w-full bg-[#2D2A26] text-white py-3 rounded-xl font-semibold hover:bg-[#4A4640] transition-all text-sm min-h-[44px]"
+                    data-testid="confirm-payment-btn"
                   >
-                    Já efetuei o pagamento
+                    Já fiz o pagamento
+                  </button>
+
+                  {/* 8. Social Proof */}
+                  {progressData && (
+                    <div className="space-y-1 text-center pt-1" data-testid="social-proof">
+                      {(progressData.journey_contributor_count > 0 || progressData.contributor_count > 0) && (
+                        <p className="text-xs text-[#6B6661] flex items-center justify-center gap-1">
+                          <Flame className="w-3 h-3 text-orange-500" />
+                          <span>
+                            {progressData.journey_contributor_count > 0
+                              ? `${progressData.journey_contributor_count} pessoas já contribuíram`
+                              : `${progressData.contributor_count} sonhadores na plataforma`}
+                          </span>
+                        </p>
+                      )}
+                      {progressData.percentage > 0 && (
+                        <p className="text-[11px] text-[#6B6661]">
+                          {progressData.percentage.toFixed(0)}% do objetivo já foi atingido
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* 9. Motivation — Ambassador Hook */}
+                  {!user?.is_ambassador && (
+                    <p className="text-xs text-center text-[#FFBE98] italic flex items-center justify-center gap-1" data-testid="ambassador-hook">
+                      <Award className="w-3 h-3" />
+                      Estás mais perto de te tornares Embaixador
+                    </p>
+                  )}
+
+                  {/* 10. Footer (Trust) */}
+                  <div className="text-center pt-1" data-testid="trust-footer">
+                    <p className="text-[10px] text-[#6B6661]/70 flex items-center justify-center gap-1">
+                      <ShieldCheck className="w-3 h-3" />
+                      Pagamento verificado manualmente em poucos minutos. Receberás confirmação por email.
+                    </p>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* STEP 3.5: Confirmation Form */}
+              {step === 3 && showConfirmForm && !showConfirmation && contribution && (
+                <motion.div
+                  key="confirm-form"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="space-y-4"
+                  data-testid="confirm-form"
+                >
+                  <div className="text-center">
+                    <div className="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <Mail className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    <h3 className="text-base font-bold text-[#2D2A26]">Confirmar contribuição</h3>
+                    <p className="text-xs text-[#6B6661] mt-1">Deixa o teu email para receberes a confirmação</p>
+                  </div>
+
+                  <div className="space-y-2.5">
+                    <div>
+                      <label className="text-[11px] text-[#6B6661] font-medium block mb-1">Nome (opcional)</label>
+                      <input
+                        type="text"
+                        value={confirmName}
+                        onChange={e => setConfirmName(e.target.value)}
+                        placeholder="O teu nome"
+                        className="w-full px-3 py-2.5 border border-stone-200 rounded-xl text-sm text-[#2D2A26] focus:outline-none focus:border-[#FFBE98] transition-colors min-h-[44px]"
+                        data-testid="confirm-name-input"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] text-[#6B6661] font-medium block mb-1">Email *</label>
+                      <input
+                        type="email"
+                        value={confirmEmail}
+                        onChange={e => setConfirmEmail(e.target.value)}
+                        placeholder="o-teu@email.com"
+                        required
+                        className="w-full px-3 py-2.5 border border-stone-200 rounded-xl text-sm text-[#2D2A26] focus:outline-none focus:border-[#FFBE98] transition-colors min-h-[44px]"
+                        data-testid="confirm-email-input"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={handleConfirmPayment}
+                    disabled={!confirmEmail || confirmingPayment}
+                    className="w-full bg-[#2D2A26] text-white py-3 rounded-xl font-semibold hover:bg-[#4A4640] transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+                    data-testid="submit-confirmation-btn"
+                  >
+                    {confirmingPayment ? 'A confirmar...' : 'Confirmar contribuição'}
+                  </button>
+
+                  <button
+                    onClick={() => setShowConfirmForm(false)}
+                    className="w-full text-xs text-[#6B6661] hover:text-[#2D2A26] transition-colors py-1"
+                    data-testid="back-to-step3-btn"
+                  >
+                    Voltar às instruções
                   </button>
                 </motion.div>
               )}

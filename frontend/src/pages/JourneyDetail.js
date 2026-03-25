@@ -629,6 +629,7 @@ const JourneyDetail = () => {
         paymentInfo={paymentInfo}
         getAuthHeaders={getAuthHeaders}
         user={user}
+        progressData={progress}
       />
 
       {/* Exit Intent Modal */}

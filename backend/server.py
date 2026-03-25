@@ -785,6 +785,38 @@ async def get_journey_public_contributions(journey_id: str):
         "contributions": public_feed
     }
 
+@api_router.put("/contributions/{contribution_id}/confirm-details")
+async def confirm_contribution_details(contribution_id: str, request: Request):
+    """User confirms they made the payment and optionally provides name/email"""
+    body = await request.json()
+    contributor_name = body.get("contributor_name")
+    contributor_email = body.get("contributor_email")
+
+    if not contributor_email:
+        raise HTTPException(status_code=400, detail="Email é obrigatório")
+
+    contribution = await db.contributions.find_one({"contribution_id": contribution_id}, {"_id": 0})
+    if not contribution:
+        raise HTTPException(status_code=404, detail="Contribuição não encontrada")
+
+    update_fields = {
+        "contributor_email": contributor_email,
+        "user_confirmed_payment": True,
+        "confirmed_by_user_at": datetime.now(timezone.utc).isoformat()
+    }
+    if contributor_name:
+        update_fields["contributor_name"] = contributor_name
+
+    await db.contributions.update_one(
+        {"contribution_id": contribution_id},
+        {"$set": update_fields}
+    )
+
+    return {
+        "status": "ok",
+        "message": "Obrigado! A tua contribuição será validada em breve."
+    }
+
 @api_router.get("/journeys/{journey_id}/progress")
 async def get_journey_progress(journey_id: str, request: Request):
     """Get journey progress - percentage is public, goal amount is admin-only"""
