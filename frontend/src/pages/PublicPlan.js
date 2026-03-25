@@ -1,15 +1,43 @@
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   MapPin, Calendar, Sun, Shirt, ClipboardList, Lightbulb,
-  Sparkles, Loader2, Globe, CheckCircle2, ArrowLeft, Share2,
-  Plane, Building2, ArrowRight, Heart, Copy, Check, Lock, Map
+  Sparkles, Loader2, Globe, CheckCircle2, Share2,
+  Plane, Building2, ArrowRight, Heart, Copy, Check, Lock, Map,
+  ChevronDown
 } from 'lucide-react';
 import axios from 'axios';
 import SEO from '../components/SEO';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+
+/* Country flag lookup */
+const COUNTRY_FLAGS = {
+  'portugal': '\u{1F1F5}\u{1F1F9}', 'franca': '\u{1F1EB}\u{1F1F7}', 'france': '\u{1F1EB}\u{1F1F7}', 'paris': '\u{1F1EB}\u{1F1F7}',
+  'espanha': '\u{1F1EA}\u{1F1F8}', 'spain': '\u{1F1EA}\u{1F1F8}', 'madrid': '\u{1F1EA}\u{1F1F8}', 'barcelona': '\u{1F1EA}\u{1F1F8}',
+  'italia': '\u{1F1EE}\u{1F1F9}', 'italy': '\u{1F1EE}\u{1F1F9}', 'roma': '\u{1F1EE}\u{1F1F9}', 'rome': '\u{1F1EE}\u{1F1F9}', 'milano': '\u{1F1EE}\u{1F1F9}',
+  'japan': '\u{1F1EF}\u{1F1F5}', 'japao': '\u{1F1EF}\u{1F1F5}', 'tokyo': '\u{1F1EF}\u{1F1F5}', 'kyoto': '\u{1F1EF}\u{1F1F5}', 'osaka': '\u{1F1EF}\u{1F1F5}',
+  'uk': '\u{1F1EC}\u{1F1E7}', 'london': '\u{1F1EC}\u{1F1E7}', 'londres': '\u{1F1EC}\u{1F1E7}', 'england': '\u{1F1EC}\u{1F1E7}',
+  'germany': '\u{1F1E9}\u{1F1EA}', 'alemanha': '\u{1F1E9}\u{1F1EA}', 'berlin': '\u{1F1E9}\u{1F1EA}', 'munich': '\u{1F1E9}\u{1F1EA}',
+  'usa': '\u{1F1FA}\u{1F1F8}', 'new york': '\u{1F1FA}\u{1F1F8}', 'nova iorque': '\u{1F1FA}\u{1F1F8}', 'los angeles': '\u{1F1FA}\u{1F1F8}',
+  'brasil': '\u{1F1E7}\u{1F1F7}', 'brazil': '\u{1F1E7}\u{1F1F7}', 'rio': '\u{1F1E7}\u{1F1F7}',
+  'grecia': '\u{1F1EC}\u{1F1F7}', 'greece': '\u{1F1EC}\u{1F1F7}', 'atenas': '\u{1F1EC}\u{1F1F7}', 'santorini': '\u{1F1EC}\u{1F1F7}',
+  'tailandia': '\u{1F1F9}\u{1F1ED}', 'thailand': '\u{1F1F9}\u{1F1ED}', 'bangkok': '\u{1F1F9}\u{1F1ED}',
+  'turquia': '\u{1F1F9}\u{1F1F7}', 'turkey': '\u{1F1F9}\u{1F1F7}', 'istanbul': '\u{1F1F9}\u{1F1F7}', 'istambul': '\u{1F1F9}\u{1F1F7}',
+  'holanda': '\u{1F1F3}\u{1F1F1}', 'netherlands': '\u{1F1F3}\u{1F1F1}', 'amsterdam': '\u{1F1F3}\u{1F1F1}',
+  'marrocos': '\u{1F1F2}\u{1F1E6}', 'morocco': '\u{1F1F2}\u{1F1E6}', 'marrakech': '\u{1F1F2}\u{1F1E6}',
+  'croacia': '\u{1F1ED}\u{1F1F7}', 'croatia': '\u{1F1ED}\u{1F1F7}', 'dubrovnik': '\u{1F1ED}\u{1F1F7}',
+  'lisboa': '\u{1F1F5}\u{1F1F9}', 'porto': '\u{1F1F5}\u{1F1F9}', 'algarve': '\u{1F1F5}\u{1F1F9}', 'acores': '\u{1F1F5}\u{1F1F9}', 'madeira': '\u{1F1F5}\u{1F1F9}',
+};
+
+const getFlag = (destination) => {
+  const lower = (destination || '').toLowerCase();
+  for (const [key, flag] of Object.entries(COUNTRY_FLAGS)) {
+    if (lower.includes(key)) return flag;
+  }
+  return '\u{1F30D}';
+};
 
 const PublicPlan = () => {
   const { slug } = useParams();
@@ -18,6 +46,7 @@ const PublicPlan = () => {
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
   const [shared, setShared] = useState(false);
+  const contentRef = useRef(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -102,76 +131,111 @@ const PublicPlan = () => {
   const destination = p.destination || plan.destination || '';
   const numDays = p.itinerary?.length || 0;
   const ogImage = `${process.env.REACT_APP_BACKEND_URL}/api/og-image/${slug}`;
+  const flag = getFlag(destination);
+
+  const scrollToContent = () => {
+    contentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   return (
     <div className="min-h-screen bg-[#FAFAF9]" data-testid="public-plan-page">
       <SEO
-        title={`Roteiro ${destination} - ${numDays} dias`}
-        description={p.summary || `Plano de viagem para ${destination} com ${numDays} dias. Roteiro completo, dicas locais e checklist.`}
+        title={`${destination} em ${numDays} dias`}
+        description={p.summary || `Roteiro inteligente para ${destination} com ${numDays} dias. Gerado com IA.`}
         image={ogImage}
         type="article"
       />
 
-      {/* Hero */}
-      <div className="bg-gradient-to-b from-[#2D2A26] via-[#3D3A36] to-[#FAFAF9] pt-24 pb-10 px-4 sm:px-6">
-        <div className="max-w-2xl mx-auto">
-          <Link to="/travel-planner" className="inline-flex items-center gap-1.5 text-sm text-white/60 hover:text-[#FFBE98] mb-6 transition-colors" data-testid="back-to-planner">
-            <ArrowLeft className="w-4 h-4" /> Criar o meu roteiro
-          </Link>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-1.5 mb-4 border border-white/10">
-              <Sparkles className="w-3.5 h-3.5 text-[#FFBE98]" />
-              <span className="text-xs font-medium text-white/70">Plano gerado por IA</span>
-            </div>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-2" data-testid="public-plan-title">
-              {destination}
-            </h1>
-            <div className="flex items-center gap-3 flex-wrap mb-4">
-              {numDays > 0 && (
-                <span className="inline-flex items-center gap-1.5 text-sm font-medium text-[#FFBE98]">
-                  <Calendar className="w-4 h-4" />{numDays} dias
-                </span>
-              )}
-              {p.dates && (
-                <span className="text-sm text-white/50">{p.dates}</span>
-              )}
-            </div>
-            {p.summary && (
-              <p className="text-sm text-white/70 leading-relaxed max-w-xl">{p.summary}</p>
-            )}
+      {/* Hero — Full viewport with OG image background */}
+      <div className="relative min-h-[100vh] flex flex-col items-center justify-center overflow-hidden" data-testid="hero-section">
+        {/* OG image background with blur */}
+        <div className="absolute inset-0 z-0">
+          <img src={ogImage} alt="" className="w-full h-full object-cover scale-110" style={{ filter: 'blur(20px) brightness(0.3)' }} />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#2D2A26]/60 via-[#2D2A26]/40 to-[#2D2A26]/80" />
+        </div>
 
-            {/* Share bar */}
-            <div className="flex items-center gap-2 mt-5" data-testid="share-bar">
-              <button
-                onClick={handleWhatsApp}
-                className="flex items-center gap-1.5 bg-[#25D366] hover:bg-[#20BA5A] text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-colors"
-                data-testid="share-whatsapp"
-              >
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.611.611l4.458-1.495A11.934 11.934 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.326-.693-6.05-1.876l-.424-.295-3.072 1.03 1.03-3.072-.296-.424A9.935 9.935 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
-                Partilhar
-              </button>
-              <button
-                onClick={handleCopy}
-                className="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white text-xs font-medium px-4 py-2.5 rounded-xl border border-white/10 transition-colors"
-                data-testid="share-copy-link"
-              >
-                {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                {copied ? 'Link copiado!' : 'Copiar link'}
-              </button>
-              <button
-                onClick={handleShare}
-                className="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white text-xs font-medium px-4 py-2.5 rounded-xl border border-white/10 transition-colors"
-                data-testid="share-native"
-              >
-                <Share2 className="w-3.5 h-3.5" />
-                {shared ? 'Copiado!' : 'Mais'}
-              </button>
+        {/* Content */}
+        <div className="relative z-10 text-center px-6 max-w-2xl mx-auto">
+          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+            {/* Title */}
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight" data-testid="public-plan-title">
+              {destination} em {numDays} dias {flag}
+            </h1>
+
+            {/* Subtitle */}
+            <p className="text-base sm:text-lg text-white/70 leading-relaxed max-w-lg mx-auto mb-6">
+              Roteiro inteligente para viver o melhor da cidade<br className="hidden sm:block" />
+              sem perder tempo nem cair em armadilhas
+            </p>
+
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-full px-5 py-2 mb-8 border border-white/10">
+              <Sparkles className="w-4 h-4 text-[#FFBE98]" />
+              <span className="text-sm font-medium text-white/80">Gerado com IA</span>
             </div>
+
+            {/* CTAs */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <button
+                onClick={scrollToContent}
+                className="flex items-center gap-2 bg-white text-[#2D2A26] font-bold text-sm px-8 py-3.5 rounded-2xl hover:shadow-2xl hover:-translate-y-0.5 transition-all duration-300"
+                data-testid="cta-explore"
+              >
+                <Map className="w-4 h-4" /> Explorar roteiro
+              </button>
+              <Link
+                to="/travel-planner"
+                className="flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white font-semibold text-sm px-8 py-3.5 rounded-2xl border border-white/15 hover:bg-white/20 hover:-translate-y-0.5 transition-all duration-300"
+                data-testid="cta-create-plan"
+              >
+                <Sparkles className="w-4 h-4 text-[#FFBE98]" /> Criar o meu
+              </Link>
+            </div>
+
+            {/* Dates */}
+            {p.dates && (
+              <p className="text-xs text-white/40 mt-5">{p.dates}</p>
+            )}
+          </motion.div>
+
+          {/* Scroll indicator */}
+          <motion.div
+            className="absolute bottom-8 left-1/2 -translate-x-1/2 cursor-pointer"
+            animate={{ y: [0, 8, 0] }} transition={{ repeat: Infinity, duration: 1.5 }}
+            onClick={scrollToContent}
+          >
+            <ChevronDown className="w-6 h-6 text-white/30" />
           </motion.div>
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 pb-24 -mt-2">
+      {/* Share bar (sticky below header on scroll) */}
+      <div className="sticky top-20 z-30 bg-white/80 backdrop-blur-xl border-b border-stone-100" data-testid="share-bar">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-2.5 flex items-center justify-between">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="text-sm font-bold text-[#2D2A26] truncate">{destination}</span>
+            <span className="text-xs text-[#6B6661]">{numDays} dias</span>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button onClick={handleWhatsApp} data-testid="share-whatsapp"
+              className="flex items-center gap-1 bg-[#25D366] text-white text-[10px] font-bold px-3 py-1.5 rounded-lg hover:bg-[#20BA5A] transition-colors">
+              <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.611.611l4.458-1.495A11.934 11.934 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.326-.693-6.05-1.876l-.424-.295-3.072 1.03 1.03-3.072-.296-.424A9.935 9.935 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+              Partilhar
+            </button>
+            <button onClick={handleCopy} data-testid="share-copy-link"
+              className="flex items-center gap-1 bg-stone-100 text-[#2D2A26] text-[10px] font-semibold px-3 py-1.5 rounded-lg hover:bg-stone-200 transition-colors">
+              {copied ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
+              {copied ? 'Copiado!' : 'Copiar'}
+            </button>
+            <button onClick={handleShare} data-testid="share-native"
+              className="flex items-center gap-1 bg-stone-100 text-[#2D2A26] text-[10px] font-semibold px-2.5 py-1.5 rounded-lg hover:bg-stone-200 transition-colors">
+              <Share2 className="w-3 h-3" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div ref={contentRef} className="max-w-2xl mx-auto px-4 sm:px-6 pb-24 pt-4">
         {/* Travel Context: Flight + Hotel (public preview) */}
         {(p.flight_info || p.hotel_info) && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
