@@ -106,6 +106,13 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 ## Key Pages
 - / (Home), /journey/:id, /plan-trip, /travel-planner, /plano/:slug, /about, /dashboard, /admin
 
+### Referral/Ambassador System Optimization (2026-03-25)
+- **PaymentSuccess redesign**: Added referral CTA with WhatsApp button, ambassador progress bar, unlock preview, and register CTA for non-logged users
+- **Messaging consistency**: Replaced all generic "Partilhar"/"Copiar link" with action-oriented "Convidar amigos"/"Copiar convite" across Dashboard, ShareMenu, AmbassadorProgress, CheckoutModal
+- **Dashboard labels**: "Referrals válidos" → "Amigos que contribuiram", dynamic slot numbering ("Convida o 1o amigo")
+- **ShareMenu header**: "Partilhar via" → "Convidar via"
+- **WhatsApp primary CTA**: Direct WhatsApp share button with pre-filled message including referral link in PaymentSuccess and AmbassadorProgress
+
 ### Active Navigation Highlight (2026-03-25)
 - Desktop: active link gets text-[#FFBE98] + subtle 2px underline using `useLocation`
 - Mobile: active link gets text-[#FFBE98] + left border accent
