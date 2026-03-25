@@ -6593,7 +6593,7 @@ async def generate_travel_plan(request: Request):
     cache_key = f"{destination}_{start_date}_{end_date}_{trip_type}".lower()
     cached = await db.travel_plans.find_one({"cache_key": cache_key}, {"_id": 0})
     if cached and cached.get("plan"):
-        return {"plan": cached["plan"], "cached": True}
+        return {"plan": cached["plan"], "cached": True, "slug": cached.get("slug")}
     
     trip_type_text = f"Tipo de viagem: {trip_type}. " if trip_type else ""
     
@@ -6728,7 +6728,7 @@ Responde APENAS com um JSON valido com esta estrutura exata (sem markdown, sem `
             upsert=True
         )
         
-        return {"plan": plan, "cached": False}
+        return {"plan": plan, "cached": False, "slug": slug}
     except asyncio.TimeoutError:
         logger.error(f"AI travel plan timeout: destination={destination}")
         raise HTTPException(status_code=504, detail="Não foi possível gerar o plano. Tente novamente.")
@@ -7464,6 +7464,89 @@ async def delete_offer(offer_id: str, request: Request):
 
 
 # ==================== SEO ENDPOINTS ====================
+
+@api_router.get("/og-image/{slug}")
+async def generate_og_image(slug: str):
+    """Generate dynamic Open Graph image for social sharing"""
+    from PIL import Image, ImageDraw, ImageFont
+    import io
+
+    plan_doc = await db.travel_plans.find_one(
+        {"slug": slug, "is_public": True},
+        {"_id": 0, "destination": 1, "plan": 1}
+    )
+    if not plan_doc:
+        raise HTTPException(status_code=404, detail="Plano não encontrado")
+
+    p = plan_doc.get("plan", {})
+    destination = p.get("destination", plan_doc.get("destination", "Viagem"))
+    dates = p.get("dates", "")
+    num_days = len(p.get("itinerary", []))
+    summary = p.get("summary", "")[:120]
+
+    # Create OG image (1200x630 — Facebook/LinkedIn standard)
+    w, h = 1200, 630
+    img = Image.new("RGB", (w, h))
+    draw = ImageDraw.Draw(img)
+
+    # Gradient background: warm peach to dark
+    for y in range(h):
+        r = int(255 - (y / h) * 210)
+        g = int(190 - (y / h) * 148)
+        b = int(152 - (y / h) * 114)
+        draw.line([(0, y), (w, y)], fill=(r, g, b))
+
+    # Semi-transparent overlay at bottom
+    overlay = Image.new("RGBA", (w, 280), (45, 42, 38, 200))
+    img.paste(Image.alpha_composite(Image.new("RGBA", (w, 280), (0, 0, 0, 0)), overlay), (0, h - 280))
+
+    # Load fonts
+    try:
+        font_bold = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf", 56)
+        font_medium = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf", 28)
+        font_small = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf", 22)
+        font_logo = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf", 32)
+    except Exception:
+        font_bold = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeSansBold.ttf", 56)
+        font_medium = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeSans.ttf", 28)
+        font_small = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeSans.ttf", 22)
+        font_logo = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeSansBold.ttf", 32)
+
+    # Logo + badge
+    draw.text((60, 40), "4Luis", fill=(255, 255, 255), font=font_logo)
+    draw.text((170, 48), "AI Travel Planner", fill=(255, 255, 255, 180), font=font_small)
+
+    # Decorative pin icon (simple circle)
+    draw.ellipse([60, 160, 100, 200], fill=(255, 255, 255))
+
+    # Destination title
+    draw.text((60, h - 250), destination, fill=(255, 255, 255), font=font_bold)
+
+    # Duration and dates
+    info_text = ""
+    if num_days > 0:
+        info_text += f"{num_days} dias"
+    if dates:
+        info_text += f"  |  {dates}" if info_text else dates
+    if info_text:
+        draw.text((60, h - 180), info_text, fill=(255, 190, 152), font=font_medium)
+
+    # Summary
+    if summary:
+        draw.text((60, h - 135), summary, fill=(200, 200, 200), font=font_small)
+
+    # Bottom bar
+    draw.text((60, h - 55), "Planeia a tua viagem com IA", fill=(255, 190, 152), font=font_small)
+    draw.text((w - 200, h - 55), "4luis.com", fill=(255, 255, 255), font=font_medium)
+
+    # Export as PNG
+    buf = io.BytesIO()
+    img.save(buf, format="PNG", optimize=True)
+    buf.seek(0)
+
+    return Response(content=buf.read(), media_type="image/png",
+                    headers={"Cache-Control": "public, max-age=86400"})
+
 
 @api_router.get("/plan/{slug}")
 async def get_public_plan(slug: str):

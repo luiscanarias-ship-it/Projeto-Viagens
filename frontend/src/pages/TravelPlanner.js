@@ -497,6 +497,7 @@ const TravelPlanner = () => {
   const [rateLimited, setRateLimited] = useState(false);
   const [rateLimitExpiry, setRateLimitExpiry] = useState(null);
   const [rateLimitMinutes, setRateLimitMinutes] = useState(0);
+  const [planSlug, setPlanSlug] = useState(null);
   const [hiddenSections, setHiddenSections] = useState(() => {
     try { return JSON.parse(localStorage.getItem('planner_hidden') || '[]'); } catch { return []; }
   });
@@ -599,6 +600,7 @@ const TravelPlanner = () => {
         trip_type: tripTypes.length > 0 ? tripTypes : ''
       }, { headers: token ? { Authorization: `Bearer ${token}` } : {}, timeout: 60000 });
       setPlan(res.data.plan);
+      setPlanSlug(res.data.slug);
       setActiveTab('guia');
       setRateLimited(false);
     } catch (err) {
@@ -625,6 +627,7 @@ const TravelPlanner = () => {
         previous_plan: plan, refinement
       }, { headers: token ? { Authorization: `Bearer ${token}` } : {}, timeout: 60000 });
       setPlan(res.data.plan);
+      if (res.data.slug) setPlanSlug(res.data.slug);
       setRefineSuccess(true);
       // Scroll to top of document
       resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -685,21 +688,21 @@ const TravelPlanner = () => {
   };
   const handleShare = async () => {
     if (!plan) return;
-    const fullText = buildPlanText();
+    const shareUrl = planSlug ? `${window.location.origin}/plano/${planSlug}` : window.location.href;
+    const shareText = `Ve este roteiro para ${plan.destination} gerado por IA!`;
     if (navigator.share) {
       try {
-        await navigator.share({ title: `Plano de viagem: ${plan.destination}`, text: fullText });
+        await navigator.share({ title: `Plano de viagem: ${plan.destination}`, text: shareText, url: shareUrl });
         return;
       } catch (e) {
-        if (e.name === 'AbortError') return; // user cancelled
+        if (e.name === 'AbortError') return;
       }
     }
-    // Fallback: copy to clipboard
     try {
-      await navigator.clipboard.writeText(fullText);
+      await navigator.clipboard.writeText(shareUrl);
     } catch {
       const ta = document.createElement('textarea');
-      ta.value = fullText; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      ta.value = shareUrl; ta.style.position = 'fixed'; ta.style.opacity = '0';
       document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
     }
     setShared(true);
@@ -1066,7 +1069,7 @@ const TravelPlanner = () => {
 
                   {/* Primary: Ajustar */}
                   <RefinePanel onSubmit={handleRefine} loading={refining} success={refineSuccess} />
-                  {/* Secondary: Copy + Share */}
+                  {/* Secondary: Copy + Share link */}
                   <div className="flex items-center gap-2">
                     <button onClick={handleCopy} data-testid="copy-btn"
                       className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold text-[#6B6661] border border-stone-200 bg-white hover:bg-stone-50 hover:border-stone-300 px-3 py-2 rounded-xl transition-all duration-200">
@@ -1076,9 +1079,14 @@ const TravelPlanner = () => {
                     <button onClick={handleShare} data-testid="share-btn"
                       className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold text-[#6B6661] border border-stone-200 bg-white hover:bg-stone-50 hover:border-stone-300 px-3 py-2 rounded-xl transition-all duration-200">
                       {shared ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Share2 className="w-3.5 h-3.5" />}
-                      {shared ? 'Plano copiado! Partilha onde quiseres' : 'Partilhar'}
+                      {shared ? 'Link copiado!' : 'Partilhar link'}
                     </button>
                   </div>
+                  {planSlug && (
+                    <p className="text-[10px] text-center text-[#6B6661]/70 -mt-1">
+                      Link publico: {window.location.origin}/plano/{planSlug}
+                    </p>
+                  )}
                 </div>
                 {error && (
                   <div className={`text-xs text-center mt-2 px-3 py-2 rounded-lg w-full ${
