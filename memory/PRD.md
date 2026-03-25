@@ -137,12 +137,17 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - **ShareMenu header**: "Partilhar via" → "Convidar via"
 - **WhatsApp primary CTA**: Direct WhatsApp share button with pre-filled message including referral link in PaymentSuccess and AmbassadorProgress
 
-### Active Navigation Highlight (2026-03-25)
+### Active Navigation Highlight (2026-03-25, verified 2026-03-25)
 - Desktop: active link gets text-[#FFBE98] + subtle 2px underline using `useLocation`
 - Mobile: active link gets text-[#FFBE98] + left border accent
-- Applies to: Home, Planear Viagem, Meu Painel, Administração
+- Applies to: Home, Planear Viagem (also covers /travel-planner), Meu Painel, Administração
 - "Viagem Principal" button keeps its own permanent peach style
 - "Explorar Viagens" keeps neutral style (scroll-only, no distinct route)
+
+### Microcopy/Conversion Optimization (2026-03-25, verified 2026-03-25)
+- Affiliate CTAs upgraded: "Evita filas — reservar entrada", "Muito procurado — garantir vaga", "Esgota rapido — garantir bilhete"
+- Contextual getCTACopy function generates benefit-driven labels per destination type
+- All affiliate logic (GetYourGuide, Skyscanner, insurance, eSIM) preserved intact
 
 ### Mobile-First Premium Layout Restructure (2026-03-25)
 - **SmartMap**: Moved from actions footer to between TravelContext and tab navigation — "central element, high priority" as per spec.
