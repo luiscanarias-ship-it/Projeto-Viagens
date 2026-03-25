@@ -144,6 +144,14 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - "Viagem Principal" button keeps its own permanent peach style
 - "Explorar Viagens" keeps neutral style (scroll-only, no distinct route)
 
+### Mobile-First Premium Layout Restructure (2026-03-25)
+- **SmartMap**: Moved from actions footer to between TravelContext and tab navigation — "central element, high priority" as per spec.
+- **AI Assistant**: Moved from actions footer to after itinerary tab content — "embedded" in the reading flow.
+- **Premium Hint**: "Algumas funcionalidades sao exclusivas para Embaixadores" with Lock icon for non-ambassadors.
+- **Conversion Block**: "Gostaste deste roteiro?" at bottom of card with dark gradient. Dual CTAs: "Criar o meu roteiro" (always) + "Tornar-me Embaixador" (non-ambassadors only).
+- **Mobile Touch**: Copy/Share buttons min-h-[44px] for touch targets.
+- **Layout Order**: Header → TopBookingBar → PremiumHint → TravelContext → SmartMap → Tabs → Content → AIAssistant → PlanningHub → ActionsFooter → ConversionBlock → Disclaimer.
+
 ### Public Plan Hero Redesign (2026-03-25)
 - **Hero**: Full-viewport (100vh) with OG image as blurred background (blur 20px, brightness 0.3). Title: "{Destination} em {X} dias {flag}" with country flag emoji mapping (25+ countries). Subtitle emocional: "Roteiro inteligente para viver o melhor da cidade sem perder tempo nem cair em armadilhas". Badge "Gerado com IA". Two CTAs: "Explorar roteiro" (smooth scroll) + "Criar o meu" (glass button → /travel-planner). Animated scroll indicator.
 - **Share Bar**: Sticky at top-20 (below fixed header) with backdrop blur. Shows destination + days + WhatsApp/Copy/Share buttons.
