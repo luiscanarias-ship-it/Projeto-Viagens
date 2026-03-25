@@ -494,8 +494,8 @@ def get_contribution_confirmed_email_html(
         invite_url = f"{FRONTEND_URL}/?ref={referral_code}"
         ambassador_section = f"""
         <div style="background: linear-gradient(135deg, #FFBE9810, #FFBE9830); border-radius: 12px; padding: 20px; margin: 20px 0; text-align: center; border: 1px solid #FFBE9840;">
-            <p style="margin: 0 0 4px 0; color: #2D2A26; font-size: 15px; font-weight: 600;">Queres aproximar-te de te tornares Embaixador?</p>
-            <p style="margin: 0 0 16px 0; color: #6B6661; font-size: 13px;">Faltam-te <strong>{remaining_referrals}</strong> amigos para desbloquear vantagens</p>
+            <p style="margin: 0 0 4px 0; color: #2D2A26; font-size: 15px; font-weight: 600;">Queres acelerar este sonho?</p>
+            <p style="margin: 0 0 16px 0; color: #6B6661; font-size: 13px;">Faltam-te <strong>{remaining_referrals}</strong> amigos para te tornares Embaixador</p>
             {_build_email_cta_button(invite_url, "Convidar amigos")}
         </div>
         """
@@ -503,19 +503,22 @@ def get_contribution_confirmed_email_html(
         invite_url = f"{FRONTEND_URL}/?ref={referral_code}"
         ambassador_section = f"""
         <div style="background: linear-gradient(135deg, #FFBE9810, #FFBE9830); border-radius: 12px; padding: 20px; margin: 20px 0; text-align: center; border: 1px solid #FFBE9840;">
-            <p style="margin: 0 0 12px 0; color: #2D2A26; font-size: 15px; font-weight: 600;">Partilha com amigos e ajuda ainda mais</p>
+            <p style="margin: 0 0 12px 0; color: #2D2A26; font-size: 15px; font-weight: 600;">Queres acelerar este sonho?</p>
             {_build_email_cta_button(invite_url, "Convidar amigos")}
         </div>
         """
 
     content = f"""
     <div style="text-align: center;">
-        <h1 style="margin: 0 0 8px 0; color: #2D2A26; font-size: 24px;">Já fazes parte deste sonho</h1>
-        <p style="margin: 0 0 24px 0; color: #6B6661; font-size: 16px; line-height: 1.6;">
-            Obrigado, {contributor_name}! Estás agora a ajudar a tornar esta viagem realidade.
+        <h1 style="margin: 0 0 8px 0; color: #2D2A26; font-size: 24px;">A tua contribuição foi confirmada com sucesso</h1>
+        <p style="margin: 0 0 8px 0; color: #6B6661; font-size: 16px; line-height: 1.6;">
+            Obrigado, {contributor_name}!
+        </p>
+        <p style="margin: 0 0 24px 0; color: #FFBE98; font-size: 14px; font-style: italic;">
+            Já estás a ajudar a tornar este sonho realidade
         </p>
 
-        <div style="background-color: #E6F4F1; border-radius: 12px; padding: 24px; text-align: center; margin-bottom: 20px;">
+        <div style="background-color: #FFF7ED; border-radius: 12px; padding: 24px; text-align: center; margin-bottom: 20px;">
             <p style="margin: 0 0 4px 0; color: #6B6661; font-size: 13px;">A tua contribuição</p>
             <p style="margin: 0; color: #2D2A26; font-size: 36px; font-weight: bold;">{amount}€</p>
             <p style="margin: 6px 0 0 0; color: #6B6661; font-size: 14px;">para "{journey_name}"</p>

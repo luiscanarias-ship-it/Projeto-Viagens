@@ -1077,75 +1077,84 @@ const CheckoutModal = ({
                 </motion.div>
               )}
 
-              {/* CONFIRMATION */}
+              {/* CONFIRMATION / SUCCESS */}
               {showConfirmation && (
                 <motion.div
                   key="confirmation"
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="text-center py-6 space-y-5"
+                  className="text-center py-4 space-y-4"
                 >
-                  <div className="w-16 h-16 bg-[#FFBE98]/20 rounded-full flex items-center justify-center mx-auto">
-                    <Heart className="w-8 h-8 text-[#FFBE98]" />
-                  </div>
-                  
+                  {/* Icon + Title */}
                   <div>
+                    <div className="w-14 h-14 bg-[#FFBE98]/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Heart className="w-7 h-7 text-[#FFBE98]" />
+                    </div>
                     <h3 className="text-xl font-bold text-[#2D2A26]" data-testid="thank-you-title">
-                      Já fazes parte deste sonho
+                      Obrigado!
                     </h3>
-                    {contribution?.status === 'COMPLETED' ? (
-                      <p className="text-sm text-green-600 mt-2 font-medium">
-                        Pagamento confirmado automaticamente via PayPal.<br />
-                        Obrigado pelo teu apoio de {contribution.amount}€!
-                      </p>
-                    ) : (
-                      <p className="text-sm text-[#6B6661] mt-2">
-                        A tua contribuição foi registada e será confirmada em poucos minutos.
-                      </p>
-                    )}
-                    <p className="text-xs text-[#FFBE98] mt-3 italic" data-testid="post-contrib-proof">
-                      Queres partilhar com amigos e ajudar ainda mais?
-                    </p>
                   </div>
 
-                  {contribution?.payment_reference && (
-                    <div className="bg-stone-50 rounded-xl p-3 inline-block">
-                      <p className="text-xs text-[#6B6661]">Referencia:</p>
-                      <p className="font-bold text-lg">{contribution.payment_reference}</p>
-                    </div>
+                  {/* Status message */}
+                  {contribution?.status === 'COMPLETED' ? (
+                    <p className="text-sm text-[#2D2A26]">
+                      Pagamento de <strong>{contribution.amount}€</strong> confirmado via PayPal.
+                    </p>
+                  ) : (
+                    <p className="text-sm text-[#6B6661]">
+                      Recebemos o teu pedido de contribuição. Estamos a validar o pagamento.
+                    </p>
                   )}
 
-                  {user?.anonymous_alias && (
-                    <div className="border-t border-stone-100 pt-4 space-y-2">
-                      <p className="text-sm text-[#6B6661]">
-                        Partilha com quem também acredita neste sonho
+                  {/* Emotional reinforcement */}
+                  <p className="text-xs text-[#FFBE98] italic" data-testid="post-contrib-proof">
+                    Já estás a ajudar a tornar este sonho realidade
+                  </p>
+
+                  {/* Ambassador progression — PRIMARY CTA */}
+                  <div className="bg-stone-50 rounded-xl p-4 space-y-2" data-testid="referral-cta-block">
+                    <p className="text-sm font-semibold text-[#2D2A26]">Queres acelerar este sonho?</p>
+                    {user?.valid_referrals_count !== undefined && (
+                      <p className="text-xs text-[#6B6661]" data-testid="ambassador-progress">
+                        Faltam-te <strong>{Math.max(0, 3 - (user.valid_referrals_count || 0))}</strong> amigos para te tornares Embaixador
                       </p>
-                      <div className="flex justify-center" data-testid="thank-you-share">
+                    )}
+                    {user?.anonymous_alias ? (
+                      <div className="flex justify-center pt-1" data-testid="thank-you-share">
                         <ShareMenu
                           inviteLink={buildInviteLink(user.anonymous_alias)}
                           senderName={null}
-                          customMessage={`Acredito que os sonhos podem tornar-se realidade.\n\nAcabei de ajudar a financiar uma viagem na 4Luis.\nSe quiseres participar também:\n\n${buildInviteLink(user.anonymous_alias)}`}
-                          buttonLabel="Partilhar convite"
+                          customMessage={`Acabei de ajudar a financiar uma viagem de sonho na 4Luis.\nSe quiseres participar também:\n\n${buildInviteLink(user.anonymous_alias)}`}
+                          buttonLabel="Convidar amigos"
                         />
                       </div>
-                    </div>
-                  )}
+                    ) : (
+                      <a
+                        href="/login"
+                        className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-semibold text-sm hover:bg-[#FFB080] transition-colors"
+                        data-testid="register-cta-btn"
+                      >
+                        Convidar amigos
+                      </a>
+                    )}
+                  </div>
 
+                  {/* Register incentive for non-users */}
                   {!user && (
-                    <div className="border-t border-stone-100 pt-4 space-y-3" data-testid="register-incentive">
-                      <p className="text-sm font-semibold text-[#2D2A26]">Cria uma conta gratuita para:</p>
-                      <div className="space-y-1.5 text-left max-w-[220px] mx-auto">
-                        {['Acompanhar a evolução da viagem', 'Convidar amigos', 'Desbloquear o teu próprio sonho'].map((t) => (
-                          <span key={t} className="flex items-center gap-2 text-sm text-[#6B6661]">
-                            <Check className="w-4 h-4 text-[#FFBE98] flex-shrink-0" />
+                    <div className="border-t border-stone-100 pt-3 space-y-2" data-testid="register-incentive">
+                      <p className="text-xs font-semibold text-[#2D2A26]">Cria conta para acompanhar tudo</p>
+                      <div className="space-y-1 text-left max-w-[240px] mx-auto">
+                        {['Acompanhar a evolução da viagem', 'Convidar amigos e ganhar recompensas', 'Desbloquear o teu próprio sonho'].map((t) => (
+                          <span key={t} className="flex items-center gap-2 text-xs text-[#6B6661]">
+                            <Check className="w-3.5 h-3.5 text-[#FFBE98] flex-shrink-0" />
                             {t}
                           </span>
                         ))}
                       </div>
                       <a
                         href="/login"
-                        className="inline-flex items-center justify-center gap-2 w-full py-2.5 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-semibold text-sm hover:bg-[#FFAB7D] transition-colors"
-                        data-testid="register-cta-btn"
+                        className="inline-flex items-center justify-center gap-2 w-full py-2.5 bg-[#2D2A26] text-white rounded-xl font-semibold text-sm hover:bg-[#4A4640] transition-colors"
+                        data-testid="register-btn"
                       >
                         Criar conta
                       </a>
@@ -1154,7 +1163,7 @@ const CheckoutModal = ({
 
                   <button
                     onClick={handleClose}
-                    className="w-full bg-[#2D2A26] text-white py-3 px-6 rounded-xl font-medium hover:bg-[#4A4640] transition-all"
+                    className="w-full text-xs text-[#6B6661] hover:text-[#2D2A26] transition-colors py-1"
                     data-testid="thank-you-close-btn"
                   >
                     Fechar
