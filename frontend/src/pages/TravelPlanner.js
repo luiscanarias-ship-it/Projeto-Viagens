@@ -35,17 +35,17 @@ const TABS = [
 /* ── Activity keyword detection for contextual CTAs ── */
 const ACTIVITY_PATTERNS = [
   { keywords: ['museu', 'museum', 'galeria', 'exposição', 'exposicao', 'palácio', 'palacio', 'castelo', 'torre', 'catedral', 'basílica', 'basilica', 'mosteiro', 'igreja', 'templo', 'santuário', 'shrine', 'temple'],
-    label: 'Reservar entrada (evita filas)', platform: 'getyourguide', icon: Ticket },
+    label: 'Evita filas — reservar entrada', platform: 'getyourguide', icon: Ticket },
   { keywords: ['restaurante', 'gastronomia', 'food tour', 'mercado', 'market', 'degustação', 'sabores', 'culinária'],
-    label: 'Reservar experiência', platform: 'getyourguide', icon: Ticket },
+    label: 'Reservar experiencia gastronomica', platform: 'getyourguide', icon: Ticket },
   { keywords: ['tour', 'visita guiada', 'excursão', 'excursao', 'passeio de barco', 'cruzeiro', 'safari', 'mergulho', 'walking tour', 'day trip'],
-    label: 'Garantir vaga (muito procurado)', platform: 'getyourguide', icon: Ticket },
+    label: 'Muito procurado — garantir vaga', platform: 'getyourguide', icon: Ticket },
   { keywords: ['bilhete', 'ingresso', 'entrada', 'ticket', 'espetáculo', 'show', 'concerto', 'ópera', 'teatro'],
-    label: 'Garantir bilhete antes de esgotar', platform: 'getyourguide', icon: Ticket },
+    label: 'Esgota rapido — garantir bilhete', platform: 'getyourguide', icon: Ticket },
   { keywords: ['atividade', 'experiência', 'adventure', 'snorkel', 'surf', 'kayak', 'hiking', 'trekking', 'zip', 'bungee'],
-    label: 'Reservar atividade', platform: 'getyourguide', icon: Compass },
+    label: 'Reservar aventura sem espera', platform: 'getyourguide', icon: Compass },
   { keywords: ['aeroporto', 'transfer', 'aluguer', 'rent a car', 'carro'],
-    label: 'Ver transporte', platform: 'cars', icon: Car },
+    label: 'Ver opcoes de transporte', platform: 'cars', icon: Car },
 ];
 
 const detectActivityCTA = (text) => {
@@ -861,10 +861,15 @@ const TravelPlanner = () => {
 
                 {/* Premium hint */}
                 {!isAmbassador && (
-                  <p className="text-[10px] text-[#6B6661]/60 mt-3 flex items-center gap-1.5 justify-center" data-testid="premium-hint">
-                    <Lock className="w-3 h-3 text-[#FFBE98]/50" />
-                    Algumas funcionalidades sao exclusivas para Embaixadores
-                  </p>
+                  <div className="mt-3 text-center space-y-1" data-testid="premium-hint">
+                    <p className="text-[10px] text-[#6B6661]/60 flex items-center gap-1.5 justify-center">
+                      <Lock className="w-3 h-3 text-[#FFBE98]/50" />
+                      Algumas funcionalidades sao exclusivas para Embaixadores
+                    </p>
+                    <p className="text-[10px] text-[#FFBE98]/70 font-medium italic">
+                      Este pode ser o inicio da tua proxima grande viagem
+                    </p>
+                  </div>
                 )}
               </div>
 
@@ -875,7 +880,18 @@ const TravelPlanner = () => {
 
               {/* Smart Map (central element — high priority) */}
               <div className="pt-3 pb-1" data-testid="smart-map-section">
-                <PremiumGate isAmbassador={isAmbassador} label="Desbloqueia o mapa interativo">
+                <div className="px-5 mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-sky-50 rounded-lg flex items-center justify-center">
+                      <MapPin className="w-4 h-4 text-sky-500" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-[#2D2A26] text-sm">Mapa do teu roteiro</h3>
+                      <p className="text-[10px] text-[#6B6661]">Todos os pontos, dia a dia, num so lugar</p>
+                    </div>
+                  </div>
+                </div>
+                <PremiumGate isAmbassador={isAmbassador} label="Desbloqueia o mapa interativo com todos os pontos do roteiro">
                   <Suspense fallback={<div className="bg-white rounded-xl border border-[#FFBE98]/20 p-8 flex items-center justify-center gap-2 mx-5"><Loader2 className="w-5 h-5 animate-spin text-[#FFBE98]" /><span className="text-xs text-[#6B6661]">A carregar mapa...</span></div>}>
                     <SmartMap plan={plan} token={token} onApplyRefinement={handleRefine} onGeoDataLoaded={setGeocodeData} affiliateLinks={links} onTrackAffiliate={trackClick} />
                   </Suspense>
@@ -1099,12 +1115,12 @@ const TravelPlanner = () => {
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   {[
-                    { id: 'skyscanner', icon: Plane, label: 'Comparar voos', sub: 'Melhor preco' },
-                    { id: 'booking', icon: Hotel, label: plan?.destination ? `Hoteis em ${plan.destination}` : 'Ver hoteis', sub: 'Cancelamento gratis' },
-                    { id: 'insurance', icon: Shield, label: 'Fazer seguro', sub: 'Protege a viagem' },
-                    { id: 'airalo', icon: Wifi, label: 'Comprar eSIM', sub: 'Sem roaming' },
-                    { id: 'getyourguide', icon: Ticket, label: 'Reservar atividades', sub: 'Evita filas' },
-                    { id: 'cars', icon: Car, label: 'Transportes', sub: 'Transfers e aluguer' },
+                    { id: 'skyscanner', icon: Plane, label: 'Comparar voos (melhor preco)', sub: 'Precos sobem rapido' },
+                    { id: 'booking', icon: Hotel, label: plan?.destination ? `Hoteis no centro de ${plan.destination}` : 'Ver hoteis', sub: 'Melhor localizacao · Cancela gratis' },
+                    { id: 'insurance', icon: Shield, label: 'Proteger viagem com seguro', sub: 'Imprevistos acontecem' },
+                    { id: 'airalo', icon: Wifi, label: 'Internet sem roaming (eSIM)', sub: 'Funciona mal aterras' },
+                    { id: 'getyourguide', icon: Ticket, label: 'Atividades sem filas', sub: 'Reserva antecipada' },
+                    { id: 'cars', icon: Car, label: 'Transfers e aluguer', sub: 'Do aeroporto ao hotel' },
                   ].map(item => (
                     <a key={item.id} href={links[item.id]?.url || '#'} target="_blank" rel="noopener noreferrer"
                       onClick={() => trackClick(item.id)} data-testid={`hub-${item.id}`}
@@ -1186,6 +1202,11 @@ const TravelPlanner = () => {
                     </Link>
                   )}
                 </div>
+                {!isAmbassador && (
+                  <p className="text-[11px] text-[#FFBE98]/60 mt-4 italic">
+                    Estas mais perto de te tornares Embaixador do que pensas
+                  </p>
+                )}
               </div>
 
             </div> {/* end travel-document card */}
