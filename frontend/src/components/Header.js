@@ -28,22 +28,28 @@ const Header = () => {
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [contactEmail, setContactEmail] = useState('contacto@4luis.com');
+  const [activeSection, setActiveSection] = useState(null);
 
-  const isActive = (path) => {
-    if (path === '/') return location.pathname === '/';
-    return location.pathname.startsWith(path);
+  useEffect(() => {
+    if (location.pathname !== '/') setActiveSection(null);
+  }, [location.pathname]);
+
+  const isActive = (key) => {
+    if (key === 'journeys') return location.pathname === '/' && activeSection === 'journeys';
+    if (key === '/') return location.pathname === '/' && activeSection !== 'journeys';
+    return location.pathname.startsWith(key);
   };
 
-  const navLinkClass = (path) =>
+  const activeStyle = 'text-[#FFBE98] after:absolute after:bottom-[-4px] after:left-0 after:right-0 after:h-[2px] after:bg-[#FFBE98] after:rounded-full';
+
+  const navLinkClass = (key) =>
     `transition-colors text-sm font-medium whitespace-nowrap relative ${
-      isActive(path)
-        ? 'text-[#FFBE98] after:absolute after:bottom-[-4px] after:left-0 after:right-0 after:h-[2px] after:bg-[#FFBE98] after:rounded-full'
-        : 'text-[#2D2A26] hover:text-[#FFBE98]'
+      isActive(key) ? activeStyle : 'text-[#2D2A26] hover:text-[#FFBE98]'
     }`;
 
-  const mobileNavClass = (path) =>
+  const mobileNavClass = (key) =>
     `block py-3 font-medium w-full text-left ${
-      isActive(path)
+      isActive(key)
         ? 'text-[#FFBE98] border-l-2 border-[#FFBE98] pl-3'
         : 'text-[#2D2A26]'
     }`;
@@ -88,6 +94,7 @@ const Header = () => {
           <nav className="hidden md:flex items-center gap-5">
             <Link 
               to="/" 
+              onClick={() => setActiveSection(null)}
               className={navLinkClass('/')}
               data-testid="nav-home"
             >
@@ -97,13 +104,14 @@ const Header = () => {
               to="/" 
               onClick={(e) => {
                 e.preventDefault();
+                setActiveSection('journeys');
                 if (window.location.pathname === '/') {
                   document.getElementById('journeys')?.scrollIntoView({ behavior: 'smooth' });
                 } else {
                   navigate('/?scrollTo=journeys');
                 }
               }}
-              className="text-[#2D2A26] hover:text-[#FFBE98] transition-colors text-sm font-medium whitespace-nowrap"
+              className={navLinkClass('journeys')}
               data-testid="nav-journeys"
             >
               Explorar Viagens
@@ -293,13 +301,14 @@ const Header = () => {
             <div className="px-6 py-4 space-y-2">
               <Link
                 to="/"
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={() => { setActiveSection(null); setMobileMenuOpen(false); }}
                 className={mobileNavClass('/')}
               >
                 {t('nav.home')}
               </Link>
               <button
                 onClick={() => {
+                  setActiveSection('journeys');
                   setMobileMenuOpen(false);
                   if (window.location.pathname === '/') {
                     setTimeout(() => {
@@ -312,7 +321,7 @@ const Header = () => {
                     }, 800);
                   }
                 }}
-                className="block py-3 text-[#2D2A26] font-medium w-full text-left"
+                className={mobileNavClass('journeys')}
               >
                 Explorar Viagens
               </button>
