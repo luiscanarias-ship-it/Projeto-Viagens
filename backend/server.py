@@ -6530,12 +6530,8 @@ async def reset_travel_plan_limit():
 
 @api_router.post("/ai/travel-plan")
 async def generate_travel_plan(request: Request):
-    """Generate an AI-powered travel plan"""
-    from emergentintegrations.llm.chat import LlmChat, UserMessage
-    
-    api_key = os.environ.get("EMERGENT_LLM_KEY")
-    if not api_key:
-        raise HTTPException(status_code=500, detail="Chave de IA nao configurada")
+    """Generate a travel plan using hybrid architecture: templates + selective AI."""
+    from destination_templates import match_destination, build_full_template_plan, adapt_cached_plan
     
     data = await request.json()
     destination = data.get("destination", "").strip()[:200]
@@ -6552,14 +6548,15 @@ async def generate_travel_plan(request: Request):
     
     # Validate date format
     try:
-        datetime.strptime(start_date, "%Y-%m-%d")
-        datetime.strptime(end_date, "%Y-%m-%d")
+        start_dt = datetime.strptime(start_date, "%Y-%m-%d")
+        end_dt = datetime.strptime(end_date, "%Y-%m-%d")
+        num_days = max((end_dt - start_dt).days, 1)
     except ValueError:
         raise HTTPException(status_code=400, detail="Formato de data invalido. Use AAAA-MM-DD.")
     
     logger.info(f"AI Travel Plan request: destination={destination}, dates={start_date} to {end_date}, type={trip_type}")
     
-    # Rate limiting: max 5 requests per user per hour (exempt admins and ambassadors)
+    # ── Rate limiting ──
     user = None
     try:
         user = await get_current_user(request)
@@ -6569,120 +6566,116 @@ async def generate_travel_plan(request: Request):
     user_key = user.user_id if user else request.client.host
     now = datetime.now(timezone.utc)
     
-    # Check if user is admin or ambassador — skip rate limit
     is_premium = False
     if user:
         user_doc = await db.users.find_one({"user_id": user.user_id}, {"_id": 0, "is_admin": 1, "level": 1})
         if user_doc and (user_doc.get("is_admin") or user_doc.get("level") == "embaixador"):
             is_premium = True
     
-    if not is_premium and user_key in ai_travel_plan_cache:
+    # Tiered rate limits: Free=3/h, Registered=5/h, Premium=15/h
+    max_requests = 15 if is_premium else (5 if user else 3)
+    
+    if user_key in ai_travel_plan_cache:
         requests_list = ai_travel_plan_cache[user_key]
-        # Clean old entries (older than 1 hour)
         requests_list = [t for t in requests_list if (now - datetime.fromisoformat(t)).total_seconds() < 3600]
         ai_travel_plan_cache[user_key] = requests_list
-        if len(requests_list) >= 5:
+        if len(requests_list) >= max_requests:
             raise HTTPException(status_code=429, detail="Ja criaste varios planos! Podes gerar um novo dentro de 1 hora.")
     
-    # Increment rate limit counter BEFORE the AI call to prevent race conditions
     if user_key not in ai_travel_plan_cache:
         ai_travel_plan_cache[user_key] = []
     ai_travel_plan_cache[user_key].append(now.isoformat())
 
-    # Check cache for identical request
+    # ── Layer 1: Exact cache match (0 cost) ──
     cache_key = f"{destination}_{start_date}_{end_date}_{trip_type}".lower()
     cached = await db.travel_plans.find_one({"cache_key": cache_key}, {"_id": 0})
     if cached and cached.get("plan"):
+        logger.info(f"Cache HIT (exact): {cache_key}")
         return {"plan": cached["plan"], "cached": True, "slug": cached.get("slug")}
+    
+    # ── Layer 2: Fuzzy cache — same destination, similar duration (0 cost) ──
+    dest_lower = destination.lower().strip()
+    fuzzy_cached = await db.travel_plans.find_one(
+        {"destination": {"$regex": f"^{dest_lower[:20]}$", "$options": "i"}, "plan": {"$exists": True}},
+        {"_id": 0}
+    )
+    if fuzzy_cached and fuzzy_cached.get("plan"):
+        cached_plan = fuzzy_cached["plan"]
+        cached_itinerary = cached_plan.get("itinerary", [])
+        cached_days = len(cached_itinerary)
+        # Only reuse if structure is complete and duration is close
+        has_required = cached_plan.get("hotel_info") and cached_plan.get("airport_to_hotel")
+        if has_required and abs(cached_days - num_days) <= 2:
+            logger.info(f"Cache HIT (fuzzy): adapting {cached_days}d plan to {num_days}d")
+            adapted = adapt_cached_plan(cached_plan, start_date, end_date)
+            slug = f"{dest_lower.replace(' ', '-')[:20]}-{uuid.uuid4().hex[:6]}"
+            await db.travel_plans.update_one(
+                {"cache_key": cache_key},
+                {"$set": {"cache_key": cache_key, "destination": destination, "plan": adapted, "slug": slug, "is_public": True, "user_id": user.user_id if user else None, "created_at": now.isoformat(), "updated_at": now.isoformat(), "source": "fuzzy_cache"}},
+                upsert=True
+            )
+            return {"plan": adapted, "cached": True, "slug": slug}
+    
+    # ── Layer 3: Template engine for known destinations (0 cost) ──
+    dest_data = match_destination(destination)
+    if dest_data:
+        logger.info(f"Template HIT: {dest_data['name']} ({num_days} days)")
+        plan = build_full_template_plan(dest_data, destination, start_date, end_date)
+        
+        import re as _re
+        def _slugify(text):
+            s = text.lower().strip()
+            s = _re.sub(r'[àáâãäå]', 'a', s)
+            s = _re.sub(r'[èéêë]', 'e', s)
+            s = _re.sub(r'[ìíîï]', 'i', s)
+            s = _re.sub(r'[òóôõö]', 'o', s)
+            s = _re.sub(r'[ùúûü]', 'u', s)
+            s = _re.sub(r'[ç]', 'c', s)
+            s = _re.sub(r'[^a-z0-9\s-]', '', s)
+            s = _re.sub(r'[\s_]+', '-', s)
+            s = _re.sub(r'-+', '-', s).strip('-')
+            return s
+        slug = f"{_slugify(destination)}-{uuid.uuid4().hex[:6]}"
+        
+        await db.travel_plans.update_one(
+            {"cache_key": cache_key},
+            {"$set": {"cache_key": cache_key, "destination": destination, "plan": plan, "slug": slug, "is_public": True, "user_id": user.user_id if user else None, "created_at": now.isoformat(), "updated_at": now.isoformat(), "source": "template"}},
+            upsert=True
+        )
+        return {"plan": plan, "cached": False, "slug": slug}
+    
+    # ── Layer 4: Full AI generation for unknown destinations (LLM cost) ──
+    from emergentintegrations.llm.chat import LlmChat, UserMessage
+    
+    api_key = os.environ.get("EMERGENT_LLM_KEY")
+    if not api_key:
+        raise HTTPException(status_code=500, detail="Chave de IA nao configurada")
     
     trip_type_text = f"Tipo de viagem: {trip_type}. " if trip_type else ""
     
-    prompt = f"""Cria um plano de viagem detalhado e pratico para:
-Destino: {destination}
-Datas: {start_date} a {end_date}
-{trip_type_text}
+    # Optimized prompt — smaller, focused only on what AI does best
+    prompt = f"""Cria um plano de viagem para: {destination}, {start_date} a {end_date}. {trip_type_text}
 
-REGRAS PARA CTAs CONTEXTUAIS:
-- Nas atividades do itinerario e nas dicas locais, adiciona marcadores de CTA quando for util para o viajante.
-- Formato do marcador: [CTA:tipo:texto do botao]
-- Tipos permitidos: activity, hotel, flight, esim, transport, insurance
-- Mapas: activity = tours/bilhetes/experiencias, hotel = alojamento, flight = voos, esim = internet/dados, transport = aluguer de carro, insurance = seguro de viagem
-- MAXIMO 4-6 CTAs no plano inteiro (nao em todas as frases!)
-- Coloca o CTA no FIM da frase, de forma natural
-- Exemplos: "Visite o teamLab Borderless [CTA:activity:Ver bilhetes]", "Reserve alojamento no centro [CTA:hotel:Ver hoteis]", "Garanta internet no destino [CTA:esim:Ver eSIM]"
-- NAO repitas o mesmo tipo de CTA mais de 2 vezes
-
-INFORMACAO ADICIONAL OBRIGATORIA:
-- Inclui informacao de voo sugerida (ida e volta) com numeros de voo reais ou realisticos para a rota
-- Inclui hotel sugerido (real, que exista) no centro ou zona turistica principal
-- Inclui instrucoes de transporte aeroporto-hotel com opcao publica e alternativa taxi
-
-Responde APENAS com um JSON valido com esta estrutura exata (sem markdown, sem ```):
+Responde APENAS com JSON valido (sem markdown):
 {{
   "destination": "{destination}",
   "dates": "{start_date} a {end_date}",
-  "summary": "Resumo curto da viagem (1-2 frases)",
-  "flight_info": {{
-    "outbound": {{
-      "flight_number": "Numero de voo (ex: TAP TP548)",
-      "departure_airport": "Aeroporto partida (nome - codigo IATA)",
-      "departure_time": "Hora partida (ex: 08:30)",
-      "arrival_airport": "Aeroporto chegada (nome - codigo IATA)",
-      "arrival_time": "Hora chegada"
-    }},
-    "return": {{
-      "flight_number": "Numero voo regresso",
-      "departure_airport": "Aeroporto regresso",
-      "departure_time": "Hora partida",
-      "arrival_airport": "Aeroporto chegada",
-      "arrival_time": "Hora chegada"
-    }}
-  }},
-  "hotel_info": {{
-    "name": "Nome hotel real no centro",
-    "address": "Morada completa",
-    "phone": "Telefone ou null",
-    "area": "Bairro/zona (1-2 palavras)"
-  }},
-  "airport_to_hotel": {{
-    "best_option": {{
-      "mode": "Metro/Comboio/Bus",
-      "details": "Descricao curta do percurso pratico",
-      "duration": "35 min",
-      "cost": "2-5 EUR"
-    }},
-    "alternative": {{
-      "mode": "Taxi/Uber",
-      "details": "Descricao curta",
-      "duration": "20 min",
-      "cost": "30-50 EUR"
-    }},
-    "tip": "Dica pratica"
-  }},
-  "itinerary": [
-    {{
-      "day": 1,
-      "title": "Titulo do dia",
-      "activities": ["Atividade 1", "Atividade 2 [CTA:activity:Ver bilhetes]", "Atividade 3"]
-    }}
-  ],
-  "weather": "Descricao do clima esperado durante as datas",
-  "packing": {{
-    "clothing": ["item1", "item2", "item3"],
-    "essentials": ["item1", "item2", "item3"]
-  }},
-  "checklist": {{
-    "documents": ["item1", "item2"],
-    "hygiene": ["item1", "item2"],
-    "tech": ["item1", "item2"]
-  }},
-  "local_tips": ["Dica 1", "Dica 2 [CTA:activity:Ver atividades]", "Dica 3", "Dica 4"]
-}}"""
+  "summary": "Resumo (1-2 frases)",
+  "flight_info": {{"outbound": {{"flight_number": "Ex: TAP TP548", "departure_airport": "Partida", "departure_time": "08:30", "arrival_airport": "Chegada", "arrival_time": "Hora"}}, "return": {{"flight_number": "Regresso", "departure_airport": "Partida", "departure_time": "09:00", "arrival_airport": "Chegada", "arrival_time": "Hora"}}}},
+  "hotel_info": {{"name": "Hotel real", "address": "Morada", "phone": null, "area": "Zona"}},
+  "airport_to_hotel": {{"best_option": {{"mode": "Transporte", "details": "Descricao", "duration": "X min", "cost": "X EUR"}}, "alternative": {{"mode": "Taxi", "details": "Desc", "duration": "X min", "cost": "X EUR"}}, "tip": "Dica"}},
+  "itinerary": [{{"day": 1, "title": "Titulo", "activities": ["Act 1", "Act 2 [CTA:activity:Ver bilhetes]"]}}],
+  "weather": "Clima esperado",
+  "packing": {{"clothing": ["item1", "item2", "item3"], "essentials": ["item1", "item2", "item3"]}},
+  "checklist": {{"documents": ["item1"], "hygiene": ["item1"], "tech": ["item1"]}},
+  "local_tips": ["Dica 1", "Dica 2 [CTA:activity:Reservar]"]
+}}
+CTAs: max 5, formato [CTA:tipo:texto]. Tipos: activity, hotel, flight, esim, transport, insurance."""
 
     chat = LlmChat(
         api_key=api_key,
         session_id=f"travel_plan_{uuid.uuid4().hex[:8]}",
-        system_message="Es um agente de viagens especialista. Cria planos de viagem detalhados, praticos e uteis. Responde APENAS com JSON valido, sem markdown."
+        system_message="Es um agente de viagens. Responde APENAS com JSON valido, sem markdown."
     ).with_model("openai", "gpt-5.2")
     
     try:
@@ -6695,9 +6688,8 @@ Responde APENAS com um JSON valido com esta estrutura exata (sem markdown, sem `
             clean = clean.strip()
         
         plan = json.loads(clean)
-        logger.info(f"AI Travel Plan success: destination={destination}, sections={list(plan.keys())}")
+        logger.info(f"AI Travel Plan success (full LLM): destination={destination}")
         
-        # Cache the result + generate SEO slug
         import re as _re
         def _slugify(text):
             s = text.lower().strip()
@@ -6723,7 +6715,8 @@ Responde APENAS com um JSON valido com esta estrutura exata (sem markdown, sem `
                 "is_public": True,
                 "user_id": user.user_id if user else None,
                 "created_at": now.isoformat(),
-                "updated_at": now.isoformat()
+                "updated_at": now.isoformat(),
+                "source": "ai_full"
             }},
             upsert=True
         )
@@ -6731,13 +6724,13 @@ Responde APENAS com um JSON valido com esta estrutura exata (sem markdown, sem `
         return {"plan": plan, "cached": False, "slug": slug}
     except asyncio.TimeoutError:
         logger.error(f"AI travel plan timeout: destination={destination}")
-        raise HTTPException(status_code=504, detail="Não foi possível gerar o plano. Tente novamente.")
+        raise HTTPException(status_code=504, detail="Nao foi possivel gerar o plano. Tente novamente.")
     except json.JSONDecodeError:
         logger.error(f"AI travel plan JSON parse error: {response[:500]}")
-        raise HTTPException(status_code=500, detail="Não foi possível gerar o plano. Tente novamente.")
+        raise HTTPException(status_code=500, detail="Nao foi possivel gerar o plano. Tente novamente.")
     except Exception as e:
         logger.error(f"AI travel plan error: {e}")
-        raise HTTPException(status_code=500, detail="Não foi possível gerar o plano. Tente novamente.")
+        raise HTTPException(status_code=500, detail="Nao foi possivel gerar o plano. Tente novamente.")
 
 
 
