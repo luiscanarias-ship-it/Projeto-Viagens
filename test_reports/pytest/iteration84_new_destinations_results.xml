@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="11" skipped="0" tests="17" time="2.549" timestamp="2026-03-26T14:25:03.987048+00:00" hostname="agent-env-15fa1322-fa0e-4014-bd1e-9982079a9c74"><testcase classname="backend.tests.test_iteration84_new_destinations.TestNewDestinations" name="test_berlin_airport_and_zones" time="0.285" /><testcase classname="backend.tests.test_iteration84_new_destinations.TestNewDestinations" name="test_madrid_airport_and_zones" time="0.160" /><testcase classname="backend.tests.test_iteration84_new_destinations.TestNewDestinations" name="test_prague_airport_and_zones" time="0.149" /><testcase classname="backend.tests.test_iteration84_new_destinations.TestNewDestinations" name="test_vienna_airport_and_zones" time="0.107" /><testcase classname="backend.tests.test_iteration84_new_destinations.TestNewDestinations" name="test_budapest_airport_and_zones" time="0.110" /><testcase classname="backend.tests.test_iteration84_new_destinations.TestNewDestinations" name="test_istanbul_airports_and_zones" time="0.147"><failure message="AssertionError: Expected 200, got 429: {&quot;detail&quot;:&quot;Ja criaste varios planos! Podes gerar um novo dentro de 1 hora.&quot;}&#10;assert 429 == 200&#10; +  where 429 = &lt;Response [429]&gt;.status_code">backend/tests/test_iteration84_new_destinations.py:151: in test_istanbul_airports_and_zones
+    assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
+E   AssertionError: Expected 200, got 429: {"detail":"Ja criaste varios planos! Podes gerar um novo dentro de 1 hora."}
+E   assert 429 == 200
+E    +  where 429 = &lt;Response [429]&gt;.status_code</failure></testcase><testcase classname="backend.tests.test_iteration84_new_destinations.TestNewDestinations" name="test_florence_airports_and_zones" time="0.132"><failure message="AssertionError: Expected 200, got 429: {&quot;detail&quot;:&quot;Ja criaste varios planos! Podes gerar um novo dentro de 1 hora.&quot;}&#10;assert 429 == 200&#10; +  where 429 = &lt;Response [429]&gt;.status_code">backend/tests/test_iteration84_new_destinations.py:176: in test_florence_airports_and_zones
+    assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
+E   AssertionError: Expected 200, got 429: {"detail":"Ja criaste varios planos! Podes gerar um novo dentro de 1 hora."}
+E   assert 429 == 200
+E    +  where 429 = &lt;Response [429]&gt;.status_code</failure></testcase><testcase classname="backend.tests.test_iteration84_new_destinations.TestNewDestinations" name="test_dubai_airports_and_weather_zone" time="0.145"><failure message="AssertionError: Expected 200, got 429: {&quot;detail&quot;:&quot;Ja criaste varios planos! Podes gerar um novo dentro de 1 hora.&quot;}&#10;assert 429 == 200&#10; +  where 429 = &lt;Response [429]&gt;.status_code">backend/tests/test_iteration84_new_destinations.py:201: in test_dubai_airports_and_weather_zone
+    assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
+E   AssertionError: Expected 200, got 429: {"detail":"Ja criaste varios planos! Podes gerar um novo dentro de 1 hora."}
+E   assert 429 == 200
+E    +  where 429 = &lt;Response [429]&gt;.status_code</failure></testcase><testcase classname="backend.tests.test_iteration84_new_destinations.TestNewDestinations" name="test_bali_airport_and_weather_zone" time="0.161"><failure message="AssertionError: Expected 200, got 429: {&quot;detail&quot;:&quot;Ja criaste varios planos! Podes gerar um novo dentro de 1 hora.&quot;}&#10;assert 429 == 200&#10; +  where 429 = &lt;Response [429]&gt;.status_code">backend/tests/test_iteration84_new_destinations.py:226: in test_bali_airport_and_weather_zone
+    assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
+E   AssertionError: Expected 200, got 429: {"detail":"Ja criaste varios planos! Podes gerar um novo dentro de 1 hora."}
+E   assert 429 == 200
+E    +  where 429 = &lt;Response [429]&gt;.status_code</failure></testcase><testcase classname="backend.tests.test_iteration84_new_destinations.TestTemplateTypeFallback" name="test_cancun_generic_template" time="0.115" /><testcase classname="backend.tests.test_iteration84_new_destinations.TestMustSeeAdaptation" name="test_must_see_3_day_trip" time="0.105"><failure message="assert 429 == 200&#10; +  where 429 = &lt;Response [429]&gt;.status_code">backend/tests/test_iteration84_new_destinations.py:272: in test_must_see_3_day_trip
+    assert response.status_code == 200
+E   assert 429 == 200
+E    +  where 429 = &lt;Response [429]&gt;.status_code</failure></testcase><testcase classname="backend.tests.test_iteration84_new_destinations.TestMustSeeAdaptation" name="test_must_see_7_day_trip" time="0.111"><failure message="assert 429 == 200&#10; +  where 429 = &lt;Response [429]&gt;.status_code">backend/tests/test_iteration84_new_destinations.py:287: in test_must_see_7_day_trip
+    assert response.status_code == 200
+E   assert 429 == 200
+E    +  where 429 = &lt;Response [429]&gt;.status_code</failure></testcase><testcase classname="backend.tests.test_iteration84_new_destinations.TestExistingDestinations" name="test_paris_still_works" time="0.105"><failure message="AssertionError: Expected 200, got 429: {&quot;detail&quot;:&quot;Ja criaste varios planos! Podes gerar um novo dentro de 1 hora.&quot;}&#10;assert 429 == 200&#10; +  where 429 = &lt;Response [429]&gt;.status_code">backend/tests/test_iteration84_new_destinations.py:306: in test_paris_still_works
+    assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
+E   AssertionError: Expected 200, got 429: {"detail":"Ja criaste varios planos! Podes gerar um novo dentro de 1 hora."}
+E   assert 429 == 200
+E    +  where 429 = &lt;Response [429]&gt;.status_code</failure></testcase><testcase classname="backend.tests.test_iteration84_new_destinations.TestAliasMatching" name="test_vienna_alias" time="0.147"><failure message="assert 429 == 200&#10; +  where 429 = &lt;Response [429]&gt;.status_code">backend/tests/test_iteration84_new_destinations.py:339: in test_vienna_alias
+    assert response.status_code == 200
+E   assert 429 == 200
+E    +  where 429 = &lt;Response [429]&gt;.status_code</failure></testcase><testcase classname="backend.tests.test_iteration84_new_destinations.TestAliasMatching" name="test_florence_alias" time="0.128"><failure message="assert 429 == 200&#10; +  where 429 = &lt;Response [429]&gt;.status_code">backend/tests/test_iteration84_new_destinations.py:356: in test_florence_alias
+    assert response.status_code == 200
+E   assert 429 == 200
+E    +  where 429 = &lt;Response [429]&gt;.status_code</failure></testcase><testcase classname="backend.tests.test_iteration84_new_destinations.TestAliasMatching" name="test_istanbul_alias" time="0.121"><failure message="assert 429 == 200&#10; +  where 429 = &lt;Response [429]&gt;.status_code">backend/tests/test_iteration84_new_destinations.py:373: in test_istanbul_alias
+    assert response.status_code == 200
+E   assert 429 == 200
+E    +  where 429 = &lt;Response [429]&gt;.status_code</failure></testcase><testcase classname="backend.tests.test_iteration84_new_destinations.TestAliasMatching" name="test_prague_alias" time="0.160"><failure message="assert 429 == 200&#10; +  where 429 = &lt;Response [429]&gt;.status_code">backend/tests/test_iteration84_new_destinations.py:390: in test_prague_alias
+    assert response.status_code == 200
+E   assert 429 == 200
+E    +  where 429 = &lt;Response [429]&gt;.status_code</failure></testcase></testsuite></testsuites>

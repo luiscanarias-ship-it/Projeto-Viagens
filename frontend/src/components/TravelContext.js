@@ -1,18 +1,22 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Plane, Building2, ArrowRight, Train, Car, Lightbulb, ChevronDown, ChevronUp, MapPin, Phone, ExternalLink, Search } from 'lucide-react';
+import { Plane, Building2, ArrowRight, Train, Car, Lightbulb, ChevronDown, ChevronUp, MapPin, Phone, ExternalLink, Search, Star, Bed } from 'lucide-react';
 
 const TravelContext = ({ plan, affiliateLinks }) => {
   const [expanded, setExpanded] = useState(true);
   const flight = plan?.flight_info;
   const hotel = plan?.hotel_info;
   const transport = plan?.airport_to_hotel;
+  const mustSee = plan?.must_see;
+  const stayZones = hotel?.stay_zones;
 
   if (!flight && !hotel && !transport) return null;
 
   const isSuggestionFlight = flight?.suggestion === true;
   const isSuggestionHotel = hotel?.suggestion === true;
   const hasAirportList = transport?.airports && transport.airports.length > 0;
+  const hasStayZones = stayZones && stayZones.length > 0;
+  const hasMustSee = mustSee && mustSee.length > 0;
 
   return (
     <motion.div
@@ -268,6 +272,70 @@ const TravelContext = ({ plan, affiliateLinks }) => {
                     <p className="text-[9px] text-amber-800">{transport.tip}</p>
                   </div>
                 )}
+              </div>
+            </div>
+          )}
+
+          {/* Stay Zones — recommended areas to stay */}
+          {hasStayZones && (
+            <div className="border border-stone-100 rounded-lg overflow-hidden" data-testid="stay-zones">
+              <div className="px-3 py-2 bg-[#FFBE98]/10">
+                <p className="text-[10px] font-bold text-[#2D2A26] flex items-center gap-1.5">
+                  <Bed className="w-3.5 h-3.5 text-[#FFBE98]" />Melhores zonas para ficar
+                </p>
+              </div>
+              <div className="p-2.5 space-y-2">
+                {stayZones.map((zone, idx) => (
+                  <div key={idx} className="flex items-start gap-2.5 p-2 rounded-lg bg-stone-50/50 hover:bg-stone-50 transition-colors">
+                    <div className="w-5 h-5 bg-[#FFBE98]/20 rounded-full flex items-center justify-center shrink-0 mt-0.5">
+                      <span className="text-[9px] font-bold text-[#FFBE98]">{idx + 1}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[10px] font-bold text-[#2D2A26]">{zone.name}</p>
+                      <p className="text-[9px] text-[#6B6661] mt-0.5 leading-relaxed">{zone.description}</p>
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-1">
+                        <span className="text-[8px] text-emerald-600 font-semibold flex items-center gap-0.5">
+                          <Train className="w-2.5 h-2.5" />{zone.transport_access}
+                        </span>
+                      </div>
+                      <span className="inline-block text-[8px] text-stone-400 italic mt-0.5">{zone.vibe}</span>
+                    </div>
+                  </div>
+                ))}
+                {affiliateLinks?.hotel && (
+                  <a
+                    href={affiliateLinks.hotel}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 mt-1 px-3 py-1.5 bg-[#FFBE98]/20 text-[#2D2A26] rounded-lg text-[10px] font-semibold hover:bg-[#FFBE98]/30 transition-colors"
+                    data-testid="stay-zones-hotel-cta"
+                  >
+                    <Building2 className="w-3 h-3" />Comparar hoteis nestas zonas <ExternalLink className="w-2.5 h-2.5 opacity-60" />
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Must See — priority-ranked monuments */}
+          {hasMustSee && (
+            <div className="border border-stone-100 rounded-lg overflow-hidden" data-testid="must-see">
+              <div className="px-3 py-2 bg-amber-50/50">
+                <p className="text-[10px] font-bold text-[#2D2A26] flex items-center gap-1.5">
+                  <Star className="w-3.5 h-3.5 text-amber-500" />Imperdivel — o que nao podes perder
+                </p>
+              </div>
+              <div className="p-2.5">
+                <div className="grid grid-cols-2 gap-1.5">
+                  {mustSee.map((sight, idx) => (
+                    <div key={idx} className="flex items-center gap-2 p-1.5 rounded-md bg-stone-50/60">
+                      <span className="w-4 h-4 bg-amber-100 rounded-full flex items-center justify-center shrink-0">
+                        <span className="text-[8px] font-bold text-amber-600">{idx + 1}</span>
+                      </span>
+                      <span className="text-[9px] text-[#2D2A26] font-medium leading-tight">{sight}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           )}

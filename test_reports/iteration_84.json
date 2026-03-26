@@ -1,0 +1,65 @@
+{
+  "summary": "Iteration 84 - New Destinations Testing Complete. All 9 new destinations (Berlin, Madrid, Prague, Vienna, Budapest, Istanbul, Florence, Dubai, Bali) verified working with correct airports, 4 stay_zones each, and must_see arrays. Template type fallback (is_generic_template=true) works for unknown destinations like Cancun. Alias matching works (vienna→viena, florence→florenca, istanbul→istambul, prague→praga). must_see adapts to num_days (3-day=6 items, 7-day=8 items). Navigation bar highlights active page in peach color #FFBE98.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "passed_tests": [
+    "Backend: POST /api/ai/travel-plan with destination='berlim' returns BER airport, 4 stay_zones, 8 must_see items",
+    "Backend: POST /api/ai/travel-plan with destination='madrid' returns MAD airport, 4 stay_zones, 8 must_see items",
+    "Backend: POST /api/ai/travel-plan with destination='praga' returns PRG airport, 4 stay_zones, 7 must_see items",
+    "Backend: POST /api/ai/travel-plan with destination='viena' returns VIE airport, 4 stay_zones, 8 must_see items",
+    "Backend: POST /api/ai/travel-plan with destination='budapeste' returns BUD airport, 4 stay_zones, 8 must_see items",
+    "Backend: POST /api/ai/travel-plan with destination='istambul' returns IST and SAW airports (2 airports), 4 stay_zones, 8 must_see items",
+    "Backend: POST /api/ai/travel-plan with destination='florenca' returns FLR and PSA airports (2 airports), 4 stay_zones, 8 must_see items",
+    "Backend: POST /api/ai/travel-plan with destination='dubai' returns DXB and DWC airports (2 airports), 4 stay_zones, 8 must_see items",
+    "Backend: POST /api/ai/travel-plan with destination='bali' returns DPS airport, 4 stay_zones, 8 must_see items",
+    "Backend: Template type fallback - destination='cancun' returns is_generic_template=true (beach_destination fallback)",
+    "Backend: must_see adapts to num_days - 3-day trip returns 6 items, 7-day trip returns 8 items",
+    "Backend: Alias 'vienna' matches 'viena' template with VIE airport",
+    "Backend: Alias 'florence' matches 'florenca' template with FLR/PSA airports",
+    "Backend: Alias 'istanbul' matches 'istambul' template with IST/SAW airports",
+    "Backend: Alias 'prague' matches 'praga' template with PRG airport",
+    "Frontend: Navigation bar 'Planear Viagem' link has peach color rgb(255, 190, 152) when on /travel-planner page",
+    "Frontend: Istanbul plan shows 'Melhores zonas para ficar' section with 4 zones (Sultanahmet/Fatih, Beyoglu/Taksim, Karakoy/Galata, Kadikoy)",
+    "Frontend: Istanbul plan shows 'Imperdivel — o que nao podes perder' section with numbered monuments in 2-column grid",
+    "Frontend: Istanbul plan shows 'Como chegar ao centro da cidade' with IST and SAW airport codes and transport details",
+    "Frontend: Istanbul plan shows both airports with transport info (Metro M11, Havaist bus, Havabus)"
+  ],
+  "failed_tests": [],
+  "test_report_links": [
+    "/app/backend/tests/test_iteration84_new_destinations.py",
+    "/app/test_reports/pytest/iteration84_new_destinations_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "destination_data.py: All 9 new destinations have complete data with airports, stay_zones (4 each), must_see, weather_zone, and transport tips",
+    "destination_templates.py: match_destination() correctly uses DESTINATION_ALIASES for fuzzy matching",
+    "destination_templates.py: get_must_see() correctly filters by num_days (rule: ~2 sights per day, min 3)",
+    "destination_templates.py: build_type_plan() correctly sets is_generic_template=true for fallback destinations",
+    "TravelContext.js: Correctly renders stay_zones with numbered zones and transport_access details",
+    "TravelContext.js: Correctly renders must_see in 2-column grid with numbered items"
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration84_new_destinations.py"
+  ],
+  "success_rate": {
+    "backend": "100% (all 15 backend tests passed via curl)",
+    "frontend": "100% (all UI tests passed via Playwright)"
+  },
+  "test_credentials": "Admin: admin@4luis.com / Admin1",
+  "seed_data_creation": "",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Iteration 84 verified 9 new destinations (Berlin, Madrid, Prague, Vienna, Budapest, Istanbul, Florence, Dubai, Bali). Each destination has: airports array, 4 stay_zones with transport_access, must_see array (filtered by num_days). Template type fallback works for unknown destinations (is_generic_template=true). Alias matching works for English names (vienna, florence, istanbul, prague). Rate limiting: Anonymous=3/h, Registered=5/h, Premium=15/h - restart backend to clear rate limit cache: sudo supervisorctl restart backend. IfthenPay payment integration is MOCKED.",
+  "mocked_api": {
+    "has_mocked_apis": true,
+    "mocked_apis_list": ["IfthenPay"],
+    "note": "Payment integration via IfthenPay is mocked. AI layer (Layer 5) requires Emergent LLM key budget - if budget exhausted, only template destinations work"
+  }
+}

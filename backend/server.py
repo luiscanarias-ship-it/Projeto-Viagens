@@ -6531,7 +6531,7 @@ async def reset_travel_plan_limit():
 @api_router.post("/ai/travel-plan")
 async def generate_travel_plan(request: Request):
     """Generate a travel plan using hybrid architecture: templates + selective AI."""
-    from destination_templates import match_destination, build_full_template_plan, adapt_cached_plan
+    from destination_templates import match_destination, build_full_template_plan, adapt_cached_plan, match_template_type, build_type_plan
     
     data = await request.json()
     destination = data.get("destination", "").strip()[:200]
@@ -6644,7 +6644,35 @@ async def generate_travel_plan(request: Request):
         )
         return {"plan": plan, "cached": False, "slug": slug}
     
-    # ── Layer 4: Full AI generation for unknown destinations (LLM cost) ──
+    # ── Layer 4: Template TYPE fallback for unknown destinations (0 cost) ──
+    template_type = match_template_type(destination, num_days)
+    if template_type:
+        logger.info(f"Template TYPE fallback for: {destination} ({num_days} days)")
+        plan = build_type_plan(template_type, destination, start_date, end_date)
+        
+        import re as _re2
+        def _slugify2(text):
+            s = text.lower().strip()
+            s = _re2.sub(r'[àáâãäå]', 'a', s)
+            s = _re2.sub(r'[èéêë]', 'e', s)
+            s = _re2.sub(r'[ìíîï]', 'i', s)
+            s = _re2.sub(r'[òóôõö]', 'o', s)
+            s = _re2.sub(r'[ùúûü]', 'u', s)
+            s = _re2.sub(r'[ç]', 'c', s)
+            s = _re2.sub(r'[^a-z0-9\s-]', '', s)
+            s = _re2.sub(r'[\s_]+', '-', s)
+            s = _re2.sub(r'-+', '-', s).strip('-')
+            return s
+        slug = f"{_slugify2(destination)}-{uuid.uuid4().hex[:6]}"
+        
+        await db.travel_plans.update_one(
+            {"cache_key": cache_key},
+            {"$set": {"cache_key": cache_key, "destination": destination, "plan": plan, "slug": slug, "is_public": True, "user_id": user.user_id if user else None, "created_at": now.isoformat(), "updated_at": now.isoformat(), "source": "template_type"}},
+            upsert=True
+        )
+        return {"plan": plan, "cached": False, "slug": slug, "source": "template_type"}
+    
+    # ── Layer 5: Full AI generation for unknown destinations (LLM cost) ──
     from emergentintegrations.llm.chat import LlmChat, UserMessage
     
     api_key = os.environ.get("EMERGENT_LLM_KEY")
