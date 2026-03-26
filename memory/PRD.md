@@ -143,6 +143,15 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - **Bug 3**: LLM credit waste prevented — all 10 template destinations use 0 AI credits
 - **TravelContext.js**: Rewritten to handle both suggestion mode (templates) and legacy AI format (backward compatible)
 
+### Multiple Airports Per City (2026-03-26)
+- **Bug FIXED**: Platform only suggested one airport per city (e.g., Paris showed only CDG), losing credibility
+- **Fix**: `destination_templates.py` now stores `airports` as an array per destination with ALL commercial airports (code, name, distance, transport info)
+- **Airports by city**: Paris (CDG, ORY, BVA), Roma (FCO, CIA), Barcelona (BCN, GRO), Londres (LHR, LGW, STN, LTN, SEN), Amesterdão (AMS, EIN), Tóquio (NRT, HND), Nova Iorque (JFK, EWR, LGA), Lisboa (LIS), Porto (OPO)
+- **TravelContext.js**: Renders all airports in "Voos para {destination}" and "Como chegar ao centro da cidade" sections
+- **Backend fix**: `build_template_itinerary` KeyError on `dest_data['hotel']['area']` → fixed to `dest_data.get('hotel_area', 'centro')`
+- **Cache cleared**: Old cached plans without airports arrays removed from MongoDB
+- **Tested**: 100% pass rate (iteration 83) — all airports render correctly in backend and frontend
+
 ### Hybrid Travel Plan Architecture (2026-03-26) — COST REDUCTION 70-90%
 - **4-Layer System**: (1) Exact cache → (2) Fuzzy cache (same destination, different dates) → (3) Template engine → (4) Full AI (GPT-5.2)
 - **Template Engine**: 10 destinations pré-configurados (Paris, Roma, Barcelona, Londres, Amesterdão, Tóquio, Nova Iorque, Lisboa, Porto) com hotéis reais, transportes, atrações, weather por mês, packing lists
