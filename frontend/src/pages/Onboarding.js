@@ -96,7 +96,7 @@ const Onboarding = () => {
                 Ver viagem <ArrowRight className="w-4 h-4" />
               </button>
 
-              <p className="text-[10px] text-[#FFBE98] text-center mt-3 italic"
+              <p className="text-sm font-semibold text-[#2D2A26] text-center mt-4 italic leading-relaxed"
                 style={{ animation: 'pulse 4s cubic-bezier(0.4,0,0.6,1) infinite' }}
                 data-testid="onboarding-dream-msg">
                 Quem sabe se ao apoiares esta viagem de sonho não podes também tu realizares a tua...
