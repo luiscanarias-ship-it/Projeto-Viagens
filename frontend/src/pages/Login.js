@@ -58,8 +58,7 @@ const Login = () => {
     try {
       if (isRegister) {
         await register(formData.email, formData.password, formData.name, formData.surname);
-        const inviteAlias = localStorage.getItem('invite_alias');
-        navigate(inviteAlias ? '/onboarding/invite' : '/onboarding');
+        navigate('/onboarding');
       } else {
         const userData = await login(formData.email, formData.password);
         navigate(userData?.is_admin ? '/admin' : '/dashboard');

@@ -71,7 +71,7 @@ const AppRouter = () => {
     return (
       <Routes>
         <Route path="/onboarding" element={<Onboarding />} />
-        <Route path="/onboarding/invite" element={<InviteOnboarding />} />
+        <Route path="/onboarding/invite" element={<Onboarding />} />
       </Routes>
     );
   }
