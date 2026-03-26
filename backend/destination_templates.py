@@ -430,7 +430,7 @@ def build_template_itinerary(dest_data: dict, num_days: int) -> list:
     # Day 1: Arrival + iconic
     day1_acts = []
     if iconic:
-        day1_acts.append(f"Chegada e check-in no hotel ({dest_data['hotel']['area']})")
+        day1_acts.append(f"Chegada e check-in no hotel ({dest_data.get('hotel_area', 'centro')})")
         day1_acts.append(iconic[0] if len(iconic) > 0 else "Explorar o centro")
         if len(food) > 0:
             day1_acts.append(food[0])
