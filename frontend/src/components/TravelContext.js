@@ -12,6 +12,7 @@ const TravelContext = ({ plan, affiliateLinks }) => {
 
   const isSuggestionFlight = flight?.suggestion === true;
   const isSuggestionHotel = hotel?.suggestion === true;
+  const hasAirportList = transport?.airports && transport.airports.length > 0;
 
   return (
     <motion.div
@@ -37,19 +38,37 @@ const TravelContext = ({ plan, affiliateLinks }) => {
 
       {expanded && (
         <div className="px-4 pb-4 space-y-3">
-          {/* Flights — suggestion mode */}
+          {/* Flights — suggestion with airports list */}
           {flight && isSuggestionFlight && (
             <div className="bg-sky-50/50 rounded-lg p-3" data-testid="flight-suggestion">
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 bg-sky-100 rounded-lg flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 bg-sky-100 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
                   <Search className="w-4 h-4 text-sky-600" />
                 </div>
                 <div className="flex-1">
                   <p className="text-[11px] font-semibold text-[#2D2A26]">Voos para {plan?.destination}</p>
-                  {flight.destination_airport && (
+
+                  {/* Airport list */}
+                  {flight.airports && flight.airports.length > 0 && (
+                    <div className="mt-2 space-y-1.5">
+                      {flight.airports.map((ap, i) => (
+                        <div key={ap.code} className="flex items-start gap-2 bg-white/70 rounded-md px-2.5 py-1.5 border border-sky-100/50">
+                          <span className="text-[10px] font-bold text-sky-700 bg-sky-100 px-1.5 py-0.5 rounded shrink-0 mt-0.5">{ap.code}</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[10px] font-medium text-[#2D2A26]">{ap.name}</p>
+                            <p className="text-[9px] text-[#6B6661]">{ap.distance}</p>
+                            <p className="text-[9px] text-sky-700">{ap.transport}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Legacy single airport */}
+                  {!flight.airports && flight.destination_airport && (
                     <p className="text-[9px] text-[#6B6661] mt-0.5">Aeroporto: {flight.destination_airport}</p>
                   )}
-                  <p className="text-[10px] text-[#6B6661] mt-1">Compara precos e encontra o melhor voo. Os precos mudam frequentemente.</p>
+
                   {affiliateLinks?.skyscanner?.url && (
                     <a
                       href={affiliateLinks.skyscanner.url}
@@ -168,8 +187,40 @@ const TravelContext = ({ plan, affiliateLinks }) => {
             </div>
           )}
 
-          {/* Airport to Hotel transport */}
-          {transport && (
+          {/* Airport to city transport — new format with all airports */}
+          {transport && hasAirportList && (
+            <div className="border border-stone-100 rounded-lg overflow-hidden" data-testid="transport-info">
+              <div className="px-3 py-2 bg-stone-50">
+                <p className="text-[10px] font-bold text-[#2D2A26]">Como chegar ao centro da cidade</p>
+              </div>
+              <div className="p-2.5 space-y-2">
+                {transport.airports.map((ap) => (
+                  <div key={ap.code} className="flex items-start gap-2.5">
+                    <div className="w-7 h-7 bg-emerald-50 rounded-lg flex items-center justify-center shrink-0">
+                      <Train className="w-3.5 h-3.5 text-emerald-600" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">{ap.code}</span>
+                        <span className="text-[9px] text-[#2D2A26] font-medium">{ap.name}</span>
+                      </div>
+                      <p className="text-[10px] text-[#6B6661] mt-0.5">{ap.transport}</p>
+                      <p className="text-[9px] text-stone-400">{ap.distance}</p>
+                    </div>
+                  </div>
+                ))}
+                {transport.tip && (
+                  <div className="flex items-start gap-1.5 bg-amber-50/50 rounded-md px-2.5 py-1.5 mt-1">
+                    <Lightbulb className="w-3 h-3 text-amber-500 shrink-0 mt-0.5" />
+                    <p className="text-[9px] text-amber-800">{transport.tip}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Transport — legacy format (best + alternative) */}
+          {transport && !hasAirportList && (transport.best_option || transport.alternative) && (
             <div className="border border-stone-100 rounded-lg overflow-hidden" data-testid="transport-info">
               <div className="px-3 py-2 bg-stone-50">
                 <p className="text-[10px] font-bold text-[#2D2A26]">Como chegar ao centro da cidade</p>

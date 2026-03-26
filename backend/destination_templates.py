@@ -11,12 +11,14 @@ from datetime import datetime, timedelta
 DESTINATIONS = {
     "paris": {
         "name": "Paris", "country": "Franca", "timezone": "CET",
-        "airport": {"code": "CDG", "name": "Charles de Gaulle"},
-        "hotel": {"name": "Hotel Le Marais", "address": "21 Rue du Temple, 75004 Paris", "area": "Le Marais"},
+        "airports": [
+            {"code": "CDG", "name": "Charles de Gaulle", "distance": "25 km do centro", "transport": "RER B direto ate Chatelet-Les Halles — 35 min, 11 EUR"},
+            {"code": "ORY", "name": "Orly", "distance": "14 km do centro", "transport": "Orlyval + RER B ate Chatelet — 35 min, 12 EUR"},
+            {"code": "BVA", "name": "Beauvais-Tille", "distance": "85 km do centro", "transport": "Shuttle bus ate Porte Maillot — 75-90 min, 17 EUR. Usado por companhias low-cost (Ryanair, Wizz Air)"}
+        ],
+        "hotel_area": "Le Marais",
         "transport": {
-            "best": {"mode": "RER B", "details": "RER B direto de CDG ate Chatelet-Les Halles (centro)", "duration": "35 min", "cost": "11 EUR"},
-            "alt": {"mode": "Taxi/Uber", "details": "Servico porta-a-porta do aeroporto", "duration": "45-60 min", "cost": "55-75 EUR"},
-            "tip": "Compra o bilhete do RER B na maquina automatica (aceita cartao). Evita horarios de pico (8h-9h e 17h-19h)."
+            "tip": "Verifica qual o teu aeroporto antes de reservar transporte. CDG e o principal, Orly e mais proximo do centro, Beauvais e low-cost mas fica longe. Compra bilhetes de transporte nas maquinas automaticas (aceitam cartao)."
         },
         "weather_zone": "continental",
         "attractions": {
@@ -36,12 +38,13 @@ DESTINATIONS = {
     },
     "roma": {
         "name": "Roma", "country": "Italia", "timezone": "CET",
-        "airport": {"code": "FCO", "name": "Leonardo da Vinci-Fiumicino"},
-        "hotel": {"name": "Hotel Navona", "address": "Via dei Sediari 8, 00186 Roma", "area": "Centro Storico"},
+        "airports": [
+            {"code": "FCO", "name": "Leonardo da Vinci-Fiumicino", "distance": "30 km do centro", "transport": "Leonardo Express ate Roma Termini — 32 min, 14 EUR"},
+            {"code": "CIA", "name": "Ciampino", "distance": "15 km do centro", "transport": "Bus SIT/Terravision ate Termini — 40 min, 6 EUR. Usado por Ryanair e Wizz Air"}
+        ],
+        "hotel_area": "Centro Storico",
         "transport": {
-            "best": {"mode": "Leonardo Express", "details": "Comboio direto de Fiumicino a Roma Termini", "duration": "32 min", "cost": "14 EUR"},
-            "alt": {"mode": "Taxi", "details": "Tarifa fixa do aeroporto ao centro", "duration": "40-50 min", "cost": "50 EUR (tarifa fixa)"},
-            "tip": "O Leonardo Express parte a cada 15 min. Valida o bilhete antes de embarcar nas maquinas amarelas."
+            "tip": "Fiumicino e o aeroporto principal (voos internacionais). Ciampino e usado por low-cost. O Leonardo Express parte a cada 15 min — valida o bilhete nas maquinas amarelas antes de embarcar."
         },
         "weather_zone": "mediterranean",
         "attractions": {
@@ -61,12 +64,13 @@ DESTINATIONS = {
     },
     "barcelona": {
         "name": "Barcelona", "country": "Espanha", "timezone": "CET",
-        "airport": {"code": "BCN", "name": "El Prat"},
-        "hotel": {"name": "Hotel Catalonia Born", "address": "Carrer de l'Argenteria 37, 08003 Barcelona", "area": "El Born"},
+        "airports": [
+            {"code": "BCN", "name": "El Prat", "distance": "15 km do centro", "transport": "Aerobus A1/A2 ate Placa Catalunya — 35 min, 7 EUR"},
+            {"code": "GRO", "name": "Girona-Costa Brava", "distance": "100 km do centro", "transport": "Bus direto ate Estacio del Nord Barcelona — 75 min, 16 EUR. Usado por Ryanair"}
+        ],
+        "hotel_area": "El Born",
         "transport": {
-            "best": {"mode": "Aerobus", "details": "Aerobus A1/A2 do aeroporto a Placa Catalunya", "duration": "35 min", "cost": "7 EUR"},
-            "alt": {"mode": "Taxi", "details": "Tarifa fixa aeroporto-centro", "duration": "25-40 min", "cost": "39 EUR (tarifa fixa)"},
-            "tip": "O Aerobus parte a cada 5-10 min do Terminal 1. Aceita cartao contactless."
+            "tip": "El Prat e o aeroporto principal. Girona fica a 100km mas e servido por low-cost — verifica qual e o teu antes de planear. O Aerobus parte a cada 5-10 min do Terminal 1 e aceita cartao contactless."
         },
         "weather_zone": "mediterranean",
         "attractions": {
@@ -86,12 +90,16 @@ DESTINATIONS = {
     },
     "londres": {
         "name": "Londres", "country": "Reino Unido", "timezone": "GMT",
-        "airport": {"code": "LHR", "name": "Heathrow"},
-        "hotel": {"name": "Premier Inn London City", "address": "1 Whitbread Court, EC4V 4AX London", "area": "City of London"},
+        "airports": [
+            {"code": "LHR", "name": "Heathrow", "distance": "24 km do centro", "transport": "Piccadilly Line (metro) ate centro — 50-60 min, 6 GBP (Oyster)"},
+            {"code": "LGW", "name": "Gatwick", "distance": "45 km do centro", "transport": "Gatwick Express ate Victoria — 30 min, 20 GBP"},
+            {"code": "STN", "name": "Stansted", "distance": "60 km do centro", "transport": "Stansted Express ate Liverpool Street — 47 min, 20 GBP"},
+            {"code": "LTN", "name": "Luton", "distance": "55 km do centro", "transport": "Thameslink ate St Pancras — 40 min, 17 GBP"},
+            {"code": "SEN", "name": "Southend", "distance": "65 km do centro", "transport": "Comboio ate Liverpool Street — 55 min, 12 GBP"}
+        ],
+        "hotel_area": "City of London",
         "transport": {
-            "best": {"mode": "Piccadilly Line", "details": "Metro direto de Heathrow ao centro", "duration": "50-60 min", "cost": "6 GBP (Oyster)"},
-            "alt": {"mode": "Heathrow Express", "details": "Comboio expresso a Paddington", "duration": "15 min", "cost": "25 GBP"},
-            "tip": "Compra um Oyster Card no aeroporto ou usa cartao contactless para o metro."
+            "tip": "Londres tem 5 aeroportos — verifica qual e o teu! Heathrow e o principal. Gatwick, Stansted e Luton sao usados por low-cost. Compra um Oyster Card ou usa contactless para o metro."
         },
         "weather_zone": "oceanic",
         "attractions": {
@@ -111,12 +119,13 @@ DESTINATIONS = {
     },
     "amesterdao": {
         "name": "Amesterdao", "country": "Holanda", "timezone": "CET",
-        "airport": {"code": "AMS", "name": "Schiphol"},
-        "hotel": {"name": "Hotel V Nesplein", "address": "Nes 49, 1012 KD Amesterdao", "area": "Centro"},
+        "airports": [
+            {"code": "AMS", "name": "Schiphol", "distance": "15 km do centro", "transport": "Comboio NS direto ate Amsterdam Centraal — 17 min, 5.50 EUR"},
+            {"code": "EIN", "name": "Eindhoven", "distance": "125 km do centro", "transport": "Bus ate Eindhoven Centraal + comboio ate Amsterdam — 90 min total, 25 EUR. Usado por Ryanair e Transavia"}
+        ],
+        "hotel_area": "Centro",
         "transport": {
-            "best": {"mode": "Comboio NS", "details": "Comboio direto de Schiphol a Amsterdam Centraal", "duration": "17 min", "cost": "5.50 EUR"},
-            "alt": {"mode": "Taxi", "details": "Servico direto ao hotel", "duration": "20-30 min", "cost": "40-50 EUR"},
-            "tip": "O comboio parte a cada 10 min de Schiphol. Compra bilhete no balcao NS ou usa cartao contactless."
+            "tip": "Schiphol e o aeroporto principal e fica muito perto do centro (17 min de comboio). Eindhoven e usado por low-cost mas fica a 125 km — verifica antes de reservar. O comboio NS parte a cada 10 min de Schiphol."
         },
         "weather_zone": "oceanic",
         "attractions": {
@@ -136,12 +145,13 @@ DESTINATIONS = {
     },
     "toquio": {
         "name": "Toquio", "country": "Japao", "timezone": "JST",
-        "airport": {"code": "NRT", "name": "Narita International"},
-        "hotel": {"name": "Hotel Gracery Shinjuku", "address": "1-19-1 Kabukicho, Shinjuku, Tokyo", "area": "Shinjuku"},
+        "airports": [
+            {"code": "NRT", "name": "Narita International", "distance": "65 km do centro", "transport": "Narita Express (N'EX) ate Shinjuku/Tokyo Station — 80 min, 3250 JPY (~22 EUR)"},
+            {"code": "HND", "name": "Haneda", "distance": "15 km do centro", "transport": "Tokyo Monorail ou Keikyu Line ate centro — 20-30 min, 500 JPY (~3 EUR). Mais proximo do centro!"}
+        ],
+        "hotel_area": "Shinjuku",
         "transport": {
-            "best": {"mode": "Narita Express (N'EX)", "details": "Comboio direto de Narita a Shinjuku/Tokyo Station", "duration": "80 min", "cost": "3250 JPY (~22 EUR)"},
-            "alt": {"mode": "Limousine Bus", "details": "Autocarro direto ao hotel/estacao", "duration": "90-120 min", "cost": "3200 JPY (~21 EUR)"},
-            "tip": "Compra o Japan Rail Pass antes de viajar — inclui o N'EX e poupa muito em comboios."
+            "tip": "Narita e o principal para voos internacionais. Haneda e muito mais proximo do centro (20 min vs 80 min) — se tiveres opcao, escolhe Haneda. Compra o Japan Rail Pass antes de viajar se fores visitar varias cidades."
         },
         "weather_zone": "humid_subtropical",
         "attractions": {
@@ -161,12 +171,14 @@ DESTINATIONS = {
     },
     "nova iorque": {
         "name": "Nova Iorque", "country": "EUA", "timezone": "EST",
-        "airport": {"code": "JFK", "name": "John F. Kennedy International"},
-        "hotel": {"name": "Pod 51 Hotel", "address": "230 E 51st St, New York, NY 10022", "area": "Midtown Manhattan"},
+        "airports": [
+            {"code": "JFK", "name": "John F. Kennedy International", "distance": "25 km de Manhattan", "transport": "AirTrain + metro E/J ate centro — 60-75 min, 11 USD"},
+            {"code": "EWR", "name": "Newark Liberty (New Jersey)", "distance": "25 km de Manhattan", "transport": "AirTrain + NJ Transit ate Penn Station — 45 min, 15 USD"},
+            {"code": "LGA", "name": "LaGuardia", "distance": "13 km de Manhattan", "transport": "Bus Q70 + metro ate centro — 45-60 min, 2.90 USD. Mais proximo, mas sem comboio direto"}
+        ],
+        "hotel_area": "Midtown Manhattan",
         "transport": {
-            "best": {"mode": "AirTrain + Metro", "details": "AirTrain de JFK a Jamaica Station + metro E/J ao centro", "duration": "60-75 min", "cost": "11 USD"},
-            "alt": {"mode": "Taxi/Uber", "details": "Tarifa fixa JFK-Manhattan", "duration": "45-75 min", "cost": "70-90 USD (+ portagens)"},
-            "tip": "O AirTrain+Metro e muito mais barato que taxi. Compra MetroCard no aeroporto."
+            "tip": "JFK e o principal para voos internacionais. Newark (EWR) tem boas opcoes transatlanticas e pode ser mais barato. LaGuardia e para voos domesticos. Todos ficam a 45-75 min do centro de Manhattan."
         },
         "weather_zone": "humid_continental",
         "attractions": {
@@ -186,12 +198,12 @@ DESTINATIONS = {
     },
     "lisboa": {
         "name": "Lisboa", "country": "Portugal", "timezone": "WET",
-        "airport": {"code": "LIS", "name": "Humberto Delgado"},
-        "hotel": {"name": "Hotel Borges Chiado", "address": "Rua Garrett 108, 1200-205 Lisboa", "area": "Chiado"},
+        "airports": [
+            {"code": "LIS", "name": "Humberto Delgado", "distance": "7 km do centro", "transport": "Metro (Linha Vermelha) ate Baixa-Chiado ou Sao Sebastiao — 25 min, 1.65 EUR (Viva Viagem)"}
+        ],
+        "hotel_area": "Chiado",
         "transport": {
-            "best": {"mode": "Metro (Linha Vermelha)", "details": "Metro do aeroporto a Baixa-Chiado ou Sao Sebastiao", "duration": "25 min", "cost": "1.65 EUR (Viva Viagem)"},
-            "alt": {"mode": "Taxi/Uber", "details": "Servico direto ao hotel", "duration": "15-25 min", "cost": "15-20 EUR"},
-            "tip": "Compra o cartao Viva Viagem no metro do aeroporto. Carrega com zapping para usar em todos os transportes."
+            "tip": "O aeroporto de Lisboa fica muito proximo do centro (7 km). O metro e a opcao mais rapida e barata. Compra o cartao Viva Viagem no metro do aeroporto e carrega com zapping para usar em todos os transportes."
         },
         "weather_zone": "mediterranean",
         "attractions": {
@@ -211,12 +223,12 @@ DESTINATIONS = {
     },
     "porto": {
         "name": "Porto", "country": "Portugal", "timezone": "WET",
-        "airport": {"code": "OPO", "name": "Francisco Sa Carneiro"},
-        "hotel": {"name": "Hotel Infante Sagres", "address": "Praca D. Filipa de Lencastre 62, 4050-259 Porto", "area": "Baixa"},
+        "airports": [
+            {"code": "OPO", "name": "Francisco Sa Carneiro", "distance": "11 km do centro", "transport": "Metro (Linha Violeta E) ate Trindade/Aliados — 30 min, 2.60 EUR (Andante)"}
+        ],
+        "hotel_area": "Baixa",
         "transport": {
-            "best": {"mode": "Metro (Linha Violeta E)", "details": "Metro do aeroporto a Trindade/Aliados", "duration": "30 min", "cost": "2.60 EUR (Andante)"},
-            "alt": {"mode": "Taxi/Uber", "details": "Servico direto ao hotel", "duration": "20 min", "cost": "20-25 EUR"},
-            "tip": "Compra o cartao Andante no metro do aeroporto. A zona Z4 cobre aeroporto-centro."
+            "tip": "O aeroporto do Porto fica proximo do centro (11 km). O metro e a melhor opcao. Compra o cartao Andante no metro do aeroporto — a zona Z4 cobre aeroporto-centro."
         },
         "weather_zone": "oceanic",
         "attractions": {
@@ -383,15 +395,24 @@ def get_packing(zone: str, month: int) -> dict:
 
 
 def get_flight_info(dest_data: dict, start_date: str, end_date: str) -> dict:
-    """Generate flight SEARCH suggestion (not fake booking data)."""
-    airport = dest_data.get("airport", {})
-    if not airport:
+    """Generate flight SEARCH suggestion listing all real airports."""
+    airports = dest_data.get("airports", [])
+    if not airports:
         return None
+    
+    airport_list = []
+    for ap in airports:
+        airport_list.append({
+            "code": ap["code"],
+            "name": ap["name"],
+            "distance": ap.get("distance", ""),
+            "transport": ap.get("transport", "")
+        })
     
     return {
         "suggestion": True,
-        "destination_airport": f"{airport.get('name', '')} ({airport.get('code', '')})",
-        "tip": f"Compara precos e encontra o melhor voo para {dest_data['name']}. Os precos mudam frequentemente — reserva com antecedencia para melhores precos. [CTA:flight:Comparar voos]"
+        "airports": airport_list,
+        "tip": f"Compara precos entre todos os aeroportos de {dest_data['name']}. Voos para aeroportos secundarios podem ser mais baratos mas ficam mais longe do centro. [CTA:flight:Comparar voos]"
     }
 
 
@@ -543,12 +564,11 @@ def build_full_template_plan(dest_data: dict, destination: str, start_date: str,
         "flight_info": flight_info,
         "hotel_info": {
             "suggestion": True,
-            "area": dest_data["hotel"]["area"],
-            "tip": f"Recomendamos ficar na zona de {dest_data['hotel']['area']} — zona central com bom acesso a transportes e atracoes principais. [CTA:hotel:Ver hoteis no centro]"
+            "area": dest_data.get("hotel_area", "centro"),
+            "tip": f"Recomendamos ficar na zona de {dest_data.get('hotel_area', 'centro')} — zona central com bom acesso a transportes e atracoes principais. [CTA:hotel:Ver hoteis no centro]"
         },
         "airport_to_hotel": {
-            "best_option": dest_data["transport"]["best"],
-            "alternative": dest_data["transport"]["alt"],
+            "airports": dest_data.get("airports", []),
             "tip": dest_data["transport"]["tip"]
         },
         "itinerary": itinerary,
