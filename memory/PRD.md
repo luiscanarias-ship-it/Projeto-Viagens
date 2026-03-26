@@ -284,6 +284,15 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - **Ambassador Progression Visibility**: New dedicated block before Planning Hub showing compact progress bar + "Estas mais perto de te tornares Embaixador do que pensas" (visible only for logged-in non-ambassadors).
 - **Files**: `JourneyProgressBanner.js` (new), `TravelPlanner.js` (modified), `TravelContext.js` (modified), `SmartMap.js` (modified)
 
+### Conversion & Monetization Optimization Phase 2 (2026-03-26)
+- **Social Proof Banner (NEW)**: `SocialProofBanner.js` — Mostra "59 pessoas já contribuíram" com lista dos últimos 3 contribuidores (nome, valor, timestamp relativo), barra de progresso, e CTA forte "Junta-te a eles" em dark bg
+- **CTA Hierarchy Reforçada**: "Contribuir para o sonho" agora é o CTA dominante (full-width, texto maior, pulse suave). "Criar o meu roteiro" reduzido a link de texto
+- **Ambassador Messaging como Oportunidade**: "Sabias que podes abrir a tua própria viagem de sonho?" + "O teu próximo passo: torna-te Embaixador" com benefícios claros
+- **AI Assistant Monetização**: Keywords expandidos (hotel/alojamento/hostel/quarto/dormir + bilhete/experiência/atividade/fila/museu/tour/visita/excursão/ingresso/reservar), CTAs em dark bg com "Ver opções de alojamento" e "Ver opções"
+- **Affiliate CTAs Otimizados**: Must-see items agora com botões dark bg "Evita filas" (mais visíveis), stay zones com tracking
+- **Urgência**: Badge "Falta pouco!" quando progresso entre 10-100%
+- **Ficheiros**: `SocialProofBanner.js` (novo), `TravelPlanner.js`, `AIAssistant.js`, `TravelContext.js` (modificados)
+
 ## Prioritized Backlog
 ### P1
 - Celebracao "Sonho 100% Financiado": UI especial/animacao quando viagem atinge 100%
