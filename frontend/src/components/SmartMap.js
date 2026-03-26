@@ -257,7 +257,7 @@ const SmartMap = ({ plan, token, onApplyRefinement, onGeoDataLoaded, affiliateLi
     return (
       <div className="bg-stone-50 rounded-xl border border-stone-100 p-6 text-center" data-testid="smart-map-empty">
         <Navigation className="w-8 h-8 text-stone-300 mx-auto mb-2" />
-        <p className="text-sm text-[#6B6661]">Nao foi possivel localizar os pontos do roteiro no mapa.</p>
+        <p className="text-sm text-[#6B6661]">Não foi possível localizar os pontos do roteiro no mapa.</p>
         <button onClick={fetchGeoData} className="text-xs text-[#FFBE98] font-semibold mt-2 hover:underline">Tentar novamente</button>
       </div>
     );
@@ -438,7 +438,7 @@ const SmartMap = ({ plan, token, onApplyRefinement, onGeoDataLoaded, affiliateLi
                         {[
                           { id: 'what_to_see', label: 'O que ver aqui', icon: Eye },
                           { id: 'where_to_eat', label: 'Onde comer', icon: UtensilsCrossed },
-                          { id: 'how_to_next', label: 'Como chegar ao proximo', icon: MapPinned }
+                          { id: 'how_to_next', label: 'Como chegar ao próximo', icon: MapPinned }
                         ].map(opt => (
                           <button
                             key={opt.id}
@@ -457,7 +457,7 @@ const SmartMap = ({ plan, token, onApplyRefinement, onGeoDataLoaded, affiliateLi
                         {[
                           { id: 'less_queues', label: 'Menos filas', icon: Users },
                           { id: 'cheaper', label: 'Mais barato', icon: DollarSign },
-                          { id: 'best_time', label: 'Melhor horario', icon: Clock }
+                          { id: 'best_time', label: 'Melhor horário', icon: Clock }
                         ].map(opt => (
                           <button
                             key={opt.id}
@@ -485,7 +485,7 @@ const SmartMap = ({ plan, token, onApplyRefinement, onGeoDataLoaded, affiliateLi
                             onClick={() => onTrackAffiliate?.('getyourguide')}
                             className="flex items-center gap-1.5 text-[9px] font-semibold text-[#6B6661] bg-stone-50 hover:bg-[#FFBE98]/8 border border-stone-200 px-2 py-1.5 rounded transition-colors w-full justify-center"
                             data-testid="map-cta-experience">
-                            Reservar experiencia
+                            Reservar experiência
                           </a>
                         )}
                       </div>

@@ -31,12 +31,12 @@ const JourneyProgressBanner = ({ variant = 'top' }) => {
         data-testid="journey-banner-mid"
       >
         <div className="bg-gradient-to-r from-[#2D2A26] to-[#3D3A36] px-5 py-5">
-          <p className="text-[11px] font-semibold text-[#FFBE98] uppercase tracking-wider mb-1">Viagem de sonho</p>
+          <p className="text-[11px] font-semibold text-[#FFBE98] uppercase tracking-wider mb-1">Viagem de sonho da 4Luis a {journey.name}</p>
           <p className="text-base font-bold text-white leading-snug">
             Gostaste deste roteiro?
           </p>
           <p className="text-sm text-white/60 mt-0.5">
-            Ajuda a tornar esta viagem real
+            Ajuda a concretizar este sonho
           </p>
 
           <div className="mt-3 mb-2">
@@ -61,7 +61,8 @@ const JourneyProgressBanner = ({ variant = 'top' }) => {
             </span>
             <Link
               to={`/journey/${journey.journey_id}`}
-              className="inline-flex items-center gap-1.5 bg-[#FFBE98] text-[#2D2A26] text-xs font-bold px-4 py-2 rounded-xl shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 animate-pulse"
+              className="inline-flex items-center gap-1.5 bg-[#FFBE98] text-[#2D2A26] text-xs font-bold px-4 py-2 rounded-xl shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
+              style={{ animation: 'pulse 4s cubic-bezier(0.4,0,0.6,1) infinite' }}
               data-testid="journey-contribute-mid"
             >
               <Heart className="w-3.5 h-3.5" />Contribuir
@@ -88,7 +89,7 @@ const JourneyProgressBanner = ({ variant = 'top' }) => {
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-[11px] font-semibold text-[#2D2A26]">
-            Estamos a financiar uma viagem de sonho
+            Estamos a ajudar a realizar uma viagem de sonho a: {journey.name}
           </p>
           <div className="flex items-center gap-2 mt-1">
             <div className="flex-1 bg-stone-200/50 rounded-full h-1.5">
@@ -102,7 +103,7 @@ const JourneyProgressBanner = ({ variant = 'top' }) => {
             <span className="text-[10px] font-bold text-[#FFBE98] shrink-0">{pct.toFixed(0)}%</span>
           </div>
           <p className="text-[9px] text-[#6B6661] mt-0.5 flex items-center gap-1">
-            <Users className="w-2.5 h-2.5" />{displayCount} pessoas ja contribuiram
+            <Users className="w-2.5 h-2.5" />{displayCount} pessoas já contribuíram
           </p>
         </div>
         <Link

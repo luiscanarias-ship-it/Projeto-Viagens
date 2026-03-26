@@ -41,7 +41,7 @@ const TravelContext = ({ plan, affiliateLinks, onTrackAffiliate }) => {
           <div className="w-7 h-7 bg-sky-100 rounded-lg flex items-center justify-center">
             <Plane className="w-3.5 h-3.5 text-sky-600" />
           </div>
-          <p className="text-xs font-bold text-[#2D2A26]">Informacao de viagem</p>
+          <p className="text-xs font-bold text-[#2D2A26]">Informação de viagem</p>
         </div>
         {expanded ? <ChevronUp className="w-4 h-4 text-stone-400" /> : <ChevronDown className="w-4 h-4 text-stone-400" />}
       </button>
@@ -142,35 +142,6 @@ const TravelContext = ({ plan, affiliateLinks, onTrackAffiliate }) => {
                   </div>
                 </div>
               )}
-            </div>
-          )}
-
-          {/* Hotel — suggestion mode */}
-          {hotel && isSuggestionHotel && (
-            <div className="bg-[#FFBE98]/10 rounded-lg p-3" data-testid="hotel-suggestion">
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 bg-[#FFBE98]/20 rounded-lg flex items-center justify-center shrink-0">
-                  <Search className="w-4 h-4 text-[#FFBE98]" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-[11px] font-semibold text-[#2D2A26]">Alojamento em {plan?.destination}</p>
-                  {hotel.area && (
-                    <p className="text-[9px] text-[#6B6661] mt-0.5">Zona recomendada: <span className="font-medium text-[#FFBE98]">{hotel.area}</span></p>
-                  )}
-                  <p className="text-[10px] text-[#6B6661] mt-1">Zona central com bom acesso a transportes e atracoes. Reserva com antecedencia para melhores precos.</p>
-                  {affiliateLinks?.booking?.url && (
-                    <a
-                      href={affiliateLinks.booking.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 mt-2 px-3 py-1.5 bg-[#FFBE98]/20 text-[#2D2A26] rounded-lg text-[10px] font-semibold hover:bg-[#FFBE98]/30 transition-colors"
-                      data-testid="hotel-search-cta"
-                    >
-                      <Building2 className="w-3 h-3" />Ver hoteis no centro <ExternalLink className="w-2.5 h-2.5 opacity-60" />
-                    </a>
-                  )}
-                </div>
-              </div>
             </div>
           )}
 
@@ -317,7 +288,7 @@ const TravelContext = ({ plan, affiliateLinks, onTrackAffiliate }) => {
                     className="inline-flex items-center gap-1.5 mt-1 px-3 py-1.5 bg-[#FFBE98]/20 text-[#2D2A26] rounded-lg text-[10px] font-semibold hover:bg-[#FFBE98]/30 transition-colors"
                     data-testid="stay-zones-hotel-cta"
                   >
-                    <Building2 className="w-3 h-3" />Comparar hoteis nestas zonas <ExternalLink className="w-2.5 h-2.5 opacity-60" />
+                    <Building2 className="w-3 h-3" />Comparar hotéis nestas zonas <ExternalLink className="w-2.5 h-2.5 opacity-60" />
                   </a>
                 )}
               </div>
@@ -329,7 +300,7 @@ const TravelContext = ({ plan, affiliateLinks, onTrackAffiliate }) => {
             <div className="border border-stone-100 rounded-lg overflow-hidden" data-testid="must-see">
               <div className="px-3 py-2 bg-amber-50/50">
                 <p className="text-[10px] font-bold text-[#2D2A26] flex items-center gap-1.5">
-                  <Star className="w-3.5 h-3.5 text-amber-500" />Imperdivel — o que nao podes perder
+                  <Star className="w-3.5 h-3.5 text-amber-500" />Imperdível — o que não podes perder
                 </p>
               </div>
               <div className="p-2.5">

@@ -38,15 +38,15 @@ const ACTIVITY_PATTERNS = [
   { keywords: ['museu', 'museum', 'galeria', 'exposição', 'exposicao', 'palácio', 'palacio', 'castelo', 'torre', 'catedral', 'basílica', 'basilica', 'mosteiro', 'igreja', 'templo', 'santuário', 'shrine', 'temple'],
     label: 'Evita filas — reservar entrada', platform: 'getyourguide', icon: Ticket },
   { keywords: ['restaurante', 'gastronomia', 'food tour', 'mercado', 'market', 'degustação', 'sabores', 'culinária'],
-    label: 'Reservar experiencia gastronomica', platform: 'getyourguide', icon: Ticket },
+    label: 'Reservar experiência gastronómica', platform: 'getyourguide', icon: Ticket },
   { keywords: ['tour', 'visita guiada', 'excursão', 'excursao', 'passeio de barco', 'cruzeiro', 'safari', 'mergulho', 'walking tour', 'day trip'],
     label: 'Muito procurado — garantir vaga', platform: 'getyourguide', icon: Ticket },
   { keywords: ['bilhete', 'ingresso', 'entrada', 'ticket', 'espetáculo', 'show', 'concerto', 'ópera', 'teatro'],
-    label: 'Esgota rapido — garantir bilhete', platform: 'getyourguide', icon: Ticket },
+    label: 'Esgota rápido — garantir bilhete', platform: 'getyourguide', icon: Ticket },
   { keywords: ['atividade', 'experiência', 'adventure', 'snorkel', 'surf', 'kayak', 'hiking', 'trekking', 'zip', 'bungee'],
     label: 'Reservar aventura sem espera', platform: 'getyourguide', icon: Compass },
   { keywords: ['aeroporto', 'transfer', 'aluguer', 'rent a car', 'carro'],
-    label: 'Ver opcoes de transporte', platform: 'cars', icon: Car },
+    label: 'Ver opções de transporte', platform: 'cars', icon: Car },
 ];
 
 const detectActivityCTA = (text) => {
@@ -890,7 +890,7 @@ const TravelPlanner = () => {
                   <div className="mt-3 text-center space-y-1" data-testid="premium-hint">
                     <p className="text-[10px] text-[#6B6661]/60 flex items-center gap-1.5 justify-center">
                       <Lock className="w-3 h-3 text-[#FFBE98]/50" />
-                      Algumas funcionalidades sao exclusivas para Embaixadores
+                      Algumas funcionalidades são exclusivas para Embaixadores
                     </p>
                     <p className="text-[10px] text-[#FFBE98]/70 font-medium italic">
                       Este pode ser o inicio da tua proxima grande viagem
@@ -1148,7 +1148,7 @@ const TravelPlanner = () => {
                     className="bg-gradient-to-r from-[#FFBE98]/8 to-[#E6A07C]/5 rounded-xl border border-[#FFBE98]/20 p-4"
                   >
                     <p className="text-xs font-bold text-[#2D2A26] mb-0.5">
-                      Estas mais perto de te tornares Embaixador do que pensas
+                      Estás mais perto de te tornares Embaixador do que pensas
                     </p>
                     <p className="text-[10px] text-[#6B6661] mb-3">
                       Desbloqueia mapa interativo, assistente IA e dicas secretas
@@ -1238,11 +1238,11 @@ const TravelPlanner = () => {
               {/* ── Final Conversion Block ── */}
               <div className="px-5 py-8 border-t border-stone-100 bg-gradient-to-b from-[#2D2A26] to-[#3D3A36] text-center rounded-b-2xl" data-testid="conversion-block">
                 <p className="text-lg font-bold text-white mb-1">Gostaste deste roteiro?</p>
-                <p className="text-sm text-white/50 mb-5">Ajuda a tornar esta viagem real — ou cria o teu</p>
+                <p className="text-sm text-white/50 mb-5">Ajuda a concretizar este sonho — ou cria o teu</p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5">
                   <Link to="/"
                     className="flex items-center gap-2 bg-[#FFBE98] text-[#2D2A26] font-bold text-sm px-6 py-3.5 rounded-2xl hover:bg-[#E6A07C] transition-all min-h-[48px] w-full sm:w-auto justify-center shadow-lg"
-                    style={{ animation: 'pulse 2s cubic-bezier(0.4,0,0.6,1) infinite' }}
+                    style={{ animation: 'pulse 4s cubic-bezier(0.4,0,0.6,1) infinite' }}
                     data-testid="final-cta-contribute">
                     <Heart className="w-4 h-4" /> Contribuir para o sonho
                   </Link>
@@ -1255,7 +1255,7 @@ const TravelPlanner = () => {
                 {!isAmbassador && (
                   <div className="mt-5 space-y-1">
                     <p className="text-[11px] text-[#FFBE98]/60 italic">
-                      Estas mais perto de te tornares Embaixador do que pensas
+                      Estás mais perto de te tornares Embaixador do que pensas
                     </p>
                     <Link to="/embaixador"
                       className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#FFBE98]/80 hover:text-[#FFBE98] transition-colors"
