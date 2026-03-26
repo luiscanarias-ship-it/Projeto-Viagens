@@ -174,7 +174,7 @@ const Login = () => {
           </h1>
           {!isRegister && (
             <p className="text-[10px] text-[#6B6661] text-center mb-3">
-              Entra para continuar a apoiar viagens e desbloquear a tua
+              Entra para continuares a apoiar viagens e desbloquear a tua
             </p>
           )}
           {isRegister && <div className="mb-3" />}
