@@ -1,0 +1,58 @@
+{
+  "summary": "Iteration 82 - Bug Fixes Testing Complete. All 3 critical bugs verified as FIXED: (1) Template plans now show flight/hotel SUGGESTIONS with affiliate links instead of fake booking data, (2) Geocoding distance threshold reduced from 5° to 1° (~111km), (3) Food/restaurant activities filtered from geocoding. All 10 backend tests passed. Frontend TravelContext component correctly displays 'Voos para Paris' suggestion card with 'Comparar voos' CTA and 'Alojamento em Paris' with 'Ver hoteis no centro' CTA. Transport section shows real RER B data.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "passed_tests": [
+    "Backend: POST /api/ai/travel-plan with destination='paris' returns flight_info.suggestion=true (NOT outbound/return fake flights)",
+    "Backend: POST /api/ai/travel-plan with destination='paris' returns hotel_info.suggestion=true with area='Le Marais' (NOT fake hotel name/address)",
+    "Backend: POST /api/ai/travel-plan with destination='roma' returns flight_info.suggestion=true with destination_airport containing 'FCO'",
+    "Backend: POST /api/ai/travel-plan with destination='barcelona' returns hotel_info.suggestion=true with area='El Born'",
+    "Backend: Template plans have airport_to_hotel with real transport data (best_option.mode='RER B', cost='11 EUR', duration='35 min')",
+    "Backend: Geocoding skip_words list contains food activities (croissant, jantar, falafel, gelato, pizza, ramen, etc)",
+    "Backend: Geocoding distance threshold is 1.0 degree (not 5.0) - results must be within ~111km of destination",
+    "Backend: GET /api/journeys returns 200",
+    "Backend: get_flight_info function returns suggestion format with suggestion=True",
+    "Backend: build_full_template_plan returns hotel_info with suggestion format",
+    "Frontend: /plan-trip page loads correctly with 'Gerar plano de viagem' button",
+    "Frontend: TravelContext shows 'Voos para Paris' suggestion card with 'Comparar voos' affiliate link",
+    "Frontend: TravelContext shows 'Alojamento em Paris' suggestion card with 'Zona recomendada: Le Marais' and 'Ver hoteis no centro' affiliate link",
+    "Frontend: TravelContext shows transport section 'Como chegar ao centro da cidade' with RER B as best option"
+  ],
+  "failed_tests": [],
+  "test_report_links": [
+    "/app/backend/tests/test_iteration82_bug_fixes.py",
+    "/app/test_reports/pytest/iteration82_bug_fixes_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "destination_templates.py (lines 385-395): get_flight_info correctly returns {suggestion: True, destination_airport: '...', tip: '...'} format",
+    "destination_templates.py (lines 521-561): build_full_template_plan correctly sets hotel_info with {suggestion: True, area: '...', tip: '...'}",
+    "server.py (line 6779): Geocoding distance threshold correctly set to 1.0 degree (~111km) instead of 5.0",
+    "server.py (line 6852): skip_words list correctly filters food activities from geocoding (croissant, jantar, falafel, gelato, pizza, ramen, etc)",
+    "TravelContext.js: Correctly handles both suggestion mode (new format) and legacy AI format (outbound/return)"
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration82_bug_fixes.py"
+  ],
+  "success_rate": {
+    "backend": "100% (10/10 tests passed)",
+    "frontend": "100% (4/4 UI tests passed)"
+  },
+  "test_credentials": "Admin: admin@4luis.com / Admin1",
+  "seed_data_creation": "",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Iteration 82 verified 3 critical bug fixes: (1) flight_info now returns {suggestion:true, destination_airport:'CDG', tip:'...'} instead of fake outbound/return flight data, (2) hotel_info now returns {suggestion:true, area:'Le Marais', tip:'...'} instead of fake hotel name/address, (3) geocode threshold reduced from 5° to 1° and food activities filtered. TravelContext.js handles both new suggestion format and legacy AI format. Templates use 0 AI credits. IfthenPay payment integration is MOCKED.",
+  "mocked_api": {
+    "has_mocked_apis": true,
+    "mocked_apis_list": ["IfthenPay"],
+    "note": "Payment integration via IfthenPay is mocked. AI layer (Layer 4) requires Emergent LLM key budget - if budget exhausted, only template destinations work"
+  }
+}

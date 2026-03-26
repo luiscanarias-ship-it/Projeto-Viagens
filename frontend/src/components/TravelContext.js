@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Plane, Building2, ArrowRight, Train, Car, Lightbulb, ChevronDown, ChevronUp, MapPin, Phone } from 'lucide-react';
+import { Plane, Building2, ArrowRight, Train, Car, Lightbulb, ChevronDown, ChevronUp, MapPin, Phone, ExternalLink, Search } from 'lucide-react';
 
-const TravelContext = ({ plan }) => {
+const TravelContext = ({ plan, affiliateLinks }) => {
   const [expanded, setExpanded] = useState(true);
   const flight = plan?.flight_info;
   const hotel = plan?.hotel_info;
   const transport = plan?.airport_to_hotel;
 
-  if (!flight && !hotel) return null;
+  if (!flight && !hotel && !transport) return null;
+
+  const isSuggestionFlight = flight?.suggestion === true;
+  const isSuggestionHotel = hotel?.suggestion === true;
 
   return (
     <motion.div
@@ -34,10 +37,38 @@ const TravelContext = ({ plan }) => {
 
       {expanded && (
         <div className="px-4 pb-4 space-y-3">
-          {/* Flights */}
-          {flight && (
+          {/* Flights — suggestion mode */}
+          {flight && isSuggestionFlight && (
+            <div className="bg-sky-50/50 rounded-lg p-3" data-testid="flight-suggestion">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 bg-sky-100 rounded-lg flex items-center justify-center shrink-0">
+                  <Search className="w-4 h-4 text-sky-600" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-[11px] font-semibold text-[#2D2A26]">Voos para {plan?.destination}</p>
+                  {flight.destination_airport && (
+                    <p className="text-[9px] text-[#6B6661] mt-0.5">Aeroporto: {flight.destination_airport}</p>
+                  )}
+                  <p className="text-[10px] text-[#6B6661] mt-1">Compara precos e encontra o melhor voo. Os precos mudam frequentemente.</p>
+                  {affiliateLinks?.skyscanner?.url && (
+                    <a
+                      href={affiliateLinks.skyscanner.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 mt-2 px-3 py-1.5 bg-sky-100 text-sky-700 rounded-lg text-[10px] font-semibold hover:bg-sky-200 transition-colors"
+                      data-testid="flight-search-cta"
+                    >
+                      <Plane className="w-3 h-3" />Comparar voos <ExternalLink className="w-2.5 h-2.5 opacity-60" />
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Flights — legacy format (from AI plans) */}
+          {flight && !isSuggestionFlight && flight.outbound && (
             <div className="space-y-2" data-testid="flight-info">
-              {/* Outbound */}
               {flight.outbound && (
                 <div className="flex items-center gap-3 bg-sky-50/50 rounded-lg p-2.5">
                   <Plane className="w-4 h-4 text-sky-500 shrink-0" />
@@ -60,7 +91,6 @@ const TravelContext = ({ plan }) => {
                   </div>
                 </div>
               )}
-              {/* Return */}
               {flight.return && (
                 <div className="flex items-center gap-3 bg-amber-50/50 rounded-lg p-2.5">
                   <Plane className="w-4 h-4 text-amber-500 shrink-0 rotate-180" />
@@ -86,8 +116,37 @@ const TravelContext = ({ plan }) => {
             </div>
           )}
 
-          {/* Hotel */}
-          {hotel && hotel.name && (
+          {/* Hotel — suggestion mode */}
+          {hotel && isSuggestionHotel && (
+            <div className="bg-[#FFBE98]/10 rounded-lg p-3" data-testid="hotel-suggestion">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 bg-[#FFBE98]/20 rounded-lg flex items-center justify-center shrink-0">
+                  <Search className="w-4 h-4 text-[#FFBE98]" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-[11px] font-semibold text-[#2D2A26]">Alojamento em {plan?.destination}</p>
+                  {hotel.area && (
+                    <p className="text-[9px] text-[#6B6661] mt-0.5">Zona recomendada: <span className="font-medium text-[#FFBE98]">{hotel.area}</span></p>
+                  )}
+                  <p className="text-[10px] text-[#6B6661] mt-1">Zona central com bom acesso a transportes e atracoes. Reserva com antecedencia para melhores precos.</p>
+                  {affiliateLinks?.booking?.url && (
+                    <a
+                      href={affiliateLinks.booking.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 mt-2 px-3 py-1.5 bg-[#FFBE98]/20 text-[#2D2A26] rounded-lg text-[10px] font-semibold hover:bg-[#FFBE98]/30 transition-colors"
+                      data-testid="hotel-search-cta"
+                    >
+                      <Building2 className="w-3 h-3" />Ver hoteis no centro <ExternalLink className="w-2.5 h-2.5 opacity-60" />
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Hotel — legacy format (from AI plans) */}
+          {hotel && !isSuggestionHotel && hotel.name && (
             <div className="flex items-start gap-3 bg-amber-50/30 rounded-lg p-2.5" data-testid="hotel-info">
               <Building2 className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
               <div className="flex-1 min-w-0">
@@ -113,10 +172,9 @@ const TravelContext = ({ plan }) => {
           {transport && (
             <div className="border border-stone-100 rounded-lg overflow-hidden" data-testid="transport-info">
               <div className="px-3 py-2 bg-stone-50">
-                <p className="text-[10px] font-bold text-[#2D2A26]">Como ir do aeroporto para o hotel</p>
+                <p className="text-[10px] font-bold text-[#2D2A26]">Como chegar ao centro da cidade</p>
               </div>
               <div className="p-2.5 space-y-2">
-                {/* Best option */}
                 {transport.best_option && (
                   <div className="flex items-start gap-2.5">
                     <div className="w-7 h-7 bg-emerald-50 rounded-lg flex items-center justify-center shrink-0">
@@ -135,7 +193,6 @@ const TravelContext = ({ plan }) => {
                     </div>
                   </div>
                 )}
-                {/* Alternative */}
                 {transport.alternative && (
                   <div className="flex items-start gap-2.5">
                     <div className="w-7 h-7 bg-stone-100 rounded-lg flex items-center justify-center shrink-0">
@@ -154,7 +211,6 @@ const TravelContext = ({ plan }) => {
                     </div>
                   </div>
                 )}
-                {/* Tip */}
                 {transport.tip && (
                   <div className="flex items-start gap-1.5 bg-amber-50/50 rounded-md px-2.5 py-1.5 mt-1">
                     <Lightbulb className="w-3 h-3 text-amber-500 shrink-0 mt-0.5" />

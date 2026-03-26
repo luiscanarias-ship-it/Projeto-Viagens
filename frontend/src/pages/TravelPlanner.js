@@ -897,7 +897,7 @@ const TravelPlanner = () => {
 
               {/* Travel Context: Flight + Hotel + Transport */}
               <div className="px-5 pt-4">
-                <TravelContext plan={plan} />
+                <TravelContext plan={plan} affiliateLinks={dynamicLinks} />
               </div>
 
               {/* Smart Map (central element — high priority) */}

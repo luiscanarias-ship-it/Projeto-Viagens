@@ -6752,7 +6752,7 @@ async def geocode_location(location_name: str, destination_context: str = "", bi
     search_query = f"{location_name}, {destination_context}" if destination_context else location_name
 
     # Build Photon params with geographic bias
-    photon_params = {"q": search_query, "limit": 3}
+    photon_params = {"q": search_query, "limit": 5}
     if bias_lat is not None and bias_lng is not None:
         photon_params["lat"] = bias_lat
         photon_params["lon"] = bias_lng
@@ -6769,14 +6769,14 @@ async def geocode_location(location_name: str, destination_context: str = "", bi
                 if resp.status_code == 200:
                     data = resp.json()
                     features = data.get("features", [])
-                    # Pick closest result to bias point if bias provided
+                    # Pick closest result to bias point — strict 1° threshold (~111km)
                     best = None
                     if features and bias_lat is not None:
                         import math
                         for f in features:
                             c = f["geometry"]["coordinates"]
                             dist = math.sqrt((c[1] - bias_lat)**2 + (c[0] - bias_lng)**2)
-                            if dist < 5:  # ~500km threshold in degrees
+                            if dist < 1.0:  # ~111km — must be in/near the destination city
                                 if best is None or dist < best[1]:
                                     best = (f, dist)
                         if best:
@@ -6848,8 +6848,14 @@ async def geocode_plan(request: Request):
         location_names = []
         # Portuguese verbs/prepositions to strip for better geocoding
         strip_words = r'\b(visitar|explorar|passear|almoco|almocar|jantar|conhecer|ir|ver|fazer|tomar|comprar|experimentar|descobrir|subida|passeio|deslocacao|regresso|tempo|tarde|manha|livre|reservar|centro|historico|com|sem)\b'
+        # Skip food/restaurant/departure activities — not useful as map pins
+        skip_words = ['croissant', 'jantar', 'almoco', 'almocar', 'cafe ', 'falafel', 'gelato', 'crepe', 'pizza', 'ramen', 'sushi', 'churros', 'comida', 'degustacao', 'aperitivo', 'brunch', 'check-out', 'check-in', 'transfer para', 'regresso', 'despedida', 'chegada e check', 'aeroporto', 'dia livre']
         for activity in activities:
             name = activity if isinstance(activity, str) else activity.get("title", activity.get("name", str(activity)))
+            name_lower = name.lower()
+            # Skip food/meal/departure activities
+            if any(sw in name_lower for sw in skip_words):
+                continue
             clean = re.sub(r'\[CTA:\w+:[^\]]+\]', '', name).strip()
             clean = re.sub(r'^\d{1,2}[h:]\d{0,2}\s*[-–—]\s*', '', clean).strip()
             # Remove parenthetical notes

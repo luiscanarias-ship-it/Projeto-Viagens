@@ -383,38 +383,15 @@ def get_packing(zone: str, month: int) -> dict:
 
 
 def get_flight_info(dest_data: dict, start_date: str, end_date: str) -> dict:
-    """Generate realistic flight info from templates."""
-    flights = dest_data.get("flights_from_lisbon") or dest_data.get("flights_from_porto")
-    if not flights:
+    """Generate flight SEARCH suggestion (not fake booking data)."""
+    airport = dest_data.get("airport", {})
+    if not airport:
         return None
-    
-    num = random.choice(flights["numbers"])
-    departure_h = random.choice(["07:30", "08:45", "10:15", "14:30", "16:00"])
-    
-    try:
-        start = datetime.strptime(start_date, "%Y-%m-%d")
-        end = datetime.strptime(end_date, "%Y-%m-%d")
-    except ValueError:
-        return None
-    
-    origin = "Aeroporto de Lisboa (LIS)" if dest_data.get("flights_from_lisbon") else "Aeroporto do Porto (OPO)"
-    arrival_airport = f"{dest_data['airport']['name']} ({dest_data['airport']['code']})"
     
     return {
-        "outbound": {
-            "flight_number": f"{flights['airline']} {flights['prefix']}{num}",
-            "departure_airport": origin,
-            "departure_time": departure_h,
-            "arrival_airport": arrival_airport,
-            "arrival_time": "Hora local"
-        },
-        "return": {
-            "flight_number": f"{flights['airline']} {flights['prefix']}{random.choice(flights['numbers'])}",
-            "departure_airport": arrival_airport,
-            "departure_time": random.choice(["09:00", "11:30", "15:00", "17:45"]),
-            "arrival_airport": origin,
-            "arrival_time": "Hora local"
-        }
+        "suggestion": True,
+        "destination_airport": f"{airport.get('name', '')} ({airport.get('code', '')})",
+        "tip": f"Compara precos e encontra o melhor voo para {dest_data['name']}. Os precos mudam frequentemente — reserva com antecedencia para melhores precos. [CTA:flight:Comparar voos]"
     }
 
 
@@ -565,10 +542,9 @@ def build_full_template_plan(dest_data: dict, destination: str, start_date: str,
         "summary": f"Roteiro de {num_days} dias em {dest_data['name']}, {dest_data['country']}. Descobre o melhor da cidade com este guia pratico.",
         "flight_info": flight_info,
         "hotel_info": {
-            "name": dest_data["hotel"]["name"],
-            "address": dest_data["hotel"]["address"],
-            "phone": None,
-            "area": dest_data["hotel"]["area"]
+            "suggestion": True,
+            "area": dest_data["hotel"]["area"],
+            "tip": f"Recomendamos ficar na zona de {dest_data['hotel']['area']} — zona central com bom acesso a transportes e atracoes principais. [CTA:hotel:Ver hoteis no centro]"
         },
         "airport_to_hotel": {
             "best_option": dest_data["transport"]["best"],
