@@ -143,6 +143,12 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - **Bug 3**: LLM credit waste prevented — all 10 template destinations use 0 AI credits
 - **TravelContext.js**: Rewritten to handle both suggestion mode (templates) and legacy AI format (backward compatible)
 
+### Bug Fixes — Itinerário, Mapa e Popups (2026-03-26)
+- **Bug 1 FIXED**: Dias com 0-1 atividades → Reescrito `build_template_itinerary` com distribuição 1-por-categoria, tracking de atividades usadas (set), e fallback para day_trips/stay_zones. Mínimo 3 atividades por dia, zero repetições
+- **Bug 2 FIXED**: Mapa mostrava 0-2 marcadores → Geocoding agora extrai nomes dos parênteses (ex: "Sultan Ahmed" de "Mesquita Azul (Sultan Ahmed — gratis)") como nome primário de geocodificação, com fallback triplo. Istanbul passou de 0 para 14 marcadores
+- **Bug 3 FIXED**: Popup mostrava "Dia 3 — Ponto 8" → Agora mostra nome do monumento em bold + tema do dia
+- **day_trips** adicionados a todos os 19 destinos para viagens 6+ dias (3 excursões por cidade)
+
 ### Expansão do Motor de Templates — 9 Novos Destinos (2026-03-26)
 - **9 destinos adicionados**: Berlim, Madrid, Praga, Viena, Budapeste, Istambul, Florença, Dubai, Bali (total: 19 cidades)
 - **Stay Zones**: Cada cidade tem 3-4 zonas recomendadas para ficar, com transportes públicos que ligam ao aeroporto e descrição do vibe
