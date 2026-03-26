@@ -134,6 +134,82 @@ async def login(credentials: UserLogin):
         }
     }
 
+# ==================== PASSWORD RESET ====================
+
+@api_router.post("/auth/forgot-password")
+async def forgot_password(request: Request):
+    data = await request.json()
+    email = data.get("email", "").strip().lower()
+    # Always return success to not reveal if email exists
+    if not email:
+        return {"message": "Se este email existir, vais receber instruções."}
+    
+    user = await db.users.find_one({"email": email}, {"_id": 0, "user_id": 1, "name": 1})
+    if user:
+        token = str(uuid.uuid4())
+        await db.password_resets.delete_many({"user_id": user["user_id"]})
+        await db.password_resets.insert_one({
+            "token": token,
+            "user_id": user["user_id"],
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "expires_at": (datetime.now(timezone.utc) + timedelta(minutes=30)).isoformat(),
+            "used": False
+        })
+        reset_link = f"{FRONTEND_URL}/reset-password?token={token}"
+        name = user.get("name", "Sonhador")
+        html_content = get_email_base_template(f"""
+            <h2 style="color: #2D2A26; font-size: 20px; margin: 0 0 16px 0;">Recuperar palavra-passe</h2>
+            <p style="color: #6B6661; font-size: 14px; line-height: 1.6;">
+                Olá {name},<br><br>
+                Recebemos um pedido para repor a tua palavra-passe. Clica no botão abaixo para criar uma nova.
+            </p>
+            <div style="text-align: center; margin: 24px 0;">
+                <a href="{reset_link}" style="display: inline-block; background-color: #FFBE98; color: #2D2A26; padding: 14px 32px; border-radius: 12px; text-decoration: none; font-weight: bold; font-size: 14px;">
+                    Repor palavra-passe
+                </a>
+            </div>
+            <p style="color: #9B9590; font-size: 12px; line-height: 1.5;">
+                Este link expira em 30 minutos.<br>
+                Se não fizeste este pedido, ignora este email.
+            </p>
+        """, "Recuperar palavra-passe — 4Luis")
+        try:
+            await send_email_resend(email, "Recuperar palavra-passe — 4Luis", html_content)
+        except Exception as e:
+            logger.error(f"Failed to send password reset email: {e}")
+    
+    return {"message": "Se este email existir, vais receber instruções."}
+
+@api_router.post("/auth/reset-password")
+async def reset_password(request: Request):
+    data = await request.json()
+    token = data.get("token", "")
+    new_password = data.get("password", "")
+    
+    if not token or not new_password:
+        raise HTTPException(status_code=400, detail="Token e nova palavra-passe são obrigatórios.")
+    if len(new_password) < 8:
+        raise HTTPException(status_code=400, detail="A palavra-passe deve ter pelo menos 8 caracteres.")
+    
+    reset_doc = await db.password_resets.find_one({"token": token, "used": False}, {"_id": 0})
+    if not reset_doc:
+        raise HTTPException(status_code=400, detail="Link inválido ou já utilizado.")
+    
+    expires_at = datetime.fromisoformat(reset_doc["expires_at"])
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+    if datetime.now(timezone.utc) > expires_at:
+        raise HTTPException(status_code=400, detail="O link expirou. Solicita uma nova recuperação.")
+    
+    await db.users.update_one(
+        {"user_id": reset_doc["user_id"]},
+        {"$set": {"password_hash": hash_password(new_password)}}
+    )
+    await db.password_resets.update_one({"token": token}, {"$set": {"used": True}})
+    
+    return {"message": "Palavra-passe atualizada com sucesso."}
+
+
 @api_router.post("/auth/google/session")
 async def process_google_session(request: Request, response: Response):
     data = await request.json()

@@ -29,6 +29,7 @@ import About from "./pages/About";
 import PlanTrip from "./pages/PlanTrip";
 import TravelPlanner from "./pages/TravelPlanner";
 import PublicPlan from "./pages/PublicPlan";
+import ResetPassword from "./pages/ResetPassword";
 
 // Syncs user's preferred language on login
 const LanguageSync = () => {
@@ -82,6 +83,7 @@ const AppRouter = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/journey/:id" element={<JourneyDetail />} />
           <Route path="/dashboard" element={<Dashboard />} />
