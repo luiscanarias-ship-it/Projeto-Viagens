@@ -168,6 +168,12 @@ code {
     @apply bg-[#FFBE98]/10 border-[#FFBE98] scale-105;
 }
 
+/* Pulse glow animation for primary CTAs */
+@keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 4px 15px rgba(45, 42, 38, 0.3); }
+    50% { box-shadow: 0 4px 25px rgba(255, 190, 152, 0.45), 0 0 40px rgba(255, 190, 152, 0.15); }
+}
+
 /* Card styles */
 .card-journey {
     @apply rounded-3xl bg-white border border-stone-100 overflow-hidden transition-all duration-300;
