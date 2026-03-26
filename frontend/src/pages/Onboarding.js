@@ -96,7 +96,7 @@ const Onboarding = () => {
                 Ver viagem <ArrowRight className="w-4 h-4" />
               </button>
 
-              <p className="text-base font-bold text-[#B5693A] text-center mt-4 italic leading-relaxed animate-[softGlow_3s_ease-in-out_infinite]"
+              <p className="text-base font-bold text-[#E08A50] text-center mt-4 italic leading-relaxed animate-[softGlow_3s_ease-in-out_infinite]"
                 data-testid="onboarding-dream-msg">
                 Quem sabe se ao apoiares esta viagem de sonho não podes também tu realizares a tua...
               </p>
