@@ -65,7 +65,7 @@ const JourneyProgressBanner = ({ variant = 'top' }) => {
               style={{ animation: 'pulse 4s cubic-bezier(0.4,0,0.6,1) infinite' }}
               data-testid="journey-contribute-mid"
             >
-              <Heart className="w-3.5 h-3.5" />Contribuir
+              <Heart className="w-3.5 h-3.5" />Contribuir agora
               <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
@@ -112,7 +112,7 @@ const JourneyProgressBanner = ({ variant = 'top' }) => {
           style={{ animation: 'pulse 2s cubic-bezier(0.4,0,0.6,1) infinite' }}
           data-testid="journey-contribute-top"
         >
-          <Heart className="w-3.5 h-3.5" />Contribuir
+          <Heart className="w-3.5 h-3.5" />Contribuir agora
         </Link>
       </div>
     </motion.div>

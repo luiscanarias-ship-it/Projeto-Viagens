@@ -1253,7 +1253,7 @@ const TravelPlanner = () => {
                     className="flex items-center justify-center gap-2 bg-[#FFBE98] text-[#2D2A26] font-bold text-base px-8 py-4 rounded-2xl hover:bg-[#E6A07C] transition-all w-full max-w-sm shadow-lg"
                     style={{ animation: 'pulse 4s cubic-bezier(0.4,0,0.6,1) infinite' }}
                     data-testid="final-cta-contribute">
-                    <Heart className="w-5 h-5" /> Contribuir para o sonho
+                    <Heart className="w-5 h-5" /> Apoiar este sonho
                   </Link>
                   <Link to="/travel-planner" onClick={() => { setPlan(null); window.scrollTo(0, 0); }}
                     className="flex items-center justify-center gap-2 text-white/50 hover:text-white/80 font-medium text-xs transition-colors"

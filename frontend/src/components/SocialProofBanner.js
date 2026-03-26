@@ -105,7 +105,7 @@ const SocialProofBanner = () => {
           data-testid="social-proof-cta"
         >
           <Heart className="w-4 h-4 text-[#FFBE98]" />
-          Junta-te a eles
+          Apoiar este sonho
           <ArrowRight className="w-3.5 h-3.5 opacity-60" />
         </Link>
       </div>
