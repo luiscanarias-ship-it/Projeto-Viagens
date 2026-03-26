@@ -24,7 +24,7 @@ const defaultTexts = {
   "home.main_journey": "Viagem Principal",
   "home.progress": "Progresso",
   "home.goal_reached": "Objetivo atingido! Ainda podes contribuir.",
-  "home.contribute_dream": "Contribuir para este Sonho",
+  "home.contribute_dream": "Apoiar este sonho",
   "home.latest_contributions": "Últimas Contribuições",
   "home.view_all_contributions": "Ver todas as contribuições",
   "home.no_main_journey": "Nenhuma viagem principal ativa de momento.",
@@ -96,7 +96,7 @@ const defaultTexts = {
   // Journey Detail
   "journey.dream": "O Sonho",
   "journey.impact": "O Impacto",
-  "journey.support_btn": "Apoiar esta Viagem",
+  "journey.support_btn": "Apoiar este sonho",
   "journey.crypto_bonus": "Utilize Criptomoedas para duplicar as suas possibilidades de ganhar uma viagem de sonho.",
   "journey.testimonials": "Mensagens de Apoio",
   
