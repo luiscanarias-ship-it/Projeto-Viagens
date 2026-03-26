@@ -137,6 +137,13 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - **ShareMenu header**: "Partilhar via" → "Convidar via"
 - **WhatsApp primary CTA**: Direct WhatsApp share button with pre-filled message including referral link in PaymentSuccess and AmbassadorProgress
 
+### Affiliate Links Fix (2026-03-25)
+- **Bug**: 7 de 9 links de afiliados eram placeholders ("SKYSCANNER_LINK_HERE", etc.) que não funcionavam
+- **Fix backend**: Substituídos todos os placeholders por URLs reais (skyscanner.pt, booking.com, hotels.com, discovercars.com, airalo.com, holafly.com/pt, iatiseguros.com)
+- **Fix frontend**: `buildDynamicLinks` atualizado com construção de URLs específica por plataforma (Booking usa `?ss=`, Skyscanner usa `?query=`, Google Maps usa `/search/`)
+- **PDF**: Links no guia offline agora também apontam para URLs reais
+- **Nota**: Apenas GetYourGuide tem affiliate ID real (WFPE9ME). Os restantes usam URLs genéricas até o utilizador fornecer IDs de afiliado
+
 ### Analytics Dashboard (2026-03-25)
 - **Endpoint**: GET /api/admin/analytics — aggregates funnel, affiliates, shares, referrals, top plans in one call
 - **Funnel section**: Registos, Contribuições (completed + pending), Total Angariado, Embaixadores (com taxa conversão)
