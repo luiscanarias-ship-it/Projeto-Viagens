@@ -629,12 +629,13 @@ const CheckoutModal = ({
                           <div className="px-3 py-2 flex items-center justify-between">
                             <div className="flex items-center gap-1.5">
                               <ShieldCheck className="w-4 h-4 text-[#FFBE98]" />
-                              <span className="text-[11px] font-bold text-[#2D2A26]">Pagamento rápido e seguro</span>
+                              <span className="text-[11px] font-bold text-[#2D2A26]">Cartão (inclui Revolut e Wise)</span>
                             </div>
                             <span className="text-[10px] text-[#6B6661] flex items-center gap-1">
                               <Lock className="w-3 h-3" /> 100% seguro
                             </span>
                           </div>
+                          <p className="px-3 text-[9px] text-[#6B6661] -mt-0.5 mb-1">Aceita cartões internacionais (Revolut, Wise e bancos tradicionais)</p>
                           <div className="px-3 pb-2">
                             {paypalError && (
                               <p className="text-xs text-red-500 mb-2">{paypalError}</p>
@@ -667,12 +668,13 @@ const CheckoutModal = ({
                           <div className="px-3 py-2 flex items-center justify-between">
                             <div className="flex items-center gap-1.5">
                               <ShieldCheck className="w-4 h-4 text-[#FFBE98]" />
-                              <span className="text-[11px] font-bold text-[#2D2A26]">Pagamento rápido e seguro</span>
+                              <span className="text-[11px] font-bold text-[#2D2A26]">Cartão (inclui Revolut e Wise)</span>
                             </div>
                             <span className="text-[10px] text-[#6B6661] flex items-center gap-1">
                               <Lock className="w-3 h-3" /> 100% seguro
                             </span>
                           </div>
+                          <p className="px-3 text-[9px] text-[#6B6661] -mt-0.5 mb-1">Aceita cartões internacionais (Revolut, Wise e bancos tradicionais)</p>
                           <div className="px-3 pb-2">
                             {paypalError && (
                               <p className="text-xs text-red-500 mb-2">{paypalError}</p>
