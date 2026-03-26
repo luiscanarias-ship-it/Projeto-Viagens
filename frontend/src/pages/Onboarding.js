@@ -82,15 +82,11 @@ const Onboarding = () => {
                   </div>
                 </div>
                 <div className="p-4">
-                  <div className="flex justify-between text-xs mb-1.5">
-                    <span className="text-[#6B6661]">Progresso</span>
-                    <span className="font-bold text-[#2D2A26]">{pct}%</span>
-                  </div>
-                  <div className="h-2 bg-stone-100 rounded-full overflow-hidden">
-                    <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }}
-                      transition={{ duration: 1.2, ease: 'easeOut', delay: 0.4 }}
-                      className="h-full bg-gradient-to-r from-[#FFBE98] to-[#F2C94C] rounded-full" />
-                  </div>
+                  <p className="text-xs text-[#6B6661] text-center leading-relaxed" data-testid="onboarding-context-msg">
+                    {hasInviter
+                      ? `Foste convidado por ${inviterName} para ajudares a que esta viagem de sonho se torne uma realidade`
+                      : 'Obrigado por ajudares a que esta viagem de sonho se torne uma realidade'}
+                  </p>
                 </div>
               </div>
 
@@ -99,6 +95,12 @@ const Onboarding = () => {
                 data-testid="onboarding-view-journey-btn">
                 Ver viagem <ArrowRight className="w-4 h-4" />
               </button>
+
+              <p className="text-[10px] text-[#FFBE98] text-center mt-3 italic"
+                style={{ animation: 'pulse 4s cubic-bezier(0.4,0,0.6,1) infinite' }}
+                data-testid="onboarding-dream-msg">
+                Quem sabe se ao apoiares esta viagem de sonho não podes também tu realizares a tua...
+              </p>
             </div>
           )}
         </motion.div>
