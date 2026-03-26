@@ -137,6 +137,15 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - **ShareMenu header**: "Partilhar via" → "Convidar via"
 - **WhatsApp primary CTA**: Direct WhatsApp share button with pre-filled message including referral link in PaymentSuccess and AmbassadorProgress
 
+### Hybrid Travel Plan Architecture (2026-03-26) — COST REDUCTION 70-90%
+- **4-Layer System**: (1) Exact cache → (2) Fuzzy cache (same destination, different dates) → (3) Template engine → (4) Full AI (GPT-5.2)
+- **Template Engine**: 10 destinations pré-configurados (Paris, Roma, Barcelona, Londres, Amesterdão, Tóquio, Nova Iorque, Lisboa, Porto) com hotéis reais, transportes, atrações, weather por mês, packing lists
+- **Fuzzy Cache**: Adapta planos existentes a novas datas deterministicamente (0 custo AI)
+- **Smart Aliases**: tokyo→toquio, london→londres, new york→nova iorque, amsterdam→amesterdão, rome→roma, etc.
+- **Tiered Rate Limits**: Free=3/h, Registered=5/h, Ambassador/Admin=15/h
+- **Optimized AI Prompt**: Prompt 50% menor para destinos desconhecidos, focado apenas no que a AI faz bem
+- **Files**: `destination_templates.py` (template engine), `server.py` (hybrid endpoint)
+
 ### Product UX & Conversion Optimization (2026-03-26)
 - **Visual Hierarchy**: btn-primary changed from peach to dark (#2D2A26) for stronger contrast. New btn-peach class for affiliate/monetization CTAs. btn-secondary uses peach outline
 - **Home Hero**: CTA "Descobrir Viagens" now dark with Heart icon + shadow. Trust signals below
