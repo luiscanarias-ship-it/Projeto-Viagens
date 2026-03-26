@@ -1,8 +1,14 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Plane, Building2, ArrowRight, Train, Car, Lightbulb, ChevronDown, ChevronUp, MapPin, Phone, ExternalLink, Search, Star, Bed } from 'lucide-react';
+import { Plane, Building2, ArrowRight, Train, Car, Lightbulb, ChevronDown, ChevronUp, MapPin, Phone, ExternalLink, Search, Star, Bed, Ticket } from 'lucide-react';
 
-const TravelContext = ({ plan, affiliateLinks }) => {
+const GYG_PARTNER_ID = 'WFPE9ME';
+const buildMustSeeGYGLink = (destination, sightName) => {
+  const query = `${sightName} ${destination}`.toLowerCase().replace(/[^a-záàâãéèêíïóôõúüçñ\w\s]/gi, '').replace(/\s+/g, ' ').trim();
+  return `https://www.getyourguide.com/s/?q=${encodeURIComponent(query)}&partner_id=${GYG_PARTNER_ID}`;
+};
+
+const TravelContext = ({ plan, affiliateLinks, onTrackAffiliate }) => {
   const [expanded, setExpanded] = useState(true);
   const flight = plan?.flight_info;
   const hotel = plan?.hotel_info;
@@ -302,11 +308,12 @@ const TravelContext = ({ plan, affiliateLinks }) => {
                     </div>
                   </div>
                 ))}
-                {affiliateLinks?.hotel && (
+                {affiliateLinks?.booking?.url && (
                   <a
-                    href={affiliateLinks.hotel}
+                    href={affiliateLinks.booking.url}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={() => onTrackAffiliate?.('booking')}
                     className="inline-flex items-center gap-1.5 mt-1 px-3 py-1.5 bg-[#FFBE98]/20 text-[#2D2A26] rounded-lg text-[10px] font-semibold hover:bg-[#FFBE98]/30 transition-colors"
                     data-testid="stay-zones-hotel-cta"
                   >
@@ -317,7 +324,7 @@ const TravelContext = ({ plan, affiliateLinks }) => {
             </div>
           )}
 
-          {/* Must See — priority-ranked monuments */}
+          {/* Must See — priority-ranked monuments with affiliate CTAs */}
           {hasMustSee && (
             <div className="border border-stone-100 rounded-lg overflow-hidden" data-testid="must-see">
               <div className="px-3 py-2 bg-amber-50/50">
@@ -326,13 +333,24 @@ const TravelContext = ({ plan, affiliateLinks }) => {
                 </p>
               </div>
               <div className="p-2.5">
-                <div className="grid grid-cols-2 gap-1.5">
+                <div className="space-y-1.5">
                   {mustSee.map((sight, idx) => (
-                    <div key={idx} className="flex items-center gap-2 p-1.5 rounded-md bg-stone-50/60">
-                      <span className="w-4 h-4 bg-amber-100 rounded-full flex items-center justify-center shrink-0">
+                    <div key={idx} className="flex items-center gap-2 p-2 rounded-lg bg-stone-50/60 hover:bg-stone-50 transition-colors group">
+                      <span className="w-5 h-5 bg-amber-100 rounded-full flex items-center justify-center shrink-0">
                         <span className="text-[8px] font-bold text-amber-600">{idx + 1}</span>
                       </span>
-                      <span className="text-[9px] text-[#2D2A26] font-medium leading-tight">{sight}</span>
+                      <span className="flex-1 text-[10px] text-[#2D2A26] font-medium leading-tight">{sight}</span>
+                      <a
+                        href={buildMustSeeGYGLink(plan?.destination, sight)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => onTrackAffiliate?.('getyourguide')}
+                        className="shrink-0 inline-flex items-center gap-1 text-[8px] font-bold text-[#FFBE98] bg-[#FFBE98]/8 hover:bg-[#FFBE98]/15 border border-[#FFBE98]/15 px-2 py-1 rounded-md transition-all opacity-70 group-hover:opacity-100"
+                        data-testid={`must-see-cta-${idx}`}
+                      >
+                        <Ticket className="w-2.5 h-2.5" />Ver bilhetes
+                        <ExternalLink className="w-2 h-2" />
+                      </a>
                     </div>
                   ))}
                 </div>

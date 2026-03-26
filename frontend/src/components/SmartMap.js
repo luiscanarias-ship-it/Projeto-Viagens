@@ -471,16 +471,24 @@ const SmartMap = ({ plan, token, onApplyRefinement, onGeoDataLoaded, affiliateLi
                         ))}
                       </div>
                       {/* Affiliate quick actions */}
-                      {affiliateLinks?.getyourguide?.url && (
-                        <div className="mt-2 pt-2 border-t border-stone-100">
-                          <a href={affiliateLinks.getyourguide.url} target="_blank" rel="noopener noreferrer"
+                      <div className="mt-2 pt-2 border-t border-stone-100 space-y-1">
+                        {affiliateLinks?.getyourguide?.url && (
+                          <a href={`https://www.getyourguide.com/s/?q=${encodeURIComponent(loc.name + ' ' + (plan?.destination || ''))}&partner_id=WFPE9ME`} target="_blank" rel="noopener noreferrer"
                             onClick={() => onTrackAffiliate?.('getyourguide')}
-                            className="flex items-center gap-1.5 text-[8px] font-bold text-[#FFBE98] bg-[#FFBE98]/8 hover:bg-[#FFBE98]/15 border border-[#FFBE98]/15 px-2 py-1.5 rounded transition-colors w-full justify-center"
-                            data-testid={`map-cta-getyourguide`}>
-                            Evita filas — reservar experiencia aqui
+                            className="flex items-center gap-1.5 text-[9px] font-bold text-[#FFBE98] bg-[#FFBE98]/10 hover:bg-[#FFBE98]/20 border border-[#FFBE98]/20 px-2 py-1.5 rounded transition-colors w-full justify-center"
+                            data-testid="map-cta-tickets">
+                            Evita filas — ver bilhetes
                           </a>
-                        </div>
-                      )}
+                        )}
+                        {affiliateLinks?.getyourguide?.url && (
+                          <a href={`https://www.getyourguide.com/s/?q=${encodeURIComponent('tour ' + loc.name + ' ' + (plan?.destination || ''))}&partner_id=WFPE9ME`} target="_blank" rel="noopener noreferrer"
+                            onClick={() => onTrackAffiliate?.('getyourguide')}
+                            className="flex items-center gap-1.5 text-[9px] font-semibold text-[#6B6661] bg-stone-50 hover:bg-[#FFBE98]/8 border border-stone-200 px-2 py-1.5 rounded transition-colors w-full justify-center"
+                            data-testid="map-cta-experience">
+                            Reservar experiencia
+                          </a>
+                        )}
+                      </div>
                     </div>
                   </Popup>
                 </Marker>

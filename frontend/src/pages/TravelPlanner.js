@@ -5,13 +5,14 @@ import {
   MapPin, Calendar, Compass, Sparkles, Loader2,
   Sun, Shirt, ClipboardList, Lightbulb, Hotel, Plane, Wifi,
   ExternalLink, Globe, Ticket, Send, SlidersHorizontal, 
-  CheckCircle2, Copy, Share2, Check, Eye, EyeOff, Car, Clock, Star, Shield, Lock, Map
+  CheckCircle2, Copy, Share2, Check, Eye, EyeOff, Car, Clock, Star, Shield, Lock, Map, Heart
 } from 'lucide-react';
 import axios from 'axios';
 import { AmbassadorProgress, PremiumGate, InlineReferralCTA } from '../components/AmbassadorProgress';
 import AIAssistant from '../components/AIAssistant';
 import TravelContext from '../components/TravelContext';
 import OfflineGuideDownload from '../components/OfflineGuideDownload';
+import JourneyProgressBanner from '../components/JourneyProgressBanner';
 const SmartMap = React.lazy(() => import('../components/SmartMap'));
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -868,6 +869,9 @@ const TravelPlanner = () => {
               </motion.div>
             )}
 
+            {/* Journey Progress Banner — Top */}
+            <JourneyProgressBanner variant="top" />
+
             {/* ── Single Document Card ── */}
             <div className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden" data-testid="travel-document">
               {/* Document header */}
@@ -897,7 +901,7 @@ const TravelPlanner = () => {
 
               {/* Travel Context: Flight + Hotel + Transport */}
               <div className="px-5 pt-4">
-                <TravelContext plan={plan} affiliateLinks={dynamicLinks} />
+                <TravelContext plan={plan} affiliateLinks={dynamicLinks} onTrackAffiliate={trackClick} />
               </div>
 
               {/* Smart Map (central element — high priority) */}
@@ -1038,6 +1042,11 @@ const TravelPlanner = () => {
                   link={links.skyscanner?.url} platform="skyscanner" onTrack={trackClick} trust={false} />
               </div>
 
+              {/* Journey Progress Banner — Mid-content CTA */}
+              <div className="px-5">
+                <JourneyProgressBanner variant="mid" />
+              </div>
+
               {/* AI Assistant (embedded after itinerary) */}
               <div className="px-5 py-3" data-testid="ai-assistant-section">
                 <PremiumGate isAmbassador={isAmbassador} label="Desbloqueia o assistente completo">
@@ -1129,6 +1138,26 @@ const TravelPlanner = () => {
                   link={links.getyourguide?.url} platform="getyourguide" onTrack={trackClick} trust={true} />
               </div>
 
+              {/* ── Ambassador Progression Visibility ── */}
+              {token && !isAmbassador && (
+                <div className="px-5 py-4" data-testid="ambassador-progression-cta">
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="bg-gradient-to-r from-[#FFBE98]/8 to-[#E6A07C]/5 rounded-xl border border-[#FFBE98]/20 p-4"
+                  >
+                    <p className="text-xs font-bold text-[#2D2A26] mb-0.5">
+                      Estas mais perto de te tornares Embaixador do que pensas
+                    </p>
+                    <p className="text-[10px] text-[#6B6661] mb-3">
+                      Desbloqueia mapa interativo, assistente IA e dicas secretas
+                    </p>
+                    <AmbassadorProgress token={token} compact={true} showValueSection={false} />
+                  </motion.div>
+                </div>
+              )}
+
               {/* ── Planning Hub: Grouped Links ── */}
               <div className="px-5 py-5 bg-gradient-to-b from-stone-50/50 to-white border-t border-stone-100" data-testid="planning-hub">
                 <div className="flex items-center gap-2 mb-3">
@@ -1209,25 +1238,31 @@ const TravelPlanner = () => {
               {/* ── Final Conversion Block ── */}
               <div className="px-5 py-8 border-t border-stone-100 bg-gradient-to-b from-[#2D2A26] to-[#3D3A36] text-center rounded-b-2xl" data-testid="conversion-block">
                 <p className="text-lg font-bold text-white mb-1">Gostaste deste roteiro?</p>
-                <p className="text-sm text-white/50 mb-5">Cria o teu ou desbloqueia todas as funcionalidades</p>
+                <p className="text-sm text-white/50 mb-5">Ajuda a tornar esta viagem real — ou cria o teu</p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5">
+                  <Link to="/"
+                    className="flex items-center gap-2 bg-[#FFBE98] text-[#2D2A26] font-bold text-sm px-6 py-3.5 rounded-2xl hover:bg-[#E6A07C] transition-all min-h-[48px] w-full sm:w-auto justify-center shadow-lg"
+                    style={{ animation: 'pulse 2s cubic-bezier(0.4,0,0.6,1) infinite' }}
+                    data-testid="final-cta-contribute">
+                    <Heart className="w-4 h-4" /> Contribuir para o sonho
+                  </Link>
                   <Link to="/travel-planner" onClick={() => { setPlan(null); window.scrollTo(0, 0); }}
-                    className="flex items-center gap-2 bg-[#FFBE98] text-[#2D2A26] font-bold text-sm px-6 py-3.5 rounded-2xl hover:bg-[#E6A07C] transition-all min-h-[48px] w-full sm:w-auto justify-center"
+                    className="flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white font-semibold text-sm px-6 py-3.5 rounded-2xl border border-white/15 hover:bg-white/20 transition-all min-h-[48px] w-full sm:w-auto justify-center"
                     data-testid="final-cta-create">
                     <Sparkles className="w-4 h-4" /> Criar o meu roteiro
                   </Link>
-                  {!isAmbassador && (
-                    <Link to="/embaixador"
-                      className="flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white font-semibold text-sm px-6 py-3.5 rounded-2xl border border-white/15 hover:bg-white/20 transition-all min-h-[48px] w-full sm:w-auto justify-center"
-                      data-testid="final-cta-ambassador">
-                      <Star className="w-4 h-4 text-[#FFBE98]" /> Tornar-me Embaixador
-                    </Link>
-                  )}
                 </div>
                 {!isAmbassador && (
-                  <p className="text-[11px] text-[#FFBE98]/60 mt-4 italic">
-                    Estas mais perto de te tornares Embaixador do que pensas
-                  </p>
+                  <div className="mt-5 space-y-1">
+                    <p className="text-[11px] text-[#FFBE98]/60 italic">
+                      Estas mais perto de te tornares Embaixador do que pensas
+                    </p>
+                    <Link to="/embaixador"
+                      className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#FFBE98]/80 hover:text-[#FFBE98] transition-colors"
+                      data-testid="final-cta-ambassador">
+                      <Star className="w-3 h-3" /> Saber mais sobre o programa
+                    </Link>
+                  </div>
                 )}
               </div>
 
