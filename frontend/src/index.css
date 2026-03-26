@@ -145,19 +145,27 @@ code {
 
 /* Button hover effects */
 .btn-primary {
-    @apply rounded-full px-8 py-4 bg-[#FFBE98] text-[#2D2A26] font-semibold transition-all duration-300;
+    @apply rounded-full px-8 py-4 bg-[#2D2A26] text-white font-semibold transition-all duration-300 shadow-md;
 }
 
 .btn-primary:hover {
+    @apply bg-[#4A4640] scale-105 shadow-xl;
+}
+
+.btn-peach {
+    @apply rounded-full px-8 py-4 bg-[#FFBE98] text-[#2D2A26] font-semibold transition-all duration-300;
+}
+
+.btn-peach:hover {
     @apply bg-[#FFAB7D] scale-105 shadow-lg;
 }
 
 .btn-secondary {
-    @apply rounded-full px-8 py-4 bg-white border border-stone-200 text-[#2D2A26] transition-all duration-300;
+    @apply rounded-full px-8 py-4 bg-white border-2 border-[#FFBE98]/40 text-[#2D2A26] transition-all duration-300;
 }
 
 .btn-secondary:hover {
-    @apply bg-stone-50 scale-105;
+    @apply bg-[#FFBE98]/10 border-[#FFBE98] scale-105;
 }
 
 /* Card styles */

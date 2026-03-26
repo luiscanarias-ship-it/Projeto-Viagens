@@ -196,7 +196,7 @@ const Home = () => {
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.4 }}>
             <button onClick={scrollToMain} className="btn-primary text-base sm:text-lg" data-testid="discover-btn">
-              {t('hero.cta')}
+              <Heart className="w-5 h-5 inline mr-2" />{t('hero.cta')}
             </button>
           </motion.div>
 
@@ -258,12 +258,13 @@ const Home = () => {
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.4 }}
               className="text-center mt-10">
               <Link to={`/journey/${mainJourney.journey.journey_id}?pay=true`}
-                className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 bg-[#2D2A26] text-white rounded-xl font-semibold hover:bg-[#4A4640] transition-colors text-sm sm:text-base"
+                className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 bg-[#2D2A26] text-white rounded-xl font-semibold hover:bg-[#4A4640] transition-all shadow-md hover:shadow-xl text-sm sm:text-base"
                 data-testid="howit-works-cta"
               >
-                <Heart className="w-5 h-5" />
+                <Heart className="w-5 h-5 text-[#FFBE98]" />
                 {t('home.support_dream')}
               </Link>
+              <p className="text-xs text-[#6B6661]/60 mt-3">Sem comissões — 100% vai para o sonhador</p>
             </motion.div>
           )}
         </div>
@@ -358,9 +359,9 @@ const Home = () => {
                       <button
                         ref={mainContributeBtnRef}
                         onClick={() => setShowCheckout(true)}
-                        className="inline-flex items-center gap-2 px-6 sm:px-8 py-3.5 sm:py-4 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-bold text-base sm:text-lg hover:bg-[#FFAB7D] transition-colors w-full sm:w-auto justify-center"
+                        className="inline-flex items-center gap-2 px-6 sm:px-8 py-3.5 sm:py-4 bg-[#2D2A26] text-white rounded-xl font-bold text-base sm:text-lg hover:bg-[#4A4640] transition-all shadow-lg hover:shadow-xl hover:scale-[1.02] w-full sm:w-auto justify-center"
                         data-testid="contribute-main-btn">
-                        <Heart className="w-5 h-5" /> {t('home.contribute_dream')}
+                        <Heart className="w-5 h-5 text-[#FFBE98]" /> {t('home.contribute_dream')}
                       </button>
                       {mainJourney.contributor_count > 0 && (
                         <p className="text-white/50 text-xs mt-3 text-center" data-testid="social-proof-line">
@@ -422,6 +423,35 @@ const Home = () => {
                     {t('home.view_all_contributions')} →
                   </Link>
                 </motion.div>
+
+                {/* Contextual invite prompt for logged-in users */}
+                {user && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 15 }} 
+                    whileInView={{ opacity: 1, y: 0 }} 
+                    viewport={{ once: true }}
+                    className="mt-6 bg-gradient-to-r from-[#FFF8F0] to-[#FFBE98]/10 rounded-2xl p-5 border border-[#FFBE98]/20"
+                    data-testid="home-invite-prompt"
+                  >
+                    <div className="flex flex-col sm:flex-row items-center gap-4">
+                      <div className="flex-1 text-center sm:text-left">
+                        <p className="text-sm font-semibold text-[#2D2A26]">
+                          Conheces alguém que queira apoiar este sonho?
+                        </p>
+                        <p className="text-xs text-[#6B6661] mt-0.5">
+                          Cada amigo que convidas aproxima-te do nível Embaixador
+                        </p>
+                      </div>
+                      <Link 
+                        to="/dashboard"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#2D2A26] text-white rounded-xl text-sm font-semibold hover:bg-[#4A4640] transition-all shadow-sm flex-shrink-0"
+                        data-testid="home-invite-cta"
+                      >
+                        <Users className="w-4 h-4 text-[#FFBE98]" />Convidar amigos
+                      </Link>
+                    </div>
+                  </motion.div>
+                )}
                 </div>
               </div>
             )}
@@ -444,7 +474,7 @@ const Home = () => {
             <p className="text-[#6B6661] mb-2">{t('home.plan_trip_intro')}</p>
             <p className="text-sm text-[#6B6661]/70 mb-6">{t('home.plan_trip_desc')}</p>
             
-            <div className="max-w-md mx-auto flex flex-col sm:flex-row gap-2">
+            <div className="max-w-md mx-auto flex flex-col sm:flex-row gap-2 mb-6">
               <input type="text" value={customDestination} onChange={(e) => setCustomDestination(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && searchDestination()}
                 placeholder={t('home.plan_placeholder')}
@@ -452,10 +482,23 @@ const Home = () => {
                 data-testid="home-search-input"
               />
               <button onClick={searchDestination} disabled={!customDestination.trim()}
-                className="px-6 py-3 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-medium hover:bg-[#FFAB7D] transition-colors disabled:opacity-50"
+                className="px-6 py-3 bg-[#2D2A26] text-white rounded-xl font-medium hover:bg-[#4A4640] transition-all shadow-sm disabled:opacity-50"
                 data-testid="home-search-btn">
                 {t('home.search')}
               </button>
+            </div>
+
+            {/* Benefit pills */}
+            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+              {[
+                { icon: Sparkles, text: 'Roteiro com IA' },
+                { icon: MapPin, text: 'Mapa interativo' },
+                { icon: Globe, text: 'Hotéis e voos' },
+              ].map(({ icon: Icon, text }) => (
+                <span key={text} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-stone-50 rounded-full text-xs text-[#6B6661] border border-stone-100">
+                  <Icon className="w-3 h-3 text-[#FFBE98]" />{text}
+                </span>
+              ))}
             </div>
           </motion.div>
         </div>
@@ -563,7 +606,7 @@ const Home = () => {
                   >
                     <Link
                       to="/journeys"
-                      className="inline-flex items-center gap-2 px-8 py-3 bg-white border-2 border-[#FFBE98]/40 text-[#2D2A26] rounded-xl font-semibold hover:bg-[#FFBE98]/10 hover:border-[#FFBE98] transition-all"
+                      className="inline-flex items-center gap-2 px-8 py-3 bg-[#2D2A26] text-white rounded-xl font-semibold hover:bg-[#4A4640] transition-all shadow-md hover:shadow-lg"
                       data-testid="explore-more-dreams-btn"
                     >
                       <Compass className="w-5 h-5 text-[#FFBE98]" />
@@ -744,10 +787,10 @@ const Home = () => {
               <div className="flex-1 flex justify-center sm:justify-end">
                 <button
                   onClick={() => setShowCheckout(true)}
-                  className="w-full sm:w-auto py-3 px-6 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-[#FFAB7D] transition-colors"
+                  className="w-full sm:w-auto py-3 px-6 bg-[#2D2A26] text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-[#4A4640] transition-all shadow-md"
                   data-testid="home-sticky-contribute-btn"
                 >
-                  <Heart className="w-4 h-4" />
+                  <Heart className="w-4 h-4 text-[#FFBE98]" />
                   {t('home.contribute_dream')}
                 </button>
               </div>

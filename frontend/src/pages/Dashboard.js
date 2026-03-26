@@ -259,7 +259,7 @@ const Dashboard = () => {
                 <div>
                   <p className="text-white/80 text-sm font-medium">Estado</p>
                   <h2 className="text-2xl md:text-3xl font-bold text-white">Sonhador</h2>
-                  <p className="text-white/70 text-sm mt-1">Utilizador registado da plataforma</p>
+                  <p className="text-white/70 text-sm mt-1">Estás a caminho de te tornares Embaixador</p>
                 </div>
               </div>
             </div>
@@ -455,10 +455,10 @@ const Dashboard = () => {
                 <div className="p-4 bg-[#FFF8F0] rounded-xl border border-[#FFBE98]/30">
                   <p className="text-sm text-[#2D2A26] font-medium">
                     {!hasContribution && validReferrals === 0
-                      ? 'Estás a 3 passos de desbloquear o nível Embaixador. Contribui para a viagem principal e convida 3 amigos para tornar este sonho realidade.'
+                      ? 'O nível Embaixador permite-te abrir a tua própria viagem na plataforma. Contribui para a viagem principal e convida 3 amigos — estás a 2 passos de lá chegar.'
                       : !hasContribution
-                        ? `Contribui para a viagem principal e convida mais ${referralsNeeded} amigo${referralsNeeded > 1 ? 's' : ''} para desbloquear Embaixador.`
-                        : `Faltam apenas ${referralsNeeded} amigo${referralsNeeded > 1 ? 's' : ''} para desbloqueares o nível Embaixador.`}
+                        ? `Estás cada vez mais perto! Contribui para a viagem principal e convida mais ${referralsNeeded} amigo${referralsNeeded > 1 ? 's' : ''} para desbloqueares Embaixador.`
+                        : `Falta${referralsNeeded > 1 ? 'm' : ''} apenas ${referralsNeeded} amigo${referralsNeeded > 1 ? 's' : ''} que contribua${referralsNeeded > 1 ? 'm' : ''} para desbloqueares Embaixador e poderes abrir a tua viagem.`}
                   </p>
                 </div>
               )}
@@ -498,7 +498,7 @@ const Dashboard = () => {
                 inviteLink={buildInviteLink(dashboardData.user_alias)}
                 senderName={user?.name}
                 buttonLabel="Convidar amigos"
-                buttonClassName="w-full flex items-center justify-center gap-2 py-2.5 bg-[#FFBE98] text-[#2D2A26] rounded-lg text-sm font-semibold hover:bg-[#FFBE98]/80 transition-colors"
+                buttonClassName="w-full flex items-center justify-center gap-2 py-2.5 bg-[#2D2A26] text-white rounded-lg text-sm font-semibold hover:bg-[#4A4640] transition-all shadow-sm"
               />
               <p className="text-[10px] text-center text-[#6B6661]/60 mt-3">
                 Mais convites = mais contribuições = mais sonhos realizados
