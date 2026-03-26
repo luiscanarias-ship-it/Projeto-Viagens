@@ -82,11 +82,11 @@ const Onboarding = () => {
                   </div>
                 </div>
                 <div className="p-4">
-                  <p className="text-xs text-[#6B6661] text-center leading-relaxed" data-testid="onboarding-context-msg">
-                    {hasInviter
-                      ? `Foste convidado por ${inviterName} para ajudares a que esta viagem de sonho se torne uma realidade`
-                      : 'Obrigado por ajudares a que esta viagem de sonho se torne uma realidade'}
-                  </p>
+                  {hasInviter && (
+                    <p className="text-xs text-[#6B6661] text-center leading-relaxed" data-testid="onboarding-context-msg">
+                      Foste convidado por {inviterName} para ajudares a que esta viagem de sonho se torne uma realidade
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -96,11 +96,11 @@ const Onboarding = () => {
                 Ver viagem <ArrowRight className="w-4 h-4" />
               </button>
 
-              <p className="text-sm font-semibold text-[#2D2A26] text-center mt-4 italic leading-relaxed"
-                style={{ animation: 'pulse 4s cubic-bezier(0.4,0,0.6,1) infinite' }}
+              <p className="text-base font-bold text-[#B5693A] text-center mt-4 italic leading-relaxed animate-[softGlow_3s_ease-in-out_infinite]"
                 data-testid="onboarding-dream-msg">
                 Quem sabe se ao apoiares esta viagem de sonho não podes também tu realizares a tua...
               </p>
+              <style>{`@keyframes softGlow { 0%,100% { opacity: 0.7; } 50% { opacity: 1; } }`}</style>
             </div>
           )}
         </motion.div>
