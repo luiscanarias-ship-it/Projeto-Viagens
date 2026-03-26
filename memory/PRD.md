@@ -137,6 +137,15 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - **ShareMenu header**: "Partilhar via" → "Convidar via"
 - **WhatsApp primary CTA**: Direct WhatsApp share button with pre-filled message including referral link in PaymentSuccess and AmbassadorProgress
 
+### Product UX & Conversion Optimization (2026-03-26)
+- **Visual Hierarchy**: btn-primary changed from peach to dark (#2D2A26) for stronger contrast. New btn-peach class for affiliate/monetization CTAs. btn-secondary uses peach outline
+- **Home Hero**: CTA "Descobrir Viagens" now dark with Heart icon + shadow. Trust signals below
+- **Home Contribute**: Main button, sticky bar, How it Works CTA all use dark bg with peach Heart icon
+- **Home Plan Trip**: Search button darkened. Added benefit pills ("Roteiro com IA", "Mapa interativo", "Hotéis e voos")
+- **Home Growth Loop**: Contextual invite prompt for logged-in users below contributions feed ("Conheces alguém que queira apoiar este sonho?" + "Convidar amigos" CTA)
+- **Dashboard Emotional**: Sonhador card copy updated ("Estás a caminho de te tornares Embaixador"). Progress messages now mention ambassador benefits ("permite-te abrir a tua própria viagem"). Invite button darkened for contrast
+- **Mobile**: All changes responsive-tested on 390px viewport
+
 ### Affiliate Links Fix (2026-03-25)
 - **Bug**: 7 de 9 links de afiliados eram placeholders ("SKYSCANNER_LINK_HERE", etc.) que não funcionavam
 - **Fix backend**: Substituídos todos os placeholders por URLs reais (skyscanner.pt, booking.com, hotels.com, discovercars.com, airalo.com, holafly.com/pt, iatiseguros.com)
