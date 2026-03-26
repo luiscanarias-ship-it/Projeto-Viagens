@@ -274,19 +274,28 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - **Integration**: Clicking any button triggers AI call, results displayed in overlay with "Aplicar ao roteiro" option
 - **Citymapper-inspired**: "Como chegar ao proximo" provides simple transport comparison (time + mode)
 
+### Conversion & Monetization Optimization (2026-03-26)
+- **Journey Progress Banner (Top)**: New `JourneyProgressBanner.js` component fetching `/api/homepage/main-journey`. Shows main journey name (China), progress bar (%), contributor count, pulsing "Contribuir" CTA linking to `/journey/{id}`. Displayed above the travel document card.
+- **Journey Progress Banner (Mid)**: Dark gradient variant with emotional copy "Gostaste deste roteiro? Ajuda a tornar esta viagem real" + progress bar + "Contribuir" CTA. Placed between itinerary and AI assistant.
+- **Must-See Affiliate CTAs**: Each must-see landmark now has a "Ver bilhetes" button linking to GYG search with destination+sight name (partner ID WFPE9ME). Changed from 2-column grid to full-width list layout for better CTA visibility.
+- **Stay Zones Hotel CTA Fix**: Fixed broken `affiliateLinks?.hotel` reference to `affiliateLinks?.booking?.url` + added click tracking.
+- **SmartMap Popup Enhancement**: Replaced single generic GYG link with two separate CTAs: "Evita filas — ver bilhetes" (sight-specific search) and "Reservar experiencia" (tour-specific search).
+- **Final Conversion Block Update**: Primary CTA changed from "Criar o meu roteiro" to "Contribuir para o sonho" (pulsing heart). Secondary CTA "Criar o meu roteiro". Ambassador link moved below.
+- **Ambassador Progression Visibility**: New dedicated block before Planning Hub showing compact progress bar + "Estas mais perto de te tornares Embaixador do que pensas" (visible only for logged-in non-ambassadors).
+- **Files**: `JourneyProgressBanner.js` (new), `TravelPlanner.js` (modified), `TravelContext.js` (modified), `SmartMap.js` (modified)
+
 ## Prioritized Backlog
 ### P1
 - Celebracao "Sonho 100% Financiado": UI especial/animacao quando viagem atinge 100%
+- Monetizacao do AI Assistant: sugestoes com CTAs de afiliados ("Ver opcoes")
 ### P2
 - Ativar IfthenPay quando credenciais forem fornecidas
 - Refatoracao backend server.py -> APIRouters modulares
 - Refatoracao frontend TravelPlanner.js -> subcomponentes
 ### Backlog
 - Geracao automatica de plano na viagem principal
-- Sistema de gamificacao
-- Notificacoes push/email automaticas
-- Open Graph images para planos publicos
-- SEO: meta description, favicon, og:image
+- Sistema de gamificacao avancada
+- Notificacoes push
 - Consistencias de dados (viagens duplicadas, endpoint /api/health)
 
 ## Credentials
