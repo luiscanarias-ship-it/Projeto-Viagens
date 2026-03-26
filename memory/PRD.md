@@ -143,6 +143,16 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - **Bug 3**: LLM credit waste prevented — all 10 template destinations use 0 AI credits
 - **TravelContext.js**: Rewritten to handle both suggestion mode (templates) and legacy AI format (backward compatible)
 
+### Expansão do Motor de Templates — 9 Novos Destinos (2026-03-26)
+- **9 destinos adicionados**: Berlim, Madrid, Praga, Viena, Budapeste, Istambul, Florença, Dubai, Bali (total: 19 cidades)
+- **Stay Zones**: Cada cidade tem 3-4 zonas recomendadas para ficar, com transportes públicos que ligam ao aeroporto e descrição do vibe
+- **Must See**: Lista prioritária de monumentos/sítios adaptada ao número de dias (regra: ~2 por dia, mínimo 3)
+- **Template Types**: 3 tipos reutilizáveis (european_city_break, beach_destination, long_haul_trip) como Layer 4 fallback antes da AI
+- **Novas zonas meteorológicas**: desert (Dubai) e tropical (Bali) com packing lists específicos
+- **Arquitetura**: Dados separados em `destination_data.py` (manutenibilidade), funções em `destination_templates.py`
+- **Frontend**: TravelContext.js renderiza stay_zones (numbered cards) e must_see (2-column grid) com iconografia
+- **Testado**: 100% pass rate iteração 84 (19 destinos backend + frontend UI)
+
 ### Multiple Airports Per City (2026-03-26)
 - **Bug FIXED**: Platform only suggested one airport per city (e.g., Paris showed only CDG), losing credibility
 - **Fix**: `destination_templates.py` now stores `airports` as an array per destination with ALL commercial airports (code, name, distance, transport info)
