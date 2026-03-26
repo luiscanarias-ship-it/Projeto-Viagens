@@ -316,11 +316,11 @@ const TravelContext = ({ plan, affiliateLinks, onTrackAffiliate }) => {
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={() => onTrackAffiliate?.('getyourguide')}
-                        className="shrink-0 inline-flex items-center gap-1 text-[8px] font-bold text-[#FFBE98] bg-[#FFBE98]/8 hover:bg-[#FFBE98]/15 border border-[#FFBE98]/15 px-2 py-1 rounded-md transition-all opacity-70 group-hover:opacity-100"
+                        className="shrink-0 inline-flex items-center gap-1 text-[8px] font-bold text-white bg-[#2D2A26] hover:bg-[#1D1A16] px-2.5 py-1.5 rounded-md transition-all opacity-80 group-hover:opacity-100 shadow-sm"
                         data-testid={`must-see-cta-${idx}`}
                       >
-                        <Ticket className="w-2.5 h-2.5" />Ver bilhetes
-                        <ExternalLink className="w-2 h-2" />
+                        <Ticket className="w-2.5 h-2.5 text-[#FFBE98]" />Evita filas
+                        <ExternalLink className="w-2 h-2 opacity-60" />
                       </a>
                     </div>
                   ))}

@@ -13,6 +13,7 @@ import AIAssistant from '../components/AIAssistant';
 import TravelContext from '../components/TravelContext';
 import OfflineGuideDownload from '../components/OfflineGuideDownload';
 import JourneyProgressBanner from '../components/JourneyProgressBanner';
+import SocialProofBanner from '../components/SocialProofBanner';
 const SmartMap = React.lazy(() => import('../components/SmartMap'));
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -1138,6 +1139,11 @@ const TravelPlanner = () => {
                   link={links.getyourguide?.url} platform="getyourguide" onTrack={trackClick} trust={true} />
               </div>
 
+              {/* ── Social Proof: Recent Contributors ── */}
+              <div className="px-5">
+                <SocialProofBanner />
+              </div>
+
               {/* ── Ambassador Progression Visibility ── */}
               {token && !isAmbassador && (
                 <div className="px-5 py-4" data-testid="ambassador-progression-cta">
@@ -1147,11 +1153,14 @@ const TravelPlanner = () => {
                     viewport={{ once: true }}
                     className="bg-gradient-to-r from-[#FFBE98]/8 to-[#E6A07C]/5 rounded-xl border border-[#FFBE98]/20 p-4"
                   >
-                    <p className="text-xs font-bold text-[#2D2A26] mb-0.5">
-                      Estás mais perto de te tornares Embaixador do que pensas
+                    <p className="text-xs font-bold text-[#2D2A26] mb-1">
+                      O teu próximo passo: torna-te Embaixador
                     </p>
-                    <p className="text-[10px] text-[#6B6661] mb-3">
-                      Desbloqueia mapa interativo, assistente IA e dicas secretas
+                    <p className="text-[10px] text-[#6B6661] mb-1">
+                      Embaixadores desbloqueiam mapa interativo, assistente IA e podem criar a sua própria viagem de sonho
+                    </p>
+                    <p className="text-[10px] font-semibold text-[#FFBE98] mb-3">
+                      Convida amigos e acumula referrals para desbloquear
                     </p>
                     <AmbassadorProgress token={token} compact={true} showValueSection={false} />
                   </motion.div>
@@ -1239,28 +1248,28 @@ const TravelPlanner = () => {
               <div className="px-5 py-8 border-t border-stone-100 bg-gradient-to-b from-[#2D2A26] to-[#3D3A36] text-center rounded-b-2xl" data-testid="conversion-block">
                 <p className="text-lg font-bold text-white mb-1">Gostaste deste roteiro?</p>
                 <p className="text-sm text-white/50 mb-5">Ajuda a concretizar este sonho — ou cria o teu</p>
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5">
+                <div className="flex flex-col items-center gap-3">
                   <Link to="/"
-                    className="flex items-center gap-2 bg-[#FFBE98] text-[#2D2A26] font-bold text-sm px-6 py-3.5 rounded-2xl hover:bg-[#E6A07C] transition-all min-h-[48px] w-full sm:w-auto justify-center shadow-lg"
+                    className="flex items-center justify-center gap-2 bg-[#FFBE98] text-[#2D2A26] font-bold text-base px-8 py-4 rounded-2xl hover:bg-[#E6A07C] transition-all w-full max-w-sm shadow-lg"
                     style={{ animation: 'pulse 4s cubic-bezier(0.4,0,0.6,1) infinite' }}
                     data-testid="final-cta-contribute">
-                    <Heart className="w-4 h-4" /> Contribuir para o sonho
+                    <Heart className="w-5 h-5" /> Contribuir para o sonho
                   </Link>
                   <Link to="/travel-planner" onClick={() => { setPlan(null); window.scrollTo(0, 0); }}
-                    className="flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white font-semibold text-sm px-6 py-3.5 rounded-2xl border border-white/15 hover:bg-white/20 transition-all min-h-[48px] w-full sm:w-auto justify-center"
+                    className="flex items-center justify-center gap-2 text-white/50 hover:text-white/80 font-medium text-xs transition-colors"
                     data-testid="final-cta-create">
-                    <Sparkles className="w-4 h-4" /> Criar o meu roteiro
+                    <Sparkles className="w-3.5 h-3.5" /> ou cria o teu roteiro
                   </Link>
                 </div>
                 {!isAmbassador && (
-                  <div className="mt-5 space-y-1">
-                    <p className="text-[11px] text-[#FFBE98]/60 italic">
-                      Estás mais perto de te tornares Embaixador do que pensas
+                  <div className="mt-6 pt-4 border-t border-white/10">
+                    <p className="text-[11px] text-[#FFBE98]/70 font-medium">
+                      Sabias que podes abrir a tua própria viagem de sonho?
                     </p>
                     <Link to="/embaixador"
-                      className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#FFBE98]/80 hover:text-[#FFBE98] transition-colors"
+                      className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#FFBE98]/80 hover:text-[#FFBE98] transition-colors mt-1"
                       data-testid="final-cta-ambassador">
-                      <Star className="w-3 h-3" /> Saber mais sobre o programa
+                      <Star className="w-3 h-3" /> Descobre como te tornares Embaixador
                     </Link>
                   </div>
                 )}

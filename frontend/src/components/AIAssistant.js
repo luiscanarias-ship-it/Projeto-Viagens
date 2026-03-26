@@ -5,9 +5,9 @@ import { Sparkles, Send, Loader2, ArrowRight, DollarSign, Star, Calendar, CloudS
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 const QUICK_ACTIONS = [
-  { id: 'cheaper', label: 'Tornar mais barato', icon: DollarSign, message: 'Sugere formas de tornar esta viagem mais economica, mantendo as experiencias essenciais.' },
-  { id: 'experiences', label: 'Experiencias unicas', icon: Star, message: 'Sugere experiencias unicas e autenticas que nao estejam no roteiro atual.' },
-  { id: 'days', label: 'Melhorar distribuicao dos dias', icon: Calendar, message: 'Analisa a distribuicao das atividades por dia e sugere melhorias para evitar dias muito cheios ou vazios.' },
+  { id: 'cheaper', label: 'Tornar mais barato', icon: DollarSign, message: 'Sugere formas de tornar esta viagem mais económica, mantendo as experiências essenciais.' },
+  { id: 'experiences', label: 'Experiências únicas', icon: Star, message: 'Sugere experiências únicas e autênticas que não estejam no roteiro atual.' },
+  { id: 'days', label: 'Melhorar distribuição dos dias', icon: Calendar, message: 'Analisa a distribuição das atividades por dia e sugere melhorias para evitar dias muito cheios ou vazios.' },
   { id: 'weather', label: 'Ajustar ao clima', icon: CloudSun, message: 'Ajusta o roteiro considerando o clima previsto para as datas da viagem.' },
 ];
 
@@ -174,27 +174,33 @@ const AIAssistant = ({ plan, token, onApplyRefinement, affiliateLinks, onTrackAf
                     </div>
                   )}
 
-                  {/* Contextual affiliate CTA based on conversation intent */}
-                  {msg.role === 'assistant' && affiliateLinks && (
-                    <div className="ml-7 pt-1.5 flex flex-wrap gap-1.5" data-testid="assistant-affiliate-ctas">
-                      {(msg.content?.toLowerCase().includes('hotel') || msg.content?.toLowerCase().includes('alojamento')) && affiliateLinks.booking?.url && (
-                        <a href={affiliateLinks.booking.url} target="_blank" rel="noopener noreferrer"
-                          onClick={() => onTrackAffiliate?.('booking')}
-                          className="inline-flex items-center gap-1 text-[9px] font-semibold text-[#FFBE98] bg-[#FFBE98]/8 hover:bg-[#FFBE98]/15 border border-[#FFBE98]/15 px-2.5 py-1 rounded-lg transition-colors"
-                          data-testid="assistant-cta-booking">
-                          <Hotel className="w-3 h-3" />Ver hoteis alternativos<ExternalLink className="w-2.5 h-2.5 opacity-60" />
-                        </a>
-                      )}
-                      {(msg.content?.toLowerCase().includes('bilhete') || msg.content?.toLowerCase().includes('experiencia') || msg.content?.toLowerCase().includes('atividade') || msg.content?.toLowerCase().includes('fila')) && affiliateLinks.getyourguide?.url && (
-                        <a href={affiliateLinks.getyourguide.url} target="_blank" rel="noopener noreferrer"
-                          onClick={() => onTrackAffiliate?.('getyourguide')}
-                          className="inline-flex items-center gap-1 text-[9px] font-semibold text-[#FFBE98] bg-[#FFBE98]/8 hover:bg-[#FFBE98]/15 border border-[#FFBE98]/15 px-2.5 py-1 rounded-lg transition-colors"
-                          data-testid="assistant-cta-getyourguide">
-                          <Ticket className="w-3 h-3" />Ver opcoes<ExternalLink className="w-2.5 h-2.5 opacity-60" />
-                        </a>
-                      )}
-                    </div>
-                  )}
+                  {/* Contextual affiliate CTAs based on conversation intent */}
+                  {msg.role === 'assistant' && affiliateLinks && (() => {
+                    const lower = (msg.content || '').toLowerCase() + ' ' + (msg.suggestions || []).join(' ').toLowerCase();
+                    const showHotel = /hotel|alojamento|hostel|airbnb|quarto|dormir|ficar/.test(lower);
+                    const showExp = /bilhete|experiência|experiencia|atividade|fila|museu|tour|visita|excursão|excursao|ingresso|reservar|espetáculo|espetaculo/.test(lower);
+                    if (!showHotel && !showExp) return null;
+                    return (
+                      <div className="ml-7 pt-2 flex flex-wrap gap-1.5" data-testid="assistant-affiliate-ctas">
+                        {showHotel && affiliateLinks.booking?.url && (
+                          <a href={affiliateLinks.booking.url} target="_blank" rel="noopener noreferrer"
+                            onClick={() => onTrackAffiliate?.('booking')}
+                            className="inline-flex items-center gap-1.5 text-[10px] font-bold text-white bg-[#2D2A26] hover:bg-[#1D1A16] px-3 py-1.5 rounded-lg transition-colors shadow-sm"
+                            data-testid="assistant-cta-booking">
+                            <Hotel className="w-3 h-3 text-[#FFBE98]" />Ver opções de alojamento<ExternalLink className="w-2.5 h-2.5 opacity-60" />
+                          </a>
+                        )}
+                        {showExp && affiliateLinks.getyourguide?.url && (
+                          <a href={affiliateLinks.getyourguide.url} target="_blank" rel="noopener noreferrer"
+                            onClick={() => onTrackAffiliate?.('getyourguide')}
+                            className="inline-flex items-center gap-1.5 text-[10px] font-bold text-white bg-[#2D2A26] hover:bg-[#1D1A16] px-3 py-1.5 rounded-lg transition-colors shadow-sm"
+                            data-testid="assistant-cta-getyourguide">
+                            <Ticket className="w-3 h-3 text-[#FFBE98]" />Ver opções<ExternalLink className="w-2.5 h-2.5 opacity-60" />
+                          </a>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
               )}
             </motion.div>
