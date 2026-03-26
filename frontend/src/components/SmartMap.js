@@ -430,7 +430,7 @@ const SmartMap = ({ plan, token, onApplyRefinement, onGeoDataLoaded, affiliateLi
                     <div className="p-1">
                       <p className="text-xs font-bold text-[#2D2A26] mb-0.5">{loc.name}</p>
                       <p className="text-[9px] mb-2" style={{ color: DAY_COLORS[(loc.day - 1) % DAY_COLORS.length] }}>
-                        Dia {loc.day} — Ponto {i + 1}
+                        Dia {loc.day}{loc.day_title ? ` — ${loc.day_title}` : ''}
                       </p>
                       {/* Exploration mode */}
                       <p className="text-[9px] font-semibold text-[#2D2A26] mb-1">Explorar:</p>

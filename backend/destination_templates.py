@@ -103,93 +103,107 @@ def get_stay_zones(dest_data: dict) -> list:
 
 
 def build_template_itinerary(dest_data: dict, num_days: int) -> list:
-    """Build a deterministic itinerary from the knowledge base."""
+    """Build a deterministic itinerary — NEVER repeats activities, distributes evenly."""
     attractions = dest_data.get("attractions", {})
-    iconic = attractions.get("iconic", [])
-    cultural = attractions.get("cultural", [])
-    local = attractions.get("local", [])
-    food = attractions.get("food", [])
+    iconic = list(attractions.get("iconic", []))
+    cultural = list(attractions.get("cultural", []))
+    local = list(attractions.get("local", []))
+    food = list(attractions.get("food", []))
+    day_trips = list(dest_data.get("day_trips", []))
+    stay_zones = dest_data.get("stay_zones", [])
+
+    used = set()
+
+    def pick(pool, count=1):
+        result = []
+        for item in pool:
+            if item not in used and len(result) < count:
+                result.append(item)
+                used.add(item)
+        return result
 
     itinerary = []
 
-    # Day 1: Arrival + iconic
-    day1_acts = []
-    if iconic:
-        day1_acts.append(f"Chegada e check-in no hotel ({dest_data.get('hotel_area', 'centro')})")
-        day1_acts.append(iconic[0] if iconic else "Explorar o centro")
-        if food:
-            day1_acts.append(food[0])
-        if local:
-            day1_acts.append(f"Passeio por {local[0].split('(')[0].strip()}")
-    itinerary.append({"day": 1, "title": f"Chegada a {dest_data['name']}", "activities": day1_acts[:4]})
+    # Day 1: Arrival + 1 iconic + 1 local + 1 food
+    day1 = [f"Chegada e check-in no hotel ({dest_data.get('hotel_area', 'centro')})"]
+    day1 += pick(iconic, 1)
+    day1 += pick(local, 1)
+    day1 += pick(food, 1)
+    itinerary.append({"day": 1, "title": f"Chegada a {dest_data['name']}", "activities": day1[:4]})
 
-    # Middle days: mix of iconic, cultural, local
-    pools = [iconic[1:], cultural, local[1:], food[1:]]
+    # Middle days: 1 from each main category + 1 food = 4 per day (even distribution)
+    day_themes = [
+        f"Icones de {dest_data['name']}",
+        "Cultura e descobertas",
+        f"Bairros e sabores de {dest_data['name']}",
+        f"Arte e historia de {dest_data['name']}",
+        f"O lado local de {dest_data['name']}",
+    ]
+    pools_order = [
+        ["iconic", "cultural", "local"],
+        ["cultural", "local", "iconic"],
+        ["local", "iconic", "cultural"],
+        ["iconic", "cultural", "local"],
+        ["cultural", "local", "iconic"],
+    ]
+    pools_map = {"iconic": iconic, "cultural": cultural, "local": local, "food": food}
 
     for d in range(2, num_days):
+        theme_idx = (d - 2) % len(day_themes)
+        title = day_themes[theme_idx]
+        cats = pools_order[theme_idx]
+
         acts = []
-        day_title = ""
+        # Pick 1 from each main category
+        for cat in cats:
+            acts += pick(pools_map[cat], 1)
+        # Always add a food experience
+        acts += pick(food, 1)
 
-        if d == 2 and len(iconic) > 1:
-            acts = [iconic[1]]
-            if cultural:
-                acts.append(cultural[0])
-            if len(local) > 1:
-                acts.append(local[1])
-            if len(food) > 1:
-                acts.append(food[1])
-            day_title = f"Icones de {dest_data['name']}"
-        elif d == 3 and len(cultural) > 1:
-            acts = [cultural[min(1, len(cultural) - 1)]]
-            if len(iconic) > 2:
-                acts.append(iconic[2])
-            if len(local) > 2:
-                acts.append(local[2])
-            if len(food) > 2:
-                acts.append(food[2])
-            day_title = "Cultura e descobertas"
-        elif d == 4:
-            acts = []
-            if len(iconic) > 3:
-                acts.append(iconic[3])
-            if len(cultural) > 2:
-                acts.append(cultural[2])
-            if len(local) > 3:
-                acts.append(local[3])
-            if len(food) > 3:
-                acts.append(food[3])
-            day_title = f"Explorar {dest_data['name']} a fundo"
-        elif d == 5:
-            acts = []
-            if len(iconic) > 4:
-                acts.append(iconic[4])
-            if len(cultural) > 3:
-                acts.append(cultural[3])
-            if len(local) > 4:
-                acts.append(local[4])
-            if len(food) > 4:
-                acts.append(food[4])
-            day_title = "Tesouros escondidos"
-        else:
-            for pool in pools:
-                if pool and len(acts) < 4:
-                    idx = (d - 6) % max(len(pool), 1)
-                    if idx < len(pool):
-                        acts.append(pool[idx])
-            day_title = f"Dia {d}: Explorar {dest_data['name']}"
+        # If less than 3 activities, supplement with day trips
+        if len(acts) < 3 and day_trips:
+            trips = pick(day_trips, min(2, 3 - len(acts)))
+            acts += trips
+            if trips and len(acts) <= len(trips) + 1:
+                trip_name = trips[0].split('—')[0].replace('Day trip ', '').replace('a ', '').strip()
+                title = f"Excursao: {trip_name}"
 
-        if not acts:
-            acts = ["Dia livre para explorar ao teu ritmo", "Visita zonas menos turisticas", "Descansa e aproveita a cidade"]
-        itinerary.append({"day": d, "title": day_title, "activities": acts[:4]})
+        # If STILL less than 3, add zone-based exploration
+        if len(acts) < 3:
+            for zi in range(len(stay_zones)):
+                zone = stay_zones[(d - 2 + zi) % len(stay_zones)]
+                fillers = [
+                    f"Explorar a zona de {zone['name']} — {zone.get('vibe', 'bairro local')}",
+                    f"Passeio matinal e cafe local no bairro de {zone['name']}",
+                ]
+                for filler in fillers:
+                    if filler not in used and len(acts) < 4:
+                        acts.append(filler)
+                        used.add(filler)
+                if len(acts) >= 3:
+                    break
+            if len(acts) < 3:
+                filler = f"Tempo livre para explorar {dest_data['name']} ao teu ritmo"
+                if filler not in used:
+                    acts.append(filler)
+                    used.add(filler)
+
+        itinerary.append({"day": d, "title": title, "activities": acts[:4]})
 
     # Last day: departure
-    last_acts = ["Check-out do hotel"]
-    if local:
-        last_acts.append(f"Ultima visita: {local[-1].split('(')[0].strip()}")
-    if food:
-        last_acts.append(f"Almoco de despedida: {food[-1]}")
-    last_acts.append("Transfer para o aeroporto e regresso")
-    itinerary.append({"day": num_days, "title": f"Despedida de {dest_data['name']}", "activities": last_acts[:4]})
+    last = ["Check-out do hotel"]
+    leftover_local = pick(local, 1)
+    if leftover_local:
+        last.append(f"Ultima visita: {leftover_local[0].split('(')[0].strip()}")
+    else:
+        last.append(f"Passeio de despedida pelo centro de {dest_data['name']}")
+    leftover_food = pick(food, 1)
+    if leftover_food:
+        last.append(f"Almoco de despedida: {leftover_food[0]}")
+    else:
+        last.append(f"Almoco de despedida num restaurante local")
+    last.append("Transfer para o aeroporto e regresso")
+    itinerary.append({"day": num_days, "title": f"Despedida de {dest_data['name']}", "activities": last[:4]})
 
     return itinerary
 

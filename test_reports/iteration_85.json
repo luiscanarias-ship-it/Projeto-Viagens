@@ -1,0 +1,54 @@
+{
+  "summary": "Verified all 3 bug fixes: 1) Itinerary now has 3-4 activities per day (no empty days), 2) Geocoding extracts parenthetical names and returns 14+ locations for Istanbul (was 0 before), 3) Map popup shows activity name as bold title with day_title (not 'dia X ponto Y'). All backend tests pass. Frontend SmartMap displays 14 markers correctly.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "/api/ai/travel-plan", "issue": "Rate limiter (3 req/hour anonymous) causes 429 errors during rapid testing - restart backend to clear"}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration85_bug_fixes.py",
+    "/app/test_reports/pytest/iteration85_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Bug 1 FIXED: build_template_itinerary in destination_templates.py now uses pools_map with even 1-per-category distribution, ensuring 3-4 activities per day with no repeats",
+    "Bug 2 FIXED: Geocoding in server.py (line ~6870) extracts parenthetical names (e.g., 'Sultan Ahmed' from 'Mesquita Azul (Sultan Ahmed — gratis)') with 3-strategy fallback",
+    "Bug 3 FIXED: SmartMap.js (line ~431-433) shows loc.name as bold title and day_title instead of 'Ponto X'"
+  ],
+  "updated_files": [],
+  "success_rate": {
+    "backend": "100% (9/9 tests pass when rate limit cleared)",
+    "frontend": "100% (SmartMap displays 14 markers, itinerary shows 3-4 activities per day)"
+  },
+  "test_credentials": "Admin: admin@4luis.com / Admin1 (embaixador level, required for geocode endpoint)",
+  "seed_data_creation": "None - used existing destination templates",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "All 3 reported bugs are fixed and verified. Rate limiter is in-memory (3 req/hour anonymous) - restart backend to clear. Geocode endpoint requires admin auth (embaixador level). SmartMap requires ambassador login to view. All 19 destinations have day_trips field.",
+  "bugs_verified": {
+    "bug_1_empty_days": {
+      "status": "FIXED",
+      "evidence": "Istanbul 9-day plan: all days have 3-4 unique activities, no repeats",
+      "test": "test_istanbul_9_days_activities_per_day PASSED"
+    },
+    "bug_2_geocoding_portuguese": {
+      "status": "FIXED",
+      "evidence": "Istanbul 5-day plan geocoded with 14 locations (was 0 before fix)",
+      "test": "test_geocode_istanbul_plan_success PASSED"
+    },
+    "bug_3_map_popup_title": {
+      "status": "FIXED",
+      "evidence": "SmartMap.js line 431-433 shows loc.name as bold title, day_title instead of 'Ponto X'",
+      "test": "test_geocode_returns_day_title PASSED"
+    }
+  },
+  "mocked_apis": {
+    "IfthenPay": "Payment integration is MOCKED"
+  }
+}

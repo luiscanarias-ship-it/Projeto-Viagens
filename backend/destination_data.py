@@ -27,6 +27,7 @@ DESTINATIONS = {
             "food": ["Croissant na Du Pain et des Idees", "Jantar no Le Bouillon Chartier (classico acessivel)", "Crepes em Montparnasse", "Falafel no L'As du Fallafel (Marais)", "Degustacao de queijos e vinhos"]
         },
         "must_see": ["Torre Eiffel", "Museu do Louvre", "Notre-Dame e Ile de la Cite", "Sacre-Coeur e Montmartre", "Arco do Triunfo", "Museu d'Orsay", "Jardins de Versailles (day trip)", "Champs-Elysees e Grand Palais"],
+        "day_trips": ["Day trip a Versailles — palacio e jardins reais (RER C, 40 min)", "Day trip a Giverny — casa e jardins de Monet (comboio desde Gare Saint-Lazare, 75 min)", "Day trip a Champagne (Reims/Epernay) — degustacao de champanhe (TGV, 45 min)"],
         "flights_from_lisbon": {"airline": "TAP", "prefix": "TP", "numbers": ["448", "450", "452"], "duration": "2h30"},
         "flights_from_porto": {"airline": "Ryanair", "prefix": "FR", "numbers": ["1024", "1026"], "duration": "2h20"},
         "tips": [
@@ -58,6 +59,7 @@ DESTINATIONS = {
             "food": ["Carbonara na Roscioli", "Pizza al taglio na Pizzarium", "Gelato na Fatamorgana", "Aperitivo no Salotto 42", "Suppli na Supplizio"]
         },
         "must_see": ["Coliseu e Forum Romano", "Vaticano e Capela Sistina", "Fontana di Trevi", "Pantheon", "Piazza Navona", "Galleria Borghese", "Trastevere"],
+        "day_trips": ["Day trip a Pompeia e Vesuvio (comboio Frecciarossa ate Napoles, depois Circumvesuviana)", "Day trip a Tivoli — Villa d'Este e Villa Adriana (comboio regional, 40 min)", "Day trip a Orvieto — cidade medieval no topo de uma colina (comboio, 70 min)"],
         "flights_from_lisbon": {"airline": "TAP", "prefix": "TP", "numbers": ["832", "834"], "duration": "2h50"},
         "flights_from_porto": {"airline": "Ryanair", "prefix": "FR", "numbers": ["5164", "5166"], "duration": "2h45"},
         "tips": [
@@ -89,6 +91,7 @@ DESTINATIONS = {
             "food": ["Tapas no Cal Pep", "Paella na Barceloneta", "Patatas bravas no Bar Canete", "Churros con chocolate na Granja Viader", "Vermut no El Born"]
         },
         "must_see": ["Sagrada Familia", "Park Guell", "La Rambla e Boqueria", "Casa Batllo", "Bairro Gotico", "Barceloneta (praia)", "Museu Picasso", "Montjuic"],
+        "day_trips": ["Day trip a Montserrat — mosteiro e trilhos de montanha (comboio FGC + cremalheira, 90 min)", "Day trip a Girona — cidade medieval colorida (comboio AVE, 38 min)", "Day trip a Sitges — vila costeira com praias (comboio Rodalies, 40 min)"],
         "flights_from_lisbon": {"airline": "Vueling", "prefix": "VY", "numbers": ["8912", "8914"], "duration": "2h10"},
         "flights_from_porto": {"airline": "Ryanair", "prefix": "FR", "numbers": ["2501", "2503"], "duration": "2h00"},
         "tips": [
@@ -123,6 +126,7 @@ DESTINATIONS = {
             "food": ["Fish and Chips no Poppies", "Sunday Roast num pub local", "Afternoon Tea no Sketch", "Curry em Brick Lane", "Street food em Borough Market"]
         },
         "must_see": ["Big Ben e Parlamento", "Tower of London", "British Museum", "Buckingham Palace", "London Eye", "Tower Bridge", "Westminster Abbey", "Tate Modern"],
+        "day_trips": ["Day trip a Stonehenge e Bath (comboio ate Bath, 90 min, excursao a Stonehenge)", "Day trip a Oxford — universidade historica (comboio, 60 min)", "Day trip a Cambridge — colleges e punting no rio (comboio, 50 min)"],
         "flights_from_lisbon": {"airline": "TAP", "prefix": "TP", "numbers": ["1358", "1360"], "duration": "2h45"},
         "flights_from_porto": {"airline": "easyJet", "prefix": "U2", "numbers": ["7834", "7836"], "duration": "2h40"},
         "tips": [
@@ -154,6 +158,7 @@ DESTINATIONS = {
             "food": ["Stroopwafel fresco no Albert Cuyp", "Queijo holandes no Henri Willig", "Bitterballen num cafe castanho (brown cafe)", "Panqueca holandesa na The Pancake Bakery", "Indonesian Rijsttafel"]
         },
         "must_see": ["Museu Van Gogh", "Rijksmuseum", "Casa de Anne Frank", "Canais (passeio de barco)", "Praca Dam", "Vondelpark", "Jordaan"],
+        "day_trips": ["Day trip a Zaanse Schans — moinhos e casas tradicionais holandesas (bus 391, 40 min)", "Day trip a Haarlem — cidade charmosa com Frans Hals Museum (comboio, 15 min)", "Day trip a Keukenhof — jardins de tulipas (marco-maio, bus direto, 40 min)"],
         "flights_from_lisbon": {"airline": "KLM", "prefix": "KL", "numbers": ["1694", "1696"], "duration": "2h50"},
         "flights_from_porto": {"airline": "Transavia", "prefix": "HV", "numbers": ["5902", "5904"], "duration": "2h45"},
         "tips": [
@@ -185,6 +190,7 @@ DESTINATIONS = {
             "food": ["Ramen em Ichiran ou Fuunji", "Sushi no Tsukiji Outer Market", "Yakitori em Omoide Yokocho", "Tempura no Tsunahachi", "Matcha e wagashi em Asakusa"]
         },
         "must_see": ["Templo Senso-ji", "Cruzamento de Shibuya", "Santuario Meiji", "Tokyo Skytree", "teamLab Planets", "Tsukiji Outer Market", "Harajuku", "Akihabara"],
+        "day_trips": ["Day trip a Kamakura — Grande Buda e templos junto ao mar (JR, 60 min)", "Day trip a Nikko — santuarios UNESCO nas montanhas (Shinkansen + bus, 2h)", "Day trip a Hakone — onsen e vista do Monte Fuji (Romancecar, 85 min)"],
         "flights_from_lisbon": {"airline": "ANA", "prefix": "NH", "numbers": ["202"], "duration": "13h"},
         "flights_from_porto": {"airline": "Lufthansa via Frankfurt", "prefix": "LH", "numbers": ["710+LH714"], "duration": "15h (escala)"},
         "tips": [
@@ -217,6 +223,7 @@ DESTINATIONS = {
             "food": ["Pizza na Joe's Pizza (Greenwich)", "Bagel no Russ & Daughters", "Cheesecake na Junior's", "Ramen no Ippudo", "Pastrami no Katz's Delicatessen"]
         },
         "must_see": ["Estatua da Liberdade", "Central Park", "Times Square", "Empire State Building", "Brooklyn Bridge", "Metropolitan Museum (Met)", "9/11 Memorial", "High Line"],
+        "day_trips": ["Day trip a Washington D.C. — Capitol, Lincoln Memorial, Smithsonian (Amtrak, 3h30)", "Day trip a Hudson Valley — natureza e vinhas (Metro North, 90 min)", "Day trip a Coney Island — praia, feira e boardwalk (metro D/F/N/Q, 60 min)"],
         "flights_from_lisbon": {"airline": "TAP", "prefix": "TP", "numbers": ["201", "203"], "duration": "8h30"},
         "flights_from_porto": {"airline": "United via Newark", "prefix": "UA", "numbers": ["53"], "duration": "8h45"},
         "tips": [
@@ -247,6 +254,7 @@ DESTINATIONS = {
             "food": ["Pastel de nata na Manteigaria", "Bifana no Ponto Final (Almada, com vista)", "Ginjinha no Rossio", "Marisco na Cervejaria Ramiro", "Francesinhas (se quiseres experimentar o Porto em Lisboa)"]
         },
         "must_see": ["Torre de Belem", "Mosteiro dos Jeronimos", "Castelo de Sao Jorge", "Alfama", "Electrico 28", "Praca do Comercio", "Belem (pasteis de nata)"],
+        "day_trips": ["Day trip a Sintra — palacios romanticos e Cabo da Roca (comboio de Rossio, 40 min)", "Day trip a Cascais e Estoril — praias e costa (comboio de Cais do Sodre, 35 min)", "Day trip a Setubal e Arrabida — serra e golfinhos no rio Sado (bus ou carro, 45 min)"],
         "flights_from_lisbon": None,
         "flights_from_porto": {"airline": "TAP", "prefix": "TP", "numbers": ["1946", "1948"], "duration": "0h55"},
         "tips": [
@@ -277,6 +285,7 @@ DESTINATIONS = {
             "food": ["Francesinha no Cafe Santiago", "Pastel de nata na Nata Lisboa", "Bacalhau a Bras no Adega Sao Nicolau", "Vinho do Porto nas caves em Gaia", "Petiscos na Rua das Flores"]
         },
         "must_see": ["Ponte D. Luis I", "Livraria Lello", "Ribeira", "Caves de Gaia", "Torre dos Clerigos", "Se do Porto", "Mercado do Bolhao"],
+        "day_trips": ["Day trip ao Vale do Douro — cruzeiro, quintas e prova de vinho (comboio ou tour, 2-3h)", "Day trip a Braga e Bom Jesus — escadaria barroca (comboio, 60 min)", "Day trip a Guimaraes — berco de Portugal, castelo medieval (comboio, 70 min)"],
         "flights_from_lisbon": {"airline": "TAP", "prefix": "TP", "numbers": ["1945", "1947"], "duration": "0h55"},
         "flights_from_porto": None,
         "tips": [
@@ -310,6 +319,7 @@ DESTINATIONS = {
             "food": ["Currywurst no Curry 36 (Kreuzberg)", "Doner Kebab no Mustafa's Gemuse Kebap", "Brunch no Five Elephant (Kreuzberg)", "Cerveja artesanal em Prenzlauer Berg", "Schnitzel no Zur letzten Instanz (restaurante mais antigo)"]
         },
         "must_see": ["Porta de Brandemburgo", "East Side Gallery (Muro)", "Ilha dos Museus", "Reichstag (cupula)", "Memorial do Holocausto", "Checkpoint Charlie", "Alexanderplatz e TV Tower", "Tiergarten"],
+        "day_trips": ["Day trip a Potsdam — Palacio de Sanssouci e jardins (S-Bahn S7, 40 min)", "Day trip ao Memorial de Sachsenhausen (S-Bahn S1, 50 min)", "Day trip a Dresden — Frauenkirche e Zwinger barroco (comboio ICE, 2h)"],
         "flights_from_lisbon": {"airline": "easyJet", "prefix": "U2", "numbers": ["4576", "4578"], "duration": "3h15"},
         "flights_from_porto": {"airline": "Ryanair", "prefix": "FR", "numbers": ["2172", "2174"], "duration": "3h10"},
         "tips": [
@@ -340,6 +350,7 @@ DESTINATIONS = {
             "food": ["Tapas no Mercado de San Miguel", "Bocadillo de calamares na Plaza Mayor", "Churros con chocolate na Chocolateria San Gines", "Cocido madrileno (cozido tradicional)", "Rooftop bar na Gran Via (Circulo de Bellas Artes)"]
         },
         "must_see": ["Museu do Prado", "Palacio Real", "Parque do Retiro", "Plaza Mayor", "Puerta del Sol", "Reina Sofia (Guernica)", "Gran Via", "Mercado de San Miguel"],
+        "day_trips": ["Day trip a Toledo — cidade medieval das tres culturas (comboio AVE, 33 min)", "Day trip a Segovia — aqueduto romano e Alcazar (comboio AVE, 27 min)", "Day trip a El Escorial — mosteiro-palacio de Filipe II (comboio Cercanias, 60 min)"],
         "flights_from_lisbon": {"airline": "Iberia/TAP", "prefix": "IB", "numbers": ["3107", "3109"], "duration": "1h15"},
         "flights_from_porto": {"airline": "Ryanair", "prefix": "FR", "numbers": ["3714", "3716"], "duration": "1h20"},
         "tips": [
@@ -370,6 +381,7 @@ DESTINATIONS = {
             "food": ["Trdelnik (chimney cake) em Stare Mesto", "Svickova na smetane (carne com molho cremoso)", "Cerveja checa num beer garden (Letna)", "Kulajda (sopa de cogumelos)", "Cafe no Grand Cafe Orient (cubismo checo)"]
         },
         "must_see": ["Ponte Carlos", "Castelo de Praga", "Praca da Cidade Velha", "Relogio Astronomico", "Catedral de Sao Vito", "Bairro Judeu (Josefov)", "Letna Park (vista panoramica)"],
+        "day_trips": ["Day trip a Kutna Hora — ossario e catedral gotica UNESCO (comboio, 60 min)", "Day trip a Karlovy Vary — cidade termal e colunatas (bus, 2h15)", "Day trip a Cesky Krumlov — vila medieval perfeita UNESCO (bus, 3h)"],
         "flights_from_lisbon": {"airline": "Wizz Air/TAP", "prefix": "W6", "numbers": ["2339", "2341"], "duration": "3h20"},
         "flights_from_porto": {"airline": "Ryanair", "prefix": "FR", "numbers": ["4923", "4925"], "duration": "3h15"},
         "tips": [
@@ -400,6 +412,7 @@ DESTINATIONS = {
             "food": ["Wiener Schnitzel no Figlmuller (o mais famoso)", "Sachertorte no Hotel Sacher (original!)", "Cafe vienense no Cafe Central", "Apfelstrudel no Cafe Hawelka", "Kaiserschmarrn (panqueca imperial)"]
         },
         "must_see": ["Palacio de Schonbrunn", "Catedral de Santo Estevao", "Palacio Belvedere (Klimt)", "Hofburg", "Ring Boulevard", "Museumsquartier", "Naschmarkt", "Prater (roda gigante)"],
+        "day_trips": ["Day trip a Wachau Valley — vinhas e Melk Abbey ao longo do Danubio (comboio, 80 min)", "Day trip a Bratislava — capital eslovaca a 1h de comboio", "Day trip a Hallstatt — aldeia alpina mais bonita da Austria (comboio, 3h30)"],
         "flights_from_lisbon": {"airline": "Austrian/TAP", "prefix": "OS", "numbers": ["592", "594"], "duration": "3h10"},
         "flights_from_porto": {"airline": "Ryanair", "prefix": "FR", "numbers": ["7103", "7105"], "duration": "3h05"},
         "tips": [
@@ -430,6 +443,7 @@ DESTINATIONS = {
             "food": ["Goulash hungaro no Bors Gasztrobar", "Langos no Mercado Central (com sour cream e queijo)", "Chimney cake (kurtoskalacs) na rua", "Dobos Torta no Cafe Gerbeaud", "Jantar num cruzeiro no Danubio"]
         },
         "must_see": ["Parlamento Hungaro", "Castelo de Buda", "Bastiao dos Pescadores", "Ponte das Correntes", "Termas de Szechenyi", "Basilica de Santo Estevao", "Sapatos no Danubio (memorial)", "Mercado Central"],
+        "day_trips": ["Day trip a Szentendre — vila de artistas no Danubio (comboio HEV, 40 min)", "Day trip a Eger — castelo, termas e regiao vinicola (comboio, 2h)", "Day trip ao Lago Balaton — praia da Hungria (comboio, 90 min, verao)"],
         "flights_from_lisbon": {"airline": "Wizz Air", "prefix": "W6", "numbers": ["2347", "2349"], "duration": "3h30"},
         "flights_from_porto": {"airline": "Ryanair", "prefix": "FR", "numbers": ["1847", "1849"], "duration": "3h25"},
         "tips": [
@@ -461,6 +475,7 @@ DESTINATIONS = {
             "food": ["Kebab turco no Bayramoglu (local, nao turistico)", "Balik ekmek (sanduiche de peixe) em Eminonu junto ao rio", "Cha turco num cafe tradicional", "Baklava no Karakoy Gulluoglu (o melhor de Istambul)", "Breakfast turco completo (kahvalti) em Kadikoy"]
         },
         "must_see": ["Hagia Sophia", "Mesquita Azul", "Palacio de Topkapi", "Grande Bazar", "Cisterna da Basilica", "Torre de Galata", "Cruzeiro no Bosforo", "Mesquita de Suleymaniye"],
+        "day_trips": ["Day trip as Ilhas dos Principes (Buyukada) — ferry de Kadikoy ou Eminonu, 90 min. Sem carros, passeio de bicicleta", "Day trip a Bursa — antiga capital otomana e Grand Mosque (ferry + bus, 3h)", "Day trip a Edirne — mesquita de Selimiye, obra-prima de Sinan (comboio, 3h30)"],
         "flights_from_lisbon": {"airline": "Turkish Airlines", "prefix": "TK", "numbers": ["1760", "1762"], "duration": "4h15"},
         "flights_from_porto": {"airline": "Pegasus/Turkish", "prefix": "PC", "numbers": ["1228", "1230"], "duration": "4h30"},
         "tips": [
@@ -492,6 +507,7 @@ DESTINATIONS = {
             "food": ["Bistecca alla Fiorentina no Trattoria Mario", "Gelato na Gelateria dei Neri ou Vivoli", "Lampredotto (tripas no pao — street food classico)", "Ribollita (sopa toscana de pao)", "Chianti numa enoteca no Oltrarno"]
         },
         "must_see": ["Duomo e Cupula de Brunelleschi", "Galleria degli Uffizi", "Ponte Vecchio", "Piazza della Signoria", "David de Michelangelo (Accademia)", "Palazzo Pitti", "Piazzale Michelangelo (vista)", "Santa Croce"],
+        "day_trips": ["Day trip a Pisa — Torre Inclinada, Piazza dei Miracoli (comboio, 60 min)", "Day trip a Siena — Piazza del Campo e centro medieval (bus, 75 min)", "Day trip a San Gimignano — torres medievais e Chianti (bus via Siena, 90 min)"],
         "flights_from_lisbon": {"airline": "TAP/Vueling", "prefix": "VY", "numbers": ["6240", "6242"], "duration": "2h50"},
         "flights_from_porto": {"airline": "Ryanair (via Pisa)", "prefix": "FR", "numbers": ["5130", "5132"], "duration": "2h40 (para Pisa)"},
         "tips": [
@@ -523,6 +539,7 @@ DESTINATIONS = {
             "food": ["Shawarma no Al Mallah (Satwa — local)", "Brunch de sexta-feira (tradicao de Dubai)", "Cafe arabico com tamara no Al Fahidi", "Jantar no Pierchic (sobre a agua, Palm)", "Comida indiana em Deira (curry autentico a precos locais)"]
         },
         "must_see": ["Burj Khalifa (At the Top)", "Dubai Mall", "Palm Jumeirah", "Dubai Marina", "Gold Souk", "Dubai Frame", "Desert Safari", "Dubai Creek (Abra)"],
+        "day_trips": ["Day trip a Abu Dhabi — Sheikh Zayed Grand Mosque e Louvre Abu Dhabi (bus ou carro, 90 min)", "Desert Safari ao entardecer — dunas, camelo e jantar beduino (tour organizado, 6h)", "Day trip a Sharjah — museus e souks tradicionais (metro + bus, 40 min)"],
         "flights_from_lisbon": {"airline": "Emirates", "prefix": "EK", "numbers": ["192", "194"], "duration": "7h15"},
         "flights_from_porto": {"airline": "Emirates via Dubai", "prefix": "EK", "numbers": ["196"], "duration": "7h30"},
         "tips": [
@@ -553,6 +570,7 @@ DESTINATIONS = {
             "food": ["Nasi Goreng (arroz frito — prato nacional)", "Babi Guling (porco assado — Ibu Oka em Ubud)", "Smoothie bowl nos cafes de Canggu", "Satay (espetadas) num warung local", "Lawar e Bebek Betutu (comida cerimonial balinesa)"]
         },
         "must_see": ["Templo de Uluwatu (por do sol)", "Terracos de Arroz Tegallalang", "Tanah Lot", "Sacred Monkey Forest (Ubud)", "Tirta Empul", "Besakih (templo-mae)", "Praia de Padang Padang", "Cachoeira de Tegenungan"],
+        "day_trips": ["Day trip as Ilhas Nusa (Nusa Penida/Lembongan) — praias paradisiacas e snorkeling (fast boat, 30-45 min)", "Day trip ao Monte Batur — nascer do sol no vulcao (trekking noturno, saida 2h-3h)", "Day trip a Sidemen — arrozais escondidos e trilhos rurais (scooter/carro, 90 min de Ubud)"],
         "flights_from_lisbon": {"airline": "Qatar Airways via Doha", "prefix": "QR", "numbers": ["341+QR962"], "duration": "17-19h (1 escala)"},
         "flights_from_porto": {"airline": "Turkish Airlines via Istanbul", "prefix": "TK", "numbers": ["1764+TK66"], "duration": "18-20h (1 escala)"},
         "tips": [

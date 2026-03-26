@@ -6875,61 +6875,80 @@ async def geocode_plan(request: Request):
         # Extract location names from activity strings
         location_names = []
         # Portuguese verbs/prepositions to strip for better geocoding
-        strip_words = r'\b(visitar|explorar|passear|almoco|almocar|jantar|conhecer|ir|ver|fazer|tomar|comprar|experimentar|descobrir|subida|passeio|deslocacao|regresso|tempo|tarde|manha|livre|reservar|centro|historico|com|sem)\b'
-        # Skip food/restaurant/departure activities — not useful as map pins
-        skip_words = ['croissant', 'jantar', 'almoco', 'almocar', 'cafe ', 'falafel', 'gelato', 'crepe', 'pizza', 'ramen', 'sushi', 'churros', 'comida', 'degustacao', 'aperitivo', 'brunch', 'check-out', 'check-in', 'transfer para', 'regresso', 'despedida', 'chegada e check', 'aeroporto', 'dia livre']
+        strip_words = r'\b(visitar|explorar|passear|almoco|almocar|jantar|conhecer|ir|ver|fazer|tomar|comprar|experimentar|descobrir|subida|passeio|deslocacao|regresso|tempo|tarde|manha|livre|reservar|centro|historico|com|sem|ultima|visita|almoco|despedida)\b'
+        # Skip non-geocodable activities
+        skip_words = ['croissant', 'jantar ', 'almoco ', 'almocar', 'cafe ', 'falafel', 'gelato', 'crepe ', 'pizza ', 'ramen', 'sushi', 'churros', 'comida', 'degustacao', 'aperitivo', 'brunch ', 'check-out', 'check-in', 'transfer para', 'regresso', 'despedida', 'chegada e check', 'aeroporto e regresso', 'dia livre', 'tempo livre', 'cha turco num', 'cafe tradicional', 'cerveja artesanal', 'rooftop bar']
         for activity in activities:
             name = activity if isinstance(activity, str) else activity.get("title", activity.get("name", str(activity)))
             name_lower = name.lower()
-            # Skip food/meal/departure activities
+            # Skip non-geocodable activities
             if any(sw in name_lower for sw in skip_words):
                 continue
-            clean = re.sub(r'\[CTA:\w+:[^\]]+\]', '', name).strip()
-            clean = re.sub(r'^\d{1,2}[h:]\d{0,2}\s*[-–—]\s*', '', clean).strip()
-            # Remove parenthetical notes
-            clean = re.sub(r'\([^)]*\)', '', clean).strip()
-            # Remove everything after colon (usually descriptions)
+
+            raw = re.sub(r'\[CTA:\w+:[^\]]+\]', '', name).strip()
+            raw = re.sub(r'^\d{1,2}[h:]\d{0,2}\s*[-–—]\s*', '', raw).strip()
+
+            # BEFORE removing parentheses, extract potential geocoding name from them
+            # Parentheses often contain the original/English/international name
+            paren_geo_name = None
+            paren_match = re.search(r'\(([^)]+)\)', raw)
+            if paren_match:
+                paren_text = paren_match.group(1)
+                # Get the first meaningful part (before —, comma)
+                first_part = re.split(r'[—,\-]', paren_text)[0].strip()
+                # Check: has capitals, longer than 3 chars, not purely descriptive
+                descriptive_words = ['gratis', 'entrada', 'reserva', 'obra', 'melhor', 'mais', 'menos', 'para', 'com vista', 'visita', 'preco', 'degraus', 'subterran', 'exterior', 'interior', 'obra-prima']
+                if (first_part and len(first_part) > 3
+                        and any(c.isupper() for c in first_part)
+                        and not any(dw in first_part.lower() for dw in descriptive_words)):
+                    paren_geo_name = first_part
+
+            # Clean display name (without parentheses)
+            clean = re.sub(r'\([^)]*\)', '', raw).strip()
             if ':' in clean:
                 parts = clean.split(':')
-                # Keep the part with capitalized words (likely location)
                 best = max(parts, key=lambda p: sum(1 for w in p.split() if w and w[0].isupper()))
                 clean = best.strip()
-            # Remove common verbs/prepositions
+
+            # Build geo name from clean text
             geo_name = re.sub(strip_words, '', clean, flags=re.IGNORECASE).strip()
             geo_name = re.sub(r'\s+', ' ', geo_name).strip(' -–—,')
             # Extract capitalized words (proper nouns = likely locations)
             proper_nouns = [w for w in geo_name.split() if w and w[0].isupper() and len(w) > 1]
             if proper_nouns:
-                geo_name = ' '.join(proper_nouns[:4])
+                geo_name = ' '.join(proper_nouns[:5])
             elif len(geo_name) > 2:
-                geo_name = ' '.join(geo_name.split()[:3])
-            if len(geo_name) > 2:
-                location_names.append((clean[:80], geo_name[:60]))
+                geo_name = ' '.join(geo_name.split()[:4])
+
+            display = clean[:80]
+
+            if paren_geo_name and len(paren_geo_name) > 3:
+                location_names.append((display, paren_geo_name[:60], geo_name[:60] if len(geo_name) > 2 else None))
+            elif len(geo_name) > 2:
+                location_names.append((display, geo_name[:60], None))
+
         logger.info(f"Day {day.get('day')}: {len(activities)} activities -> {len(location_names)} geocodable names")
 
         # Geocode concurrently (batch of tasks)
-        day_title = day.get("title", "")
-
-        async def geocode_with_delay(display_name, geo_name, idx):
-            await asyncio.sleep(idx * 0.5)
-            geo_context = day_title if day_title and any(c.isupper() for c in day_title) else destination
-            # Always use bias coordinates from destination
-            result = await geocode_location(geo_name, geo_context, bias_lat, bias_lng)
+        async def geocode_with_delay(display_name, primary_geo, fallback_geo, idx):
+            await asyncio.sleep(idx * 0.4)
+            # Strategy 1: primary name (often parenthetical/international) + destination
+            result = await geocode_location(primary_geo, destination, bias_lat, bias_lng)
+            # Strategy 2: fallback name (Portuguese clean) + destination
+            if not result and fallback_geo and fallback_geo != primary_geo:
+                result = await geocode_location(fallback_geo, destination, bias_lat, bias_lng)
+            # Strategy 3: short name + destination
             if not result:
-                # Try without context but with bias
-                result = await geocode_location(geo_name, "", bias_lat, bias_lng)
-            if not result:
-                # Try first 3 words only
-                short_name = ' '.join(geo_name.split()[:3]).strip(' ,')
-                if short_name != geo_name and len(short_name) > 2:
-                    result = await geocode_location(short_name, geo_context, bias_lat, bias_lng)
+                short = ' '.join(primary_geo.split()[:2])
+                if short != primary_geo and len(short) > 2:
+                    result = await geocode_location(short, destination, bias_lat, bias_lng)
             return result
 
-        tasks = [geocode_with_delay(display, geo, i) for i, (display, geo) in enumerate(location_names)]
+        tasks = [geocode_with_delay(display, primary, fallback, i) for i, (display, primary, fallback) in enumerate(location_names)]
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
         day_locations = []
-        for i, ((display_name, geo_name), coords) in enumerate(zip(location_names, results)):
+        for i, ((display_name, primary_geo, fallback_geo), coords) in enumerate(zip(location_names, results)):
             if isinstance(coords, Exception):
                 logger.warning(f"Geocode exception for '{display_name}': {coords}")
             elif isinstance(coords, dict) and coords:
