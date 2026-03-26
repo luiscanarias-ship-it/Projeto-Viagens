@@ -1,0 +1,87 @@
+{
+  "summary": "Iteration 79 - Affiliate Links Audit & Repair. All 21 backend tests passed (100%). All 9 frontend CTA buttons on /plan-trip have valid HTTP URLs. TravelPlanner buildDynamicLinks function correctly constructs platform-specific URLs with destination/dates params. Bug fix verified: 7 of 9 affiliate link URLs that were placeholders (SKYSCANNER_LINK_HERE, BOOKING_LINK_HERE, etc.) have been replaced with real platform URLs.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "passed_tests": [
+    "Backend: GET /api/affiliate-links returns all 9 links",
+    "Backend: All URLs are valid HTTP URLs (no placeholders)",
+    "Backend: skyscanner URL starts with https://www.skyscanner.pt",
+    "Backend: booking URL starts with https://www.booking.com",
+    "Backend: hotels URL starts with https://pt.hotels.com",
+    "Backend: getyourguide URL starts with https://www.getyourguide.com",
+    "Backend: cars URL starts with https://www.discovercars.com",
+    "Backend: airalo URL starts with https://www.airalo.com",
+    "Backend: holafly URL starts with https://www.holafly.com",
+    "Backend: insurance URL starts with https://www.iatiseguros.com",
+    "Backend: googlemaps URL starts with https://maps.google.com",
+    "Backend: POST /api/affiliate-click tracking works for skyscanner",
+    "Backend: POST /api/affiliate-click tracking works for booking",
+    "Backend: POST /api/affiliate-click tracking works for hotels",
+    "Backend: POST /api/affiliate-click tracking works for getyourguide",
+    "Backend: POST /api/affiliate-click tracking works for cars",
+    "Backend: POST /api/affiliate-click tracking works for airalo",
+    "Backend: POST /api/affiliate-click tracking works for holafly",
+    "Backend: POST /api/affiliate-click tracking works for insurance",
+    "Backend: POST /api/affiliate-click tracking works for googlemaps",
+    "Backend: Invalid platform correctly rejected with 400",
+    "Frontend: /plan-trip - cta-booking href contains booking.com",
+    "Frontend: /plan-trip - cta-skyscanner href contains skyscanner.pt",
+    "Frontend: /plan-trip - cta-getyourguide href contains getyourguide.com",
+    "Frontend: /plan-trip - cta-insurance href contains iatiseguros.com",
+    "Frontend: /plan-trip - cta-airalo href contains airalo.com",
+    "Frontend: /plan-trip - cta-holafly href contains holafly.com",
+    "Frontend: /plan-trip - cta-cars href contains discovercars.com",
+    "Frontend: /plan-trip - cta-hotels href contains hotels.com",
+    "Frontend: /plan-trip - cta-googlemaps href contains maps.google.com",
+    "Frontend: /travel-planner - Booking link has destination param (Lisboa)",
+    "Frontend: /travel-planner - Skyscanner link correct with locale params",
+    "Frontend: /travel-planner - GetYourGuide link correct with partner_id=WFPE9ME"
+  ],
+  "failed_tests": [],
+  "test_report_links": [
+    "/app/backend/tests/test_iteration79_affiliate_links.py",
+    "/app/test_reports/pytest/iteration79_affiliate_links_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "server.py (line 7331): AFFILIATE_LINKS dict now has all 9 real platform URLs - no placeholders",
+    "server.py (line 7332): Skyscanner URL: https://www.skyscanner.pt/",
+    "server.py (line 7333): Booking URL: https://www.booking.com/searchresults.html",
+    "server.py (line 7334): Hotels URL: https://pt.hotels.com/",
+    "server.py (line 7335): GetYourGuide URL: https://www.getyourguide.com/s/ with affiliate_id WFPE9ME",
+    "server.py (line 7336): DiscoverCars URL: https://www.discovercars.com/",
+    "server.py (line 7337): Airalo URL: https://www.airalo.com/",
+    "server.py (line 7338): Holafly URL: https://www.holafly.com/pt",
+    "server.py (line 7339): IATI Seguros URL: https://www.iatiseguros.com/",
+    "server.py (line 7340): Google Maps URL: https://maps.google.com",
+    "TravelPlanner.js (line 359): buildDynamicLinks function correctly constructs platform-specific URLs",
+    "TravelPlanner.js (line 367): Booking uses ?ss= param for destination search",
+    "TravelPlanner.js (line 369): Skyscanner uses ?query= param",
+    "TravelPlanner.js (line 365): GetYourGuide uses buildGYGLink with partner_id",
+    "PlanTrip.js (line 31): getLink function returns affiliateLinks[id]?.url || '#'"
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration79_affiliate_links.py"
+  ],
+  "success_rate": {
+    "backend": "100% (21/21 tests passed)",
+    "frontend": "100% (12/12 tests passed)"
+  },
+  "test_credentials": "Admin: admin@4luis.com / Admin1",
+  "seed_data_creation": "",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Iteration 79 verified the affiliate links bug fix. All 9 affiliate links in AFFILIATE_LINKS dict (server.py line 7331) now have real platform URLs instead of placeholders. The buildDynamicLinks function in TravelPlanner.js correctly constructs platform-specific URLs with destination/dates params. GetYourGuide has partner_id=WFPE9ME. IfthenPay payment integration is MOCKED.",
+  "mocked_api": {
+    "has_mocked_apis": true,
+    "mocked_apis_list": ["IfthenPay"],
+    "note": "Affiliate links use generic platform URLs (no real affiliate tracking IDs except GYG partner_id WFPE9ME)"
+  }
+}

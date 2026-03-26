@@ -7329,15 +7329,15 @@ Responde APENAS com um JSON valido com esta estrutura exata (sem markdown, sem `
 # Replace ONLY the base URLs below when real affiliate links are available.
 # Dynamic params (?destination=...&checkin=...&checkout=...) are appended by the frontend.
 AFFILIATE_LINKS = {
-    "skyscanner":   {"name": "Skyscanner",      "url": "SKYSCANNER_LINK_HERE",    "category": "flights",    "affiliate_id": "4luis"},
-    "booking":      {"name": "Booking.com",      "url": "BOOKING_LINK_HERE",       "category": "hotels",     "affiliate_id": "4luis"},
-    "hotels":       {"name": "Hotels.com",       "url": "HOTELS_LINK_HERE",        "category": "hotels",     "affiliate_id": ""},
-    "getyourguide": {"name": "GetYourGuide",     "url": "https://www.getyourguide.com/s/",  "category": "activities", "affiliate_id": "WFPE9ME"},
-    "cars":         {"name": "DiscoverCars",     "url": "DISCOVERCARS_LINK_HERE",  "category": "transport",  "affiliate_id": ""},
-    "airalo":       {"name": "Airalo",           "url": "AIRALO_LINK_HERE",        "category": "esim",       "affiliate_id": ""},
-    "holafly":      {"name": "Holafly",          "url": "HOLAFLY_LINK_HERE",       "category": "esim",       "affiliate_id": ""},
-    "insurance":    {"name": "IATI Seguros",     "url": "IATI_LINK_HERE",          "category": "insurance",  "affiliate_id": "4luis"},
-    "googlemaps":   {"name": "Google Maps",      "url": "https://maps.google.com", "category": "map",        "affiliate_id": ""},
+    "skyscanner":   {"name": "Skyscanner",      "url": "https://www.skyscanner.pt/",                   "category": "flights",    "affiliate_id": "4luis"},
+    "booking":      {"name": "Booking.com",      "url": "https://www.booking.com/searchresults.html",   "category": "hotels",     "affiliate_id": "4luis"},
+    "hotels":       {"name": "Hotels.com",       "url": "https://pt.hotels.com/",                      "category": "hotels",     "affiliate_id": ""},
+    "getyourguide": {"name": "GetYourGuide",     "url": "https://www.getyourguide.com/s/",             "category": "activities", "affiliate_id": "WFPE9ME"},
+    "cars":         {"name": "DiscoverCars",     "url": "https://www.discovercars.com/",                "category": "transport",  "affiliate_id": ""},
+    "airalo":       {"name": "Airalo",           "url": "https://www.airalo.com/",                     "category": "esim",       "affiliate_id": ""},
+    "holafly":      {"name": "Holafly",          "url": "https://www.holafly.com/pt",                  "category": "esim",       "affiliate_id": ""},
+    "insurance":    {"name": "IATI Seguros",     "url": "https://www.iatiseguros.com/",                "category": "insurance",  "affiliate_id": "4luis"},
+    "googlemaps":   {"name": "Google Maps",      "url": "https://maps.google.com",                     "category": "map",        "affiliate_id": ""},
 }
 
 @api_router.get("/affiliate-links")

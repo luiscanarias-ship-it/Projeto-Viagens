@@ -355,19 +355,31 @@ const extractActivityName = (text) => {
 };
 
 /* ── Build dynamic affiliate links with destination/dates ── */
-/* Appends ?destination=...&checkin=...&checkout=... to each base URL.
-   When real affiliate URLs replace the placeholders, this logic stays the same. */
+/* Platform-specific URL construction for proper deep-linking. */
 const buildDynamicLinks = (baseLinks, destination, startDate, endDate) => {
   const enc = encodeURIComponent;
   const links = {};
   Object.entries(baseLinks).forEach(([key, val]) => {
+    const base = val.url || '';
     if (key === 'getyourguide') {
-      // Smart GYG link: destination-based fallback with partner_id
       links[key] = { ...val, url: buildGYGLink(destination) };
+    } else if (key === 'booking') {
+      links[key] = { ...val, url: `${base}?ss=${enc(destination)}&checkin=${startDate}&checkout=${endDate}&lang=pt-pt` };
+    } else if (key === 'skyscanner') {
+      links[key] = { ...val, url: `${base}?locale=pt-PT&market=PT&query=${enc(destination)}` };
+    } else if (key === 'hotels') {
+      links[key] = { ...val, url: `${base}?q-destination=${enc(destination)}&q-check-in=${startDate}&q-check-out=${endDate}` };
+    } else if (key === 'cars') {
+      links[key] = { ...val, url: `${base}?location=${enc(destination)}&pick_up_date=${startDate}&drop_off_date=${endDate}` };
+    } else if (key === 'airalo' || key === 'holafly') {
+      links[key] = { ...val, url: base };
+    } else if (key === 'insurance') {
+      links[key] = { ...val, url: base };
+    } else if (key === 'googlemaps') {
+      links[key] = { ...val, url: `https://www.google.com/maps/search/${enc(destination)}` };
     } else {
-      const base = val.url || '';
       const sep = base.includes('?') ? '&' : '?';
-      links[key] = { ...val, url: `${base}${sep}destination=${enc(destination)}&checkin=${startDate}&checkout=${endDate}` };
+      links[key] = { ...val, url: `${base}${sep}destination=${enc(destination)}` };
     }
   });
   return links;
