@@ -137,6 +137,12 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - **ShareMenu header**: "Partilhar via" → "Convidar via"
 - **WhatsApp primary CTA**: Direct WhatsApp share button with pre-filled message including referral link in PaymentSuccess and AmbassadorProgress
 
+### Critical Bug Fixes — Travel Plan Credibility (2026-03-26)
+- **Bug 1 FIXED**: Template plans showed fake flight numbers (TAP TP448) and hotel names (Hotel Le Marais) as real bookings → Now shows **search suggestions** with affiliate links ("Comparar voos", "Ver hotéis no centro")
+- **Bug 2 FIXED**: Map showed pins in Netherlands/Normandy instead of Paris → Geocoding threshold reduced from 5° (~500km) to 1° (~111km), food/restaurant activities filtered from geocoding
+- **Bug 3**: LLM credit waste prevented — all 10 template destinations use 0 AI credits
+- **TravelContext.js**: Rewritten to handle both suggestion mode (templates) and legacy AI format (backward compatible)
+
 ### Hybrid Travel Plan Architecture (2026-03-26) — COST REDUCTION 70-90%
 - **4-Layer System**: (1) Exact cache → (2) Fuzzy cache (same destination, different dates) → (3) Template engine → (4) Full AI (GPT-5.2)
 - **Template Engine**: 10 destinations pré-configurados (Paris, Roma, Barcelona, Londres, Amesterdão, Tóquio, Nova Iorque, Lisboa, Porto) com hotéis reais, transportes, atrações, weather por mês, packing lists
