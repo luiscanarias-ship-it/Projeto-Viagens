@@ -293,6 +293,15 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - **Urgência**: Badge "Falta pouco!" quando progresso entre 10-100%
 - **Ficheiros**: `SocialProofBanner.js` (novo), `TravelPlanner.js`, `AIAssistant.js`, `TravelContext.js` (modificados)
 
+### Login UX + Password Recovery (2026-03-26)
+- **Login Compacto**: Reescrita total do Login.js — spacing reduzido, nome/apelido lado-a-lado no registo, todo o conteúdo acima do fold
+- **Helper Text**: "Entra para continuar a apoiar viagens e desbloquear a tua"
+- **Forgot Password**: Link "Esqueceste-te da palavra-passe?" abre formulário integrado de recuperação
+- **Password Reset (Backend)**: Endpoints POST `/api/auth/forgot-password` e `/api/auth/reset-password` com tokens single-use (UUID), expiração 30 min, bcrypt hash, sem revelação de existência de email
+- **Reset Password Page**: Nova página `/reset-password` com validação de token e formulário de nova password
+- **Email de Reset**: Template HTML via Resend com link direto para reset
+- **Ficheiros**: `Login.js` (reescrito), `ResetPassword.js` (novo), `server.py` (endpoints), `App.js` (rota)
+
 ## Prioritized Backlog
 ### P1
 - Celebracao "Sonho 100% Financiado": UI especial/animacao quando viagem atinge 100%
