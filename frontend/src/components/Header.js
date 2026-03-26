@@ -150,15 +150,6 @@ const Header = () => {
               </Link>
             )}
             
-            {user?.is_admin && (
-              <Link 
-                to="/admin" 
-                className={navLinkClass('/admin')}
-                data-testid="nav-admin"
-              >
-                {t('nav.admin')}
-              </Link>
-            )}
           </nav>
 
           {/* Right side */}
@@ -242,17 +233,6 @@ const Header = () => {
                         <User className="w-4 h-4" />
                         <span className="text-sm">{t('nav.dashboard')}</span>
                       </Link>
-                      {user.is_admin && (
-                        <Link
-                          to="/admin"
-                          onClick={() => setUserMenuOpen(false)}
-                          className="w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-stone-50 transition-colors"
-                          data-testid="menu-admin"
-                        >
-                          <Settings className="w-4 h-4" />
-                          <span className="text-sm">{t('nav.admin')}</span>
-                        </Link>
-                      )}
                       <button
                         onClick={() => {
                           handleLogout();
@@ -359,15 +339,6 @@ const Header = () => {
                   className={mobileNavClass('/dashboard')}
                 >
                   {t('nav.dashboard')}
-                </Link>
-              )}
-              {user?.is_admin && (
-                <Link
-                  to="/admin"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={mobileNavClass('/admin')}
-                >
-                  {t('nav.admin')}
                 </Link>
               )}
             </div>
