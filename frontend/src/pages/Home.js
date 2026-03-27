@@ -190,8 +190,8 @@ const Home = () => {
           </motion.div>
 
           <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-lg sm:text-2xl md:text-3xl text-[#6B6661] mb-8 sm:mb-10 max-w-2xl mx-auto leading-relaxed px-2 font-medium">
-            Afinal, e se as nossas viagens de sonho se pudessem realizar...
+            className="text-sm sm:text-lg md:text-xl text-[#6B6661] mb-8 sm:mb-10 max-w-2xl mx-auto leading-relaxed px-2">
+            A plataforma de <span className="font-bold text-[#FFBE98]">CrowdDreaming</span> para quem acredita que as viagens de sonho se podem concretizar.
           </motion.p>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.4 }}>
@@ -728,10 +728,8 @@ const Home = () => {
       <section className="py-10 bg-white" data-testid="about-block">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 text-center">
           <h3 className="text-lg font-bold text-[#2D2A26] mb-3">Sobre a 4Luis</h3>
-          <p className="text-sm text-[#6B6661] leading-relaxed mb-4">
-            A 4Luis nasceu de uma ideia simples:<br />
-            E se fosse possível criar uma comunidade<br />
-            onde as pessoas ajudam outras a realizar os seus sonhos?
+          <p className="text-base sm:text-xl md:text-2xl text-[#6B6661] leading-relaxed mb-4 font-medium">
+            Afinal, e se as nossas viagens de sonho se pudessem realizar...
           </p>
           <Link to="/about" className="text-sm text-[#FFBE98] hover:text-[#E6A07C] font-medium transition-colors" data-testid="about-link">
             Saber mais →
