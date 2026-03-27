@@ -728,8 +728,10 @@ const Home = () => {
       <section className="py-10 bg-white" data-testid="about-block">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 text-center">
           <h3 className="text-lg font-bold text-[#2D2A26] mb-3">Sobre a 4Luis</h3>
-          <p className="text-base sm:text-xl md:text-2xl text-[#6B6661] leading-relaxed mb-4 font-medium">
-            Afinal, e se as nossas viagens de sonho se pudessem realizar...
+          <p className="text-sm text-[#6B6661] leading-relaxed mb-4">
+            A 4Luis nasceu de uma ideia simples:<br />
+            E se fosse possível criar uma comunidade<br />
+            onde as pessoas ajudam outras a realizar os seus sonhos?
           </p>
           <Link to="/about" className="text-sm text-[#FFBE98] hover:text-[#E6A07C] font-medium transition-colors" data-testid="about-link">
             Saber mais →

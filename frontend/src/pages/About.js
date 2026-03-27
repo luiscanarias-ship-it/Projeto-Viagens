@@ -30,7 +30,7 @@ const About = () => {
               </p>
               <p>
                 Mas também nasceu de uma pergunta:<br />
-                <span className="font-handwritten text-2xl text-[#FFBE98]">e se as viagens de sonho se pudessem concretizar?</span>
+                <span className="font-handwritten text-4xl text-[#FFBE98]">afinal, e se as nossas viagens de sonho se pudessem realizar...</span>
               </p>
               <p>
                 E se fosse possível criar uma comunidade<br />
