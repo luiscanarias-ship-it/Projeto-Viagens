@@ -64,7 +64,7 @@ const About = () => {
             </ul>
             <p className="text-[#6B6661] leading-relaxed">
               Não é apenas sobre financiar viagens.<br />
-              É sobre acreditar que <span className="font-handwritten text-3xl text-[#FFBE98]">os sonhos se podem tornar realidade quando são partilhados.</span>
+              É sobre acreditar que <span className="font-handwritten text-2xl text-[#FFBE98]">os sonhos se podem tornar realidade quando são partilhados.</span>
             </p>
           </motion.div>
         </div>
