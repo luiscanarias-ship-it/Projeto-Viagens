@@ -807,6 +807,20 @@ const CheckoutModal = ({
                     )}
                   </div>
 
+                  {/* Terms acceptance line */}
+                  <p className="text-[11px] text-[#6B6661]/70 text-center mt-2" data-testid="terms-acceptance">
+                    Ao continuar, aceitas os{' '}
+                    <a
+                      href="/terms"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#6B6661] underline hover:text-[#2D2A26] transition-colors"
+                      data-testid="terms-link"
+                    >
+                      Termos e Condições
+                    </a>
+                  </p>
+
                   {/* Crypto selection */}
                   {selectedMethod === 'crypto' && (
                     <motion.div
