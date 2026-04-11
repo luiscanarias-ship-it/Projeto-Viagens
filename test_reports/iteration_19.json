@@ -49,7 +49,7 @@
     "frontend": "100% (all 17 tests passed)"
   },
   "test_credentials": {
-    "app_url": "https://active-nav-highlight.preview.emergentagent.com",
+    "app_url": "https://comeback-point.preview.emergentagent.com",
     "test_journey": "journey_china001 (China) - has last_milestone_reached=25, last_milestone_at=recent timestamp",
     "admin_credentials": "admin@4luis.com / Admin1"
   },
