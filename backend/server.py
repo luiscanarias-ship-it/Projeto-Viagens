@@ -42,7 +42,8 @@ from email_service import (
     send_weekly_summary_emails, send_dream_funded_announcement,
     send_new_journey_email,
     send_contribution_confirmed_email, send_contribution_pending_email,
-    _build_email_progress_bar, _build_email_cta_button, _build_standard_email
+    _build_email_progress_bar, _build_email_cta_button, _build_standard_email,
+    send_tip_thank_you_email
 )
 
 app = FastAPI(title="4Luis API")
@@ -926,11 +927,16 @@ async def paypal_capture_order(order_id: str, request: Request):
     updated_contribution = await db.contributions.find_one({"contribution_id": contribution_id}, {"_id": 0})
     if journey_doc and updated_contribution:
         asyncio.create_task(send_contribution_email(updated_contribution, journey_doc))
+        # Send tip thank you email if tip was given
+        if updated_contribution.get("tip_amount", 0) > 0:
+            asyncio.create_task(send_tip_thank_you_email(updated_contribution))
     
     return {
         "status": "COMPLETED",
         "contribution_id": contribution_id,
         "amount": amount,
+        "support_amount": support_amount,
+        "tip_amount": contribution.get("tip_amount", 0),
         "message": "Pagamento confirmado com sucesso"
     }
 
@@ -7921,6 +7927,15 @@ async def get_platform_revenue(request: Request):
     ]
     tip_breakdown = await db.contributions.aggregate(tip_breakdown_pipeline).to_list(10)
     
+    # Include zero tips in breakdown for tracking
+    zero_tip_count = await db.contributions.count_documents({
+        "status": {"$in": ["confirmed", "completed"]},
+        "$or": [{"tip_amount": 0}, {"tip_amount": {"$exists": False}}]
+    })
+    
+    # Calculate average tip (only from contributors who gave tips)
+    avg_tip = round(total_tips / max(tip_contributions, 1), 2)
+    
     # Recent tips
     recent_tips = await db.contributions.find(
         {"status": {"$in": ["confirmed", "completed"]}, "tip_amount": {"$gt": 0}},
@@ -7935,13 +7950,15 @@ async def get_platform_revenue(request: Request):
             "tip_contributions": tip_contributions,
             "platform_campaign_contributions": platform_campaign_count,
             "tip_conversion_rate": tip_conversion_rate,
+            "average_tip": avg_tip,
+            "zero_tip_count": zero_tip_count,
             "ambassador_support_total": ambassador_support_total,
             "ambassador_contributions_count": ambassador_contributions_count
         },
         "tip_breakdown": [
             {"amount": t["_id"], "count": t["count"], "total": t["total"]}
             for t in tip_breakdown
-        ],
+        ] + ([{"amount": 0, "count": zero_tip_count, "total": 0, "label": "Sem contribuição"}] if zero_tip_count > 0 else []),
         "recent_tips": recent_tips
     }
 

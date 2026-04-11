@@ -610,25 +610,30 @@ const CheckoutModal = ({
                         </button>
                       ))}
                     </div>
+                    
+                    {/* Microcopy de reforço */}
+                    <p className="text-[10px] text-[#6B6661]/70 mt-2" data-testid="tip-microcopy">
+                      Contribuição opcional. Podes remover a qualquer momento.
+                    </p>
                   </div>
 
-                  {/* Total Summary */}
-                  {selectedTip > 0 && (
-                    <div className="bg-stone-50 rounded-xl p-3 mt-2" data-testid="total-summary">
-                      <div className="flex justify-between text-xs text-[#6B6661]">
-                        <span>Apoio ao sonho</span>
-                        <span>€{selectedAmount}</span>
-                      </div>
+                  {/* Total Summary - Always visible for transparency */}
+                  <div className="bg-stone-50 rounded-xl p-3 mt-2" data-testid="total-summary">
+                    <div className="flex justify-between text-xs text-[#6B6661]">
+                      <span>Apoio ao sonho</span>
+                      <span>€{selectedAmount}</span>
+                    </div>
+                    {selectedTip > 0 && (
                       <div className="flex justify-between text-xs text-[#6B6661]">
                         <span>Contribuição para a plataforma</span>
                         <span>€{selectedTip}</span>
                       </div>
-                      <div className="flex justify-between text-sm font-bold text-[#2D2A26] mt-1 pt-1 border-t border-stone-200">
-                        <span>Total</span>
-                        <span>€{totalPayment}</span>
-                      </div>
+                    )}
+                    <div className="flex justify-between text-sm font-bold text-[#2D2A26] mt-1 pt-1 border-t border-stone-200">
+                      <span>Total</span>
+                      <span>€{totalPayment}</span>
                     </div>
-                  )}
+                  </div>
 
                 </motion.div>
               )}
@@ -1167,12 +1172,27 @@ const CheckoutModal = ({
                   {/* Status message */}
                   {contribution?.status === 'COMPLETED' ? (
                     <p className="text-sm text-[#2D2A26]">
-                      Pagamento de <strong>{contribution.amount}€</strong> confirmado via PayPal.
+                      Pagamento de <strong>{contribution.amount || totalPayment}€</strong> confirmado via PayPal.
                     </p>
                   ) : (
                     <p className="text-sm text-[#6B6661]">
                       Recebemos o teu pedido de contribuição. Estamos a validar o pagamento.
                     </p>
+                  )}
+
+                  {/* Platform tip thank you message - only if tip > 0 */}
+                  {selectedTip > 0 && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3 }}
+                      className="bg-gradient-to-r from-rose-50 to-amber-50 rounded-xl p-3 border border-rose-100"
+                      data-testid="tip-thank-you-message"
+                    >
+                      <p className="text-sm font-medium text-rose-700">
+                        Sem pessoas como tu, esta plataforma não existia ❤️
+                      </p>
+                    </motion.div>
                   )}
 
                   {/* Emotional reinforcement */}

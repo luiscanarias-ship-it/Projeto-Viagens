@@ -881,6 +881,34 @@ const Admin = () => {
                       </p>
                     </div>
 
+                    {/* Tracking Metrics - Essential for Optimization */}
+                    <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl p-4 mb-6 border border-indigo-100">
+                      <h3 className="font-semibold text-[#2D2A26] mb-3 flex items-center gap-2">
+                        <BarChart3 className="w-4 h-4 text-indigo-500" />
+                        Métricas de Otimização
+                      </h3>
+                      <div className="grid md:grid-cols-3 gap-4">
+                        <div>
+                          <p className="text-lg font-bold text-indigo-700" data-testid="avg-tip">
+                            €{platformRevenue.summary.average_tip || 0}
+                          </p>
+                          <p className="text-xs text-[#6B6661]">Valor médio de contribuição</p>
+                        </div>
+                        <div>
+                          <p className="text-lg font-bold text-indigo-700" data-testid="tip-conversion">
+                            {platformRevenue.summary.tip_conversion_rate || 0}%
+                          </p>
+                          <p className="text-xs text-[#6B6661]">Taxa de conversão</p>
+                        </div>
+                        <div>
+                          <p className="text-lg font-bold text-indigo-700" data-testid="zero-tip-count">
+                            {platformRevenue.summary.zero_tip_count || 0}
+                          </p>
+                          <p className="text-xs text-[#6B6661]">Sem contribuição</p>
+                        </div>
+                      </div>
+                    </div>
+
                     {/* Tip Breakdown */}
                     {platformRevenue.tip_breakdown && platformRevenue.tip_breakdown.length > 0 && (
                       <div className="mb-6">
@@ -888,16 +916,20 @@ const Admin = () => {
                           <TrendingUp className="w-4 h-4 text-[#FFBE98]" />
                           Distribuição das Contribuições
                         </h3>
-                        <div className="grid md:grid-cols-3 gap-3">
+                        <div className="grid md:grid-cols-4 gap-3">
                           {platformRevenue.tip_breakdown.map((tip, idx) => (
-                            <div key={idx} className="bg-white border border-stone-200 rounded-xl p-3">
+                            <div key={idx} className={`bg-white border rounded-xl p-3 ${tip.amount === 0 ? 'border-stone-300' : 'border-stone-200'}`}>
                               <div className="flex justify-between items-center">
-                                <span className="font-bold text-[#2D2A26]">€{tip.amount}</span>
-                                <span className="text-xs bg-stone-100 px-2 py-0.5 rounded-full text-[#6B6661]">
+                                <span className={`font-bold ${tip.amount === 0 ? 'text-[#6B6661]' : 'text-[#2D2A26]'}`}>
+                                  {tip.amount === 0 ? '€0' : `€${tip.amount}`}
+                                </span>
+                                <span className={`text-xs px-2 py-0.5 rounded-full ${tip.amount === 0 ? 'bg-stone-200 text-[#6B6661]' : 'bg-stone-100 text-[#6B6661]'}`}>
                                   {tip.count} vezes
                                 </span>
                               </div>
-                              <p className="text-xs text-[#6B6661] mt-1">Total: €{tip.total}</p>
+                              <p className="text-xs text-[#6B6661] mt-1">
+                                {tip.amount === 0 ? 'Sem contribuição' : `Total: €${tip.total}`}
+                              </p>
                             </div>
                           ))}
                         </div>

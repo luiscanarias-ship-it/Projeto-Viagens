@@ -347,6 +347,63 @@ async def send_ambassador_unlocked_email(user_id: str):
     logger.info(f"Ambassador unlocked email sent to user {user_id}")
 
 
+async def send_tip_thank_you_email(contribution: dict):
+    """Send thank you email to contributors who left a platform tip"""
+    email = contribution.get("contributor_email")
+    tip_amount = contribution.get("tip_amount", 0)
+    
+    # Only send if tip > 0 and email exists
+    if not email or tip_amount <= 0:
+        return
+    
+    name = contribution.get("contributor_name", "Sonhador")
+    
+    body = f"""
+    <div style="text-align: center; padding: 20px 0;">
+        <div style="font-size: 48px; margin-bottom: 16px;">❤️</div>
+        <h1 style="margin: 0 0 24px 0; color: #2D2A26; font-size: 24px;">Obrigado por fazeres parte deste sonho</h1>
+        
+        <p style="color: #6B6661; font-size: 16px; line-height: 1.8; margin-bottom: 16px;">
+            Olá {name},
+        </p>
+        
+        <p style="color: #6B6661; font-size: 16px; line-height: 1.8; margin-bottom: 16px;">
+            Obrigado por ajudares a manter esta plataforma viva.
+        </p>
+        
+        <p style="color: #6B6661; font-size: 16px; line-height: 1.8; margin-bottom: 16px;">
+            Sem pessoas como tu, não seria possível tornar estas viagens realidade.
+        </p>
+        
+        <div style="background: linear-gradient(135deg, #FFF5F5 0%, #FFF8E1 100%); border-radius: 12px; padding: 24px; margin: 24px 0; border: 1px solid #FFE4E1;">
+            <p style="color: #C53030; font-size: 18px; font-weight: bold; margin: 0;">
+                O teu apoio faz mesmo a diferença.
+            </p>
+        </div>
+        
+        <p style="color: #6B6661; font-size: 16px; line-height: 1.8; margin-bottom: 24px;">
+            Até breve ✨
+        </p>
+        
+        <p style="color: #FFBE98; font-style: italic; font-size: 14px;">
+            — Equipa 4Luis
+        </p>
+    </div>
+    """
+    
+    html = get_email_base_template(body, "Obrigado - 4Luis")
+    
+    try:
+        await send_email_resend(
+            to_email=email,
+            subject="Obrigado por fazeres parte deste sonho ❤️",
+            html_content=html
+        )
+        logger.info(f"Tip thank you email sent to {email} (tip: {tip_amount}€)")
+    except Exception as e:
+        logger.error(f"Failed to send tip thank you email to {email}: {e}")
+
+
 async def send_journey_funded_emails(journey: dict, ambassador_user: dict, amount_raised: float):
     journey_name = journey.get("name", "")
     journey_id = journey.get("journey_id", "")
