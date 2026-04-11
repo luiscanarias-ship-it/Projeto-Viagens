@@ -617,24 +617,6 @@ const CheckoutModal = ({
                     </p>
                   </div>
 
-                  {/* Total Summary - Always visible for transparency */}
-                  <div className="bg-stone-50 rounded-xl p-3 mt-2" data-testid="total-summary">
-                    <div className="flex justify-between text-xs text-[#6B6661]">
-                      <span>Apoio ao sonho</span>
-                      <span>€{selectedAmount}</span>
-                    </div>
-                    {selectedTip > 0 && (
-                      <div className="flex justify-between text-xs text-[#6B6661]">
-                        <span>Contribuição para a plataforma</span>
-                        <span>€{selectedTip}</span>
-                      </div>
-                    )}
-                    <div className="flex justify-between text-sm font-bold text-[#2D2A26] mt-1 pt-1 border-t border-stone-200">
-                      <span>Total</span>
-                      <span>€{totalPayment}</span>
-                    </div>
-                  </div>
-
                 </motion.div>
               )}
 
