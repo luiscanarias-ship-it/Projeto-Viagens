@@ -150,7 +150,9 @@ class Contribution(BaseModel):
     contribution_id: str = Field(default_factory=lambda: f"contrib_{uuid.uuid4().hex[:12]}")
     journey_id: str
     user_id: Optional[str] = None
-    amount: int
+    amount: int  # Total payment amount (support_amount + tip_amount) - kept for payment processing compatibility
+    support_amount: Optional[int] = None  # Amount going to journey/ambassador (100%)
+    tip_amount: Optional[int] = 0  # Optional platform tip (always goes to platform)
     currency: str = "EUR"
     payment_method: str
     crypto_type: Optional[str] = None
@@ -167,6 +169,9 @@ class Contribution(BaseModel):
     public_message: Optional[str] = None
     show_name: bool = True
     notes: Optional[str] = None
+    # Distribution tracking (set after payment confirmed)
+    ambassador_revenue: Optional[int] = None  # For ambassador campaigns: support_amount
+    platform_revenue: Optional[int] = None  # tip_amount + (support_amount if platform campaign)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -178,7 +183,9 @@ def generate_payment_reference() -> str:
 
 class ContributionCreate(BaseModel):
     journey_id: str
-    amount: int
+    amount: int  # Total payment amount (support_amount + tip_amount)
+    support_amount: Optional[int] = None  # Amount for journey/ambassador
+    tip_amount: Optional[int] = 0  # Optional platform tip
     payment_method: str
     crypto_type: Optional[str] = None
     tx_hash: Optional[str] = None

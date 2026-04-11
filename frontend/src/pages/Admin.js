@@ -70,6 +70,9 @@ const Admin = () => {
   const [payoutStatusFilter, setPayoutStatusFilter] = useState('all');
   const [editingPayout, setEditingPayout] = useState(null);
   const [payoutForm, setPayoutForm] = useState({ payment_method: '', payment_reference: '', admin_notes: '' });
+  // Platform Revenue state
+  const [platformRevenue, setPlatformRevenue] = useState(null);
+  const [loadingPlatformRevenue, setLoadingPlatformRevenue] = useState(false);
 
   // Autosave: restore create form data from localStorage or server
   const CREATE_AUTOSAVE_KEY = 'autosave_journey_create';
@@ -161,7 +164,7 @@ const Admin = () => {
     const fetchData = async () => {
       try {
         const headers = getAuthHeaders();
-        const [journeysRes, statsRes, settingsRes, contributionsRes, sponsorsRes, rafflesRes, usersRes, applicationsRes, supportRes, payoutsRes] = await Promise.all([
+        const [journeysRes, statsRes, settingsRes, contributionsRes, sponsorsRes, rafflesRes, usersRes, applicationsRes, supportRes, payoutsRes, platformRevenueRes] = await Promise.all([
           axios.get(`${API}/admin/journeys`, { headers, withCredentials: true }).catch(e => ({ data: [] })),
           axios.get(`${API}/admin/stats`, { headers, withCredentials: true }).catch(e => ({ data: {} })),
           axios.get(`${API}/admin/settings`, { headers, withCredentials: true }).catch(e => ({ data: {} })),
@@ -171,7 +174,8 @@ const Admin = () => {
           axios.get(`${API}/admin/users/dashboard`, { headers, withCredentials: true }).catch(e => ({ data: null })),
           axios.get(`${API}/admin/ambassador-journeys?status=candidatura`, { headers, withCredentials: true }).catch(() => ({ data: { journeys: [] } })),
           axios.get(`${API}/admin/support/tickets?status=Aberto`, { headers, withCredentials: true }).catch(() => ({ data: { open_count: 0 } })),
-          axios.get(`${API}/admin/payouts`, { headers, withCredentials: true }).catch(() => ({ data: { payouts: [], summary: {} } }))
+          axios.get(`${API}/admin/payouts`, { headers, withCredentials: true }).catch(() => ({ data: { payouts: [], summary: {} } })),
+          axios.get(`${API}/admin/platform-revenue`, { headers, withCredentials: true }).catch(() => ({ data: null }))
         ]);
         
         // Validate data before setting state
@@ -189,6 +193,10 @@ const Admin = () => {
         setOpenSupportCount(supportRes.data?.open_count || 0);
         if (payoutsRes.data?.payouts) {
           setPayoutsData(payoutsRes.data);
+        }
+        // Platform revenue data
+        if (platformRevenueRes?.data) {
+          setPlatformRevenue(platformRevenueRes.data);
         }
       } catch (error) {
         console.error('Error fetching admin data:', error);
@@ -757,6 +765,7 @@ const Admin = () => {
         <div className="flex flex-wrap gap-1.5 mb-6">
           {[
             { id: 'analytics', label: 'Analytics', icon: null },
+            { id: 'revenue', label: 'Receita', icon: platformRevenue?.summary?.total_tips > 0 ? '€' : null },
             { id: 'journeys', label: 'Viagens', icon: null },
             { id: 'candidaturas', label: 'Candidaturas', icon: ambassadorApplications?.by_status?.candidatura?.length || null },
             { id: 'visibility', label: 'Visibilidade', icon: null },
@@ -799,6 +808,136 @@ const Admin = () => {
               exit={{ opacity: 0, y: -20 }}
             >
               <AnalyticsDashboard token={token} />
+            </motion.div>
+          )}
+
+          {/* Revenue Tab - Platform Monetization */}
+          {activeTab === 'revenue' && (
+            <motion.div
+              key="revenue"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="space-y-6"
+              data-testid="revenue-tab"
+            >
+              <div className="bg-white rounded-3xl p-6 shadow-lg border border-stone-100">
+                <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
+                  <Banknote className="w-5 h-5 text-[#FFBE98]" />
+                  Receita da Plataforma
+                </h2>
+
+                {platformRevenue ? (
+                  <>
+                    {/* Summary Cards */}
+                    <div className="grid md:grid-cols-4 gap-4 mb-6">
+                      <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-2xl p-4 border border-emerald-200">
+                        <p className="text-2xl font-bold text-emerald-700" data-testid="total-platform-revenue">
+                          €{platformRevenue.summary.total_platform_revenue || 0}
+                        </p>
+                        <p className="text-sm text-emerald-600">Receita Total da Plataforma</p>
+                      </div>
+                      <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-4 border border-purple-200">
+                        <p className="text-2xl font-bold text-purple-700" data-testid="total-tips">
+                          €{platformRevenue.summary.total_tips || 0}
+                        </p>
+                        <p className="text-sm text-purple-600">Total em Contribuições</p>
+                        <p className="text-xs text-purple-500 mt-1">{platformRevenue.summary.tip_contributions || 0} contribuições</p>
+                      </div>
+                      <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-4 border border-blue-200">
+                        <p className="text-2xl font-bold text-blue-700" data-testid="platform-campaign-revenue">
+                          €{platformRevenue.summary.total_platform_campaign_revenue || 0}
+                        </p>
+                        <p className="text-sm text-blue-600">Campanhas da Plataforma</p>
+                        <p className="text-xs text-blue-500 mt-1">{platformRevenue.summary.platform_campaign_contributions || 0} contribuições</p>
+                      </div>
+                      <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-2xl p-4 border border-amber-200">
+                        <p className="text-2xl font-bold text-amber-700" data-testid="tip-conversion-rate">
+                          {platformRevenue.summary.tip_conversion_rate || 0}%
+                        </p>
+                        <p className="text-sm text-amber-600">Taxa de Conversão</p>
+                        <p className="text-xs text-amber-500 mt-1">Utilizadores que contribuem</p>
+                      </div>
+                    </div>
+
+                    {/* Ambassador Stats */}
+                    <div className="bg-stone-50 rounded-2xl p-4 mb-6">
+                      <h3 className="font-semibold text-[#2D2A26] mb-3 flex items-center gap-2">
+                        <Award className="w-4 h-4 text-[#FFBE98]" />
+                        Apoio aos Embaixadores
+                      </h3>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-lg font-bold text-[#2D2A26]">€{platformRevenue.summary.ambassador_support_total || 0}</p>
+                          <p className="text-xs text-[#6B6661]">Total enviado para embaixadores</p>
+                        </div>
+                        <div>
+                          <p className="text-lg font-bold text-[#2D2A26]">{platformRevenue.summary.ambassador_contributions_count || 0}</p>
+                          <p className="text-xs text-[#6B6661]">Contribuições em campanhas de embaixadores</p>
+                        </div>
+                      </div>
+                      <p className="text-xs text-[#6B6661] mt-2 italic">
+                        100% do apoio vai para os embaixadores. A plataforma só recebe as contribuições voluntárias.
+                      </p>
+                    </div>
+
+                    {/* Tip Breakdown */}
+                    {platformRevenue.tip_breakdown && platformRevenue.tip_breakdown.length > 0 && (
+                      <div className="mb-6">
+                        <h3 className="font-semibold text-[#2D2A26] mb-3 flex items-center gap-2">
+                          <TrendingUp className="w-4 h-4 text-[#FFBE98]" />
+                          Distribuição das Contribuições
+                        </h3>
+                        <div className="grid md:grid-cols-3 gap-3">
+                          {platformRevenue.tip_breakdown.map((tip, idx) => (
+                            <div key={idx} className="bg-white border border-stone-200 rounded-xl p-3">
+                              <div className="flex justify-between items-center">
+                                <span className="font-bold text-[#2D2A26]">€{tip.amount}</span>
+                                <span className="text-xs bg-stone-100 px-2 py-0.5 rounded-full text-[#6B6661]">
+                                  {tip.count} vezes
+                                </span>
+                              </div>
+                              <p className="text-xs text-[#6B6661] mt-1">Total: €{tip.total}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Recent Tips */}
+                    {platformRevenue.recent_tips && platformRevenue.recent_tips.length > 0 && (
+                      <div>
+                        <h3 className="font-semibold text-[#2D2A26] mb-3 flex items-center gap-2">
+                          <Heart className="w-4 h-4 text-[#FFBE98]" />
+                          Contribuições Recentes
+                        </h3>
+                        <div className="space-y-2">
+                          {platformRevenue.recent_tips.slice(0, 5).map((tip, idx) => (
+                            <div key={idx} className="flex justify-between items-center py-2 border-b border-stone-100 last:border-0">
+                              <div>
+                                <p className="text-sm font-medium text-[#2D2A26]">
+                                  €{tip.tip_amount} contribuição
+                                </p>
+                                <p className="text-xs text-[#6B6661]">
+                                  Apoio: €{tip.support_amount || tip.amount - tip.tip_amount}
+                                </p>
+                              </div>
+                              <span className="text-xs text-[#6B6661]">
+                                {new Date(tip.created_at).toLocaleDateString('pt-PT')}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="text-center py-12">
+                    <Banknote className="w-12 h-12 text-stone-300 mx-auto mb-3" />
+                    <p className="text-[#6B6661]">A carregar dados de receita...</p>
+                  </div>
+                )}
+              </div>
             </motion.div>
           )}
           {/* Journeys Tab */}

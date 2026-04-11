@@ -18,7 +18,8 @@ from config import (
     STRIPE_API_KEY, STRIPE_SONHADOR_PRICE_ID, STRIPE_WEBHOOK_SECRET, FRONTEND_URL,
     FIXED_CONTRIBUTION_AMOUNTS, PAYMENT_METHODS, CRYPTO_TYPES, JOURNEY_STATUSES,
     TICKET_TYPES, TICKET_STATUSES, TICKET_PRIORITIES,
-    PAYPAL_CLIENT_ID, PAYPAL_SECRET, PAYPAL_API_URL, PAYPAL_MODE
+    PAYPAL_CLIENT_ID, PAYPAL_SECRET, PAYPAL_API_URL, PAYPAL_MODE,
+    TIP_OPTIONS, DEFAULT_TIP_AMOUNT
 )
 from models import (
     UserBase, UserCreate, UserLogin, User, Journey, JourneyCreate, JourneyUpdate,
@@ -46,6 +47,73 @@ from email_service import (
 
 app = FastAPI(title="4Luis API")
 api_router = APIRouter(prefix="/api")
+
+# ==================== REVENUE DISTRIBUTION ====================
+
+async def calculate_revenue_distribution(contribution: dict) -> dict:
+    """
+    Calculate revenue distribution for a contribution.
+    
+    Rules:
+    - Ambassador campaign: 100% support_amount → ambassador, tip_amount → platform
+    - Platform campaign: 100% support_amount → platform, tip_amount → platform
+    
+    Returns dict with ambassador_revenue and platform_revenue
+    """
+    support_amount = contribution.get("support_amount") or contribution.get("amount", 0)
+    tip_amount = contribution.get("tip_amount", 0)
+    is_ambassador_journey = contribution.get("is_ambassador_journey", False)
+    ambassador_user_id = contribution.get("ambassador_user_id")
+    
+    if is_ambassador_journey and ambassador_user_id:
+        # Ambassador campaign: support goes to ambassador, tip goes to platform
+        return {
+            "ambassador_revenue": support_amount,
+            "platform_revenue": tip_amount,
+            "ambassador_user_id": ambassador_user_id
+        }
+    else:
+        # Platform campaign: everything goes to platform
+        return {
+            "ambassador_revenue": 0,
+            "platform_revenue": support_amount + tip_amount,
+            "ambassador_user_id": None
+        }
+
+
+async def apply_revenue_distribution(contribution_id: str):
+    """
+    Apply revenue distribution after payment is confirmed.
+    Updates the contribution with ambassador_revenue and platform_revenue.
+    """
+    contribution = await db.contributions.find_one(
+        {"contribution_id": contribution_id},
+        {"_id": 0}
+    )
+    if not contribution:
+        return
+    
+    distribution = await calculate_revenue_distribution(contribution)
+    
+    # Update contribution with distribution
+    await db.contributions.update_one(
+        {"contribution_id": contribution_id},
+        {"$set": {
+            "ambassador_revenue": distribution["ambassador_revenue"],
+            "platform_revenue": distribution["platform_revenue"]
+        }}
+    )
+    
+    # If ambassador journey, update ambassador's total earnings
+    if distribution["ambassador_user_id"] and distribution["ambassador_revenue"] > 0:
+        await db.users.update_one(
+            {"user_id": distribution["ambassador_user_id"]},
+            {"$inc": {"ambassador_earnings": distribution["ambassador_revenue"]}}
+        )
+    
+    logger.info(f"Revenue distribution applied for {contribution_id}: ambassador={distribution['ambassador_revenue']}€, platform={distribution['platform_revenue']}€")
+    
+    return distribution
 
 # ==================== AUTH ROUTES ====================
 
@@ -423,31 +491,51 @@ async def get_all_journeys_admin(request: Request):
 
 @api_router.get("/contributions/config")
 async def get_contribution_config():
-    """Get contribution configuration (fixed amounts and payment methods)"""
+    """Get contribution configuration (fixed amounts, payment methods, and tip options)"""
     return {
         "fixed_amounts": FIXED_CONTRIBUTION_AMOUNTS,
         "payment_methods": PAYMENT_METHODS,
         "crypto_types": CRYPTO_TYPES,
+        "tip_options": TIP_OPTIONS,
+        "default_tip": DEFAULT_TIP_AMOUNT,
         "currency": "EUR",
-        "note": "A plataforma não retém comissões. As contribuições vão diretamente para o sonhador."
+        "note": "100% do teu apoio vai para o sonhador. A contribuição para a plataforma é totalmente opcional."
     }
 
 @api_router.post("/contributions/create")
 async def create_contribution(request: Request):
     """Create a new contribution with payment reference for external payments"""
     data = await request.json()
-    amount = data.get("amount")
+    support_amount = data.get("support_amount")  # Amount for journey/ambassador
+    tip_amount = data.get("tip_amount", 0)  # Optional platform tip
+    amount = data.get("amount")  # Total (for backward compatibility)
     payment_method = data.get("payment_method")
     journey_id = data.get("journey_id")
     sponsor_code = data.get("sponsor_code")
     contributor_name = data.get("contributor_name")
     contributor_email = data.get("contributor_email")
     
-    # Validate amount
-    if amount not in FIXED_CONTRIBUTION_AMOUNTS:
+    # Handle backward compatibility: if support_amount not provided, use amount
+    if support_amount is None:
+        support_amount = amount
+        tip_amount = 0
+    
+    # Calculate total payment amount
+    total_amount = support_amount + tip_amount
+    
+    # Validate support_amount
+    if support_amount not in FIXED_CONTRIBUTION_AMOUNTS:
         raise HTTPException(
             status_code=400, 
             detail=f"Montante inválido. Valores permitidos: {FIXED_CONTRIBUTION_AMOUNTS}"
+        )
+    
+    # Validate tip_amount (must be 0 or one of the tip options)
+    valid_tip_values = [opt["value"] for opt in TIP_OPTIONS]
+    if tip_amount not in valid_tip_values:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Valor de contribuição para a plataforma inválido. Valores permitidos: {valid_tip_values}"
         )
     
     # Validate payment method (Stripe temporarily disabled)
@@ -491,13 +579,17 @@ async def create_contribution(request: Request):
         "contribution_id": contribution_id,
         "journey_id": journey_id,
         "user_id": user_id,
-        "amount": amount,
+        "amount": total_amount,  # Total payment amount
+        "support_amount": support_amount,  # Amount for journey/ambassador
+        "tip_amount": tip_amount,  # Optional platform tip
         "currency": "EUR",
         "payment_method": payment_method,
         "crypto_type": crypto_type if payment_method == "crypto" else None,
         "payment_reference": payment_reference,
         "status": "pending",  # Requires admin confirmation
         "is_main_trip": journey.get("is_main_trip", False),
+        "is_ambassador_journey": journey.get("is_ambassador_journey", False),
+        "ambassador_user_id": journey.get("ambassador_user_id"),
         "sponsor_link_id": sponsor_code,
         "contributor_name": contributor_name or (user.name if user else None),
         "contributor_email": contributor_email or (user.email if user else None),
@@ -519,7 +611,9 @@ async def create_contribution(request: Request):
         "payment_reference": payment_reference,
         "payment_method": payment_method,
         "crypto_type": crypto_type,
-        "amount": amount,
+        "support_amount": support_amount,
+        "tip_amount": tip_amount,
+        "amount": total_amount,
         "status": "pending",
         "message": f"Contribuição registada. Use o código {payment_reference} na descrição do pagamento."
     }
@@ -609,13 +703,28 @@ async def get_paypal_config():
 
 @api_router.post("/paypal/create-order")
 async def paypal_create_order(request: Request):
-    """Create a PayPal order for a contribution"""
+    """Create a PayPal order for a contribution with optional platform tip"""
     data = await request.json()
-    amount = data.get("amount")
+    support_amount = data.get("support_amount")  # Amount for journey/ambassador
+    tip_amount = data.get("tip_amount", 0)  # Optional platform tip
+    amount = data.get("amount")  # Total (for backward compatibility)
     journey_id = data.get("journey_id")
     
-    if amount not in FIXED_CONTRIBUTION_AMOUNTS:
+    # Handle backward compatibility
+    if support_amount is None:
+        support_amount = amount
+        tip_amount = 0
+    
+    # Calculate total payment
+    total_amount = support_amount + tip_amount
+    
+    if support_amount not in FIXED_CONTRIBUTION_AMOUNTS:
         raise HTTPException(status_code=400, detail=f"Montante invalido: {FIXED_CONTRIBUTION_AMOUNTS}")
+    
+    # Validate tip amount
+    valid_tip_values = [opt["value"] for opt in TIP_OPTIONS]
+    if tip_amount not in valid_tip_values:
+        raise HTTPException(status_code=400, detail=f"Valor de contribuição para a plataforma inválido")
     
     journey = await db.journeys.find_one({"journey_id": journey_id, "is_active": True}, {"_id": 0})
     if not journey:
@@ -636,6 +745,7 @@ async def paypal_create_order(request: Request):
     # Get PayPal access token and create order
     access_token = await get_paypal_access_token()
     
+    # PayPal order uses total amount (support + tip)
     order_payload = {
         "intent": "CAPTURE",
         "purchase_units": [{
@@ -643,7 +753,7 @@ async def paypal_create_order(request: Request):
             "description": f"Contribuicao 4Luis - {journey.get('name', 'Viagem')}",
             "amount": {
                 "currency_code": "EUR",
-                "value": f"{amount:.2f}"
+                "value": f"{total_amount:.2f}"
             }
         }]
     }
@@ -668,13 +778,17 @@ async def paypal_create_order(request: Request):
         "contribution_id": contribution_id,
         "journey_id": journey_id,
         "user_id": user_id,
-        "amount": amount,
+        "amount": total_amount,  # Total payment amount
+        "support_amount": support_amount,  # Amount for journey/ambassador
+        "tip_amount": tip_amount,  # Platform tip
         "currency": "EUR",
         "payment_method": "paypal",
         "payment_reference": payment_reference,
         "paypal_order_id": paypal_order["id"],
         "status": "pending",
         "is_main_trip": journey.get("is_main_trip", False),
+        "is_ambassador_journey": journey.get("is_ambassador_journey", False),
+        "ambassador_user_id": journey.get("ambassador_user_id"),
         "sponsor_link_id": sponsor_code,
         "contributor_name": contributor_name,
         "contributor_email": contributor_email,
@@ -685,6 +799,9 @@ async def paypal_create_order(request: Request):
     return {
         "paypal_order_id": paypal_order["id"],
         "contribution_id": contribution_id,
+        "support_amount": support_amount,
+        "tip_amount": tip_amount,
+        "total_amount": total_amount,
         "status": "CREATED"
     }
 
@@ -739,6 +856,7 @@ async def paypal_capture_order(order_id: str, request: Request):
     contribution_id = contribution["contribution_id"]
     journey_id = contribution["journey_id"]
     amount = contribution["amount"]
+    support_amount = contribution.get("support_amount") or amount
     user_id = contribution.get("user_id")
     
     # Update contribution to completed
@@ -753,10 +871,13 @@ async def paypal_capture_order(order_id: str, request: Request):
         }}
     )
     
-    # Update journey current_amount
+    # Apply revenue distribution (ambassador vs platform)
+    distribution = await apply_revenue_distribution(contribution_id)
+    
+    # Update journey current_amount with support_amount only (not tip)
     await db.journeys.update_one(
         {"journey_id": journey_id},
-        {"$inc": {"current_amount": amount}}
+        {"$inc": {"current_amount": support_amount}}
     )
     
     # Update user total_contributed
@@ -7728,6 +7849,102 @@ async def get_analytics_dashboard(request: Request):
     }
 
 
+@api_router.get("/admin/platform-revenue")
+async def get_platform_revenue(request: Request):
+    """Get platform revenue analytics (tips and platform campaign support)"""
+    await require_admin(request)
+    
+    # Total tips collected
+    tip_pipeline = [
+        {"$match": {"status": {"$in": ["confirmed", "completed"]}, "tip_amount": {"$gt": 0}}},
+        {"$group": {
+            "_id": None,
+            "total_tips": {"$sum": "$tip_amount"},
+            "tip_count": {"$sum": 1}
+        }}
+    ]
+    tip_result = await db.contributions.aggregate(tip_pipeline).to_list(1)
+    total_tips = tip_result[0]["total_tips"] if tip_result else 0
+    tip_contributions = tip_result[0]["tip_count"] if tip_result else 0
+    
+    # Total contributions (to calculate tip conversion rate)
+    total_confirmed = await db.contributions.count_documents({"status": {"$in": ["confirmed", "completed"]}})
+    tip_conversion_rate = round((tip_contributions / max(total_confirmed, 1)) * 100, 1)
+    
+    # Platform campaign revenue (support_amount from non-ambassador journeys)
+    platform_campaign_pipeline = [
+        {"$match": {
+            "status": {"$in": ["confirmed", "completed"]},
+            "$or": [
+                {"is_ambassador_journey": False},
+                {"is_ambassador_journey": {"$exists": False}},
+                {"ambassador_user_id": None},
+                {"ambassador_user_id": {"$exists": False}}
+            ]
+        }},
+        {"$group": {
+            "_id": None,
+            "total": {"$sum": {"$ifNull": ["$support_amount", "$amount"]}},
+            "count": {"$sum": 1}
+        }}
+    ]
+    platform_campaign_result = await db.contributions.aggregate(platform_campaign_pipeline).to_list(1)
+    platform_campaign_revenue = platform_campaign_result[0]["total"] if platform_campaign_result else 0
+    platform_campaign_count = platform_campaign_result[0]["count"] if platform_campaign_result else 0
+    
+    # Ambassador campaign support (goes to ambassadors, not platform)
+    ambassador_pipeline = [
+        {"$match": {
+            "status": {"$in": ["confirmed", "completed"]},
+            "is_ambassador_journey": True,
+            "ambassador_user_id": {"$exists": True, "$ne": None}
+        }},
+        {"$group": {
+            "_id": None,
+            "total": {"$sum": {"$ifNull": ["$support_amount", "$amount"]}},
+            "count": {"$sum": 1}
+        }}
+    ]
+    ambassador_result = await db.contributions.aggregate(ambassador_pipeline).to_list(1)
+    ambassador_support_total = ambassador_result[0]["total"] if ambassador_result else 0
+    ambassador_contributions_count = ambassador_result[0]["count"] if ambassador_result else 0
+    
+    # Tips by amount breakdown
+    tip_breakdown_pipeline = [
+        {"$match": {"status": {"$in": ["confirmed", "completed"]}, "tip_amount": {"$gt": 0}}},
+        {"$group": {
+            "_id": "$tip_amount",
+            "count": {"$sum": 1},
+            "total": {"$sum": "$tip_amount"}
+        }},
+        {"$sort": {"_id": 1}}
+    ]
+    tip_breakdown = await db.contributions.aggregate(tip_breakdown_pipeline).to_list(10)
+    
+    # Recent tips
+    recent_tips = await db.contributions.find(
+        {"status": {"$in": ["confirmed", "completed"]}, "tip_amount": {"$gt": 0}},
+        {"_id": 0, "contribution_id": 1, "tip_amount": 1, "support_amount": 1, "amount": 1, "created_at": 1, "journey_id": 1}
+    ).sort("created_at", -1).limit(10).to_list(10)
+    
+    return {
+        "summary": {
+            "total_platform_revenue": total_tips + platform_campaign_revenue,
+            "total_tips": total_tips,
+            "total_platform_campaign_revenue": platform_campaign_revenue,
+            "tip_contributions": tip_contributions,
+            "platform_campaign_contributions": platform_campaign_count,
+            "tip_conversion_rate": tip_conversion_rate,
+            "ambassador_support_total": ambassador_support_total,
+            "ambassador_contributions_count": ambassador_contributions_count
+        },
+        "tip_breakdown": [
+            {"amount": t["_id"], "count": t["count"], "total": t["total"]}
+            for t in tip_breakdown
+        ],
+        "recent_tips": recent_tips
+    }
+
 
 # ==================== OFFERS SYSTEM (ADMIN ONLY) ====================
 
@@ -8238,6 +8455,26 @@ async def sitemap_xml():
 
 # Include router
 app.include_router(api_router)
+
+@app.on_event("startup")
+async def startup_event():
+    """Seed admin user on startup if not exists"""
+    from passlib.context import CryptContext
+    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    
+    admin_exists = await db.users.find_one({"email": ADMIN_EMAIL})
+    if not admin_exists:
+        admin_doc = {
+            "user_id": f"admin_{uuid.uuid4().hex[:8]}",
+            "email": ADMIN_EMAIL,
+            "password_hash": pwd_context.hash(ADMIN_PASSWORD),
+            "name": "Admin",
+            "is_admin": True,
+            "level": "admin",
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.users.insert_one(admin_doc)
+        logger.info(f"Admin user created: {ADMIN_EMAIL}")
 
 @app.on_event("shutdown")
 async def shutdown_db_client():

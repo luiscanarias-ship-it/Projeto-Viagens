@@ -50,6 +50,15 @@ logger = logging.getLogger(__name__)
 # Contribution constants
 FIXED_CONTRIBUTION_AMOUNTS = [10, 20, 50, 100, 200, 500, 1000]
 
+# Platform tip options (optional contribution to keep platform free)
+TIP_OPTIONS = [
+    {"value": 2, "label": "2€", "default": True},
+    {"value": 5, "label": "5€", "default": False},
+    {"value": 10, "label": "10€", "default": False},
+    {"value": 0, "label": "Não quero contribuir", "default": False}
+]
+DEFAULT_TIP_AMOUNT = 2
+
 CRYPTO_TYPES = {
     "btc": {"name": "Bitcoin", "symbol": "BTC", "icon": "bitcoin", "color": "#F7931A"},
     "eth": {"name": "Ethereum", "symbol": "ETH", "icon": "ethereum", "color": "#627EEA"},

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, Check, Copy, Bitcoin, Smartphone, CreditCard,
   Wallet, ArrowRight, Heart, Sparkles, ShieldCheck, Lock, Globe, MapPin,
-  ChevronDown, Users, Flame, Award, Mail
+  ChevronDown, Users, Flame, Award, Mail, Gift
 } from 'lucide-react';
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 import QRCode from 'qrcode';
@@ -15,6 +15,14 @@ const API = `${BACKEND_URL}/api`;
 
 // Fixed contribution amounts
 const amounts = [10, 20, 50, 100, 200, 500, 1000];
+
+// Platform tip options
+const tipOptions = [
+  { value: 2, label: '2€', default: true },
+  { value: 5, label: '5€', default: false },
+  { value: 10, label: '10€', default: false },
+  { value: 0, label: 'Não quero contribuir', default: false }
+];
 
 // IfthenPay configuration — replace keys when available
 const IFTHENPAY_CONFIG = {
@@ -107,6 +115,7 @@ const CheckoutModal = ({
   // Checkout state
   const [step, setStep] = useState(1);
   const [selectedAmount, setSelectedAmount] = useState(10);
+  const [selectedTip, setSelectedTip] = useState(2); // Default tip is 2€
   const [selectedMethod, setSelectedMethod] = useState(null);
   const [selectedCrypto, setSelectedCrypto] = useState(null);
   const [contribution, setContribution] = useState(null);
@@ -117,6 +126,9 @@ const CheckoutModal = ({
   const [cryptoPrices, setCryptoPrices] = useState({});
   const [loadingPrices, setLoadingPrices] = useState(false);
   const cryptoSectionRef = useRef(null);
+
+  // Calculate total payment
+  const totalPayment = selectedAmount + selectedTip;
 
   // QR code states
   const [cryptoAmountCalc, setCryptoAmountCalc] = useState(null);
@@ -170,6 +182,7 @@ const CheckoutModal = ({
     if (!isOpen) {
       setStep(1);
       setSelectedAmount(10);
+      setSelectedTip(2); // Reset tip to default
       setSelectedMethod(null);
       setSelectedCrypto(null);
       setContribution(null);
@@ -264,11 +277,12 @@ const CheckoutModal = ({
     if (step === 3 && selectedMethod === 'crypto' && selectedCrypto && Object.keys(cryptoPrices).length > 0) {
       const crypto = cryptoConfig[selectedCrypto];
       if (crypto) {
-        generateCryptoURI(crypto.symbol, crypto.address, selectedAmount);
+        // Use totalPayment to include tip in crypto payment
+        generateCryptoURI(crypto.symbol, crypto.address, totalPayment);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step, selectedMethod, selectedCrypto, selectedAmount, cryptoPrices]);
+  }, [step, selectedMethod, selectedCrypto, totalPayment, cryptoPrices]);
 
   // Generate QR for non-crypto payment methods
   useEffect(() => {
@@ -299,7 +313,9 @@ const CheckoutModal = ({
     setPaypalError(null);
     try {
       const res = await axios.post(`${API}/paypal/create-order`, {
-        amount: selectedAmount,
+        support_amount: selectedAmount,
+        tip_amount: selectedTip,
+        amount: totalPayment, // For backward compatibility
         journey_id: journeyId,
         contributor_name: user?.name || null,
         contributor_email: user?.email || null
@@ -338,7 +354,9 @@ const CheckoutModal = ({
     setLoading(true);
     try {
       const response = await axios.post(`${API}/contributions/create`, {
-        amount: selectedAmount,
+        support_amount: selectedAmount,
+        tip_amount: selectedTip,
+        amount: totalPayment, // For backward compatibility
         payment_method: method,
         journey_id: journeyId,
         crypto_type: cryptoType,
@@ -567,6 +585,51 @@ const CheckoutModal = ({
                     </p>
                   )}
 
+                  {/* Platform Tip Section */}
+                  <div className="mt-4 pt-4 border-t border-stone-100" data-testid="tip-section">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Gift className="w-4 h-4 text-[#FFBE98]" />
+                      <p className="text-sm font-semibold text-[#2D2A26]">Ajuda-nos a manter esta plataforma gratuita para todos</p>
+                    </div>
+                    <p className="text-xs text-[#6B6661] mb-3">Sem esta contribuição, não conseguiríamos operar.</p>
+                    
+                    <div className="flex flex-wrap gap-2">
+                      {tipOptions.map((tip) => (
+                        <button
+                          key={tip.value}
+                          onClick={() => setSelectedTip(tip.value)}
+                          data-testid={`tip-btn-${tip.value}`}
+                          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                            selectedTip === tip.value
+                              ? 'bg-[#FFBE98] text-white shadow-sm'
+                              : 'bg-stone-100 text-[#6B6661] hover:bg-stone-200'
+                          } ${tip.value === 0 ? 'text-xs' : ''}`}
+                        >
+                          {tip.label}
+                          {selectedTip === tip.value && <Check className="w-3 h-3 inline ml-1" />}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Total Summary */}
+                  {selectedTip > 0 && (
+                    <div className="bg-stone-50 rounded-xl p-3 mt-2" data-testid="total-summary">
+                      <div className="flex justify-between text-xs text-[#6B6661]">
+                        <span>Apoio ao sonho</span>
+                        <span>€{selectedAmount}</span>
+                      </div>
+                      <div className="flex justify-between text-xs text-[#6B6661]">
+                        <span>Contribuição para a plataforma</span>
+                        <span>€{selectedTip}</span>
+                      </div>
+                      <div className="flex justify-between text-sm font-bold text-[#2D2A26] mt-1 pt-1 border-t border-stone-200">
+                        <span>Total</span>
+                        <span>€{totalPayment}</span>
+                      </div>
+                    </div>
+                  )}
+
                 </motion.div>
               )}
 
@@ -583,7 +646,14 @@ const CheckoutModal = ({
                   <div className="flex items-center justify-between">
                     <p className="text-sm text-[#6B6661]">Escolhe o método de pagamento:</p>
                     <div className="flex items-center gap-3">
-                      <span className="font-bold text-[#2D2A26]">€{selectedAmount}</span>
+                      <div className="text-right">
+                        <span className="font-bold text-[#2D2A26]">€{totalPayment}</span>
+                        {selectedTip > 0 && (
+                          <span className="text-[10px] text-[#6B6661] block">
+                            (€{selectedAmount} + €{selectedTip} plataforma)
+                          </span>
+                        )}
+                      </div>
                       <button
                         onClick={goToStep1}
                         className="text-xs text-[#FFBE98] hover:underline"
@@ -649,7 +719,7 @@ const CheckoutModal = ({
                               <PayPalButtons
                                 style={{ layout: "vertical", height: 45, tagline: false, label: "pay", shape: "rect" }}
                                 disabled={paypalProcessing}
-                                forceReRender={[selectedAmount, journeyId]}
+                                forceReRender={[totalPayment, journeyId, selectedTip]}
                                 createOrder={createPayPalOrder}
                                 onApprove={onPayPalApprove}
                                 onError={onPayPalError}
@@ -688,7 +758,7 @@ const CheckoutModal = ({
                               <PayPalButtons
                                 style={{ layout: "vertical", height: 45, tagline: false, label: "pay", shape: "rect" }}
                                 disabled={paypalProcessing}
-                                forceReRender={[selectedAmount, journeyId]}
+                                forceReRender={[totalPayment, journeyId, selectedTip]}
                                 createOrder={createPayPalOrder}
                                 onApprove={onPayPalApprove}
                                 onError={onPayPalError}
@@ -809,12 +879,17 @@ const CheckoutModal = ({
                     <>
                       {/* Amount — large, centered */}
                       <div className="text-center pt-1" data-testid="step3-summary">
-                        <p className="text-3xl font-bold text-[#2D2A26]">Enviar {selectedAmount}€</p>
+                        <p className="text-3xl font-bold text-[#2D2A26]">Enviar {totalPayment}€</p>
+                        {selectedTip > 0 && (
+                          <p className="text-xs text-[#6B6661] mt-1">
+                            (€{selectedAmount} apoio + €{selectedTip} para a plataforma)
+                          </p>
+                        )}
                       </div>
 
                       {/* Open MBWay button — replaces "via MB WAY" text */}
                       <a
-                        href={`mbway://transfer?phone=${MBWAY_MANUAL.phoneClean}&amount=${selectedAmount}`}
+                        href={`mbway://transfer?phone=${MBWAY_MANUAL.phoneClean}&amount=${totalPayment}`}
                         className="mx-auto w-fit px-5 py-1.5 bg-[#FFBE98]/20 hover:bg-[#FFBE98]/40 text-[#2D2A26] rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-colors"
                         data-testid="open-mbway-btn"
                       >
@@ -1176,11 +1251,14 @@ const CheckoutModal = ({
                 className="w-full bg-[#FFBE98] text-[#2D2A26] py-3 px-6 rounded-xl font-semibold hover:bg-[#FFB080] transition-all flex items-center justify-center gap-2"
                 data-testid="step1-continue-btn"
               >
-                Continuar com €{selectedAmount} <Heart className="w-3.5 h-3.5" />
+                Continuar com €{totalPayment} <Heart className="w-3.5 h-3.5" />
                 <ArrowRight className="w-4 h-4" />
               </button>
               <p className="text-[10px] leading-relaxed text-[#6B6661]/70 text-center mt-2">
-                Promoções, descontos e vouchers para quem contribui
+                {selectedTip > 0 
+                  ? `€${selectedAmount} para o sonho + €${selectedTip} para a plataforma`
+                  : 'Promoções, descontos e vouchers para quem contribui'
+                }
               </p>
             </div>
           )}

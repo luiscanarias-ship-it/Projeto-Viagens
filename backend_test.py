@@ -1,40 +1,27 @@
+#!/usr/bin/env python3
+
 import requests
 import sys
 import json
 from datetime import datetime
 
-class FourLuisAPITester:
-    def __init__(self, base_url="https://active-nav-highlight.preview.emergentagent.com"):
+class TipSystemAPITester:
+    def __init__(self, base_url="https://comeback-point.preview.emergentagent.com"):
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
-        self.token = None
         self.admin_token = None
         self.tests_run = 0
         self.tests_passed = 0
-        self.test_results = []
-
-    def log_test(self, name, success, details=""):
-        """Log test result"""
-        self.tests_run += 1
-        if success:
-            self.tests_passed += 1
-            print(f"✅ {name}")
-        else:
-            print(f"❌ {name} - {details}")
-        
-        self.test_results.append({
-            "test": name,
-            "success": success,
-            "details": details
-        })
 
     def run_test(self, name, method, endpoint, expected_status, data=None, headers=None):
         """Run a single API test"""
         url = f"{self.api_url}/{endpoint}"
         test_headers = {'Content-Type': 'application/json'}
-        
         if headers:
             test_headers.update(headers)
+
+        self.tests_run += 1
+        print(f"\n🔍 Testing {name}...")
         
         try:
             if method == 'GET':
@@ -43,454 +30,267 @@ class FourLuisAPITester:
                 response = requests.post(url, json=data, headers=test_headers)
             elif method == 'PUT':
                 response = requests.put(url, json=data, headers=test_headers)
-            elif method == 'DELETE':
-                response = requests.delete(url, headers=test_headers)
 
             success = response.status_code == expected_status
-            details = f"Status: {response.status_code}"
-            
-            if not success:
-                details += f" (Expected: {expected_status})"
+            if success:
+                self.tests_passed += 1
+                print(f"✅ Passed - Status: {response.status_code}")
+                try:
+                    response_data = response.json()
+                    return True, response_data
+                except:
+                    return True, {}
+            else:
+                print(f"❌ Failed - Expected {expected_status}, got {response.status_code}")
                 try:
                     error_data = response.json()
-                    details += f" - {error_data.get('detail', 'Unknown error')}"
+                    print(f"   Error: {error_data}")
                 except:
-                    details += f" - {response.text[:100]}"
-            
-            self.log_test(name, success, details)
-            
-            if success and response.content:
-                try:
-                    return response.json()
-                except:
-                    return response.text
-            return None
+                    print(f"   Response: {response.text}")
+                return False, {}
 
         except Exception as e:
-            self.log_test(name, False, f"Exception: {str(e)}")
-            return None
+            print(f"❌ Failed - Error: {str(e)}")
+            return False, {}
 
-    def test_basic_endpoints(self):
-        """Test basic API endpoints"""
-        print("\n🔍 Testing Basic Endpoints...")
-        
-        # Test root endpoint
-        self.run_test("API Root", "GET", "", 200)
-        
-        # Test journeys endpoint
-        journeys = self.run_test("Get Journeys", "GET", "journeys", 200)
-        
-        # Test seed journeys
-        self.run_test("Seed Journeys", "POST", "seed-journeys", 200)
-        
-        # Test payment info
-        self.run_test("Get Payment Info", "GET", "payment-info", 200)
-        
-        return journeys
-
-    def test_auth_endpoints(self):
-        """Test authentication endpoints"""
-        print("\n🔍 Testing Authentication...")
-        
-        # Test user registration
-        timestamp = datetime.now().strftime('%H%M%S')
-        test_user = {
-            "email": f"test_user_{timestamp}@test.com",
-            "password": "TestPass123!",
-            "name": "Test",
-            "surname": "User"
-        }
-        
-        register_result = self.run_test(
-            "User Registration", 
-            "POST", 
-            "auth/register", 
-            200, 
-            test_user
-        )
-        
-        if register_result and 'token' in register_result:
-            self.token = register_result['token']
-            print(f"   User token obtained: {self.token[:20]}...")
-        
-        # Test user login
-        login_data = {
-            "email": test_user["email"],
-            "password": test_user["password"]
-        }
-        
-        login_result = self.run_test(
-            "User Login",
+    def admin_login(self):
+        """Login as admin to get token"""
+        print("\n🔐 Admin Login...")
+        success, response = self.run_test(
+            "Admin Login",
             "POST",
             "auth/login",
             200,
-            login_data
+            data={"email": "admin@4luis.com", "password": "Admin1"}
         )
-        
-        # Test admin registration (using Admin1 password)
-        admin_user = {
-            "email": f"admin_{timestamp}@test.com",
-            "password": "Admin1",
-            "name": "Admin",
-            "surname": "User"
-        }
-        
-        admin_register_result = self.run_test(
-            "Admin Registration",
-            "POST",
-            "auth/register",
-            200,
-            admin_user
-        )
-        
-        if admin_register_result and 'token' in admin_register_result:
-            self.admin_token = admin_register_result['token']
-            print(f"   Admin token obtained: {self.admin_token[:20]}...")
-        
-        # Test /auth/me endpoint
-        if self.token:
-            auth_headers = {"Authorization": f"Bearer {self.token}"}
-            self.run_test("Get Current User", "GET", "auth/me", 200, headers=auth_headers)
+        if success and 'token' in response:
+            self.admin_token = response['token']
+            print(f"✅ Admin token obtained")
+            return True
+        print(f"❌ Admin login failed")
+        return False
 
-    def test_admin_endpoints(self):
-        """Test admin-only endpoints"""
-        print("\n🔍 Testing Admin Endpoints...")
-        
-        if not self.admin_token:
-            print("❌ No admin token available, skipping admin tests")
-            return
-        
-        admin_headers = {"Authorization": f"Bearer {self.admin_token}"}
-        
-        # Test admin stats
-        self.run_test("Admin Stats", "GET", "admin/stats", 200, headers=admin_headers)
-        
-        # Test get all journeys (admin)
-        journeys = self.run_test("Admin Get All Journeys", "GET", "admin/journeys", 200, headers=admin_headers)
-        
-        # Test create journey
-        new_journey = {
-            "name": "Test Journey",
-            "poetic_name": "Where Dreams Begin",
-            "description": "A test journey for API testing",
-            "emotional_message": "Every test is a step towards perfection",
-            "impact_description": "Help us test the platform",
-            "image_url": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4",
-            "goal_amount": 1000.0
-        }
-        
-        created_journey = self.run_test(
-            "Create Journey",
-            "POST",
-            "admin/journeys",
-            200,
-            new_journey,
-            headers=admin_headers
-        )
-        
-        if created_journey and 'journey_id' in created_journey:
-            journey_id = created_journey['journey_id']
-            
-            # Test update journey
-            update_data = {
-                "goal_amount": 1500.0,
-                "is_active": True
-            }
-            
-            self.run_test(
-                "Update Journey",
-                "PUT",
-                f"admin/journeys/{journey_id}",
-                200,
-                update_data,
-                headers=admin_headers
-            )
-            
-            # Test delete journey
-            self.run_test(
-                "Delete Journey",
-                "DELETE",
-                f"admin/journeys/{journey_id}",
-                200,
-                headers=admin_headers
-            )
+    def get_auth_headers(self):
+        """Get authorization headers"""
+        if self.admin_token:
+            return {'Authorization': f'Bearer {self.admin_token}'}
+        return {}
 
-    def test_journey_endpoints(self):
-        """Test journey-related endpoints"""
-        print("\n🔍 Testing Journey Endpoints...")
-        
-        # Get journeys to test with
-        journeys = self.run_test("Get Journeys for Testing", "GET", "journeys", 200)
-        
-        if journeys and len(journeys) > 0:
-            journey_id = journeys[0]['journey_id']
-            
-            # Test get specific journey
-            self.run_test(
-                "Get Specific Journey",
-                "GET",
-                f"journeys/{journey_id}",
-                200
-            )
-        else:
-            print("❌ No journeys available for testing")
-
-    def test_stripe_payment_elements(self):
-        """Test Stripe Payment Element specific endpoints"""
-        print("\n🔍 Testing Stripe Payment Element Features...")
-        
-        # Test Stripe config endpoint
-        stripe_config = self.run_test(
-            "GET /api/stripe/config returns publishable_key",
+    def test_tip_configuration_endpoint(self):
+        """Test GET /api/contributions/config for tip options"""
+        success, response = self.run_test(
+            "Tip Configuration Endpoint",
             "GET",
-            "stripe/config",
+            "contributions/config",
             200
         )
         
-        if stripe_config:
-            print(f"   Stripe config: {stripe_config}")
-            if 'publishable_key' in stripe_config:
-                print(f"   ✅ Publishable key found: {stripe_config['publishable_key'][:20]}...")
+        if success:
+            # Verify tip_options structure
+            if 'tip_options' in response:
+                tip_options = response['tip_options']
+                print(f"   Tip options found: {len(tip_options)} options")
+                
+                # Check for required tip values
+                tip_values = [opt.get('value') for opt in tip_options]
+                expected_values = [2, 5, 10, 0]
+                
+                if all(val in tip_values for val in expected_values):
+                    print(f"   ✅ All expected tip values present: {tip_values}")
+                else:
+                    print(f"   ❌ Missing tip values. Expected: {expected_values}, Got: {tip_values}")
+                
+                # Check default tip
+                default_tip = response.get('default_tip')
+                if default_tip == 2:
+                    print(f"   ✅ Default tip is 2€")
+                else:
+                    print(f"   ❌ Default tip should be 2€, got: {default_tip}")
+                
+                # Check for default option in tip_options
+                default_options = [opt for opt in tip_options if opt.get('default', False)]
+                if len(default_options) == 1 and default_options[0].get('value') == 2:
+                    print(f"   ✅ Default option correctly marked in tip_options")
+                else:
+                    print(f"   ❌ Default option not correctly marked")
+                    
             else:
-                print(f"   ❌ publishable_key missing from response")
-        
-        # Get journeys for payment testing - use journey_china001 as mentioned
-        journey_id = "journey_china001"
-        
-        # Test contributions/create with Stripe payment method
-        stripe_contrib_data = {
-            "amount": 50,
-            "payment_method": "stripe",
-            "journey_id": journey_id,
-            "contributor_name": "Test Stripe User",
-            "contributor_email": "stripe_test@test.com",
-            "public_message": "Testing Stripe Payment Element",
-            "show_name": True
-        }
-        
-        stripe_result = self.run_test(
-            "POST /api/contributions/create with payment_method='stripe'",
-            "POST",
-            "contributions/create",
+                print(f"   ❌ tip_options not found in response")
+                
+        return success
+
+    def test_platform_revenue_endpoint(self):
+        """Test GET /api/admin/platform-revenue"""
+        if not self.admin_token:
+            print("❌ Admin token required for platform revenue test")
+            return False
+            
+        success, response = self.run_test(
+            "Platform Revenue Endpoint",
+            "GET",
+            "admin/platform-revenue",
             200,
-            stripe_contrib_data
+            headers=self.get_auth_headers()
         )
         
-        if stripe_result:
-            print(f"   Stripe contribution result: {stripe_result}")
-            if 'client_secret' in stripe_result and 'payment_intent_id' in stripe_result:
-                print(f"   ✅ client_secret and payment_intent_id returned")
+        if success:
+            # Check for expected revenue structure
+            if 'summary' in response:
+                summary = response['summary']
+                expected_fields = ['total_platform_revenue', 'total_tips', 'tip_contributions', 'tip_conversion_rate']
+                
+                missing_fields = [field for field in expected_fields if field not in summary]
+                if not missing_fields:
+                    print(f"   ✅ All expected summary fields present")
+                    print(f"   Total platform revenue: €{summary.get('total_platform_revenue', 0)}")
+                    print(f"   Total tips: €{summary.get('total_tips', 0)}")
+                    print(f"   Tip contributions: {summary.get('tip_contributions', 0)}")
+                    print(f"   Tip conversion rate: {summary.get('tip_conversion_rate', 0)}%")
+                else:
+                    print(f"   ❌ Missing summary fields: {missing_fields}")
             else:
-                print(f"   ❌ client_secret or payment_intent_id missing")
+                print(f"   ❌ summary not found in response")
+                
+        return success
+
+    def test_contribution_creation_with_tip(self):
+        """Test creating a contribution with tip amount"""
+        # First get an active journey
+        success, journeys_response = self.run_test(
+            "Get Active Journeys",
+            "GET",
+            "journeys",
+            200
+        )
         
-        # Test contributions/create with MBWay payment method
-        mbway_contrib_data = {
-            "amount": 20,
+        if not success or not journeys_response:
+            print("❌ Cannot get journeys for contribution test")
+            return False
+            
+        active_journeys = [j for j in journeys_response if j.get('is_active', False)]
+        if not active_journeys:
+            print("❌ No active journeys found for contribution test")
+            return False
+            
+        journey_id = active_journeys[0]['journey_id']
+        print(f"   Using journey: {journey_id}")
+        
+        # Test contribution with tip
+        contribution_data = {
+            "support_amount": 20,
+            "tip_amount": 5,
             "payment_method": "mbway",
             "journey_id": journey_id,
-            "contributor_name": "Test MBWay User",
-            "contributor_email": "mbway_test@test.com",
-            "public_message": "Testing MBWay Payment",
-            "show_name": True
+            "contributor_name": "Test User",
+            "contributor_email": "test@example.com"
         }
         
-        mbway_result = self.run_test(
-            "POST /api/contributions/create with payment_method='mbway'",
+        success, response = self.run_test(
+            "Create Contribution with Tip",
             "POST",
             "contributions/create",
             200,
-            mbway_contrib_data
+            data=contribution_data
         )
         
-        if mbway_result:
-            print(f"   MBWay contribution result: {mbway_result}")
-            if 'status' in mbway_result and mbway_result['status'] == 'pending':
-                print(f"   ✅ MBWay returns status='pending'")
+        if success:
+            # Verify response contains tip information
+            if 'tip_amount' in response and response['tip_amount'] == 5:
+                print(f"   ✅ Tip amount correctly set: €{response['tip_amount']}")
             else:
-                print(f"   ❌ MBWay should return status='pending'")
+                print(f"   ❌ Tip amount not correctly set")
+                
+            if 'support_amount' in response and response['support_amount'] == 20:
+                print(f"   ✅ Support amount correctly set: €{response['support_amount']}")
+            else:
+                print(f"   ❌ Support amount not correctly set")
+                
+            total_amount = response.get('amount', 0)
+            expected_total = 25  # 20 + 5
+            if total_amount == expected_total:
+                print(f"   ✅ Total amount correctly calculated: €{total_amount}")
+            else:
+                print(f"   ❌ Total amount incorrect. Expected: €{expected_total}, Got: €{total_amount}")
+                
+        return success
 
-    def test_payment_endpoints(self):
-        """Test payment-related endpoints"""
-        print("\n🔍 Testing Payment Endpoints...")
+    def test_tip_validation(self):
+        """Test tip amount validation"""
+        # Get an active journey
+        success, journeys_response = self.run_test(
+            "Get Journeys for Validation Test",
+            "GET",
+            "journeys",
+            200
+        )
         
-        # Get journeys for payment testing
-        journeys = self.run_test("Get Journeys for Payment", "GET", "journeys", 200)
-        
-        if journeys and len(journeys) > 0:
-            journey_id = journeys[0]['journey_id']
+        if not success or not journeys_response:
+            return False
             
-            # Test create checkout session
-            checkout_data = {
-                "amount_key": "10",
-                "journey_id": journey_id,
-                "origin_url": "https://test.com",
-                "sponsor_code": None
-            }
+        active_journeys = [j for j in journeys_response if j.get('is_active', False)]
+        if not active_journeys:
+            return False
             
-            # This might fail due to Stripe configuration, but we test the endpoint
-            self.run_test(
-                "Create Stripe Checkout",
-                "POST",
-                "contributions/create-checkout",
-                200,
-                checkout_data
-            )
-
-    def test_translation_endpoint(self):
-        """Test translation endpoint"""
-        print("\n🔍 Testing Translation...")
+        journey_id = active_journeys[0]['journey_id']
         
-        translation_data = {
-            "texts": {
-                "hello": "Hello",
-                "world": "World"
-            },
-            "target_language": "Portuguese"
+        # Test invalid tip amount
+        invalid_contribution_data = {
+            "support_amount": 20,
+            "tip_amount": 3,  # Invalid tip amount (not in [0, 2, 5, 10])
+            "payment_method": "mbway",
+            "journey_id": journey_id,
+            "contributor_name": "Test User",
+            "contributor_email": "test@example.com"
         }
         
-        self.run_test(
-            "Translation Service",
+        success, response = self.run_test(
+            "Invalid Tip Amount Validation",
             "POST",
-            "translate",
-            200,
-            translation_data
-        )
-
-    def test_new_features(self):
-        """Test new features: dreamers stats, settings, contributions management, raffle"""
-        print("\n🔍 Testing New Features...")
-        
-        # Test dreamers stats endpoint
-        dreamers_stats = self.run_test(
-            "Get Dreamers Stats",
-            "GET",
-            "dreamers-stats",
-            200
+            "contributions/create",
+            400,  # Should return 400 for invalid tip
+            data=invalid_contribution_data
         )
         
-        if dreamers_stats:
-            print(f"   Dreamers stats: {dreamers_stats}")
+        if success:
+            print(f"   ✅ Invalid tip amount correctly rejected")
         
-        # Test site settings endpoint
-        settings = self.run_test(
-            "Get Site Settings",
-            "GET",
-            "settings",
-            200
-        )
-        
-        if settings:
-            print(f"   Site settings: {settings}")
-        
-        # Test admin settings endpoints
-        if self.admin_token:
-            admin_headers = {"Authorization": f"Bearer {self.admin_token}"}
-            
-            # Test get admin settings
-            admin_settings = self.run_test(
-                "Get Admin Settings",
-                "GET",
-                "admin/settings",
-                200,
-                headers=admin_headers
-            )
-            
-            # Test update admin settings
-            new_settings = {
-                "contact_email": "test@4luis.com",
-                "contact_message": "Test message for contact section"
-            }
-            
-            self.run_test(
-                "Update Admin Settings",
-                "PUT",
-                "admin/settings",
-                200,
-                new_settings,
-                headers=admin_headers
-            )
-            
-            # Test admin contributions endpoint
-            contributions = self.run_test(
-                "Get Admin Contributions",
-                "GET",
-                "admin/contributions",
-                200,
-                headers=admin_headers
-            )
-            
-            if contributions:
-                print(f"   Found {len(contributions)} contributions")
-            
-            # Test manual contribution creation
-            manual_contrib_data = {
-                "journey_id": "journey_china001",  # Using seeded journey
-                "amount_key": "10",
-                "payment_method": "MBWay",
-                "is_crypto": False,
-                "name": "Test User",
-                "email": "testcontrib@test.com"
-            }
-            
-            manual_contrib = self.run_test(
-                "Create Manual Contribution",
-                "POST",
-                "contributions/manual",
-                200,
-                manual_contrib_data
-            )
-            
-            if manual_contrib and 'contribution_id' in manual_contrib:
-                contrib_id = manual_contrib['contribution_id']
-                print(f"   Created manual contribution: {contrib_id}")
-                
-                # Test confirm contribution
-                self.run_test(
-                    "Confirm Manual Contribution",
-                    "PUT",
-                    f"admin/contributions/{contrib_id}/confirm",
-                    200,
-                    {},
-                    headers=admin_headers
-                )
-            
-            # Test raffle endpoints (get tickets for a journey)
-            self.run_test(
-                "Get Raffle Tickets",
-                "GET",
-                "admin/raffle/journey_china001",
-                200,
-                headers=admin_headers
-            )
-
-    def run_all_tests(self):
-        """Run all tests"""
-        print("🚀 Starting 4Luis API Tests...")
-        print(f"Testing against: {self.base_url}")
-        
-        # Run test suites
-        self.test_basic_endpoints()
-        self.test_auth_endpoints()
-        self.test_admin_endpoints()
-        self.test_journey_endpoints()
-        self.test_stripe_payment_elements()  # New Stripe Payment Element tests
-        self.test_payment_endpoints()
-        self.test_translation_endpoint()
-        self.test_new_features()
-        
-        # Print summary
-        print(f"\n📊 Test Results: {self.tests_passed}/{self.tests_run} passed")
-        
-        if self.tests_passed == self.tests_run:
-            print("🎉 All tests passed!")
-            return 0
-        else:
-            print("⚠️  Some tests failed")
-            return 1
+        return success
 
 def main():
-    tester = FourLuisAPITester()
-    return tester.run_all_tests()
+    print("🚀 Starting Tip System API Tests")
+    print("=" * 50)
+    
+    tester = TipSystemAPITester()
+    
+    # Login as admin first
+    if not tester.admin_login():
+        print("❌ Cannot proceed without admin access")
+        return 1
+    
+    # Run tip system tests
+    tests = [
+        tester.test_tip_configuration_endpoint,
+        tester.test_platform_revenue_endpoint,
+        tester.test_contribution_creation_with_tip,
+        tester.test_tip_validation
+    ]
+    
+    for test in tests:
+        try:
+            test()
+        except Exception as e:
+            print(f"❌ Test failed with exception: {e}")
+    
+    # Print results
+    print("\n" + "=" * 50)
+    print(f"📊 Tests completed: {tester.tests_passed}/{tester.tests_run}")
+    
+    if tester.tests_passed == tester.tests_run:
+        print("🎉 All tests passed!")
+        return 0
+    else:
+        print("⚠️  Some tests failed")
+        return 1
 
 if __name__ == "__main__":
     sys.exit(main())
