@@ -329,6 +329,14 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - **API Endpoints**: GET /api/contributions/config (inclui tip_options), GET /api/admin/platform-revenue
 - **Ficheiros**: CheckoutModal.js, server.py, config.py, Admin.js, models.py
 
+### Tip System UX Improvements (2026-04-11)
+- **Mensagem de Agradecimento**: Na confirmação de pagamento, se tip > 0, mostra "Sem pessoas como tu, esta plataforma não existia ❤️"
+- **Email de Agradecimento**: Enviado automaticamente após pagamento confirmado se tip > 0, com assunto "Obrigado por fazeres parte deste sonho ❤️"
+- **Microcopy de Reforço**: "Contribuição opcional. Podes remover a qualquer momento." - reduz fricção
+- **Total Summary Sempre Visível**: Transparência total com breakdown antes do pagamento
+- **Tracking Avançado**: Admin dashboard com average_tip, zero_tip_count, distribuição por valor (incluindo €0)
+- **Ficheiros Atualizados**: CheckoutModal.js, email_service.py (send_tip_thank_you_email), Admin.js
+
 ## Credentials
 - **Admin**: admin@4luis.com / Admin1
 - **GYG Partner ID**: WFPE9ME
