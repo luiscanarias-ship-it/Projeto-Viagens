@@ -316,6 +316,19 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - Notificacoes push
 - Consistencias de dados (viagens duplicadas, endpoint /api/health)
 
+### Platform Tip System — Monetização Opcional (2026-04-11)
+- **Conceito**: Sistema de contribuição opcional para manter a plataforma gratuita
+- **Opções de Tip**: 2€ (default selecionado), 5€, 10€, "Não quero contribuir"
+- **Regras de Distribuição**:
+  - Campanha de Embaixador: 100% support_amount → embaixador, tip_amount → plataforma
+  - Campanha da Plataforma: 100% support_amount → plataforma, tip_amount → plataforma
+- **Checkout UI**: Nova secção com título "Ajuda-nos a manter esta plataforma gratuita para todos", subtítulo "Sem esta contribuição, não conseguiríamos operar."
+- **Total Display**: Resumo com "Apoio ao sonho" + "Contribuição para a plataforma" + "Total"
+- **Backend**: Campos support_amount, tip_amount, ambassador_revenue, platform_revenue no modelo Contribution
+- **Admin Dashboard**: Nova tab "Receita" com métricas de tips, taxa de conversão, distribuição por valor
+- **API Endpoints**: GET /api/contributions/config (inclui tip_options), GET /api/admin/platform-revenue
+- **Ficheiros**: CheckoutModal.js, server.py, config.py, Admin.js, models.py
+
 ## Credentials
 - **Admin**: admin@4luis.com / Admin1
 - **GYG Partner ID**: WFPE9ME
