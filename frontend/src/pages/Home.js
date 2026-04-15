@@ -43,6 +43,7 @@ const Home = () => {
   const [showCheckout, setShowCheckout] = useState(false);
   const [showStickyBar, setShowStickyBar] = useState(false);
   const [mainBtnVisible, setMainBtnVisible] = useState(true);
+  const [showAmbassadorModal, setShowAmbassadorModal] = useState(false);
   const mainContributeBtnRef = useRef(null);
   
   // Translated dynamic content from DB
@@ -336,19 +337,28 @@ const Home = () => {
                             />
                           </div>
                           {mainJourney.progress.is_funded && mainJourney.progress.funding_status === 'completed' && (
-                            <p className="text-[#F2C94C] text-sm mt-2 flex items-center gap-2">
-                              <Sparkles className="w-4 h-4" /> O primeiro objetivo foi alcançado!
-                            </p>
+                            <>
+                              <p className="text-[#F2C94C] text-sm mt-2 flex items-center gap-2">
+                                <Sparkles className="w-4 h-4" /> O primeiro objetivo foi alcançado!
+                              </p>
+                              <p className="text-white/60 text-xs">Mas o sonho continua…</p>
+                            </>
                           )}
                           {mainJourney.progress.is_funded && mainJourney.progress.funding_status === 'pending_validation' && (
-                            <p className="text-amber-300 text-sm mt-2 flex items-center gap-2">
-                              <Sparkles className="w-4 h-4" /> Objetivo atingido — em validação
-                            </p>
+                            <>
+                              <p className="text-amber-300 text-sm mt-2 flex items-center gap-2">
+                                <Sparkles className="w-4 h-4" /> O primeiro objetivo foi alcançado!
+                              </p>
+                              <p className="text-white/60 text-xs">Mas o sonho continua…</p>
+                            </>
                           )}
                           {mainJourney.progress.is_funded && (!mainJourney.progress.funding_status || mainJourney.progress.funding_status === 'active') && (
-                            <p className="text-green-400 text-sm mt-2 flex items-center gap-2">
-                              <Sparkles className="w-4 h-4" /> O primeiro objetivo foi alcançado!
-                            </p>
+                            <>
+                              <p className="text-green-400 text-sm mt-2 flex items-center gap-2">
+                                <Sparkles className="w-4 h-4" /> O primeiro objetivo foi alcançado!
+                              </p>
+                              <p className="text-white/60 text-xs">Mas o sonho continua…</p>
+                            </>
                           )}
                           {mainJourney.progress.is_funded && (
                             <p className="text-white/50 text-xs mt-1">
@@ -544,23 +554,14 @@ const Home = () => {
                 <div className="text-center py-6 bg-white rounded-2xl" data-testid="ambassador-empty-state">
                   <h3 className="text-base font-bold text-[#2D2A26] mb-1">Os primeiros sonhos estão a nascer</h3>
                   <p className="text-sm text-[#6B6661] mb-4">Em breve poderás apoiar viagens de novos embaixadores</p>
-                  <p className="text-xs text-[#6B6661] mb-3">Queres ser um dos primeiros embaixadores? Convida 3 amigos a contribuir para a viagem principal.</p>
-                  {user?.anonymous_alias ? (
-                    <ShareMenu
-                      inviteLink={buildInviteLink(user.anonymous_alias)}
-                      senderName={user?.name}
-                      buttonLabel="Quero ser embaixador"
-                      buttonClassName="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-[#2D2A26] text-white rounded-xl text-sm font-semibold hover:bg-[#4A4640] transition-all"
-                    />
-                  ) : (
-                    <Link
-                      to="/login"
-                      className="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-[#2D2A26] text-white rounded-xl text-sm font-semibold hover:bg-[#4A4640] transition-all"
-                      data-testid="become-ambassador-btn"
-                    >
-                      Quero ser embaixador
-                    </Link>
-                  )}
+                  <p className="text-xs text-[#6B6661] mb-3">Queres ser um dos primeiros embaixadores?</p>
+                  <button
+                    onClick={() => setShowAmbassadorModal(true)}
+                    className="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-[#2D2A26] text-white rounded-xl text-sm font-semibold hover:bg-[#4A4640] transition-all"
+                    data-testid="become-ambassador-btn"
+                  >
+                    Quero ser embaixador
+                  </button>
                 </div>
               );
             }
@@ -840,6 +841,58 @@ const Home = () => {
           user={user}
         />
       )}
+
+      {/* Ambassador Modal */}
+      <AnimatePresence>
+        {showAmbassadorModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center px-4"
+            onClick={() => setShowAmbassadorModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white rounded-2xl p-6 max-w-sm w-full text-center space-y-4"
+              onClick={e => e.stopPropagation()}
+              data-testid="ambassador-modal"
+            >
+              <h3 className="text-lg font-bold text-[#2D2A26]">Torna-te Embaixador</h3>
+              <p className="text-sm text-[#6B6661] leading-relaxed">
+                Para te tornares embaixador, basta convidares 3 amigos a contribuir para a viagem principal.
+              </p>
+              <p className="text-sm text-[#6B6661] leading-relaxed">
+                Partilha o sonho, envolve os teus amigos e desbloqueia a possibilidade de criar a tua própria viagem.
+              </p>
+              {user?.anonymous_alias ? (
+                <ShareMenu
+                  inviteLink={buildInviteLink(user.anonymous_alias)}
+                  senderName={user?.name}
+                  buttonLabel="Convidar amigos"
+                  buttonClassName="w-full flex items-center justify-center gap-2 py-2.5 bg-[#2D2A26] text-white rounded-xl text-sm font-semibold hover:bg-[#4A4640] transition-all"
+                />
+              ) : (
+                <Link
+                  to="/login"
+                  className="inline-flex items-center justify-center gap-2 w-full py-2.5 bg-[#2D2A26] text-white rounded-xl text-sm font-semibold hover:bg-[#4A4640] transition-all"
+                  onClick={() => setShowAmbassadorModal(false)}
+                >
+                  Convidar amigos
+                </Link>
+              )}
+              <button
+                onClick={() => setShowAmbassadorModal(false)}
+                className="text-xs text-[#6B6661] hover:text-[#2D2A26] transition-colors"
+              >
+                Fechar
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
