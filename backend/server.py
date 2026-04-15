@@ -1945,25 +1945,31 @@ async def get_journey_payment_info(journey_id: str):
 
 @api_router.get("/success-stories")
 async def get_success_stories():
-    """Get funded ambassador journeys for social proof (homepage section)"""
+    """Get funded journeys for social proof (homepage section).
+    Includes both ambassador journeys and the main trip if marked as 'realizada' by admin."""
     journeys = await db.journeys.find(
         {
-            "is_ambassador_journey": True,
             "status": {"$in": ["financiada", "realizada"]},
+            "funding_status": "completed"
         },
         {"_id": 0, "journey_id": 1, "name": 1, "poetic_name": 1, "image_url": 1,
          "ambassador_name": 1, "ambassador_user_id": 1, "current_amount": 1, "goal_amount": 1,
-         "status": 1, "created_at": 1}
-    ).sort("updated_at", -1).limit(6).to_list(6)
+         "status": 1, "is_main_trip": 1, "is_ambassador_journey": 1,
+         "completed_contributor_count": 1, "created_at": 1, "approved_at": 1}
+    ).sort("approved_at", -1).limit(6).to_list(6)
     
-    # Enrich with contributor count
     for j in journeys:
-        count = await db.contributions.count_documents({
-            "journey_id": j["journey_id"],
-            "status": {"$in": ["confirmed", "completed"]}
-        })
-        j["contributor_count"] = count
-        # Get ambassador avatar
+        # Use cached count or fetch
+        if not j.get("completed_contributor_count"):
+            count = await db.contributions.count_documents({
+                "journey_id": j["journey_id"],
+                "status": {"$in": ["confirmed", "completed"]}
+            })
+            j["contributor_count"] = count
+        else:
+            j["contributor_count"] = j.pop("completed_contributor_count", 0)
+        
+        # Get ambassador avatar if applicable
         if j.get("ambassador_user_id"):
             amb = await db.users.find_one(
                 {"user_id": j["ambassador_user_id"]},
@@ -4416,7 +4422,8 @@ async def update_payout_status(payout_id: str, request: Request):
 
 @api_router.post("/admin/journey/{journey_id}/approve-funding")
 async def admin_approve_journey_funding(journey_id: str, request: Request):
-    """Admin endpoint to approve main journey funding — moves from pending_validation to completed"""
+    """Admin endpoint to approve main journey funding — moves from pending_validation to completed.
+    This triggers the journey to appear in 'Sonhos realizados' section."""
     user = await get_current_user(request)
     if not user:
         raise HTTPException(status_code=401, detail="Não autenticado")
@@ -4432,14 +4439,22 @@ async def admin_approve_journey_funding(journey_id: str, request: Request):
         raise HTTPException(status_code=400, detail=f"Esta viagem não está pendente de validação (status: {journey.get('funding_status', 'active')})")
 
     now_iso = datetime.now(timezone.utc).isoformat()
+    
+    # Count contributors and total raised for the success story
+    contributor_count = await db.contributions.count_documents({
+        "journey_id": journey_id,
+        "status": {"$in": ["confirmed", "completed"]}
+    })
+    
     await db.journeys.update_one(
         {"journey_id": journey_id},
         {"$set": {
             "funding_status": "completed",
-            "status": "financiada",
+            "status": "realizada",
             "is_active": False,
             "approved_at": now_iso,
             "approved_by": user.user_id,
+            "completed_contributor_count": contributor_count,
             "updated_at": now_iso
         }}
     )
@@ -4448,8 +4463,8 @@ async def admin_approve_journey_funding(journey_id: str, request: Request):
     current_amount = journey.get("current_amount", 0)
     await send_journey_funded_emails(journey, None, current_amount)
 
-    logger.info(f"Admin {user.user_id} approved funding for journey {journey_id}")
-    return {"status": "completed", "message": "Financiamento aprovado. Celebração ativada!"}
+    logger.info(f"Admin {user.user_id} approved funding for journey {journey_id} — marked as realizada")
+    return {"status": "completed", "message": "Viagem fechada com sucesso. Agora aparece na secção 'Sonhos realizados'."}
 
 def get_chapter_number(percentage: float) -> int:
     """Get story chapter number based on funding percentage"""

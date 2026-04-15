@@ -1278,20 +1278,20 @@ const Admin = () => {
                           {journey.funding_status === 'pending_validation' && (
                             <button
                               onClick={async () => {
-                                if (!window.confirm(`Aprovar financiamento de "${journey.name}"? Isto ativa a celebração.`)) return;
+                                if (!window.confirm(`Fechar a viagem "${journey.name}" como sonho realizado?\n\n• A viagem será marcada como concluída\n• Deixa de aceitar contribuições\n• Passa para a secção "Sonhos realizados"\n\nEsta ação não pode ser revertida.`)) return;
                                 try {
                                   await axios.post(`${API}/admin/journey/${journey.journey_id}/approve-funding`, {}, { headers: getAuthHeaders() });
-                                  alert('Financiamento aprovado! Celebração ativada.');
+                                  alert('Viagem fechada com sucesso! Agora aparece em "Sonhos realizados".');
                                   fetchData();
                                 } catch (e) {
                                   alert('Erro: ' + (e.response?.data?.detail || e.message));
                                 }
                               }}
                               className="px-2 py-1 bg-green-500 text-white rounded-lg text-[10px] font-bold hover:bg-green-600 transition-colors flex items-center gap-1"
-                              title="Aprovar financiamento"
+                              title="Fechar viagem como sonho realizado"
                               data-testid={`approve-funding-btn-${journey.journey_id}`}
                             >
-                              <CheckCircle className="w-3 h-3" /> Aprovar
+                              <CheckCircle className="w-3 h-3" /> Fechar viagem
                             </button>
                           )}
                           <button
