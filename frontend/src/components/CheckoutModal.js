@@ -1222,30 +1222,35 @@ const CheckoutModal = ({
                   key="confirmation"
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="text-center py-4 space-y-4"
+                  className="text-center py-3 space-y-4"
                 >
-                  {/* Icon + Title */}
+                  {/* 1. Confirmation */}
                   <div>
-                    <div className="w-14 h-14 bg-[#FFBE98]/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <Heart className="w-7 h-7 text-[#FFBE98]" />
+                    <div className="w-12 h-12 bg-[#FFBE98]/20 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <Heart className="w-6 h-6 text-[#FFBE98]" />
                     </div>
-                    <h3 className="text-xl font-bold text-[#2D2A26]" data-testid="thank-you-title">
-                      Obrigado!
+                    <h3 className="text-lg font-bold text-[#2D2A26]" data-testid="thank-you-title">
+                      Contribuição enviada com sucesso
                     </h3>
+                    <p className="text-xs text-[#6B6661] mt-1">
+                      Acabaste de ajudar este sonho a ganhar forma.
+                    </p>
                   </div>
 
-                  {/* Status message */}
-                  {contribution?.status === 'COMPLETED' ? (
-                    <p className="text-sm text-[#2D2A26]">
-                      Pagamento de <strong>{contribution.amount || totalPayment}€</strong> confirmado via PayPal.
-                    </p>
-                  ) : (
-                    <p className="text-sm text-[#6B6661]">
-                      Recebemos o teu pedido de contribuição. Estamos a validar o pagamento.
-                    </p>
-                  )}
+                  {/* 2. Status */}
+                  <div className="bg-stone-50 rounded-xl px-4 py-2.5" data-testid="payment-status">
+                    {contribution?.status === 'COMPLETED' ? (
+                      <p className="text-xs text-emerald-700">
+                        Pagamento de <strong>{contribution.amount || totalPayment}€</strong> confirmado.
+                      </p>
+                    ) : (
+                      <p className="text-xs text-[#6B6661] leading-relaxed">
+                        Estamos a confirmar o teu pagamento.<br />Receberás uma atualização em breve.
+                      </p>
+                    )}
+                  </div>
 
-                  {/* Platform tip thank you message - only if tip system enabled and tip > 0 */}
+                  {/* Platform tip thank you - only if tip system enabled and tip > 0 */}
                   {TIP_SYSTEM_ENABLED && selectedTip > 0 && (
                     <motion.div 
                       initial={{ opacity: 0, y: 10 }}
@@ -1260,63 +1265,65 @@ const CheckoutModal = ({
                     </motion.div>
                   )}
 
-                  {/* Emotional reinforcement */}
-                  <p className="text-xs text-[#FFBE98] italic" data-testid="post-contrib-proof">
-                    Já estás a ajudar a tornar este sonho realidade
-                  </p>
-
-                  {/* Ambassador progression — PRIMARY CTA */}
-                  <div className="bg-stone-50 rounded-xl p-4 space-y-2" data-testid="referral-cta-block">
-                    <p className="text-sm font-semibold text-[#2D2A26]">Queres acelerar este sonho?</p>
+                  {/* 3. Share block — PRIORITY */}
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="bg-[#FFBE98]/10 border border-[#FFBE98]/30 rounded-xl p-4 space-y-2.5"
+                    data-testid="share-block"
+                  >
+                    <p className="text-sm font-bold text-[#2D2A26]">Ajuda a concretizar este sonho</p>
+                    <p className="text-xs text-[#6B6661]">
+                      Dá a conhecer aos teus amigos esta possibilidade de concretizarem viagens de sonho
+                    </p>
+                    <div className="flex gap-2">
+                      <a
+                        href={`https://wa.me/?text=${encodeURIComponent(`Estou a ajudar um amigo a realizar uma viagem de sonho 🌍\nJunta-te a mim: ${window.location.origin}${user?.anonymous_alias ? `?ref=${user.anonymous_alias}` : ''}`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-[#25D366] text-white rounded-xl text-xs font-semibold hover:bg-[#1DA851] transition-colors"
+                        data-testid="share-whatsapp-btn"
+                      >
+                        <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.121.553 4.113 1.519 5.845L.054 23.524l5.838-1.531A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.82c-1.975 0-3.856-.527-5.508-1.523l-.395-.234-4.1 1.075 1.093-3.998-.257-.41A9.79 9.79 0 012.18 12c0-5.422 4.398-9.82 9.82-9.82 5.422 0 9.82 4.398 9.82 9.82 0 5.422-4.398 9.82-9.82 9.82z"/></svg>
+                        Partilhar no WhatsApp
+                      </a>
+                      <button
+                        onClick={() => {
+                          const link = `${window.location.origin}${user?.anonymous_alias ? `?ref=${user.anonymous_alias}` : ''}`;
+                          navigator.clipboard.writeText(link);
+                          setCopied(true);
+                          setTimeout(() => setCopied(false), 2000);
+                        }}
+                        className="flex-shrink-0 px-4 py-2.5 bg-white border border-stone-200 rounded-xl text-xs font-semibold text-[#2D2A26] hover:border-[#FFBE98] transition-colors flex items-center gap-1.5"
+                        data-testid="share-copy-link-btn"
+                      >
+                        {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                        {copied ? 'Copiado!' : 'Copiar link'}
+                      </button>
+                    </div>
+                    {/* Ambassador progress for logged users */}
                     {user?.valid_referrals_count !== undefined && (
-                      <p className="text-xs text-[#6B6661]" data-testid="ambassador-progress">
+                      <p className="text-[10px] text-[#6B6661] pt-1" data-testid="ambassador-progress">
                         Faltam-te <strong>{Math.max(0, 3 - (user.valid_referrals_count || 0))}</strong> amigos para te tornares Embaixador
                       </p>
                     )}
-                    {user?.anonymous_alias ? (
-                      <div className="flex justify-center pt-1" data-testid="thank-you-share">
-                        <ShareMenu
-                          inviteLink={buildInviteLink(user.anonymous_alias)}
-                          senderName={null}
-                          customMessage={`Acabei de ajudar a financiar uma viagem de sonho na 4Luis.\nSe quiseres participar também:\n\n${buildInviteLink(user.anonymous_alias)}`}
-                          buttonLabel="Convidar amigos"
-                        />
-                      </div>
-                    ) : (
-                      <a
-                        href="/login"
-                        className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-semibold text-sm hover:bg-[#FFB080] transition-colors"
-                        data-testid="register-cta-btn"
-                      >
-                        Convidar amigos
-                      </a>
-                    )}
-                  </div>
+                  </motion.div>
 
-                  {/* Account conversion for non-users */}
+                  {/* 4. Account conversion — SECONDARY (non-users only) */}
                   {!user && (
                     <motion.div 
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.4 }}
-                      className="border-t border-stone-100 pt-4 space-y-3"
+                      className="border-t border-stone-100 pt-3 space-y-2.5"
                       data-testid="register-incentive"
                     >
                       <div className="text-center">
-                        <p className="text-sm font-bold text-[#2D2A26]">Queres acompanhar este sonho?</p>
-                        <p className="text-xs text-[#6B6661] mt-0.5">Cria a tua conta em poucos segundos</p>
+                        <p className="text-sm font-semibold text-[#2D2A26]">Acompanha este sonho</p>
+                        <p className="text-[11px] text-[#6B6661] mt-0.5">Cria a tua conta para acompanhar e participar em mais sonhos</p>
                       </div>
 
-                      <div className="space-y-1.5 text-left max-w-[260px] mx-auto">
-                        {['Acompanhar a evolução da viagem', 'Convidar amigos e ganhar recompensas', 'Desbloquear o teu próprio sonho'].map((t) => (
-                          <span key={t} className="flex items-center gap-2 text-xs text-[#6B6661]">
-                            <Check className="w-3.5 h-3.5 text-[#FFBE98] flex-shrink-0" />
-                            {t}
-                          </span>
-                        ))}
-                      </div>
-
-                      {/* Google — primary CTA */}
                       <button
                         onClick={() => {
                           window.location.href = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(window.location.origin + '/auth/callback')}`;
@@ -1328,10 +1335,9 @@ const CheckoutModal = ({
                         Continuar com Google
                       </button>
 
-                      {/* Email register — secondary */}
                       <a
                         href={`/login${confirmEmail ? `?email=${encodeURIComponent(confirmEmail)}` : ''}`}
-                        className="w-full inline-flex items-center justify-center gap-2 py-2.5 bg-[#2D2A26] text-white rounded-xl font-semibold text-sm hover:bg-[#4A4640] transition-colors"
+                        className="w-full inline-flex items-center justify-center gap-2 py-2 bg-stone-100 text-[#2D2A26] rounded-xl font-medium text-xs hover:bg-stone-200 transition-colors"
                         data-testid="register-btn"
                       >
                         Criar conta com email
