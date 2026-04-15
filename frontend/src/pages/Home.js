@@ -14,6 +14,7 @@ import TestimonialsSection from '../components/TestimonialsSection';
 import StoryChapter from '../components/StoryChapter';
 import MilestoneProgress from '../components/MilestoneProgress';
 import MilestoneCelebration from '../components/MilestoneCelebration';
+import ShareMenu, { buildInviteLink } from '../components/ShareMenu';
 import SEO from '../components/SEO';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -540,10 +541,35 @@ const Home = () => {
 
             if (displayJourneys.length === 0) {
               return (
-                <div className="text-center py-16 bg-white rounded-2xl">
-                  <Globe className="w-16 h-16 text-[#E6F4F1] mx-auto mb-4" />
-                  <p className="text-[#6B6661] mb-4">{t('home.no_ambassador_journeys')}</p>
-                  <p className="text-sm text-[#6B6661]">{t('home.become_ambassador')}</p>
+                <div className="text-center py-12 bg-white rounded-2xl" data-testid="ambassador-empty-state">
+                  <Globe className="w-12 h-12 text-[#FFBE98]/30 mx-auto mb-4" />
+                  <h3 className="text-lg font-bold text-[#2D2A26] mb-2">Os primeiros sonhos estão a nascer</h3>
+                  <p className="text-sm text-[#6B6661] mb-6">Em breve poderás apoiar viagens de novos embaixadores</p>
+                  
+                  <div className="max-w-md mx-auto bg-[#FFBE98]/10 rounded-xl p-5 border border-[#FFBE98]/20">
+                    <p className="text-sm font-semibold text-[#2D2A26] mb-2">Queres ser um dos primeiros embaixadores?</p>
+                    <p className="text-xs text-[#6B6661] mb-4 leading-relaxed">
+                      Para te tornares embaixador, basta convidares 3 amigos a contribuir para a viagem principal.
+                      Partilha o sonho, envolve os teus amigos e desbloqueia a possibilidade de criar a tua própria viagem.
+                    </p>
+                    {user?.anonymous_alias ? (
+                      <ShareMenu
+                        inviteLink={buildInviteLink(user.anonymous_alias)}
+                        senderName={user?.name}
+                        buttonLabel="Convidar amigos"
+                        buttonClassName="w-full flex items-center justify-center gap-2 py-2.5 bg-[#2D2A26] text-white rounded-xl text-sm font-semibold hover:bg-[#4A4640] transition-all"
+                      />
+                    ) : (
+                      <Link
+                        to="/login"
+                        className="inline-flex items-center justify-center gap-2 w-full py-2.5 bg-[#2D2A26] text-white rounded-xl text-sm font-semibold hover:bg-[#4A4640] transition-all"
+                        data-testid="become-ambassador-btn"
+                      >
+                        <Heart className="w-4 h-4 text-[#FFBE98]" />
+                        Quero ser embaixador
+                      </Link>
+                    )}
+                  </div>
                 </div>
               );
             }
