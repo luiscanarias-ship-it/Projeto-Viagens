@@ -1157,16 +1157,19 @@ const CheckoutModal = ({
                   data-testid="confirm-form"
                 >
                   <div className="text-center">
-                    <div className="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <Mail className="w-5 h-5 text-emerald-600" />
-                    </div>
+                    <p className="text-xs text-[#FFBE98] font-semibold mb-1">Último passo</p>
                     <h3 className="text-base font-bold text-[#2D2A26]">Confirmar contribuição</h3>
-                    <p className="text-xs text-[#6B6661] mt-1">Deixa o teu email para receberes a confirmação</p>
+                    <p className="text-xs text-[#6B6661] mt-1.5 leading-relaxed">
+                      Deixa o teu email para receberes a confirmação<br />e acompanhar este sonho.
+                    </p>
+                    <p className="text-[10px] text-[#6B6661]/70 mt-1">
+                      Vamos confirmar o teu pagamento e enviar atualização por email.
+                    </p>
                   </div>
 
                   <div className="space-y-2.5">
                     <div>
-                      <label className="text-[11px] text-[#6B6661] font-medium block mb-1">Nome (opcional)</label>
+                      <label className="text-[11px] text-[#6B6661] font-medium block mb-1">Nome (opcional – como queres aparecer)</label>
                       <input
                         type="text"
                         value={confirmName}
@@ -1177,7 +1180,7 @@ const CheckoutModal = ({
                       />
                     </div>
                     <div>
-                      <label className="text-[11px] text-[#6B6661] font-medium block mb-1">Email *</label>
+                      <label className="text-[11px] text-[#6B6661] font-medium block mb-1">Email (para confirmação do pagamento) *</label>
                       <input
                         type="email"
                         value={confirmEmail}
@@ -1196,8 +1199,12 @@ const CheckoutModal = ({
                     className="w-full bg-[#2D2A26] text-white py-3 rounded-xl font-semibold hover:bg-[#4A4640] transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
                     data-testid="submit-confirmation-btn"
                   >
-                    {confirmingPayment ? 'A confirmar...' : 'Confirmar contribuição'}
+                    {confirmingPayment ? 'A confirmar...' : 'Confirmar e acompanhar o sonho'}
                   </button>
+
+                  <p className="text-[10px] text-[#6B6661]/60 text-center">
+                    Recebes confirmação em poucos minutos
+                  </p>
 
                   <button
                     onClick={() => setShowConfirmForm(false)}
