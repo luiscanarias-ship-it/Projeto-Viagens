@@ -637,9 +637,9 @@ const CheckoutModal = ({
                   exit={{ opacity: 0, x: -20 }}
                   className="space-y-3"
                 >
-                  {/* Selected amount + payment label */}
+                  {/* Title + amount */}
                   <div className="flex items-center justify-between">
-                    <p className="text-sm text-[#6B6661]">Escolhe o método de pagamento:</p>
+                    <p className="text-sm font-medium text-[#2D2A26]" data-testid="step2-title">Escolhe como queres apoiar este sonho</p>
                     <div className="flex items-center gap-3">
                       <div className="text-right">
                         <span className="font-bold text-[#2D2A26]">€{totalPayment}</span>
@@ -658,12 +658,17 @@ const CheckoutModal = ({
                     </div>
                   </div>
 
+                  {/* Emotional message */}
+                  <p className="text-xs text-[#6B6661] text-center -mt-1" data-testid="step2-emotional-msg">
+                    Mesmo uma pequena contribuição<br />ajuda este sonho a ganhar forma.
+                  </p>
+
                   {/* ═══ SMART PAYMENT METHODS — Geo-prioritized ═══ */}
 
                   {/* PRIMARY: Portugal → MBWay + PayPal | International → PayPal */}
                   {isPortugal ? (
                     <>
-                      {/* MBWay — selectable for Portugal */}
+                      {/* MBWay — primary for Portugal */}
                       <button
                         onClick={() => handleMethodSelect('mbway')}
                         disabled={loading}
@@ -681,7 +686,7 @@ const CheckoutModal = ({
                             </div>
                             <div className="text-left">
                               <span className="text-sm font-bold text-[#2D2A26] block">MBWay</span>
-                              <span className="text-[10px] text-[#6B6661]">Leva menos de 30 segundos</span>
+                              <span className="text-[10px] text-[#6B6661]">Rápido e simples (Portugal)</span>
                             </div>
                           </div>
                           <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full flex items-center gap-1">
@@ -694,13 +699,13 @@ const CheckoutModal = ({
                           <div className="px-3 py-2 flex items-center justify-between">
                             <div className="flex items-center gap-1.5">
                               <ShieldCheck className="w-4 h-4 text-[#FFBE98]" />
-                              <span className="text-[11px] font-bold text-[#2D2A26]">Cartão (inclui Revolut e Wise)</span>
+                              <span className="text-[11px] font-bold text-[#2D2A26]">Cartão ou PayPal</span>
                             </div>
                             <span className="text-[10px] text-[#6B6661] flex items-center gap-1">
                               <Lock className="w-3 h-3" /> 100% seguro
                             </span>
                           </div>
-                          <p className="px-3 text-[9px] text-[#6B6661] -mt-0.5 mb-1">Aceita cartões internacionais (Revolut, Wise e bancos tradicionais)</p>
+                          <p className="px-3 text-[9px] text-[#6B6661] -mt-0.5 mb-1">Pagamento simples e seguro (via PayPal)</p>
                           <div className="px-3 pb-2">
                             {paypalError && (
                               <p className="text-xs text-red-500 mb-2">{paypalError}</p>
@@ -733,13 +738,13 @@ const CheckoutModal = ({
                           <div className="px-3 py-2 flex items-center justify-between">
                             <div className="flex items-center gap-1.5">
                               <ShieldCheck className="w-4 h-4 text-[#FFBE98]" />
-                              <span className="text-[11px] font-bold text-[#2D2A26]">Cartão (inclui Revolut e Wise)</span>
+                              <span className="text-[11px] font-bold text-[#2D2A26]">Cartão ou PayPal</span>
                             </div>
                             <span className="text-[10px] text-[#6B6661] flex items-center gap-1">
                               <Lock className="w-3 h-3" /> 100% seguro
                             </span>
                           </div>
-                          <p className="px-3 text-[9px] text-[#6B6661] -mt-0.5 mb-1">Aceita cartões internacionais (Revolut, Wise e bancos tradicionais)</p>
+                          <p className="px-3 text-[9px] text-[#6B6661] -mt-0.5 mb-1">Pagamento simples e seguro (via PayPal)</p>
                           <div className="px-3 pb-2">
                             {paypalError && (
                               <p className="text-xs text-red-500 mb-2">{paypalError}</p>
@@ -769,22 +774,22 @@ const CheckoutModal = ({
                     </>
                   )}
 
-                  {/* SECONDARY METHODS — same visual weight */}
+                  {/* SECONDARY METHODS */}
                   <div className="grid grid-cols-2 gap-1.5">
-                    {/* Crypto option — always visible */}
+                    {/* Crypto option */}
                     <button
                       onClick={() => handleMethodSelect('crypto')}
                       disabled={loading}
                       className={`p-2.5 rounded-xl border-2 transition-all text-center ${
                         selectedMethod === 'crypto'
                           ? 'border-[#FFBE98] bg-[#FFBE98]/10 shadow-sm'
-                          : 'border-[#FFBE98] hover:bg-[#FFBE98]/5'
+                          : 'border-stone-200 hover:border-[#FFBE98]/50 hover:bg-[#FFBE98]/5'
                       }`}
                       data-testid="crypto-method-btn"
                     >
                       <Bitcoin className="w-5 h-5 text-[#F7931A] mx-auto" />
-                      <span className="text-xs font-medium block mt-1">Crypto</span>
-                      <span className="text-[9px] text-[#6B6661]">BTC, ETH, USDT</span>
+                      <span className="text-xs font-medium block mt-1">Criptomoeda</span>
+                      <span className="text-[9px] text-[#6B6661]">Apoio direto e imediato</span>
                     </button>
 
                     {/* MBWay — secondary for international users */}
@@ -795,19 +800,19 @@ const CheckoutModal = ({
                         className={`p-2.5 rounded-xl border-2 transition-all text-center ${
                           selectedMethod === 'mbway'
                             ? 'border-[#FFBE98] bg-[#FFBE98]/10 shadow-sm'
-                            : 'border-[#FFBE98] hover:bg-[#FFBE98]/5'
+                            : 'border-stone-200 hover:border-[#FFBE98]/50 hover:bg-[#FFBE98]/5'
                         }`}
                         data-testid="mbway-secondary-btn"
                       >
                         <Smartphone className="w-5 h-5 text-[#FFBE98] mx-auto" />
                         <span className="text-xs font-medium block mt-1">MBWay</span>
-                        <span className="text-[9px] text-[#6B6661]">Portugal</span>
+                        <span className="text-[9px] text-[#6B6661]">Rápido e simples (Portugal)</span>
                       </button>
                     )}
 
                     {/* Multibanco — coming soon (Portugal only) */}
                     {isPortugal && (
-                      <div className="p-2.5 rounded-xl border-2 border-[#FFBE98]/50 bg-stone-50/50 text-center opacity-60 cursor-not-allowed" data-testid="multibanco-soon-btn">
+                      <div className="p-2.5 rounded-xl border-2 border-stone-200 bg-stone-50/50 text-center opacity-60 cursor-not-allowed" data-testid="multibanco-soon-btn">
                         <CreditCard className="w-5 h-5 text-[#6B6661] mx-auto" />
                         <span className="text-xs font-medium block mt-1">Multibanco</span>
                         <span className="text-[9px] text-[#6B6661]">Em breve</span>
@@ -815,9 +820,9 @@ const CheckoutModal = ({
                     )}
                   </div>
 
-                  {/* Terms acceptance line */}
+                  {/* Terms + trust line */}
                   <p className="text-[11px] text-[#6B6661]/70 text-center mt-2" data-testid="terms-acceptance">
-                    Ao continuar, aceitas os{' '}
+                    Pagamento seguro. Ao continuar, aceitas os{' '}
                     <a
                       href="/terms"
                       target="_blank"
