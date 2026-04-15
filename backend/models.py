@@ -73,6 +73,9 @@ class Journey(BaseModel):
     is_ambassador_journey: bool = False
     ambassador_user_id: Optional[str] = None
     ambassador_name: Optional[str] = None
+    payment_mode: str = "platform"  # "platform" (current) or "direct" (payment goes directly to ambassador)
+    ambassador_payment_methods: Optional[dict] = None  # For direct mode: {mbway: {phone}, paypal: {email}, crypto: {address}, iban: {number}}
+    ambassador_payment_instructions: Optional[str] = None  # Custom instructions from ambassador
     application_message: Optional[str] = None
     approved_at: Optional[str] = None
     funded_at: Optional[str] = None

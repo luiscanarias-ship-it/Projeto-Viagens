@@ -19,7 +19,8 @@ from config import (
     FIXED_CONTRIBUTION_AMOUNTS, PAYMENT_METHODS, CRYPTO_TYPES, JOURNEY_STATUSES,
     TICKET_TYPES, TICKET_STATUSES, TICKET_PRIORITIES,
     PAYPAL_CLIENT_ID, PAYPAL_SECRET, PAYPAL_API_URL, PAYPAL_MODE,
-    TIP_OPTIONS, DEFAULT_TIP_AMOUNT
+    TIP_OPTIONS, DEFAULT_TIP_AMOUNT,
+    CERTIFICATION_LEVELS, TRUSTED_AMBASSADOR_MIN_SUPPORTERS, TRUSTED_AMBASSADOR_MIN_RAISED
 )
 from models import (
     UserBase, UserCreate, UserLogin, User, Journey, JourneyCreate, JourneyUpdate,
@@ -411,6 +412,8 @@ async def get_journey(journey_id: str):
                 "avatar": display_avatar,
                 "country": ambassador.get("country"),
                 "level": ambassador.get("level", "sonhador"),
+                "certification_level": ambassador.get("certification_level", "embaixador"),
+                "certification_label": CERTIFICATION_LEVELS.get(ambassador.get("certification_level", "embaixador"), {}).get("label", "Embaixador 4Luis"),
                 "member_since": ambassador.get("registered_at") or ambassador.get("created_at")
             }
         elif journey.get("ambassador_name"):
@@ -1605,6 +1608,164 @@ async def get_ambassador_features(request: Request):
         }
     }
 
+
+# ==================== AMBASSADOR CERTIFICATION ====================
+
+@api_router.get("/ambassador/{user_id}/profile")
+async def get_ambassador_certification_profile(user_id: str):
+    """Get public ambassador profile with certification and stats"""
+    user_data = await db.users.find_one(
+        {"user_id": user_id, "level": "embaixador"},
+        {"_id": 0, "password_hash": 0}
+    )
+    if not user_data:
+        raise HTTPException(status_code=404, detail="Embaixador não encontrado")
+    
+    cert_level = user_data.get("certification_level", "embaixador")
+    cert_info = CERTIFICATION_LEVELS.get(cert_level, CERTIFICATION_LEVELS["embaixador"])
+    
+    # Stats
+    journeys = await db.journeys.find(
+        {"ambassador_user_id": user_id},
+        {"_id": 0, "journey_id": 1, "name": 1, "status": 1, "current_amount": 1, "goal_amount": 1}
+    ).to_list(50)
+    
+    total_raised = sum(j.get("current_amount", 0) for j in journeys)
+    total_supporters = await db.contributions.distinct("user_id", {
+        "ambassador_user_id": user_id,
+        "status": {"$in": ["confirmed", "completed"]}
+    })
+    
+    display_name = user_data.get("name") if user_data.get("use_real_name", True) else user_data.get("anonymous_alias", "Embaixador")
+    avatar = user_data.get("avatar") or user_data.get("anonymous_avatar")
+    
+    return {
+        "user_id": user_id,
+        "display_name": display_name,
+        "avatar": avatar,
+        "certification": {
+            "level": cert_level,
+            "label": cert_info["label"],
+            "level_number": cert_info["level"],
+            "verified_at": user_data.get("certification_verified_at"),
+        },
+        "stats": {
+            "total_raised": total_raised,
+            "total_supporters": len(total_supporters),
+            "journeys_count": len(journeys),
+            "journeys_funded": sum(1 for j in journeys if j.get("status") in ("financiada", "realizada")),
+        },
+        "journeys": journeys,
+        "member_since": user_data.get("created_at"),
+        "embaixador_since": user_data.get("embaixador_unlocked_at")
+    }
+
+
+@api_router.put("/admin/ambassador/{user_id}/certification")
+async def update_ambassador_certification(user_id: str, request: Request):
+    """Admin: Update ambassador certification level"""
+    await require_admin(request)
+    data = await request.json()
+    new_level = data.get("certification_level")
+    
+    if new_level not in CERTIFICATION_LEVELS:
+        raise HTTPException(status_code=400, detail=f"Nível inválido. Opções: {list(CERTIFICATION_LEVELS.keys())}")
+    
+    user = await db.users.find_one({"user_id": user_id}, {"_id": 0})
+    if not user or user.get("level") != "embaixador":
+        raise HTTPException(status_code=404, detail="Embaixador não encontrado")
+    
+    update = {
+        "certification_level": new_level,
+        "certification_updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    if new_level in ("verificado", "confiavel"):
+        update["certification_verified_at"] = datetime.now(timezone.utc).isoformat()
+    
+    await db.users.update_one({"user_id": user_id}, {"$set": update})
+    
+    # Notify ambassador
+    label = CERTIFICATION_LEVELS[new_level]["label"]
+    asyncio.create_task(create_notification(
+        user_id, "certification_updated",
+        f"O teu nível de certificação foi atualizado para: {label}",
+        {"certification_level": new_level}
+    ))
+    
+    return {"message": f"Certificação atualizada para {label}", "certification_level": new_level}
+
+
+@api_router.post("/ambassador/report")
+async def report_ambassador(request: Request):
+    """Report an ambassador campaign (anti-fraud)"""
+    data = await request.json()
+    journey_id = data.get("journey_id")
+    reason = data.get("reason", "")
+    
+    if not journey_id:
+        raise HTTPException(status_code=400, detail="journey_id obrigatório")
+    
+    user = await get_current_user(request)
+    reporter_id = user.user_id if user else None
+    
+    report_doc = {
+        "report_id": f"report_{uuid.uuid4().hex[:12]}",
+        "journey_id": journey_id,
+        "reporter_user_id": reporter_id,
+        "reason": reason,
+        "status": "pending",
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.reports.insert_one(report_doc)
+    
+    # Notify admin
+    journey = await db.journeys.find_one({"journey_id": journey_id}, {"_id": 0, "name": 1})
+    await db.notifications.insert_one({
+        "notification_id": f"notif_{uuid.uuid4().hex[:12]}",
+        "type": "campaign_reported",
+        "title": "Campanha reportada",
+        "message": f"A viagem '{journey.get('name', journey_id)}' foi reportada. Motivo: {reason[:100]}",
+        "journey_id": journey_id,
+        "for_admin": True,
+        "read": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    })
+    
+    return {"message": "Denúncia registada. A equipa irá analisar."}
+
+
+@api_router.get("/journey/{journey_id}/payment-info")
+async def get_journey_payment_info(journey_id: str):
+    """Get payment info for a journey (direct mode returns ambassador payment methods)"""
+    journey = await db.journeys.find_one({"journey_id": journey_id, "is_active": True}, {"_id": 0})
+    if not journey:
+        raise HTTPException(status_code=404, detail="Viagem não encontrada")
+    
+    payment_mode = journey.get("payment_mode", "platform")
+    
+    result = {
+        "payment_mode": payment_mode,
+        "journey_id": journey_id,
+        "is_ambassador_journey": journey.get("is_ambassador_journey", False),
+    }
+    
+    if payment_mode == "direct" and journey.get("ambassador_user_id"):
+        ambassador = await db.users.find_one(
+            {"user_id": journey["ambassador_user_id"]},
+            {"_id": 0, "name": 1, "anonymous_alias": 1, "use_real_name": 1, "certification_level": 1}
+        )
+        amb_name = ambassador.get("name") if ambassador and ambassador.get("use_real_name", True) else ambassador.get("anonymous_alias", "Embaixador") if ambassador else "Embaixador"
+        cert_level = ambassador.get("certification_level", "embaixador") if ambassador else "embaixador"
+        
+        result["ambassador_name"] = amb_name
+        result["ambassador_certification"] = cert_level
+        result["ambassador_certification_label"] = CERTIFICATION_LEVELS.get(cert_level, {}).get("label", "Embaixador 4Luis")
+        result["ambassador_payment_methods"] = journey.get("ambassador_payment_methods", {})
+        result["ambassador_payment_instructions"] = journey.get("ambassador_payment_instructions")
+    
+    return result
+
+
 # ==================== NOTIFICATIONS ====================
 
 async def create_notification(user_id: str, ntype: str, message: str, data: dict = None):
@@ -1960,6 +2121,8 @@ async def get_ambassador_public_profile(user_id: str):
         "avatar": display_avatar,
         "level": user.get("level", "sonhador"),
         "is_ambassador": is_ambassador,
+        "certification_level": user.get("certification_level", "embaixador") if is_ambassador else None,
+        "certification_label": CERTIFICATION_LEVELS.get(user.get("certification_level", "embaixador"), {}).get("label") if is_ambassador else None,
         "country": user.get("country"),
         "bio": user.get("bio"),
         "member_since": user.get("created_at"),
@@ -4409,6 +4572,9 @@ async def apply_for_ambassador_journey(request: Request):
         "is_ambassador_journey": True,
         "ambassador_user_id": user.user_id,
         "ambassador_name": user_data.get("name"),
+        "payment_mode": "direct",  # Ambassador journeys use direct payment by default
+        "ambassador_payment_methods": data.get("payment_methods", {}),
+        "ambassador_payment_instructions": data.get("payment_instructions"),
         "application_message": data["application_message"],
         "created_at": datetime.now(timezone.utc).isoformat(),
         "updated_at": datetime.now(timezone.utc).isoformat()

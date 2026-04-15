@@ -3,7 +3,7 @@ import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, Heart, Copy, Check, CreditCard, Smartphone, Bitcoin, ExternalLink,
-  Sparkles, ChevronRight, User, AlertCircle, Flag
+  Sparkles, ChevronRight, User, AlertCircle, Flag, ShieldCheck, Globe
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import axios from 'axios';
@@ -421,6 +421,18 @@ const JourneyDetail = () => {
                     level={journey.ambassador_info.level}
                     memberSince={journey.ambassador_info.member_since}
                   />
+                  {journey.ambassador_info.certification_label && (
+                    <span className={`inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                      journey.ambassador_info.certification_level === 'confiavel' 
+                        ? 'bg-emerald-100 text-emerald-700'
+                        : journey.ambassador_info.certification_level === 'verificado'
+                          ? 'bg-blue-100 text-blue-700'
+                          : 'bg-[#FFBE98]/20 text-[#2D2A26]'
+                    }`} data-testid="certification-badge">
+                      <ShieldCheck className="w-3 h-3" />
+                      {journey.ambassador_info.certification_label}
+                    </span>
+                  )}
                 </div>
                 <a 
                   href={`/ambassador/${journey.ambassador_info.user_id}`}
@@ -612,6 +624,7 @@ const JourneyDetail = () => {
         onClose={() => setShowCheckout(false)}
         journeyName={journey?.name || "China"}
         journeyId={id}
+        journeyData={journey}
         contributionDescriptions={journey?.contribution_descriptions}
         paymentInfo={paymentInfo}
         getAuthHeaders={getAuthHeaders}

@@ -800,6 +800,7 @@ const Home = () => {
           onClose={() => setShowCheckout(false)}
           journeyName={mainJourney.journey.name}
           journeyId={mainJourney.journey.journey_id}
+          journeyData={mainJourney.journey}
           contributionDescriptions={mainJourney.journey.contribution_descriptions}
           getAuthHeaders={getAuthHeaders}
           user={user}

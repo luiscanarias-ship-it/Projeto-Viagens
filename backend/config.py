@@ -108,3 +108,13 @@ TICKET_TYPES = [
 ]
 TICKET_STATUSES = ["Aberto", "Em analise", "A aguardar resposta", "Resolvido", "Fechado"]
 TICKET_PRIORITIES = ["Baixa", "Media", "Alta", "Urgente"]
+
+# Ambassador certification levels
+CERTIFICATION_LEVELS = {
+    "embaixador": {"label": "Embaixador 4Luis", "level": 1, "auto": True},
+    "verificado": {"label": "Embaixador Verificado", "level": 2, "auto": False},
+    "confiavel": {"label": "Embaixador Confiável", "level": 3, "auto": False}
+}
+# Thresholds for auto-certification to "confiavel"
+TRUSTED_AMBASSADOR_MIN_SUPPORTERS = 10
+TRUSTED_AMBASSADOR_MIN_RAISED = 500

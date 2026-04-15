@@ -113,6 +113,7 @@ const CheckoutModal = ({
   onClose, 
   journeyName = 'China',
   journeyId,
+  journeyData,
   contributionDescriptions,
   getAuthHeaders,
   user,
@@ -132,6 +133,13 @@ const CheckoutModal = ({
   const [cryptoPrices, setCryptoPrices] = useState({});
   const [loadingPrices, setLoadingPrices] = useState(false);
   const cryptoSectionRef = useRef(null);
+
+  // Direct payment mode
+  const paymentMode = journeyData?.payment_mode || 'platform';
+  const isDirectPayment = paymentMode === 'direct';
+  const ambassadorPaymentMethods = journeyData?.ambassador_payment_methods || {};
+  const ambassadorPaymentInstructions = journeyData?.ambassador_payment_instructions;
+  const ambassadorCertification = journeyData?.ambassador_info?.certification_label;
 
   // Calculate total payment
   const totalPayment = selectedAmount + selectedTip;
@@ -673,6 +681,21 @@ const CheckoutModal = ({
                   <p className="text-xs text-[#6B6661] text-center -mt-1" data-testid="step2-emotional-msg">
                     Mesmo uma pequena contribuição<br />ajuda este sonho a ganhar forma.
                   </p>
+
+                  {/* Direct payment notice */}
+                  {isDirectPayment && (
+                    <div className="bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 text-center" data-testid="direct-payment-notice">
+                      <p className="text-[11px] text-amber-800">
+                        O pagamento é feito diretamente ao Embaixador.<br />
+                        A 4Luis não gere os fundos.
+                      </p>
+                      {ambassadorCertification && (
+                        <p className="text-[10px] text-amber-700 mt-1 font-medium">
+                          {ambassadorCertification}
+                        </p>
+                      )}
+                    </div>
+                  )}
 
                   {/* ═══ SMART PAYMENT METHODS — Geo-prioritized ═══ */}
 
