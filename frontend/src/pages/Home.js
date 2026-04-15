@@ -541,35 +541,26 @@ const Home = () => {
 
             if (displayJourneys.length === 0) {
               return (
-                <div className="text-center py-12 bg-white rounded-2xl" data-testid="ambassador-empty-state">
-                  <Globe className="w-12 h-12 text-[#FFBE98]/30 mx-auto mb-4" />
-                  <h3 className="text-lg font-bold text-[#2D2A26] mb-2">Os primeiros sonhos estão a nascer</h3>
-                  <p className="text-sm text-[#6B6661] mb-6">Em breve poderás apoiar viagens de novos embaixadores</p>
-                  
-                  <div className="max-w-md mx-auto bg-[#FFBE98]/10 rounded-xl p-5 border border-[#FFBE98]/20">
-                    <p className="text-sm font-semibold text-[#2D2A26] mb-2">Queres ser um dos primeiros embaixadores?</p>
-                    <p className="text-xs text-[#6B6661] mb-4 leading-relaxed">
-                      Para te tornares embaixador, basta convidares 3 amigos a contribuir para a viagem principal.
-                      Partilha o sonho, envolve os teus amigos e desbloqueia a possibilidade de criar a tua própria viagem.
-                    </p>
-                    {user?.anonymous_alias ? (
-                      <ShareMenu
-                        inviteLink={buildInviteLink(user.anonymous_alias)}
-                        senderName={user?.name}
-                        buttonLabel="Convidar amigos"
-                        buttonClassName="w-full flex items-center justify-center gap-2 py-2.5 bg-[#2D2A26] text-white rounded-xl text-sm font-semibold hover:bg-[#4A4640] transition-all"
-                      />
-                    ) : (
-                      <Link
-                        to="/login"
-                        className="inline-flex items-center justify-center gap-2 w-full py-2.5 bg-[#2D2A26] text-white rounded-xl text-sm font-semibold hover:bg-[#4A4640] transition-all"
-                        data-testid="become-ambassador-btn"
-                      >
-                        <Heart className="w-4 h-4 text-[#FFBE98]" />
-                        Quero ser embaixador
-                      </Link>
-                    )}
-                  </div>
+                <div className="text-center py-6 bg-white rounded-2xl" data-testid="ambassador-empty-state">
+                  <h3 className="text-base font-bold text-[#2D2A26] mb-1">Os primeiros sonhos estão a nascer</h3>
+                  <p className="text-sm text-[#6B6661] mb-4">Em breve poderás apoiar viagens de novos embaixadores</p>
+                  <p className="text-xs text-[#6B6661] mb-3">Queres ser um dos primeiros embaixadores? Convida 3 amigos a contribuir para a viagem principal.</p>
+                  {user?.anonymous_alias ? (
+                    <ShareMenu
+                      inviteLink={buildInviteLink(user.anonymous_alias)}
+                      senderName={user?.name}
+                      buttonLabel="Quero ser embaixador"
+                      buttonClassName="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-[#2D2A26] text-white rounded-xl text-sm font-semibold hover:bg-[#4A4640] transition-all"
+                    />
+                  ) : (
+                    <Link
+                      to="/login"
+                      className="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-[#2D2A26] text-white rounded-xl text-sm font-semibold hover:bg-[#4A4640] transition-all"
+                      data-testid="become-ambassador-btn"
+                    >
+                      Quero ser embaixador
+                    </Link>
+                  )}
                 </div>
               );
             }
