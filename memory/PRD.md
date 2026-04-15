@@ -342,6 +342,27 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - Página /terms reescrita com 9 secções completas incluindo contribuição para plataforma e processamento de pagamentos
 - Linha de aceitação de termos no checkout (Step 2): "Ao continuar, aceitas os Termos e Condições" com link
 
+### Direct Payment Model + Ambassador Certification (2026-04-15)
+- **Payment Modes**: `platform` (plataforma gere fundos) e `direct` (pagamento direto ao embaixador)
+- **Journey Model**: Novos campos `payment_mode`, `ambassador_payment_methods`, `ambassador_payment_instructions`
+- **Checkout**: Aviso "O pagamento é feito diretamente ao Embaixador. A 4Luis não gere os fundos." para mode direct
+- **Certification Levels**: embaixador (auto) → verificado (admin) → confiável (histórico)
+- **Badge na viagem**: Mostra nível de certificação do embaixador na página da viagem
+- **Anti-fraude**: POST /api/ambassador/report para denunciar campanhas
+- **API Endpoints**: 
+  - GET /api/journey/{id}/payment-info
+  - GET /api/ambassador/{id}/profile (certificação + stats)
+  - PUT /api/admin/ambassador/{id}/certification
+  - POST /api/ambassador/report
+- **Ficheiros**: server.py, config.py, models.py, CheckoutModal.js, JourneyDetail.js, Home.js
+
+### Growth Loop Optimizations (2026-04-15)
+- Ecrã de sucesso: "Ajuda este sonho a ganhar forma" + motivação Embaixador
+- Dashboard: "Estás a X passos" + "2/3 amigos já contribuíram"
+- InvitePage: "Ao participar, também podes tornar-te Embaixador"
+- Email de contribuição: CTA "Convidar amigos" + "O sonho continua a crescer"
+- Benefícios simplificados: "Desbloqueia acesso especial + novas funcionalidades"
+
 ## Credentials
 - **Admin**: admin@4luis.com / Admin1
 - **GYG Partner ID**: WFPE9ME
