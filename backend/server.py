@@ -1942,6 +1942,42 @@ async def get_journey_payment_info(journey_id: str):
     return result
 
 
+@api_router.get("/ambassador/{user_id}/trust-indicators")
+async def get_ambassador_trust_indicators(user_id: str):
+    """Get trust indicators for an ambassador (confirmation rate, total confirmed, etc.)"""
+    # Get ambassador's journeys
+    journey_ids = await db.journeys.distinct("journey_id", {"ambassador_user_id": user_id})
+    
+    if not journey_ids:
+        return {"confirmed_count": 0, "total_count": 0, "confirmation_rate": 0, "total_raised": 0}
+    
+    confirmed = await db.contributions.count_documents({
+        "journey_id": {"$in": journey_ids},
+        "status": {"$in": ["confirmed", "completed"]}
+    })
+    rejected = await db.contributions.count_documents({
+        "journey_id": {"$in": journey_ids},
+        "status": "rejected"
+    })
+    total = confirmed + rejected
+    rate = round((confirmed / max(total, 1)) * 100) if total > 0 else 0
+    
+    # Total raised
+    pipeline = [
+        {"$match": {"journey_id": {"$in": journey_ids}, "status": {"$in": ["confirmed", "completed"]}}},
+        {"$group": {"_id": None, "total": {"$sum": {"$ifNull": ["$support_amount", "$amount"]}}}}
+    ]
+    result = await db.contributions.aggregate(pipeline).to_list(1)
+    total_raised = result[0]["total"] if result else 0
+    
+    return {
+        "confirmed_count": confirmed,
+        "total_count": total,
+        "confirmation_rate": rate,
+        "total_raised": total_raised
+    }
+
+
 # ==================== NOTIFICATIONS ====================
 
 async def create_notification(user_id: str, ntype: str, message: str, data: dict = None):
@@ -8817,7 +8853,7 @@ app.include_router(api_router)
 
 @app.on_event("startup")
 async def startup_event():
-    """Seed admin user on startup if not exists"""
+    """Seed admin user on startup and start background validation checker"""
     from passlib.context import CryptContext
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
     
@@ -8834,6 +8870,65 @@ async def startup_event():
         }
         await db.users.insert_one(admin_doc)
         logger.info(f"Admin user created: {ADMIN_EMAIL}")
+    
+    # Start background task for validation reminders
+    asyncio.create_task(validation_reminder_loop())
+
+
+async def validation_reminder_loop():
+    """Background loop: remind ambassadors of pending validations and flag stale ones"""
+    while True:
+        try:
+            await asyncio.sleep(3600)  # Run every hour
+            now = datetime.now(timezone.utc)
+            
+            # 24h reminder: notify ambassador of unvalidated contributions
+            cutoff_24h = (now - timedelta(hours=24)).isoformat()
+            stale_24h = await db.contributions.find({
+                "status": "awaiting_validation",
+                "confirmed_by_user_at": {"$lt": cutoff_24h},
+                "reminder_sent": {"$ne": True}
+            }, {"_id": 0}).to_list(100)
+            
+            for c in stale_24h:
+                journey = await db.journeys.find_one({"journey_id": c["journey_id"]}, {"_id": 0, "ambassador_user_id": 1, "name": 1})
+                if journey and journey.get("ambassador_user_id"):
+                    await create_notification(
+                        journey["ambassador_user_id"], "validation_reminder",
+                        f"Tens pagamentos por confirmar para '{journey.get('name', '')}'. Ajuda a manter o sonho a crescer.",
+                        {"contribution_id": c["contribution_id"]}
+                    )
+                    await db.contributions.update_one(
+                        {"contribution_id": c["contribution_id"]},
+                        {"$set": {"reminder_sent": True}}
+                    )
+            
+            # 7-day timeout: flag for admin
+            cutoff_7d = (now - timedelta(days=7)).isoformat()
+            stale_7d = await db.contributions.find({
+                "status": "awaiting_validation",
+                "confirmed_by_user_at": {"$lt": cutoff_7d},
+                "flagged": {"$ne": True}
+            }, {"_id": 0}).to_list(100)
+            
+            for c in stale_7d:
+                await db.contributions.update_one(
+                    {"contribution_id": c["contribution_id"]},
+                    {"$set": {"flagged": True, "flagged_at": now.isoformat(), "flagged_reason": "7d_no_validation"}}
+                )
+                await db.notifications.insert_one({
+                    "notification_id": f"notif_{uuid.uuid4().hex[:12]}",
+                    "type": "stale_contribution",
+                    "title": "Contribuição sem validação há 7 dias",
+                    "message": f"Contribuição {c['contribution_id']} ({c.get('amount', 0)}€) sem validação. Verificar.",
+                    "for_admin": True,
+                    "read": False,
+                    "created_at": now.isoformat()
+                })
+                logger.warning(f"Flagged stale contribution: {c['contribution_id']}")
+        except Exception as e:
+            logger.error(f"Validation reminder loop error: {e}")
+            await asyncio.sleep(60)
 
 @app.on_event("shutdown")
 async def shutdown_db_client():

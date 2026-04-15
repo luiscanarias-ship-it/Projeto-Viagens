@@ -126,6 +126,7 @@ const JourneyDetail = () => {
   const [showStickyBtn, setShowStickyBtn] = useState(false);
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const [showExitIntent, setShowExitIntent] = useState(false);
+  const [trustIndicators, setTrustIndicators] = useState(null);
   const exitIntentShown = useRef(false);
   const supportBtnRef = useRef(null);
   
@@ -188,6 +189,13 @@ const JourneyDetail = () => {
         setPaymentInfo(paymentRes.data);
         setProgress(progressRes.data);
         setContributions(contribRes.data.contributions || []);
+        
+        // Fetch trust indicators for ambassador journeys
+        if (journeyRes.data?.ambassador_info?.user_id) {
+          axios.get(`${API}/ambassador/${journeyRes.data.ambassador_info.user_id}/trust-indicators`)
+            .then(res => setTrustIndicators(res.data))
+            .catch(() => {});
+        }
         
         if (openPayment) {
           setShowCheckout(true);
@@ -428,10 +436,24 @@ const JourneyDetail = () => {
                         : journey.ambassador_info.certification_level === 'verificado'
                           ? 'bg-blue-100 text-blue-700'
                           : 'bg-[#FFBE98]/20 text-[#2D2A26]'
-                    }`} data-testid="certification-badge">
+                    }`} data-testid="certification-badge" title="Este embaixador foi validado pela 4Luis">
                       <ShieldCheck className="w-3 h-3" />
                       {journey.ambassador_info.certification_label}
                     </span>
+                  )}
+                  {/* Trust indicators */}
+                  {trustIndicators && trustIndicators.confirmed_count > 0 && (
+                    <div className="flex items-center gap-3 mt-2" data-testid="trust-indicators">
+                      <span className="text-[10px] text-[#6B6661] flex items-center gap-1">
+                        <Check className="w-3 h-3 text-emerald-500" />
+                        {trustIndicators.confirmed_count} pagamentos confirmados
+                      </span>
+                      {trustIndicators.confirmation_rate > 0 && (
+                        <span className="text-[10px] text-emerald-600 font-medium">
+                          {trustIndicators.confirmation_rate}% taxa de confirmação
+                        </span>
+                      )}
+                    </div>
                   )}
                 </div>
                 <a 

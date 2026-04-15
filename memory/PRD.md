@@ -364,17 +364,20 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - Benefícios simplificados: "Desbloqueia acesso especial + novas funcionalidades"
 
 ### Payment Validation System (2026-04-15)
-- **Estados**: pending → awaiting_validation → confirmed / rejected
-- **Fluxo**: User confirma ("Já enviei") → status muda para awaiting_validation → Embaixador valida no Dashboard
-- **Prova Opcional**: Upload de screenshot de comprovativo (max 5MB, base64)
-- **Dashboard Embaixador**: Secção "Pagamentos por confirmar" com botões "Confirmar" e "Não recebi"
-- **Notificações**: User → Embaixador (pagamento pendente), Embaixador → User (confirmado/rejeitado)
-- **Anti-fraude**: Max 3 contribuições pendentes por email, botão reportar, flag admin
-- **Endpoints**:
-  - PUT /api/contributions/{id}/confirm-details (atualizado: status awaiting_validation para direct)
-  - PUT /api/contributions/{id}/ambassador-validate (confirm/reject)
-  - GET /api/ambassador/pending-validations
-- **Ficheiros**: server.py, CheckoutModal.js, AmbassadorValidations.js (novo), Dashboard.js
+- **Estados**: pending → awaiting_validation → confirmed / rejected (+ flagged após 7 dias)
+- **Fluxo**: User confirma → awaiting_validation → Embaixador valida → confirmed/rejected
+- **Prova Opcional**: Upload de screenshot de comprovativo
+- **Dashboard Embaixador**: "Pagamentos por confirmar" com feedback "Pagamento confirmado com sucesso! Obrigado por manteres a confiança na plataforma."
+- **Lembretes automáticos**: Background task a cada hora — notifica embaixador após 24h sem validação
+- **Timeout 7 dias**: Flag automática + notificação admin para contribuições sem validação
+- **Anti-fraude**: Max 3 pendentes por email
+- **Trust Indicators**: GET /api/ambassador/{id}/trust-indicators (confirmed_count, confirmation_rate, total_raised)
+- **Badges de Confiança**:
+  - Página da viagem: badge certificação + "X pagamentos confirmados, Y% taxa de confirmação"
+  - Checkout: "Viagem aprovada pela 4Luis" / "Pagamento direto ao embaixador verificado"
+  - Tooltip: "Este embaixador foi validado pela 4Luis"
+- **NÃO na homepage** (decisão deliberada para evitar ruído)
+- **Ficheiros**: server.py, CheckoutModal.js, JourneyDetail.js, AmbassadorValidations.js, Dashboard.js
 
 ## Credentials
 - **Admin**: admin@4luis.com / Admin1

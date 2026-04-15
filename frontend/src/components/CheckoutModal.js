@@ -716,6 +716,18 @@ const CheckoutModal = ({
                     </div>
                   )}
 
+                  {/* Trust line for ambassador journeys */}
+                  {journeyData?.is_ambassador_journey && !isDirectPayment && (
+                    <p className="text-[10px] text-emerald-700 text-center flex items-center justify-center gap-1" data-testid="approved-badge">
+                      <ShieldCheck className="w-3 h-3" /> Viagem aprovada pela 4Luis
+                    </p>
+                  )}
+                  {isDirectPayment && journeyData?.ambassador_info?.certification_level && journeyData.ambassador_info.certification_level !== 'embaixador' && (
+                    <p className="text-[10px] text-emerald-700 text-center flex items-center justify-center gap-1" data-testid="verified-ambassador-badge">
+                      <ShieldCheck className="w-3 h-3" /> Pagamento direto ao embaixador verificado
+                    </p>
+                  )}
+
                   {/* ═══ SMART PAYMENT METHODS — Geo-prioritized ═══ */}
 
                   {/* PRIMARY: Portugal → MBWay + PayPal | International → PayPal */}

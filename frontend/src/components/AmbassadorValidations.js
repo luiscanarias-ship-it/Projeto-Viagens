@@ -10,6 +10,7 @@ const AmbassadorValidations = ({ token }) => {
   const [actionLoading, setActionLoading] = useState(null);
   const [notes, setNotes] = useState({});
   const [showProof, setShowProof] = useState(null);
+  const [successMsg, setSuccessMsg] = useState(null);
 
   const headers = { Authorization: `Bearer ${token}` };
 
@@ -33,6 +34,10 @@ const AmbassadorValidations = ({ token }) => {
         action,
         notes: notes[contributionId] || ''
       }, { headers });
+      if (action === 'confirm') {
+        setSuccessMsg('Pagamento confirmado com sucesso! Obrigado por manteres a confiança na plataforma.');
+        setTimeout(() => setSuccessMsg(null), 4000);
+      }
       fetchPending();
     } catch (e) {
       alert(e.response?.data?.detail || 'Erro ao processar');
@@ -56,6 +61,13 @@ const AmbassadorValidations = ({ token }) => {
           </span>
         )}
       </div>
+
+      {/* Success feedback */}
+      {successMsg && (
+        <div className="bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3 text-center" data-testid="success-feedback">
+          <p className="text-sm text-emerald-700 font-medium">{successMsg}</p>
+        </div>
+      )}
 
       {data.pending.length === 0 ? (
         <div className="text-center py-6 bg-stone-50 rounded-xl">
