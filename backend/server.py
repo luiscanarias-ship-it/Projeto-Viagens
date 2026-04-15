@@ -2005,11 +2005,52 @@ async def get_ambassador_trust_indicators(user_id: str):
     result = await db.contributions.aggregate(pipeline).to_list(1)
     total_raised = result[0]["total"] if result else 0
     
+    # Average confirmation time (only if confirmed_count > 5)
+    avg_confirmation_time = None
+    avg_confirmation_label = None
+    if confirmed > 5:
+        time_pipeline = [
+            {"$match": {
+                "journey_id": {"$in": journey_ids},
+                "status": {"$in": ["confirmed", "completed"]},
+                "confirmed_by_user_at": {"$exists": True},
+                "validated_at": {"$exists": True}
+            }},
+            {"$project": {
+                "user_confirmed": "$confirmed_by_user_at",
+                "validated": "$validated_at"
+            }}
+        ]
+        time_docs = await db.contributions.aggregate(time_pipeline).to_list(200)
+        
+        deltas = []
+        for doc in time_docs:
+            try:
+                t1 = datetime.fromisoformat(doc["user_confirmed"].replace("Z", "+00:00"))
+                t2 = datetime.fromisoformat(doc["validated"].replace("Z", "+00:00"))
+                delta_hours = (t2 - t1).total_seconds() / 3600
+                if 0 < delta_hours < 168:  # ignore outliers > 7 days
+                    deltas.append(delta_hours)
+            except Exception:
+                continue
+        
+        if len(deltas) >= 3:
+            avg_h = sum(deltas) / len(deltas)
+            avg_confirmation_time = round(avg_h, 1)
+            if avg_h < 1:
+                avg_confirmation_label = f"~{round(avg_h * 60)}min"
+            elif avg_h < 24:
+                avg_confirmation_label = f"~{round(avg_h)}h"
+            else:
+                avg_confirmation_label = f"~{round(avg_h / 24)}d"
+    
     return {
         "confirmed_count": confirmed,
         "total_count": total,
         "confirmation_rate": rate,
-        "total_raised": total_raised
+        "total_raised": total_raised,
+        "avg_confirmation_time": avg_confirmation_time,
+        "avg_confirmation_label": avg_confirmation_label
     }
 
 

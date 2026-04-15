@@ -114,6 +114,7 @@ const CheckoutModal = ({
   journeyName = 'China',
   journeyId,
   journeyData,
+  trustIndicators,
   contributionDescriptions,
   getAuthHeaders,
   user,
@@ -1286,7 +1287,9 @@ const CheckoutModal = ({
 
                   <p className="text-[10px] text-[#6B6661]/60 text-center">
                     {isDirectPayment
-                      ? 'O Embaixador irá confirmar o teu pagamento'
+                      ? trustIndicators?.avg_confirmation_label
+                        ? `Confirmação em ${trustIndicators.avg_confirmation_label}`
+                        : 'O Embaixador irá confirmar o teu pagamento'
                       : 'Recebes confirmação em poucos minutos'
                     }
                   </p>

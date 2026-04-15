@@ -3,7 +3,7 @@ import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, Heart, Copy, Check, CreditCard, Smartphone, Bitcoin, ExternalLink,
-  Sparkles, ChevronRight, User, AlertCircle, Flag, ShieldCheck, Globe
+  Sparkles, ChevronRight, User, AlertCircle, Flag, ShieldCheck, Globe, Clock
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import axios from 'axios';
@@ -452,7 +452,7 @@ const JourneyDetail = () => {
                   )}
                   {/* Trust indicators */}
                   {trustIndicators && trustIndicators.confirmed_count > 0 && (
-                    <div className="flex items-center gap-3 mt-2" data-testid="trust-indicators">
+                    <div className="flex items-center gap-3 mt-2 flex-wrap" data-testid="trust-indicators">
                       <span className="text-[10px] text-[#6B6661] flex items-center gap-1">
                         <Check className="w-3 h-3 text-emerald-500" />
                         {trustIndicators.confirmed_count} pagamentos confirmados
@@ -460,6 +460,12 @@ const JourneyDetail = () => {
                       {trustIndicators.confirmation_rate > 0 && (
                         <span className="text-[10px] text-emerald-600 font-medium">
                           {trustIndicators.confirmation_rate}% taxa de confirmação
+                        </span>
+                      )}
+                      {trustIndicators.avg_confirmation_label && (
+                        <span className="text-[10px] text-blue-600 font-medium flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          Confirmação em {trustIndicators.avg_confirmation_label}
                         </span>
                       )}
                     </div>
@@ -656,6 +662,7 @@ const JourneyDetail = () => {
         journeyName={journey?.name || "China"}
         journeyId={id}
         journeyData={journey}
+        trustIndicators={trustIndicators}
         contributionDescriptions={journey?.contribution_descriptions}
         paymentInfo={paymentInfo}
         getAuthHeaders={getAuthHeaders}
