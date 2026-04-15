@@ -973,74 +973,96 @@ const CheckoutModal = ({
                     </>
                   )}
 
-                  {/* ===== CRYPTO — kept as-is ===== */}
+                  {/* ===== CRYPTO — Optimized for conversion ===== */}
                   {selectedMethod === 'crypto' && cryptoData && (
-                    <div className="space-y-2" data-testid="crypto-instructions">
-                      {/* QR */}
-                      <div className="flex justify-center">
-                        <div className="bg-white p-2 rounded-xl shadow-sm border border-stone-100">
+                    <div className="space-y-2.5" data-testid="crypto-instructions">
+                      {/* QR + Amount block */}
+                      <div className="flex items-center gap-3">
+                        <div className="bg-white p-1.5 rounded-xl shadow-sm border border-stone-100 flex-shrink-0">
                           {qrImageUrl ? (
-                            <img src={qrImageUrl} alt="QR Code" width={120} height={120} />
+                            <img src={qrImageUrl} alt="QR Code" width={90} height={90} />
                           ) : (
-                            <div className="w-[120px] h-[120px] flex items-center justify-center">
+                            <div className="w-[90px] h-[90px] flex items-center justify-center">
                               <div className="w-5 h-5 border-2 border-[#FFBE98] border-t-transparent rounded-full animate-spin" />
                             </div>
                           )}
                         </div>
+                        <div className="flex-1">
+                          <p className="text-[10px] text-[#6B6661]">Envia exatamente</p>
+                          <p className="text-lg font-bold text-[#2D2A26]">{cryptoAmountCalc} {cryptoData.symbol}</p>
+                          <p className="text-[10px] text-[#6B6661]">≈ {selectedAmount}€</p>
+                          <p className="text-[10px] text-[#FFBE98] font-medium mt-0.5">Leva menos de 1 minuto</p>
+                        </div>
                       </div>
-                      {/* Amount */}
-                      <div className="bg-stone-50 rounded-lg p-2 text-center">
-                        <p className="text-xs text-[#6B6661]">Envia exatamente</p>
-                        <p className="text-base font-bold text-[#2D2A26]">{cryptoAmountCalc} {cryptoData.symbol}</p>
-                        <p className="text-[10px] text-[#6B6661]">≈ {selectedAmount}€</p>
-                      </div>
-                      {/* Steps */}
-                      <div className="flex items-start gap-2.5">
-                        <span className="w-5 h-5 rounded-full bg-[#2D2A26] text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">1</span>
-                        <p className="text-xs text-[#2D2A26]">Copia o endereço ou lê o QR</p>
-                      </div>
-                      <div className="flex items-start gap-2.5">
-                        <span className="w-5 h-5 rounded-full bg-[#2D2A26] text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">2</span>
-                        <p className="text-xs text-[#2D2A26]">Envia exatamente <strong>{cryptoAmountCalc} {cryptoData.symbol}</strong></p>
-                      </div>
-                      <div className="flex items-start gap-2.5">
-                        <span className="w-5 h-5 rounded-full bg-[#2D2A26] text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">3</span>
-                        <p className="text-xs text-[#2D2A26]">Depois clica <strong>Já fiz o pagamento</strong></p>
-                      </div>
-                      {/* Copy + Wallet */}
+
+                      {/* Action buttons */}
                       <div className="flex gap-2">
                         <button
                           onClick={() => copyToClipboard(cryptoData.address, 'address')}
-                          className="flex-1 py-2 bg-[#2D2A26] text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-[#4A4640] transition-colors"
+                          className="flex-1 py-2.5 bg-[#2D2A26] text-white rounded-lg text-xs font-semibold flex flex-col items-center justify-center gap-0.5 hover:bg-[#4A4640] transition-colors"
                           data-testid="crypto-copy-address"
                         >
-                          {copiedField === 'address' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                          {copiedField === 'address' ? 'Copiado!' : 'Copiar endereço'}
+                          <span className="flex items-center gap-1.5">
+                            {copiedField === 'address' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                            {copiedField === 'address' ? 'Copiado!' : 'Copiar endereço'}
+                          </span>
+                          <span className="text-[9px] font-normal text-white/60">Para colar na tua carteira</span>
                         </button>
                         <a
                           href={cryptoURI}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex-1 py-2 bg-emerald-600 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-emerald-700 transition-colors"
+                          className="flex-1 py-2.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold flex flex-col items-center justify-center gap-0.5 hover:bg-emerald-700 transition-colors"
                           data-testid="crypto-open-wallet"
                           onClick={(e) => {
-                            // Try to open wallet app via protocol URI
-                            // If it fails (no wallet installed), show helpful message
                             const timeout = setTimeout(() => {
                               alert('Nenhuma carteira de criptomoeda detetada.\n\nCopia o endereço e cola na tua carteira (MetaMask, Trust Wallet, etc.).');
                             }, 1500);
-                            // If wallet opens, clear the timeout
                             window.addEventListener('blur', () => clearTimeout(timeout), { once: true });
                           }}
                         >
-                          <Wallet className="w-3.5 h-3.5" /> Abrir carteira
+                          <span className="flex items-center gap-1.5">
+                            <Wallet className="w-3.5 h-3.5" /> Abrir carteira
+                          </span>
+                          <span className="text-[9px] font-normal text-white/60">Abrir automaticamente a tua app</span>
                         </a>
                       </div>
-                      {/* Network warning */}
-                      <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-1.5">
-                        <p className="text-[10px] text-amber-800">
-                          Envia apenas pela rede <strong>{cryptoData.network}</strong>. Outras redes resultam em perda de fundos.
-                        </p>
+
+                      {/* Simplified steps */}
+                      <div className="flex items-center gap-3 px-1">
+                        <div className="flex items-center gap-1.5">
+                          <span className="w-4 h-4 rounded-full bg-[#2D2A26] text-white flex items-center justify-center text-[9px] font-bold">1</span>
+                          <span className="text-[10px] text-[#6B6661]">Copia ou lê o QR</span>
+                        </div>
+                        <ArrowRight className="w-3 h-3 text-[#6B6661]/40" />
+                        <div className="flex items-center gap-1.5">
+                          <span className="w-4 h-4 rounded-full bg-[#2D2A26] text-white flex items-center justify-center text-[9px] font-bold">2</span>
+                          <span className="text-[10px] text-[#6B6661]">Envia exatamente este valor</span>
+                        </div>
+                        <ArrowRight className="w-3 h-3 text-[#6B6661]/40" />
+                        <div className="flex items-center gap-1.5">
+                          <span className="w-4 h-4 rounded-full bg-[#FFBE98] text-white flex items-center justify-center text-[9px] font-bold">3</span>
+                          <span className="text-[10px] text-[#6B6661] font-medium">Confirma abaixo</span>
+                        </div>
+                      </div>
+
+                      {/* Network warning — softer tone */}
+                      <p className="text-[10px] text-amber-700 bg-amber-50 rounded-lg px-3 py-1.5 text-center">
+                        Usa apenas a rede <strong>{cryptoData.network}</strong> para garantir a receção correta.
+                      </p>
+
+                      {/* Reference */}
+                      <div className="bg-stone-50 border border-stone-200 rounded-xl px-3 py-1.5 flex items-center justify-between" data-testid="crypto-reference-block">
+                        <div>
+                          <p className="text-[9px] text-[#6B6661]">Referência (para validação do pagamento)</p>
+                          <p className="text-sm font-bold text-[#2D2A26]" data-testid="payment-reference">{contribution.payment_reference}</p>
+                        </div>
+                        <button
+                          onClick={() => copyToClipboard(contribution.payment_reference, 'ref')}
+                          className="px-2 py-1 bg-stone-200 hover:bg-stone-300 rounded-lg text-[10px] font-medium text-[#2D2A26] transition-colors"
+                        >
+                          {copiedField === 'ref' ? 'Copiado!' : 'Copiar'}
+                        </button>
                       </div>
                     </div>
                   )}
@@ -1063,16 +1085,20 @@ const CheckoutModal = ({
                     </div>
                   )}
 
-                  {/* Crypto reference */}
+                  {/* Crypto reference - now inline above, old block removed */}
+
+                  {/* Warning + Confirm — for crypto: simplified final block */}
                   {selectedMethod === 'crypto' && (
-                    <div className="bg-stone-50 border border-stone-200 rounded-xl px-3 py-2" data-testid="crypto-reference-block">
-                      <p className="text-[10px] text-[#6B6661] text-center mb-0.5">Referência</p>
-                      <p className="text-center text-sm font-bold text-[#2D2A26]" data-testid="payment-reference">{contribution.payment_reference}</p>
-                    </div>
+                    <>
+                      {/* Guide to final action */}
+                      <div className="text-center">
+                        <span className="text-[11px] text-[#6B6661]">Depois de enviares o pagamento,<br />clica no botão abaixo</span>
+                      </div>
+                    </>
                   )}
 
-                  {/* Warning + Confirm + Social — for crypto and fallback only */}
-                  {selectedMethod !== 'mbway' && (
+                  {/* Warning + Confirm + Social — for non-crypto, non-mbway only */}
+                  {selectedMethod !== 'crypto' && selectedMethod !== 'mbway' && (
                     <>
                       <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2" data-testid="step3-warning">
                         <p className="text-[11px] text-amber-800 text-center">
@@ -1299,6 +1325,23 @@ const CheckoutModal = ({
                   ? `€${selectedAmount} para o sonho + €${selectedTip} para a plataforma`
                   : 'Promoções, descontos e vouchers para quem contribui'
                 }
+              </p>
+            </div>
+          )}
+
+          {/* Sticky footer for step 3 crypto — always visible confirm button */}
+          {step === 3 && selectedMethod === 'crypto' && !showConfirmation && !showConfirmForm && contribution && (
+            <div className="px-4 pb-3 pt-2 border-t border-stone-100 bg-white">
+              <button
+                onClick={() => setShowConfirmForm(true)}
+                className="w-full bg-[#2D2A26] text-white py-3 rounded-xl font-semibold hover:bg-[#4A4640] transition-all text-sm min-h-[44px]"
+                data-testid="crypto-confirm-sticky-btn"
+              >
+                Já enviei o pagamento
+              </button>
+              <p className="text-[10px] text-[#6B6661]/50 text-center mt-1.5 flex items-center justify-center gap-1">
+                <ShieldCheck className="w-3 h-3" />
+                100% seguro · Confirmação em poucos minutos
               </p>
             </div>
           )}
