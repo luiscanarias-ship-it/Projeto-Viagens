@@ -1293,11 +1293,21 @@ const CheckoutModal = ({
                     )}
                   </div>
 
-                  {/* Register incentive for non-users */}
+                  {/* Account conversion for non-users */}
                   {!user && (
-                    <div className="border-t border-stone-100 pt-3 space-y-2" data-testid="register-incentive">
-                      <p className="text-xs font-semibold text-[#2D2A26]">Cria conta para acompanhar tudo</p>
-                      <div className="space-y-1 text-left max-w-[240px] mx-auto">
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.4 }}
+                      className="border-t border-stone-100 pt-4 space-y-3"
+                      data-testid="register-incentive"
+                    >
+                      <div className="text-center">
+                        <p className="text-sm font-bold text-[#2D2A26]">Queres acompanhar este sonho?</p>
+                        <p className="text-xs text-[#6B6661] mt-0.5">Cria a tua conta em poucos segundos</p>
+                      </div>
+
+                      <div className="space-y-1.5 text-left max-w-[260px] mx-auto">
                         {['Acompanhar a evolução da viagem', 'Convidar amigos e ganhar recompensas', 'Desbloquear o teu próprio sonho'].map((t) => (
                           <span key={t} className="flex items-center gap-2 text-xs text-[#6B6661]">
                             <Check className="w-3.5 h-3.5 text-[#FFBE98] flex-shrink-0" />
@@ -1305,14 +1315,28 @@ const CheckoutModal = ({
                           </span>
                         ))}
                       </div>
+
+                      {/* Google — primary CTA */}
+                      <button
+                        onClick={() => {
+                          window.location.href = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(window.location.origin + '/auth/callback')}`;
+                        }}
+                        className="w-full flex items-center justify-center gap-2.5 py-2.5 bg-white border-2 border-stone-200 rounded-xl font-medium text-sm text-[#2D2A26] hover:border-[#FFBE98] hover:bg-[#FFBE98]/5 transition-all"
+                        data-testid="google-register-btn"
+                      >
+                        <Globe className="w-4 h-4" />
+                        Continuar com Google
+                      </button>
+
+                      {/* Email register — secondary */}
                       <a
-                        href="/login"
-                        className="inline-flex items-center justify-center gap-2 w-full py-2.5 bg-[#2D2A26] text-white rounded-xl font-semibold text-sm hover:bg-[#4A4640] transition-colors"
+                        href={`/login${confirmEmail ? `?email=${encodeURIComponent(confirmEmail)}` : ''}`}
+                        className="w-full inline-flex items-center justify-center gap-2 py-2.5 bg-[#2D2A26] text-white rounded-xl font-semibold text-sm hover:bg-[#4A4640] transition-colors"
                         data-testid="register-btn"
                       >
-                        Criar conta
+                        Criar conta com email
                       </a>
-                    </div>
+                    </motion.div>
                   )}
 
                   <button
@@ -1320,7 +1344,7 @@ const CheckoutModal = ({
                     className="w-full text-xs text-[#6B6661] hover:text-[#2D2A26] transition-colors py-1"
                     data-testid="thank-you-close-btn"
                   >
-                    Fechar
+                    {user ? 'Fechar' : 'Continuar sem conta'}
                   </button>
                 </motion.div>
               )}

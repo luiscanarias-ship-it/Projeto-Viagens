@@ -36,9 +36,18 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
+  // Pre-fill email from query params (e.g. from checkout conversion)
+  const urlParams = new URLSearchParams(window.location.search);
+  const prefillEmail = urlParams.get('email') || '';
+
   const [formData, setFormData] = useState({
-    email: '', password: '', confirmPassword: '', name: '', surname: ''
+    email: prefillEmail, password: '', confirmPassword: '', name: '', surname: ''
   });
+
+  // If email is pre-filled, switch to register mode
+  useEffect(() => {
+    if (prefillEmail) setIsRegister(true);
+  }, [prefillEmail]);
   const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
 
   const strength = useMemo(() => getPasswordStrength(formData.password), [formData.password]);
