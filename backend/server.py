@@ -999,6 +999,7 @@ async def confirm_contribution_details(contribution_id: str, request: Request):
     body = await request.json()
     contributor_name = body.get("contributor_name")
     contributor_email = body.get("contributor_email")
+    proof_image_url = body.get("proof_image_url")  # Optional screenshot proof
 
     if not contributor_email:
         raise HTTPException(status_code=400, detail="Email é obrigatório")
@@ -1007,32 +1008,207 @@ async def confirm_contribution_details(contribution_id: str, request: Request):
     if not contribution:
         raise HTTPException(status_code=404, detail="Contribuição não encontrada")
 
+    journey = await db.journeys.find_one({"journey_id": contribution["journey_id"]}, {"_id": 0})
+    is_direct = journey and journey.get("payment_mode") == "direct"
+    
+    # For direct payment: set awaiting_validation (ambassador must confirm)
+    # For platform payment: keep as pending (admin confirms)
+    new_status = "awaiting_validation" if is_direct else "pending"
+
     update_fields = {
+        "status": new_status,
         "contributor_email": contributor_email,
         "user_confirmed_payment": True,
         "confirmed_by_user_at": datetime.now(timezone.utc).isoformat()
     }
     if contributor_name:
         update_fields["contributor_name"] = contributor_name
+    if proof_image_url:
+        update_fields["proof_image_url"] = proof_image_url
+
+    # Anti-fraud: limit pending contributions per email (max 3 pending)
+    pending_count = await db.contributions.count_documents({
+        "contributor_email": contributor_email,
+        "status": {"$in": ["pending", "awaiting_validation"]},
+        "contribution_id": {"$ne": contribution_id}
+    })
+    if pending_count >= 3:
+        raise HTTPException(
+            status_code=429,
+            detail="Tens demasiadas contribuições pendentes. Aguarda a validação antes de enviar mais."
+        )
 
     await db.contributions.update_one(
         {"contribution_id": contribution_id},
         {"$set": update_fields}
     )
 
-    # Send pending confirmation email
+    # Send pending confirmation email to contributor
     updated_contribution = {**contribution, **update_fields}
-    journey = await db.journeys.find_one({"journey_id": contribution["journey_id"]}, {"_id": 0})
     if journey:
         try:
             await send_contribution_pending_email(updated_contribution, journey)
-            logger.info(f"Pending email sent for contribution {contribution_id}")
         except Exception as e:
             logger.error(f"Failed to send pending email: {e}")
 
+    # Notify ambassador for direct payments
+    if is_direct and journey.get("ambassador_user_id"):
+        amb_id = journey["ambassador_user_id"]
+        amount = contribution.get("support_amount") or contribution.get("amount", 0)
+        asyncio.create_task(create_notification(
+            amb_id, "payment_awaiting_validation",
+            f"Nova contribuição de {amount}€ para '{journey.get('name', '')}' aguarda a tua confirmação.",
+            {"contribution_id": contribution_id, "journey_id": journey["journey_id"], "amount": amount}
+        ))
+
     return {
-        "status": "ok",
+        "status": new_status,
         "message": "Obrigado! A tua contribuição será validada em breve."
+    }
+
+
+@api_router.put("/contributions/{contribution_id}/ambassador-validate")
+async def ambassador_validate_contribution(contribution_id: str, request: Request):
+    """Ambassador confirms or rejects a direct payment contribution"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Autenticação necessária")
+    
+    body = await request.json()
+    action = body.get("action")  # "confirm" or "reject"
+    notes = body.get("notes", "")
+    
+    if action not in ("confirm", "reject"):
+        raise HTTPException(status_code=400, detail="Ação inválida. Use 'confirm' ou 'reject'")
+    
+    contribution = await db.contributions.find_one({"contribution_id": contribution_id}, {"_id": 0})
+    if not contribution:
+        raise HTTPException(status_code=404, detail="Contribuição não encontrada")
+    
+    # Verify this ambassador owns the journey
+    journey = await db.journeys.find_one({"journey_id": contribution["journey_id"]}, {"_id": 0})
+    if not journey or journey.get("ambassador_user_id") != user.user_id:
+        raise HTTPException(status_code=403, detail="Não tens permissão para validar esta contribuição")
+    
+    if contribution.get("status") != "awaiting_validation":
+        raise HTTPException(status_code=400, detail="Esta contribuição não está à espera de validação")
+    
+    now = datetime.now(timezone.utc).isoformat()
+    
+    if action == "confirm":
+        support_amount = contribution.get("support_amount") or contribution.get("amount", 0)
+        
+        await db.contributions.update_one(
+            {"contribution_id": contribution_id},
+            {"$set": {
+                "status": "confirmed",
+                "validated_by": f"ambassador:{user.user_id}",
+                "validated_at": now,
+                "ambassador_validation_notes": notes
+            }}
+        )
+        
+        # Update journey progress
+        await db.journeys.update_one(
+            {"journey_id": contribution["journey_id"]},
+            {"$inc": {"current_amount": support_amount}}
+        )
+        
+        # Apply revenue distribution
+        await apply_revenue_distribution(contribution_id)
+        
+        # Update contributor stats
+        contributor_id = contribution.get("user_id")
+        if contributor_id:
+            await db.users.update_one(
+                {"user_id": contributor_id},
+                {"$inc": {"total_contributed": contribution.get("amount", 0)}}
+            )
+            # Check progression
+            if journey.get("is_main_trip"):
+                await db.users.update_one(
+                    {"user_id": contributor_id},
+                    {"$set": {"contributed_to_main_trip": True}}
+                )
+            await recalculate_ambassador_status(contributor_id)
+        
+        # Check journey funding
+        await check_and_update_journey_funding_status(contribution["journey_id"])
+        await check_and_update_story_chapter(contribution["journey_id"])
+        
+        # Notify contributor
+        if contribution.get("contributor_email"):
+            asyncio.create_task(create_notification(
+                contributor_id or "anonymous", "payment_confirmed",
+                f"A tua contribuição de {support_amount}€ foi confirmada pelo Embaixador.",
+                {"contribution_id": contribution_id}
+            ))
+            # Send confirmation email
+            updated = await db.contributions.find_one({"contribution_id": contribution_id}, {"_id": 0})
+            if updated:
+                asyncio.create_task(send_contribution_email(updated, journey))
+        
+        return {"status": "confirmed", "message": "Pagamento confirmado com sucesso"}
+    
+    else:  # reject
+        await db.contributions.update_one(
+            {"contribution_id": contribution_id},
+            {"$set": {
+                "status": "rejected",
+                "validated_by": f"ambassador:{user.user_id}",
+                "validated_at": now,
+                "ambassador_validation_notes": notes,
+                "rejection_reason": notes
+            }}
+        )
+        
+        # Notify contributor
+        contributor_id = contribution.get("user_id")
+        asyncio.create_task(create_notification(
+            contributor_id or "anonymous", "payment_rejected",
+            f"O Embaixador não conseguiu confirmar a tua contribuição. Razão: {notes or 'Pagamento não recebido'}",
+            {"contribution_id": contribution_id}
+        ))
+        
+        return {"status": "rejected", "message": "Contribuição marcada como não recebida"}
+
+
+@api_router.get("/ambassador/pending-validations")
+async def get_ambassador_pending_validations(request: Request):
+    """Get contributions awaiting validation by this ambassador"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Autenticação necessária")
+    
+    # Get ambassador's journeys
+    journey_ids = await db.journeys.distinct("journey_id", {
+        "ambassador_user_id": user.user_id,
+        "is_active": True
+    })
+    
+    # Get awaiting_validation contributions for those journeys
+    contributions = await db.contributions.find(
+        {
+            "journey_id": {"$in": journey_ids},
+            "status": "awaiting_validation"
+        },
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(50)
+    
+    # Also get recently validated (last 10)
+    recent = await db.contributions.find(
+        {
+            "journey_id": {"$in": journey_ids},
+            "status": {"$in": ["confirmed", "rejected"]},
+            "validated_by": {"$regex": f"^ambassador:{user.user_id}"}
+        },
+        {"_id": 0}
+    ).sort("validated_at", -1).limit(10).to_list(10)
+    
+    return {
+        "pending": contributions,
+        "pending_count": len(contributions),
+        "recently_validated": recent
     }
 
 @api_router.get("/journeys/{journey_id}/progress")

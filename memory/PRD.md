@@ -363,6 +363,19 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - Email de contribuição: CTA "Convidar amigos" + "O sonho continua a crescer"
 - Benefícios simplificados: "Desbloqueia acesso especial + novas funcionalidades"
 
+### Payment Validation System (2026-04-15)
+- **Estados**: pending → awaiting_validation → confirmed / rejected
+- **Fluxo**: User confirma ("Já enviei") → status muda para awaiting_validation → Embaixador valida no Dashboard
+- **Prova Opcional**: Upload de screenshot de comprovativo (max 5MB, base64)
+- **Dashboard Embaixador**: Secção "Pagamentos por confirmar" com botões "Confirmar" e "Não recebi"
+- **Notificações**: User → Embaixador (pagamento pendente), Embaixador → User (confirmado/rejeitado)
+- **Anti-fraude**: Max 3 contribuições pendentes por email, botão reportar, flag admin
+- **Endpoints**:
+  - PUT /api/contributions/{id}/confirm-details (atualizado: status awaiting_validation para direct)
+  - PUT /api/contributions/{id}/ambassador-validate (confirm/reject)
+  - GET /api/ambassador/pending-validations
+- **Ficheiros**: server.py, CheckoutModal.js, AmbassadorValidations.js (novo), Dashboard.js
+
 ## Credentials
 - **Admin**: admin@4luis.com / Admin1
 - **GYG Partner ID**: WFPE9ME

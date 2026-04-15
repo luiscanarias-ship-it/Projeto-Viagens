@@ -441,17 +441,36 @@ const CheckoutModal = ({
     try {
       await axios.put(`${API}/contributions/${contribution.contribution_id}/confirm-details`, {
         contributor_name: confirmName || null,
-        contributor_email: confirmEmail
+        contributor_email: confirmEmail,
+        proof_image_url: proofImage || null
       });
       setShowConfirmation(true);
       setShowConfirmForm(false);
     } catch (error) {
       console.error('Error confirming:', error);
-      setShowConfirmation(true);
-      setShowConfirmForm(false);
+      if (error.response?.status === 429) {
+        alert(error.response.data.detail);
+      } else {
+        setShowConfirmation(true);
+        setShowConfirmForm(false);
+      }
     } finally {
       setConfirmingPayment(false);
     }
+  };
+
+  // Proof image upload (convert to base64 data URL)
+  const [proofImage, setProofImage] = useState(null);
+  const handleProofUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Ficheiro demasiado grande. Máximo 5MB.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setProofImage(reader.result);
+    reader.readAsDataURL(file);
   };
 
   // Method display label
@@ -1216,6 +1235,34 @@ const CheckoutModal = ({
                     </div>
                   </div>
 
+                  {/* Optional proof upload for direct payments */}
+                  {isDirectPayment && (
+                    <div data-testid="proof-upload-section">
+                      <label className="text-[11px] text-[#6B6661] font-medium block mb-1">
+                        Comprovativo (opcional)
+                      </label>
+                      <p className="text-[10px] text-[#6B6661]/70 mb-1.5">
+                        Envia um screenshot para acelerar a confirmação
+                      </p>
+                      {proofImage ? (
+                        <div className="relative">
+                          <img src={proofImage} alt="Comprovativo" className="w-full h-20 object-cover rounded-lg border border-stone-200" />
+                          <button
+                            onClick={() => setProofImage(null)}
+                            className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ) : (
+                        <label className="block w-full py-2 px-3 border border-dashed border-stone-300 rounded-xl text-center cursor-pointer hover:border-[#FFBE98] transition-colors">
+                          <span className="text-xs text-[#6B6661]">Carregar imagem</span>
+                          <input type="file" accept="image/*" onChange={handleProofUpload} className="hidden" data-testid="proof-upload-input" />
+                        </label>
+                      )}
+                    </div>
+                  )}
+
                   <button
                     onClick={handleConfirmPayment}
                     disabled={!confirmEmail || confirmingPayment}
@@ -1226,7 +1273,10 @@ const CheckoutModal = ({
                   </button>
 
                   <p className="text-[10px] text-[#6B6661]/60 text-center">
-                    Recebes confirmação em poucos minutos
+                    {isDirectPayment
+                      ? 'O Embaixador irá confirmar o teu pagamento'
+                      : 'Recebes confirmação em poucos minutos'
+                    }
                   </p>
 
                   <button

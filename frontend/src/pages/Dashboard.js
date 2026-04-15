@@ -11,6 +11,7 @@ import { useAuth } from '../contexts/AuthContext';
 import JourneyApplicationModal from '../components/JourneyApplicationModal';
 import ShareMenu, { buildInviteLink } from '../components/ShareMenu';
 import SupportDashboard from '../components/SupportDashboard';
+import AmbassadorValidations from '../components/AmbassadorValidations';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -509,6 +510,18 @@ const Dashboard = () => {
             </div>
           )}
         </motion.div>
+
+        {/* AMBASSADOR VALIDATIONS — Pending payments to confirm */}
+        {isEmbaixador && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="bg-white rounded-3xl p-6 md:p-8 shadow-lg border border-stone-100"
+          >
+            <AmbassadorValidations token={localStorage.getItem('token')} />
+          </motion.div>
+        )}
 
         {/* BLOCO 3 — Convites */}
         <motion.div
