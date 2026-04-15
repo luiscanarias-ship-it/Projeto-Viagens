@@ -495,10 +495,21 @@ const CheckoutModal = ({
                 <p className="text-xs text-[#6B6661]">Destino: {journeyName}</p>
               </div>
               <button
-                onClick={step === 3 ? goToStep2 : step === 2 ? goToStep1 : handleClose}
+                onClick={() => {
+                  if (showConfirmForm) {
+                    // From confirm form → back to payment instructions
+                    setShowConfirmForm(false);
+                  } else if (step === 3) {
+                    goToStep2();
+                  } else if (step === 2) {
+                    goToStep1();
+                  } else {
+                    handleClose();
+                  }
+                }}
                 className="p-2 hover:bg-stone-100 rounded-full transition-colors"
               >
-                {step > 1 && !showConfirmation ? (
+                {(step > 1 || showConfirmForm) && !showConfirmation ? (
                   <ArrowRight className="w-5 h-5 text-[#6B6661] rotate-180" />
                 ) : (
                   <X className="w-5 h-5 text-[#6B6661]" />
