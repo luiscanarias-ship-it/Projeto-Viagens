@@ -316,26 +316,31 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - Notificacoes push
 - Consistencias de dados (viagens duplicadas, endpoint /api/health)
 
-### Platform Tip System — Monetização Opcional (2026-04-11)
+### Platform Tip System — Monetização Opcional (2026-04-11) — ⏸️ DESATIVADO (2026-04-15)
+- **Status**: DESATIVADO por decisão estratégica — foco em crescimento da base de utilizadores e referrals
+- **Reativar**: Alterar `TIP_SYSTEM_ENABLED = true` em CheckoutModal.js (linha ~27) e descomentar tab "revenue" em Admin.js
 - **Conceito**: Sistema de contribuição opcional para manter a plataforma gratuita
 - **Opções de Tip**: 2€ (default selecionado), 5€, 10€, "Não quero contribuir"
 - **Regras de Distribuição**:
   - Campanha de Embaixador: 100% support_amount → embaixador, tip_amount → plataforma
   - Campanha da Plataforma: 100% support_amount → plataforma, tip_amount → plataforma
-- **Checkout UI**: Nova secção com título "Ajuda-nos a manter esta plataforma gratuita para todos", subtítulo "Sem esta contribuição, não conseguiríamos operar."
-- **Total Display**: Resumo com "Apoio ao sonho" + "Contribuição para a plataforma" + "Total"
-- **Backend**: Campos support_amount, tip_amount, ambassador_revenue, platform_revenue no modelo Contribution
-- **Admin Dashboard**: Nova tab "Receita" com métricas de tips, taxa de conversão, distribuição por valor
-- **API Endpoints**: GET /api/contributions/config (inclui tip_options), GET /api/admin/platform-revenue
-- **Ficheiros**: CheckoutModal.js, server.py, config.py, Admin.js, models.py
+- **Checkout UI**: Secção com título "Ajuda-nos a manter esta plataforma gratuita para todos"
+- **Backend**: Campos support_amount, tip_amount, ambassador_revenue, platform_revenue no modelo Contribution — PRESERVADOS
+- **Admin Dashboard**: Tab "Receita" com métricas — CÓDIGO PRESERVADO, tab escondida
+- **API Endpoints**: GET /api/contributions/config, GET /api/admin/platform-revenue — PRESERVADOS
+- **Email**: send_tip_thank_you_email() em email_service.py — PRESERVADO
+- **Ficheiros com código preservado**: CheckoutModal.js, server.py, config.py, Admin.js, models.py, email_service.py
 
-### Tip System UX Improvements (2026-04-11)
-- **Mensagem de Agradecimento**: Na confirmação de pagamento, se tip > 0, mostra "Sem pessoas como tu, esta plataforma não existia ❤️"
-- **Email de Agradecimento**: Enviado automaticamente após pagamento confirmado se tip > 0, com assunto "Obrigado por fazeres parte deste sonho ❤️"
-- **Microcopy de Reforço**: "Contribuição opcional. Podes remover a qualquer momento." - reduz fricção
-- **Total Summary Sempre Visível**: Transparência total com breakdown antes do pagamento
-- **Tracking Avançado**: Admin dashboard com average_tip, zero_tip_count, distribuição por valor (incluindo €0)
-- **Ficheiros Atualizados**: CheckoutModal.js, email_service.py (send_tip_thank_you_email), Admin.js
+### Tip System UX Improvements (2026-04-11) — ⏸️ DESATIVADO
+- **Mensagem de Agradecimento**: "Sem pessoas como tu, esta plataforma não existia ❤️" — controlada por TIP_SYSTEM_ENABLED
+- **Email de Agradecimento**: Enviado se tip > 0 — preservado em email_service.py
+- **Microcopy**: "Contribuição opcional. Podes remover a qualquer momento." — preservado
+- **Tracking**: average_tip, zero_tip_count, distribuição por valor — endpoint preservado
+
+### Termos e Condições (2026-04-11)
+- Footer atualizado: "Privacy" → "Privacidade", "Terms" → "Termos e Condições"
+- Página /terms reescrita com 9 secções completas incluindo contribuição para plataforma e processamento de pagamentos
+- Linha de aceitação de termos no checkout (Step 2): "Ao continuar, aceitas os Termos e Condições" com link
 
 ## Credentials
 - **Admin**: admin@4luis.com / Admin1

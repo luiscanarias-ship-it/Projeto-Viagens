@@ -24,6 +24,12 @@ const tipOptions = [
   { value: 0, label: 'Não quero contribuir', default: false }
 ];
 
+// ========== TIP SYSTEM TOGGLE ==========
+// Set to true to reactivate the voluntary tip system
+// All code, backend endpoints and admin dashboard are preserved
+const TIP_SYSTEM_ENABLED = false;
+// ========================================
+
 // IfthenPay configuration — replace keys when available
 const IFTHENPAY_CONFIG = {
   mbway: {
@@ -115,7 +121,7 @@ const CheckoutModal = ({
   // Checkout state
   const [step, setStep] = useState(1);
   const [selectedAmount, setSelectedAmount] = useState(10);
-  const [selectedTip, setSelectedTip] = useState(2); // Default tip is 2€
+  const [selectedTip, setSelectedTip] = useState(TIP_SYSTEM_ENABLED ? 2 : 0); // Tip disabled: default 0
   const [selectedMethod, setSelectedMethod] = useState(null);
   const [selectedCrypto, setSelectedCrypto] = useState(null);
   const [contribution, setContribution] = useState(null);
@@ -182,7 +188,7 @@ const CheckoutModal = ({
     if (!isOpen) {
       setStep(1);
       setSelectedAmount(10);
-      setSelectedTip(2); // Reset tip to default
+      setSelectedTip(TIP_SYSTEM_ENABLED ? 2 : 0); // Reset tip based on toggle
       setSelectedMethod(null);
       setSelectedCrypto(null);
       setContribution(null);
@@ -585,7 +591,8 @@ const CheckoutModal = ({
                     </p>
                   )}
 
-                  {/* Platform Tip Section */}
+                  {/* Platform Tip Section - controlled by TIP_SYSTEM_ENABLED flag */}
+                  {TIP_SYSTEM_ENABLED && (
                   <div className="mt-4 pt-4 border-t border-stone-100" data-testid="tip-section">
                     <div className="flex items-center gap-2 mb-2">
                       <Gift className="w-4 h-4 text-[#FFBE98]" />
@@ -616,6 +623,7 @@ const CheckoutModal = ({
                       Contribuição opcional. Podes remover a qualquer momento.
                     </p>
                   </div>
+                  )}
 
                 </motion.div>
               )}
@@ -635,7 +643,7 @@ const CheckoutModal = ({
                     <div className="flex items-center gap-3">
                       <div className="text-right">
                         <span className="font-bold text-[#2D2A26]">€{totalPayment}</span>
-                        {selectedTip > 0 && (
+                        {TIP_SYSTEM_ENABLED && selectedTip > 0 && (
                           <span className="text-[10px] text-[#6B6661] block">
                             (€{selectedAmount} + €{selectedTip} plataforma)
                           </span>
@@ -881,7 +889,7 @@ const CheckoutModal = ({
                       {/* Amount — large, centered */}
                       <div className="text-center pt-1" data-testid="step3-summary">
                         <p className="text-3xl font-bold text-[#2D2A26]">Enviar {totalPayment}€</p>
-                        {selectedTip > 0 && (
+                        {TIP_SYSTEM_ENABLED && selectedTip > 0 && (
                           <p className="text-xs text-[#6B6661] mt-1">
                             (€{selectedAmount} apoio + €{selectedTip} para a plataforma)
                           </p>
@@ -1176,8 +1184,8 @@ const CheckoutModal = ({
                     </p>
                   )}
 
-                  {/* Platform tip thank you message - only if tip > 0 */}
-                  {selectedTip > 0 && (
+                  {/* Platform tip thank you message - only if tip system enabled and tip > 0 */}
+                  {TIP_SYSTEM_ENABLED && selectedTip > 0 && (
                     <motion.div 
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}

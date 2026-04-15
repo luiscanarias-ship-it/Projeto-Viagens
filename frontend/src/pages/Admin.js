@@ -765,7 +765,7 @@ const Admin = () => {
         <div className="flex flex-wrap gap-1.5 mb-6">
           {[
             { id: 'analytics', label: 'Analytics', icon: null },
-            { id: 'revenue', label: 'Receita', icon: platformRevenue?.summary?.total_tips > 0 ? '€' : null },
+            /* { id: 'revenue', label: 'Receita', icon: platformRevenue?.summary?.total_tips > 0 ? '€' : null }, // TIP SYSTEM DISABLED - reactivate when TIP_SYSTEM_ENABLED = true */
             { id: 'journeys', label: 'Viagens', icon: null },
             { id: 'candidaturas', label: 'Candidaturas', icon: ambassadorApplications?.by_status?.candidatura?.length || null },
             { id: 'visibility', label: 'Visibilidade', icon: null },
