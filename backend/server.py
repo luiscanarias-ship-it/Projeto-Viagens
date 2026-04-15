@@ -1942,6 +1942,41 @@ async def get_journey_payment_info(journey_id: str):
     return result
 
 
+
+@api_router.get("/success-stories")
+async def get_success_stories():
+    """Get funded ambassador journeys for social proof (homepage section)"""
+    journeys = await db.journeys.find(
+        {
+            "is_ambassador_journey": True,
+            "status": {"$in": ["financiada", "realizada"]},
+        },
+        {"_id": 0, "journey_id": 1, "name": 1, "poetic_name": 1, "image_url": 1,
+         "ambassador_name": 1, "ambassador_user_id": 1, "current_amount": 1, "goal_amount": 1,
+         "status": 1, "created_at": 1}
+    ).sort("updated_at", -1).limit(6).to_list(6)
+    
+    # Enrich with contributor count
+    for j in journeys:
+        count = await db.contributions.count_documents({
+            "journey_id": j["journey_id"],
+            "status": {"$in": ["confirmed", "completed"]}
+        })
+        j["contributor_count"] = count
+        # Get ambassador avatar
+        if j.get("ambassador_user_id"):
+            amb = await db.users.find_one(
+                {"user_id": j["ambassador_user_id"]},
+                {"_id": 0, "avatar": 1, "anonymous_avatar": 1, "name": 1, "anonymous_alias": 1, "use_real_name": 1}
+            )
+            if amb:
+                j["ambassador_avatar"] = amb.get("avatar") or amb.get("anonymous_avatar")
+                j["ambassador_display_name"] = amb.get("name") if amb.get("use_real_name", True) else amb.get("anonymous_alias", "Embaixador")
+    
+    return {"stories": journeys}
+
+
+
 @api_router.get("/ambassador/{user_id}/trust-indicators")
 async def get_ambassador_trust_indicators(user_id: str):
     """Get trust indicators for an ambassador (confirmation rate, total confirmed, etc.)"""

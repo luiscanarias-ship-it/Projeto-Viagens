@@ -10,6 +10,7 @@ import axios from 'axios';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import CheckoutModal from '../components/CheckoutModal';
+import SuccessStoryBanner from '../components/SuccessStoryBanner';
 import ShareMenu, { buildInviteLink } from '../components/ShareMenu';
 import StoryChapter from '../components/StoryChapter';
 import MilestoneProgress from '../components/MilestoneProgress';
@@ -304,6 +305,14 @@ const JourneyDetail = () => {
       </div>
 
       <div className="max-w-6xl mx-auto px-6 md:px-12 py-12">
+        {/* Success Story Banner */}
+        <SuccessStoryBanner
+          journey={journey}
+          progress={progress}
+          contributions={contributions}
+          user={user}
+        />
+
         {/* Story Chapter */}
         <div className="mb-4 -mt-8 relative z-10 max-w-2xl mx-auto">
           <StoryChapter
@@ -526,7 +535,7 @@ const JourneyDetail = () => {
                 data-testid="support-btn"
               >
                 <Heart className="w-5 h-5" />
-                {t('journey.support_btn')}
+                {journey.is_main_trip && isFunded ? 'Faz parte deste momento' : t('journey.support_btn')}
               </button>
               
               <ShareButton 

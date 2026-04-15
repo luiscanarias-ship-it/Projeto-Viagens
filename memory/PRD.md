@@ -363,21 +363,17 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - Email de contribuição: CTA "Convidar amigos" + "O sonho continua a crescer"
 - Benefícios simplificados: "Desbloqueia acesso especial + novas funcionalidades"
 
-### Payment Validation System (2026-04-15)
+### Payment Validation + Trust System (2026-04-15)
 - **Estados**: pending → awaiting_validation → confirmed / rejected (+ flagged após 7 dias)
-- **Fluxo**: User confirma → awaiting_validation → Embaixador valida → confirmed/rejected
-- **Prova Opcional**: Upload de screenshot de comprovativo
-- **Dashboard Embaixador**: "Pagamentos por confirmar" com feedback "Pagamento confirmado com sucesso! Obrigado por manteres a confiança na plataforma."
-- **Lembretes automáticos**: Background task a cada hora — notifica embaixador após 24h sem validação
-- **Timeout 7 dias**: Flag automática + notificação admin para contribuições sem validação
-- **Anti-fraude**: Max 3 pendentes por email
-- **Trust Indicators**: GET /api/ambassador/{id}/trust-indicators (confirmed_count, confirmation_rate, total_raised)
-- **Badges de Confiança**:
-  - Página da viagem: badge certificação + "X pagamentos confirmados, Y% taxa de confirmação"
-  - Checkout: "Viagem aprovada pela 4Luis" / "Pagamento direto ao embaixador verificado"
-  - Tooltip: "Este embaixador foi validado pela 4Luis"
-- **NÃO na homepage** (decisão deliberada para evitar ruído)
-- **Ficheiros**: server.py, CheckoutModal.js, JourneyDetail.js, AmbassadorValidations.js, Dashboard.js
+- **Lembretes 24h + Timeout 7 dias**: Background task automática
+- **Trust Indicators**: confirmed_count, confirmation_rate, total_raised
+- **Badges**: Certificação + "X pagamentos confirmados, Y% taxa" na viagem + "Viagem aprovada pela 4Luis" no checkout
+
+### Success Story System (2026-04-15)
+- **Embaixador (financiada)**: "Este sonho foi financiado 🎉" + métricas + badge + partilha + CTAs
+- **Main Trip (contínua)**: "O sonho já ganhou forma! Mas a viagem continua..." + prova social + CTA activo
+- **Homepage (futuro)**: GET /api/success-stories pronto
+- **Ficheiros**: SuccessStoryBanner.js, JourneyDetail.js, server.py
 
 ## Credentials
 - **Admin**: admin@4luis.com / Admin1
