@@ -1019,8 +1019,19 @@ const CheckoutModal = ({
                         </button>
                         <a
                           href={cryptoURI}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className="flex-1 py-2 bg-emerald-600 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-emerald-700 transition-colors"
                           data-testid="crypto-open-wallet"
+                          onClick={(e) => {
+                            // Try to open wallet app via protocol URI
+                            // If it fails (no wallet installed), show helpful message
+                            const timeout = setTimeout(() => {
+                              alert('Nenhuma carteira de criptomoeda detetada.\n\nCopia o endereço e cola na tua carteira (MetaMask, Trust Wallet, etc.).');
+                            }, 1500);
+                            // If wallet opens, clear the timeout
+                            window.addEventListener('blur', () => clearTimeout(timeout), { once: true });
+                          }}
                         >
                           <Wallet className="w-3.5 h-3.5" /> Abrir carteira
                         </a>
