@@ -995,7 +995,7 @@ const CheckoutModal = ({
                         </div>
                       </div>
 
-                      {/* Action buttons */}
+                      {/* Action buttons — Copy is primary, Wallet is mobile-only secondary */}
                       <div className="flex gap-2">
                         <button
                           onClick={() => copyToClipboard(cryptoData.address, 'address')}
@@ -1006,13 +1006,14 @@ const CheckoutModal = ({
                             {copiedField === 'address' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                             {copiedField === 'address' ? 'Copiado!' : 'Copiar endereço'}
                           </span>
-                          <span className="text-[9px] font-normal text-white/60">Para colar na tua carteira</span>
+                          <span className="text-[9px] font-normal text-white/60">Cola este endereço na tua carteira</span>
                         </button>
+                        {/* Wallet button — mobile only (hidden on md+ screens) */}
                         <a
                           href={cryptoURI}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex-1 py-2.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold flex flex-col items-center justify-center gap-0.5 hover:bg-emerald-700 transition-colors"
+                          className="md:hidden flex-shrink-0 w-[100px] py-2.5 bg-stone-100 text-[#2D2A26] rounded-lg text-xs font-medium flex flex-col items-center justify-center gap-0.5 hover:bg-stone-200 transition-colors border border-stone-200"
                           data-testid="crypto-open-wallet"
                           onClick={(e) => {
                             const timeout = setTimeout(() => {
@@ -1021,10 +1022,10 @@ const CheckoutModal = ({
                             window.addEventListener('blur', () => clearTimeout(timeout), { once: true });
                           }}
                         >
-                          <span className="flex items-center gap-1.5">
-                            <Wallet className="w-3.5 h-3.5" /> Abrir carteira
+                          <span className="flex items-center gap-1">
+                            <Wallet className="w-3 h-3" /> Abrir app
                           </span>
-                          <span className="text-[9px] font-normal text-white/60">Abrir automaticamente a tua app</span>
+                          <span className="text-[8px] font-normal text-[#6B6661]">Abre a tua app de crypto</span>
                         </a>
                       </div>
 
