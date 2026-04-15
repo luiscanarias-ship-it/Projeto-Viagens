@@ -81,7 +81,7 @@ const InvitePage = () => {
                 <Users className="w-7 h-7 text-[#FFBE98]" />
               </div>
               <p className="text-lg text-[#2D2A26]" data-testid="invite-main-msg">
-                <strong>{data.inviter_name}</strong> convidou-te para participar neste sonho.
+                <strong>{data.inviter_name}</strong> convidou-te para ajudar a realizar este sonho.
               </p>
               {data.inviter_has_contributed && (
                 <p className="text-sm text-[#FFBE98] font-semibold" data-testid="inviter-contributed-msg">
@@ -89,8 +89,8 @@ const InvitePage = () => {
                 </p>
               )}
               <p className="text-sm text-[#6B6661] leading-relaxed" data-testid="cooperative-msg">
-                Se participares também,<br />
-                ajudas <strong>{data.inviter_name}</strong> a aproximar-se de desbloquear o nível Embaixador.
+                Ao participar, também podes tornar-te Embaixador<br />
+                e desbloquear acesso especial.
               </p>
             </div>
 
@@ -128,7 +128,7 @@ const InvitePage = () => {
             </button>
 
             <p className="text-xs text-center text-[#6B6661]/80 italic" data-testid="invite-register-hint">
-              Se criares uma conta, o teu amigo poderá acompanhar o teu apoio e aproximar-se de desbloquear Embaixador.
+              Cria uma conta para acompanhar este sonho e desbloquear novas funcionalidades.
             </p>
 
             {/* Share this dream */}

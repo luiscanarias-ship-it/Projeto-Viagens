@@ -161,11 +161,15 @@ def get_contribution_email_html(contributor_name: str, amount: float, journey_na
     </div>
     {crypto_badge}
     <p style="margin: 0 0 24px 0; color: #6B6661; font-size: 16px; line-height: 1.6;">
-        Graças a ti, este sonho está mais perto de se tornar realidade. 
-        Cada contribuição aproxima este sonho da realidade.
+        Graças a ti, este sonho está mais perto de se tornar realidade.
     </p>
+    <div style="background-color: #FFF8F0; border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 24px; border: 1px solid #FFBE9840;">
+        <p style="margin: 0 0 8px 0; color: #2D2A26; font-weight: bold; font-size: 16px;">O sonho continua a crescer</p>
+        <p style="margin: 0 0 16px 0; color: #6B6661; font-size: 14px;">Já ajudaste — agora convida alguém a fazer parte</p>
+        <a href="{FRONTEND_URL}" style="display: inline-block; padding: 12px 28px; background-color: #FFBE98; color: #2D2A26; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 14px;">Convidar amigos</a>
+    </div>
     <div style="text-align: center;">
-        <a href="{FRONTEND_URL}/dashboard" style="display: inline-block; padding: 14px 32px; background-color: #FFBE98; color: #2D2A26; text-decoration: none; border-radius: 12px; font-weight: bold;">Ver o meu Dashboard</a>
+        <a href="{FRONTEND_URL}/dashboard" style="display: inline-block; padding: 14px 32px; background-color: #2D2A26; color: #FFFFFF; text-decoration: none; border-radius: 12px; font-weight: bold;">Ver o meu Dashboard</a>
     </div>
     """
     return get_email_base_template(content, "Contribuição Confirmada - 4Luis")

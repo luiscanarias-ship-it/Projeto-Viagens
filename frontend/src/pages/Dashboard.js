@@ -279,7 +279,7 @@ const Dashboard = () => {
             </div>
             <div>
               <h3 className="text-lg font-bold text-[#2D2A26]">Progresso para Embaixador</h3>
-              <p className="text-sm text-[#6B6661]">Contribui e convida para subir de nível</p>
+              <p className="text-sm text-[#6B6661]">Desbloqueia acesso especial + novas funcionalidades</p>
             </div>
           </div>
 
@@ -455,10 +455,10 @@ const Dashboard = () => {
                 <div className="p-4 bg-[#FFF8F0] rounded-xl border border-[#FFBE98]/30">
                   <p className="text-sm text-[#2D2A26] font-medium">
                     {!hasContribution && validReferrals === 0
-                      ? 'O nível Embaixador permite-te abrir a tua própria viagem na plataforma. Contribui para a viagem principal e convida 3 amigos — estás a 2 passos de lá chegar.'
+                      ? 'Torna-te Embaixador: contribui para a viagem principal e convida 3 amigos. Desbloqueia acesso especial e novas funcionalidades.'
                       : !hasContribution
-                        ? `Estás cada vez mais perto! Contribui para a viagem principal e convida mais ${referralsNeeded} amigo${referralsNeeded > 1 ? 's' : ''} para desbloqueares Embaixador.`
-                        : `Falta${referralsNeeded > 1 ? 'm' : ''} apenas ${referralsNeeded} amigo${referralsNeeded > 1 ? 's' : ''} que contribua${referralsNeeded > 1 ? 'm' : ''} para desbloqueares Embaixador e poderes abrir a tua viagem.`}
+                        ? `Estás cada vez mais perto! Contribui para a viagem principal e convida mais ${referralsNeeded} amigo${referralsNeeded > 1 ? 's' : ''} para te tornares Embaixador.`
+                        : `Estás a ${referralsNeeded} passo${referralsNeeded > 1 ? 's' : ''} de te tornares Embaixador. Falta${referralsNeeded > 1 ? 'm' : ''} ${referralsNeeded} amigo${referralsNeeded > 1 ? 's' : ''} que contribua${referralsNeeded > 1 ? 'm' : ''}.`}
                   </p>
                 </div>
               )}
@@ -473,10 +473,13 @@ const Dashboard = () => {
               {!isEmbaixador && referralsNeeded > 0 && (
                 <div className="mb-4 text-center">
                   <p className="text-lg font-bold text-[#2D2A26]" data-testid="referrals-needed-msg">
-                    Faltam <span className="text-[#FFBE98]">{referralsNeeded} amigo{referralsNeeded > 1 ? 's' : ''}</span> para desbloquear Embaixador
+                    Estás a <span className="text-[#FFBE98]">{referralsNeeded} passo{referralsNeeded > 1 ? 's' : ''}</span> de te tornares Embaixador
                   </p>
                   <p className="text-xs text-[#6B6661] mt-1">
-                    Cada convite aceite aproxima-te do próximo nível
+                    {validReferrals > 0 
+                      ? `${validReferrals}/3 amigos já contribuíram`
+                      : 'Convida amigos — cada contribuição aproxima-te'
+                    }
                   </p>
                 </div>
               )}

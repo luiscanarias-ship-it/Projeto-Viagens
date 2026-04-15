@@ -1273,13 +1273,13 @@ const CheckoutModal = ({
                     className="bg-[#FFBE98]/10 border border-[#FFBE98]/30 rounded-xl p-4 space-y-2.5"
                     data-testid="share-block"
                   >
-                    <p className="text-sm font-bold text-[#2D2A26]">Ajuda a concretizar este sonho</p>
+                    <p className="text-sm font-bold text-[#2D2A26]">Ajuda este sonho a ganhar forma</p>
                     <p className="text-xs text-[#6B6661]">
-                      Dá a conhecer aos teus amigos esta possibilidade de concretizarem viagens de sonho
+                      Convida amigos a fazer parte deste momento
                     </p>
                     <div className="flex gap-2">
                       <a
-                        href={`https://wa.me/?text=${encodeURIComponent(`Estou a ajudar um amigo a realizar uma viagem de sonho 🌍\nJunta-te a mim: ${window.location.origin}${user?.anonymous_alias ? `?ref=${user.anonymous_alias}` : ''}`)}`}
+                        href={`https://wa.me/?text=${encodeURIComponent(`Estou a ajudar um amigo a realizar uma viagem de sonho 🌍\nJunta-te a mim: ${window.location.origin}${user?.anonymous_alias ? `/invite/${user.anonymous_alias.replace(/\s+/g, '-')}` : ''}`)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-[#25D366] text-white rounded-xl text-xs font-semibold hover:bg-[#1DA851] transition-colors"
@@ -1290,7 +1290,7 @@ const CheckoutModal = ({
                       </a>
                       <button
                         onClick={() => {
-                          const link = `${window.location.origin}${user?.anonymous_alias ? `?ref=${user.anonymous_alias}` : ''}`;
+                          const link = `${window.location.origin}${user?.anonymous_alias ? `/invite/${user.anonymous_alias.replace(/\s+/g, '-')}` : ''}`;
                           navigator.clipboard.writeText(link);
                           setCopied(true);
                           setTimeout(() => setCopied(false), 2000);
@@ -1302,10 +1302,13 @@ const CheckoutModal = ({
                         {copied ? 'Copiado!' : 'Copiar link'}
                       </button>
                     </div>
-                    {/* Ambassador progress for logged users */}
-                    {user?.valid_referrals_count !== undefined && (
-                      <p className="text-[10px] text-[#6B6661] pt-1" data-testid="ambassador-progress">
-                        Faltam-te <strong>{Math.max(0, 3 - (user.valid_referrals_count || 0))}</strong> amigos para te tornares Embaixador
+                    {/* Ambassador motivation */}
+                    {user && (
+                      <p className="text-[10px] text-[#FFBE98] font-medium pt-1 text-center" data-testid="ambassador-motivation">
+                        {user.level === 'embaixador' 
+                          ? 'Embaixador — continua a partilhar e a inspirar!'
+                          : `Se 3 amigos contribuírem, tornas-te Embaixador`
+                        }
                       </p>
                     )}
                   </motion.div>
@@ -1340,7 +1343,7 @@ const CheckoutModal = ({
                         className="w-full inline-flex items-center justify-center gap-2 py-2 bg-stone-100 text-[#2D2A26] rounded-xl font-medium text-xs hover:bg-stone-200 transition-colors"
                         data-testid="register-btn"
                       >
-                        Criar conta com email
+                        Criar conta
                       </a>
                     </motion.div>
                   )}
