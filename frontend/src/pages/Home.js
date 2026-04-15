@@ -318,7 +318,12 @@ const Home = () => {
                         <div className="max-w-md">
                           <div className="flex justify-between items-center mb-2">
                             <span className="text-white/70 text-sm">{t('home.progress')}</span>
-                            <span className="text-white font-bold text-lg">{mainJourney.progress.percentage}% <span className="text-white/60 text-sm font-normal">{t('home.funded')}</span></span>
+                            <span className="text-white font-bold text-lg">
+                              {mainJourney.progress.is_funded 
+                                ? <>100% <span className="text-white/60 text-sm font-normal">do objetivo inicial</span></>
+                                : <>{mainJourney.progress.percentage}% <span className="text-white/60 text-sm font-normal">{t('home.funded')}</span></>
+                              }
+                            </span>
                           </div>
                           <div className="h-2.5 bg-white/15 rounded-full overflow-hidden">
                             <motion.div
@@ -331,7 +336,7 @@ const Home = () => {
                           </div>
                           {mainJourney.progress.is_funded && mainJourney.progress.funding_status === 'completed' && (
                             <p className="text-[#F2C94C] text-sm mt-2 flex items-center gap-2">
-                              <Sparkles className="w-4 h-4" /> Sonho 100% Financiado
+                              <Sparkles className="w-4 h-4" /> O primeiro objetivo foi alcançado!
                             </p>
                           )}
                           {mainJourney.progress.is_funded && mainJourney.progress.funding_status === 'pending_validation' && (
@@ -341,7 +346,15 @@ const Home = () => {
                           )}
                           {mainJourney.progress.is_funded && (!mainJourney.progress.funding_status || mainJourney.progress.funding_status === 'active') && (
                             <p className="text-green-400 text-sm mt-2 flex items-center gap-2">
-                              <Sparkles className="w-4 h-4" /> {t('home.goal_reached')}
+                              <Sparkles className="w-4 h-4" /> O primeiro objetivo foi alcançado!
+                            </p>
+                          )}
+                          {mainJourney.progress.is_funded && (
+                            <p className="text-white/50 text-xs mt-1">
+                              {mainJourney.contributor_count > 0 
+                                ? `${mainJourney.contributor_count} pessoas já fazem parte deste sonho`
+                                : 'As contribuições continuam a impulsionar esta viagem'
+                              }
                             </p>
                           )}
                           {!mainJourney.progress.is_funded && (
@@ -354,14 +367,18 @@ const Home = () => {
                     {/* Right: CTA aligned with chapter */}
                     <div className="md:w-72 flex flex-col items-start md:items-center justify-start md:pt-4">
                       <p className="text-white/70 text-sm italic mb-4 text-center" data-testid="micro-question">
-                        Queres ajudar este sonho a dar o próximo passo?
+                        {mainJourney.progress?.is_funded
+                          ? 'As contribuições continuam a impulsionar esta viagem'
+                          : 'Queres ajudar este sonho a dar o próximo passo?'
+                        }
                       </p>
                       <button
                         ref={mainContributeBtnRef}
                         onClick={() => setShowCheckout(true)}
                         className="inline-flex items-center gap-2 px-6 sm:px-8 py-3.5 sm:py-4 bg-[#2D2A26] text-white rounded-xl font-bold text-base sm:text-lg hover:bg-[#4A4640] transition-all shadow-lg hover:shadow-xl hover:scale-[1.02] w-full sm:w-auto justify-center animate-[pulse-glow_2.5s_ease-in-out_infinite]"
                         data-testid="contribute-main-btn">
-                        <Heart className="w-5 h-5 text-[#FFBE98]" /> {t('home.contribute_dream')}
+                        <Heart className="w-5 h-5 text-[#FFBE98]" />
+                        {mainJourney.progress?.is_funded ? 'Faz parte deste momento' : t('home.contribute_dream')}
                       </button>
                     </div>
                   </div>
