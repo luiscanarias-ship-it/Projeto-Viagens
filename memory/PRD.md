@@ -397,11 +397,18 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
   - Fase 1 (Read-only): GET journeys, featured, realized, active, single journey, progress, contributions, payment-info, success-stories, homepage endpoints (main-journey, ambassador-journeys, realized-journeys, curated-dreams)
   - Fase 2 (CRUD): POST/PUT/DELETE /admin/journeys, GET /admin/journeys
   - Fase 3 (States/Logic): approve-funding, test-chapter-email, ambassador journey apply/my-journeys, admin ambassador-journeys CRUD + status, visibility system (update/recalculate/show-goal/list), raffle system (ready/participants/draw), seed-journeys, migrate-journey-status, set-main-journey
-- **journey_service.py** ✅ ATUALIZADO — Lógica partilhada: check_and_update_journey_funding_status, check_and_update_story_chapter, send_chapter_change_emails, _build_chapter_email_body, get_chapter_number, DEFAULT_STORY_CHAPTERS, calculate_journey_visibility_score
+- **payment_routes.py** ✅ EXTRAÍDO (Fase 1+2+3 + Admin) — Todos os endpoints de pagamento:
+  - Fase 1 (Read-only): contributions/config, payment-info, stripe/config, paypal/config, checkout-status, my-contributions, ambassador/pending-validations
+  - Fase 2 (Validation): contributions/create, contributions/manual, confirm-details, ambassador-validate
+  - Fase 3 (Integrations): paypal/create-order, paypal/capture-order, webhook/stripe
+  - Admin: admin/contributions (search, list, confirm, reject, validate, reports, pending), admin/payouts (list, update status)
+- **journey_service.py** ✅ — Lógica de funding, chapters, visibility scoring
+- **payment_service.py** ✅ — Revenue distribution, PayPal auth, points generation
+- **referral_service.py** ✅ — Ambassador status recalculation (versão completa com notificações e emails)
 - **Padrão validado**: routes → services → models (sem dependências inversas)
-- **server.py**: Reduzido de ~8280 para ~7000 linhas (remoção de ~1280 linhas)
-- **Próximas extrações** (mesmo padrão): payment_routes.py, ambassador_routes.py, admin_routes.py
-- **Testes**: 24/24 backend + frontend — todos validados após extração (iteration_92.json)
+- **server.py**: Reduzido de ~8280 para ~5230 linhas (remoção de ~3050 linhas total)
+- **Próximas extrações**: ambassador_routes.py, admin_routes.py
+- **Testes**: 32/32 payment + 24/24 journey — todos validados (iteration_93.json, iteration_92.json)
 
 ## Credentials
 - **Admin**: admin@4luis.com / Admin1
