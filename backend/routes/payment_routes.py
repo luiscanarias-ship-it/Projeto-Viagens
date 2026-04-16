@@ -38,6 +38,7 @@ from services.payment_service import (
     generate_points_for_user
 )
 from services.referral_service import recalculate_ambassador_status
+from services.audit_service import log_admin_action
 
 router = APIRouter()
 
@@ -1062,6 +1063,11 @@ async def confirm_contribution(contribution_id: str, request: Request):
     if journey:
         await send_contribution_email(contribution, journey)
 
+    await log_admin_action(
+        (await get_current_user(request)).user_id if await get_current_user(request) else "system",
+        "contribution_confirmed", "contribution", contribution_id, {"amount": contribution.get("amount")}
+    )
+
     return {"message": "Contribuição confirmada com sucesso"}
 
 
@@ -1081,6 +1087,8 @@ async def reject_contribution(contribution_id: str, request: Request):
 
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Contribuição não encontrada")
+
+    await log_admin_action(admin.user_id, "contribution_rejected", "contribution", contribution_id, {})
 
     return {"message": "Contribuição rejeitada"}
 

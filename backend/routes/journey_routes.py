@@ -25,6 +25,7 @@ from services.journey_service import (
     _build_chapter_email_body,
     calculate_journey_visibility_score
 )
+from services.audit_service import log_admin_action
 
 router = APIRouter()
 
@@ -526,6 +527,9 @@ async def admin_approve_journey_funding(journey_id: str, request: Request):
     await send_journey_funded_emails(journey, None, current_amount)
 
     logger.info(f"Admin {user.user_id} approved funding for journey {journey_id} — marked as realizada")
+    await log_admin_action(user.user_id, "journey_funding_approved", "journey", journey_id, {
+        "contributor_count": contributor_count, "current_amount": current_amount
+    })
     return {"status": "completed", "message": "Viagem fechada com sucesso. Agora aparece na secção 'Sonhos realizados'."}
 
 
@@ -935,6 +939,10 @@ async def update_ambassador_journey_status(journey_id: str, request: Request):
         response_data["published_in"] = "Sonhos em Materialização"
         response_data["email_sent"] = bool(ambassador and ambassador.get("email") and RESEND_API_KEY)
     
+    await log_admin_action(admin.user_id, "journey_status_changed", "journey", journey_id, {
+        "old_status": journey.get("status"), "new_status": new_status
+    })
+
     return response_data
 
 
