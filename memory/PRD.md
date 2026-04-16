@@ -411,7 +411,9 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - **Padrão validado**: routes → services → models (sem dependências inversas)
 - **server.py**: Reduzido de ~8280 para ~3890 linhas (remoção de 53%)
 - **Refatorização COMPLETA** — 5 módulos de rotas: auth, journey, payment, ambassador, admin
-- **Testes**: 38/38 ambassador+admin + 32/32 payment + 24/24 journey (94 testes total)
+- **Audit Log Dashboard** ✅ — Interface admin com filtros (ação, alvo, pesquisa), lista cronológica, metadata
+- **Validação E2E pré-lançamento** ✅ — 28/28 fluxos testados (iteration_95)
+- **Testes totais**: 122 testes (38+32+24+28) em 4 iterações — ZERO bugs
 
 ## Credentials
 - **Admin**: admin@4luis.com / Admin1
