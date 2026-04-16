@@ -1,0 +1,114 @@
+{
+  "summary": "Completed comprehensive testing of journey routes migration (Phase 2 & 3). All 24 backend API tests passed. Frontend homepage and journey exploration pages render correctly with data from migrated routes.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "passed_tests": [
+    "GET /api/journeys - list active journeys (200 OK)",
+    "GET /api/journeys/{journey_id} - get single journey by ID (200 OK)",
+    "GET /api/journeys/{journey_id} - 404 for non-existent journey",
+    "GET /api/journeys/{journey_id}/progress - journey progress with percentage, current_amount, is_funded",
+    "GET /api/journeys/{journey_id}/contributions - journey contributions list",
+    "GET /api/journey/{journey_id}/payment-info - payment info with payment_mode",
+    "GET /api/success-stories - success stories endpoint",
+    "GET /api/homepage/main-journey - homepage main journey data with progress and contributions",
+    "GET /api/homepage/ambassador-journeys - homepage ambassador journeys with regions",
+    "GET /api/homepage/curated-dreams - curated dreams fallback",
+    "GET /api/homepage/realized-journeys - realized journeys by country",
+    "POST /api/auth/login - admin login successful (auth_routes.py)",
+    "POST /api/auth/login - invalid credentials returns 401",
+    "GET /api/contributions/config - payments config with tip_options (server.py)",
+    "GET /api/admin/journeys - list all journeys (admin)",
+    "GET /api/admin/ambassador-journeys - list ambassador journeys (admin)",
+    "GET /api/admin/journeys-visibility - visibility data (admin)",
+    "GET /api/admin/journeys-ready-for-raffle - raffle-ready journeys (admin)",
+    "GET /api/admin/journeys - unauthorized returns 401/403",
+    "POST /api/seed-journeys - seed journeys idempotent",
+    "POST /api/admin/migrate-journey-status - migration utility",
+    "POST/PUT/DELETE /api/admin/journeys - full CRUD cycle",
+    "POST /api/admin/set-main-journey/{journey_id} - set main journey",
+    "GET /api/journeys/{journey_id}/progress (admin) - admin sees goal_amount",
+    "Frontend: Homepage loads with China journey (25% funded)",
+    "Frontend: Explorar Viagens page shows ambassador journeys section",
+    "Frontend: Sonhos Realizados section shows curated dreams"
+  ],
+  "test_report_links": [
+    "/app/backend/tests/test_journey_routes_migration.py",
+    "/app/test_reports/pytest/journey_routes_migration_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [
+    "/app/backend/tests/test_journey_routes_migration.py"
+  ],
+  "success_rate": {
+    "backend": "100%",
+    "frontend": "100%"
+  },
+  "seed_data_creation": "Used existing seed data (journey_china001)",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Journey routes migration (Phase 2 & 3) is complete and working. All journey endpoints have been successfully extracted from server.py to routes/journey_routes.py. Business logic helpers are in services/journey_service.py. The server.py still contains payment routes, user routes, email admin routes, AI endpoints. Test file test_journey_routes_migration.py covers all migrated endpoints.",
+  "migration_verification": {
+    "routes_migrated_to_journey_routes_py": [
+      "GET /api/journeys",
+      "GET /api/journeys/featured",
+      "GET /api/journeys/realized",
+      "GET /api/journeys/active",
+      "GET /api/journeys/{journey_id}",
+      "GET /api/journeys/{journey_id}/progress",
+      "GET /api/journeys/{journey_id}/contributions",
+      "GET /api/journey/{journey_id}/payment-info",
+      "GET /api/success-stories",
+      "GET /api/homepage/main-journey",
+      "GET /api/homepage/ambassador-journeys",
+      "GET /api/homepage/realized-journeys",
+      "GET /api/homepage/curated-dreams",
+      "POST /api/admin/journeys",
+      "PUT /api/admin/journeys/{journey_id}",
+      "DELETE /api/admin/journeys/{journey_id}",
+      "GET /api/admin/journeys",
+      "POST /api/admin/journey/{journey_id}/approve-funding",
+      "POST /api/admin/test-chapter-email/{journey_id}/{chapter_num}",
+      "POST /api/ambassador/journey/apply",
+      "GET /api/ambassador/my-journeys",
+      "GET /api/admin/ambassador-journeys",
+      "GET /api/admin/ambassador-journeys/{journey_id}/details",
+      "PUT /api/admin/ambassador-journeys/{journey_id}/status",
+      "POST /api/admin/journeys/{journey_id}/update-visibility",
+      "POST /api/admin/recalculate-all-visibility",
+      "PUT /api/admin/journeys/{journey_id}/show-goal",
+      "GET /api/admin/journeys-visibility",
+      "GET /api/admin/journeys-ready-for-raffle",
+      "GET /api/admin/raffle/{journey_id}",
+      "POST /api/admin/raffle/{journey_id}/draw",
+      "POST /api/seed-journeys",
+      "POST /api/admin/migrate-journey-status",
+      "POST /api/admin/set-main-journey/{journey_id}"
+    ],
+    "services_in_journey_service_py": [
+      "DEFAULT_STORY_CHAPTERS",
+      "get_chapter_number()",
+      "_build_chapter_email_body()",
+      "send_chapter_change_emails()",
+      "check_and_update_journey_funding_status()",
+      "check_and_update_story_chapter()",
+      "calculate_journey_visibility_score()"
+    ],
+    "routes_still_in_server_py": [
+      "Payment/contribution routes",
+      "User routes",
+      "Ambassador system routes",
+      "Notification routes",
+      "Sponsor links routes",
+      "Email admin routes",
+      "AI endpoints"
+    ]
+  }
+}
