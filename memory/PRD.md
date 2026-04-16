@@ -402,13 +402,16 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
   - Fase 2 (Validation): contributions/create, contributions/manual, confirm-details, ambassador-validate
   - Fase 3 (Integrations): paypal/create-order, paypal/capture-order, webhook/stripe
   - Admin: admin/contributions (search, list, confirm, reject, validate, reports, pending), admin/payouts (list, update status)
+- **ambassador_routes.py** ✅ EXTRAÍDO — Sponsor links, progressão, certificação, trust indicators, perfil público
+- **admin_routes.py** ✅ EXTRAÍDO — Stats, user management, email admin, settings, gallery, audit logs
 - **journey_service.py** ✅ — Lógica de funding, chapters, visibility scoring
 - **payment_service.py** ✅ — Revenue distribution, PayPal auth, points generation
-- **referral_service.py** ✅ — Ambassador status recalculation (versão completa com notificações e emails)
+- **referral_service.py** ✅ — Ambassador status recalculation completa
+- **audit_service.py** ✅ NOVO — Audit log para ações administrativas
 - **Padrão validado**: routes → services → models (sem dependências inversas)
-- **server.py**: Reduzido de ~8280 para ~5230 linhas (remoção de ~3050 linhas total)
-- **Próximas extrações**: ambassador_routes.py, admin_routes.py
-- **Testes**: 32/32 payment + 24/24 journey — todos validados (iteration_93.json, iteration_92.json)
+- **server.py**: Reduzido de ~8280 para ~3890 linhas (remoção de 53%)
+- **Refatorização COMPLETA** — 5 módulos de rotas: auth, journey, payment, ambassador, admin
+- **Testes**: 38/38 ambassador+admin + 32/32 payment + 24/24 journey (94 testes total)
 
 ## Credentials
 - **Admin**: admin@4luis.com / Admin1
