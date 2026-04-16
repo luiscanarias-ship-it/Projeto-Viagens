@@ -391,6 +391,14 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - **Nomenclatura**: User/Ambassador/Contributor/Sponsor definidos
 - **server.py**: Mantido funcional (9026 linhas) — extracção progressiva via services
 
+### Routes Extraction (2026-04-16)
+- **auth_routes.py** ✅ EXTRAÍDO — register, login, forgot-password, reset-password, Google OAuth, /auth/me, logout
+- **Padrão validado**: routes → services → models (sem dependências inversas)
+- **Services importados**: notification_service.py para create_notification
+- **server.py**: Reduzido ~250 linhas (de 9027 para ~8775)
+- **Próximas extrações** (mesmo padrão): journey_routes.py, payment_routes.py, ambassador_routes.py
+- **Testes**: Login, registo, forgot password — todos validados após extração
+
 ## Credentials
 - **Admin**: admin@4luis.com / Admin1
 - **GYG Partner ID**: WFPE9ME

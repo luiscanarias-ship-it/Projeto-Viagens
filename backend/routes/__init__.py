@@ -20,4 +20,4 @@ from models import (
     UserCreate, UserLogin, JourneyCreate, JourneyUpdate,
     ContributionCreate, Contribution
 )
-from auth import get_current_user, require_admin, create_access_token
+from auth import get_current_user, require_admin, create_jwt_token
