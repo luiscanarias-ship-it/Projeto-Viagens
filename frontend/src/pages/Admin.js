@@ -8,6 +8,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import JourneyEditForm from '../components/JourneyEditForm';
 import EmailPreviewModal from '../components/EmailPreviewModal';
 import AdminSupportSection from '../components/AdminSupportSection';
+import AdminAuditLogSection from '../components/AdminAuditLogSection';
 import AnalyticsDashboard from '../components/AnalyticsDashboard';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -775,6 +776,7 @@ const Admin = () => {
             { id: 'raffles', label: 'Sorteios', icon: rafflesReady?.length || null },
             { id: 'sponsors', label: 'Sponsors', icon: sponsorsReport?.total_qualified_sponsors || null },
             { id: 'support', label: 'Suporte', icon: openSupportCount > 0 ? openSupportCount : null },
+            { id: 'audit', label: 'Audit Log', icon: null },
             { id: 'settings', label: 'Configurações', icon: null }
           ].map(tab => (
             <button
@@ -2913,6 +2915,10 @@ const Admin = () => {
 
 
           {/* Settings Tab */}
+          {activeTab === 'audit' && (
+            <AdminAuditLogSection token={token} API={API} />
+          )}
+
           {activeTab === 'settings' && (
             <motion.div
               key="settings"
