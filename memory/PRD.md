@@ -393,11 +393,15 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 
 ### Routes Extraction (2026-04-16)
 - **auth_routes.py** ✅ EXTRAÍDO — register, login, forgot-password, reset-password, Google OAuth, /auth/me, logout
+- **journey_routes.py** ✅ EXTRAÍDO (Fase 1+2+3) — Todos os endpoints de viagem:
+  - Fase 1 (Read-only): GET journeys, featured, realized, active, single journey, progress, contributions, payment-info, success-stories, homepage endpoints (main-journey, ambassador-journeys, realized-journeys, curated-dreams)
+  - Fase 2 (CRUD): POST/PUT/DELETE /admin/journeys, GET /admin/journeys
+  - Fase 3 (States/Logic): approve-funding, test-chapter-email, ambassador journey apply/my-journeys, admin ambassador-journeys CRUD + status, visibility system (update/recalculate/show-goal/list), raffle system (ready/participants/draw), seed-journeys, migrate-journey-status, set-main-journey
+- **journey_service.py** ✅ ATUALIZADO — Lógica partilhada: check_and_update_journey_funding_status, check_and_update_story_chapter, send_chapter_change_emails, _build_chapter_email_body, get_chapter_number, DEFAULT_STORY_CHAPTERS, calculate_journey_visibility_score
 - **Padrão validado**: routes → services → models (sem dependências inversas)
-- **Services importados**: notification_service.py para create_notification
-- **server.py**: Reduzido ~250 linhas (de 9027 para ~8775)
-- **Próximas extrações** (mesmo padrão): journey_routes.py, payment_routes.py, ambassador_routes.py
-- **Testes**: Login, registo, forgot password — todos validados após extração
+- **server.py**: Reduzido de ~8280 para ~7000 linhas (remoção de ~1280 linhas)
+- **Próximas extrações** (mesmo padrão): payment_routes.py, ambassador_routes.py, admin_routes.py
+- **Testes**: 24/24 backend + frontend — todos validados após extração (iteration_92.json)
 
 ## Credentials
 - **Admin**: admin@4luis.com / Admin1
