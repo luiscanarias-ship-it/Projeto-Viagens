@@ -375,6 +375,22 @@ Plataforma de angariacao de fundos para viagens solidarias com sistema de niveis
 - **Homepage (futuro)**: GET /api/success-stories pronto
 - **Ficheiros**: SuccessStoryBanner.js, JourneyDetail.js, server.py
 
+### Architecture Refactor (2026-04-16)
+- **Backend Services Layer**: Criados 5 módulos independentes em /backend/services/
+  - `payment_service.py` — revenue distribution, validação de montantes, cálculo de totais
+  - `validation_service.py` — transições de estado, anti-fraude, flagging
+  - `referral_service.py` — progressão ambassador, contagem de referrals
+  - `ambassador_service.py` — certificação, trust indicators, tempo de confirmação
+  - `journey_service.py` — progresso, status de funding
+- **Backend Routes Structure**: Criada estrutura /backend/routes/ com __init__.py (shared deps)
+- **Frontend Components**: Criados subcomponentes reutilizáveis
+  - `Checkout/PaymentMethods.js` — métodos de pagamento geo-prioritized
+  - `Journey/JourneyTrustIndicators.js` — badges e métricas de confiança
+- **i18n**: Toast "Tradução automática por IA" já implementado no LanguageContext
+- **Responsividade**: Mantida (mobile-first, CTAs acessíveis)
+- **Nomenclatura**: User/Ambassador/Contributor/Sponsor definidos
+- **server.py**: Mantido funcional (9026 linhas) — extracção progressiva via services
+
 ## Credentials
 - **Admin**: admin@4luis.com / Admin1
 - **GYG Partner ID**: WFPE9ME
