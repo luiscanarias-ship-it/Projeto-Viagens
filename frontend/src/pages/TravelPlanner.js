@@ -156,7 +156,7 @@ const TopBookingBar = ({ links, onTrack, destination, ctaCopy }) => (
     ].map(item => (
       <a key={item.id} href={links[item.id]?.url || '#'} target="_blank" rel="noopener noreferrer"
         onClick={() => onTrack(item.id)} data-testid={`top-booking-${item.id}`}
-        className={`flex items-center gap-3 rounded-xl p-3 transition-all duration-200 group border ${
+        className={`flex items-start gap-3 rounded-xl p-3 transition-all duration-200 group border ${
           item.trust
             ? 'bg-gradient-to-r from-[#FFBE98]/8 to-transparent border-[#FFBE98]/15 hover:shadow-lg hover:border-[#FFBE98]/25'
             : 'bg-white border-stone-200/60 hover:shadow-md hover:border-stone-300'
@@ -167,20 +167,20 @@ const TopBookingBar = ({ links, onTrack, destination, ctaCopy }) => (
           <item.icon className={`${item.trust ? 'w-5 h-5' : 'w-4 h-4'} text-[#FFBE98]`} />
         </div>
         <div className="flex-1 min-w-0">
-          <p className={`font-bold text-[#2D2A26] ${item.trust ? 'text-[13px]' : 'text-xs'}`}>
+          <p className={`font-bold text-[#2D2A26] leading-snug ${item.trust ? 'text-[13px]' : 'text-xs'}`}>
             {item.copy?.text || (item.id === 'booking' ? `Hoteis em ${destination}` : item.id === 'skyscanner' ? 'Voos' : 'Atividades')}
           </p>
           {item.copy?.sublabel && (
             <p className="text-[10px] text-[#6B6661] mt-0.5">{item.copy.sublabel}</p>
           )}
+          <span className={`inline-flex items-center gap-1 rounded-xl transition-all duration-200 mt-2 ${
+            item.trust
+              ? 'bg-[#2D2A26] text-white text-[11px] font-bold px-4 py-2 shadow-sm group-hover:shadow-lg group-hover:-translate-y-0.5'
+              : 'bg-stone-50 text-[#2D2A26] text-[10px] font-semibold px-3 py-1.5 border border-stone-200 group-hover:border-stone-300'
+          }`}>
+            {item.copy?.label || 'Ver'}<ExternalLink className="w-3 h-3" />
+          </span>
         </div>
-        <span className={`shrink-0 flex items-center gap-1 rounded-xl transition-all duration-200 ${
-          item.trust
-            ? 'bg-[#2D2A26] text-white text-[11px] font-bold px-4 py-2 shadow-sm group-hover:shadow-lg group-hover:-translate-y-0.5'
-            : 'bg-stone-50 text-[#2D2A26] text-[10px] font-semibold px-3 py-1.5 border border-stone-200 group-hover:border-stone-300'
-        }`}>
-          {item.copy?.label || 'Ver'}<ExternalLink className="w-3 h-3" />
-        </span>
       </a>
     ))}
   </div>
@@ -255,32 +255,32 @@ const ContextualCTA = ({ icon: Icon, text, label, sublabel, link, platform, onTr
       : 'bg-white border-stone-200/60 hover:shadow-md hover:border-stone-300'
   }`}
     data-testid={`cta-card-${platform}`}>
-    <div className="flex items-center gap-3">
+    <div className="flex items-start gap-3">
       <div className={`flex items-center justify-center shrink-0 rounded-xl bg-white shadow-sm group-hover:shadow-md transition-shadow ${
         trust ? 'w-11 h-11' : 'w-10 h-10'
       }`}>
         <Icon className={`${trust ? 'w-[22px] h-[22px]' : 'w-5 h-5'} text-[#FFBE98]`} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className={`font-bold text-[#2D2A26] ${trust ? 'text-sm' : 'text-[13px]'}`}>{text}</p>
+        <p className={`font-bold text-[#2D2A26] leading-snug ${trust ? 'text-sm' : 'text-[13px]'}`}>{text}</p>
         <p className="text-[11px] text-[#6B6661] mt-0.5">{sublabel}</p>
+        <a href={link || '#'} target="_blank" rel="noopener noreferrer" onClick={() => onTrack(platform)}
+          data-testid={`cta-contextual-${platform}`}
+          className={`inline-flex items-center gap-1.5 rounded-xl hover:-translate-y-0.5 transition-all duration-200 mt-2.5 ${
+            trust
+              ? 'bg-[#2D2A26] text-white text-xs font-bold px-5 py-2.5 shadow-sm hover:shadow-lg hover:bg-[#1a1816]'
+              : 'bg-stone-50 text-[#2D2A26] text-[11px] font-semibold px-4 py-2 border border-stone-200 hover:border-stone-300 hover:shadow-md'
+          }`}>
+          {label}<ExternalLink className={`${trust ? 'w-3.5 h-3.5' : 'w-3 h-3'}`} />
+        </a>
+        {trust && (
+          <div className="flex items-center gap-1.5 mt-2">
+            <Star className="w-3.5 h-3.5 text-[#FFBE98] fill-[#FFBE98]" />
+            <span className="text-[11px] font-semibold text-[#FFBE98]">Recomendado pela 4Luis</span>
+          </div>
+        )}
       </div>
-      <a href={link || '#'} target="_blank" rel="noopener noreferrer" onClick={() => onTrack(platform)}
-        data-testid={`cta-contextual-${platform}`}
-        className={`shrink-0 flex items-center gap-1.5 rounded-xl hover:-translate-y-0.5 transition-all duration-200 ${
-          trust
-            ? 'bg-[#2D2A26] text-white text-xs font-bold px-5 py-2.5 shadow-sm hover:shadow-lg hover:bg-[#1a1816]'
-            : 'bg-stone-50 text-[#2D2A26] text-[11px] font-semibold px-4 py-2 border border-stone-200 hover:border-stone-300 hover:shadow-md'
-        }`}>
-        {label}<ExternalLink className={`${trust ? 'w-3.5 h-3.5' : 'w-3 h-3'}`} />
-      </a>
     </div>
-    {trust && (
-      <div className="flex items-center gap-1.5 mt-2.5 ml-[56px]">
-        <Star className="w-3.5 h-3.5 text-[#FFBE98] fill-[#FFBE98]" />
-        <span className="text-[11px] font-semibold text-[#FFBE98]">Recomendado pela 4Luis</span>
-      </div>
-    )}
   </div>
 );
 
