@@ -1214,7 +1214,7 @@ async def seed_journeys():
             "description": "Uma viagem pela milenar cultura chinesa",
             "emotional_message": "Cada passo na Grande Muralha é um passo na história da humanidade",
             "impact_description": "Ajude o Luis a descobrir os segredos do Império do Meio",
-            "image_url": "https://images.unsplash.com/photo-1758637689971-fe6124e7cabd?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2ODl8MHwxfHNlYXJjaHwxfHxkcmVhbXklMjBjaGluYSUyMGxhbmRzY2FwZXxlbnwwfHx8fDE3NzA4MTc0NzZ8MA&ixlib=rb-4.1.0&q=85",
+            "image_url": "https://images.pexels.com/photos/5714057/pexels-photo-5714057.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
             "goal_amount": 5000.0,
             "current_amount": 1250.0,
             "currency": "EUR",
