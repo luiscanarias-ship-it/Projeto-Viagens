@@ -18,7 +18,7 @@ const defaultTexts = {
   // Hero
   "hero.tagline": "Aqui, cada gesto ilumina um caminho.",
   "hero.subtitle": "A plataforma de CrowdDreaming para quem acredita que os sonhos se podem concretizar.",
-  "hero.cta": "Descobrir Viagens",
+  "hero.cta": "Descobrir viagem principal",
   
   // Main Journey
   "home.main_journey": "Viagem Principal",
@@ -39,7 +39,7 @@ const defaultTexts = {
   "home.how_it_works": "Como funciona o Crowddreaming",
   "home.step1_title": "Apoia um sonho",
   "home.step1_desc": "Apoia a viagem principal e ajuda a concretizar um sonho",
-  "home.step2_title": "Convida 3 amigos a contribuirem",
+  "home.step2_title": "Convida 3 amigos e torna-te embaixador",
   "home.step2_desc": "Partilha a viagem principal da 4Luis com os teus amigos e torna-te embaixador",
   "home.step3_title": "Embaixador: financia a tua viagem",
   "home.step3_desc": "Angaria apoio para realizares a tua viagem de sonho",

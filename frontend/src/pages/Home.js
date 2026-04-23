@@ -402,81 +402,6 @@ const Home = () => {
               <MilestoneCelebration journey={mainJourney.journey} customChapters={mainJourney.journey?.story_chapters} />
             </div>
 
-            {/* Contributions Feed */}
-            {mainJourney.contributions?.length > 0 && (
-              <div className="bg-white py-12">
-                <div className="max-w-6xl mx-auto px-4 sm:px-6">
-                <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-                  className="bg-[#FAFAF9] rounded-2xl p-6 md:p-8">
-                  <h3 className="text-xl font-bold text-[#2D2A26] mb-6 flex items-center gap-2">
-                    <Heart className="w-5 h-5 text-[#FFBE98]" /> {t('home.latest_contributions')}
-                  </h3>
-                  <div className="space-y-4">
-                    {mainJourney.contributions.slice(0, 5).map((contrib, idx) => (
-                      <div key={idx} className="flex items-center gap-4 p-4 bg-white rounded-xl">
-                        <div className={`w-12 h-12 rounded-full flex items-center justify-center ${contrib.is_crypto ? 'bg-gradient-to-br from-[#F7931A] to-[#627EEA]' : 'bg-[#E6F4F1]'}`}>
-                          {contrib.is_crypto ? (
-                            <Bitcoin className="w-6 h-6 text-white" />
-                          ) : (
-                            <Heart className="w-6 h-6 text-[#FFBE98]" />
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <p className="font-medium text-[#2D2A26]">
-                            {contrib.display_name}
-                            {contrib.is_crypto && (
-                              <span className="ml-2 text-xs px-2 py-1 bg-gradient-to-r from-[#F7931A]/10 to-[#627EEA]/10 text-[#F7931A] rounded-full">
-                                {contrib.crypto_type?.toUpperCase()}
-                              </span>
-                            )}
-                          </p>
-                          {contrib.message && (
-                            <p className="text-sm text-[#6B6661] italic">"{contrib.message}"</p>
-                          )}
-                        </div>
-                        <div className="text-right">
-                          <p className="font-bold text-[#2D2A26]">{contrib.amount}€</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <Link to={`/journey/${mainJourney.journey.journey_id}`}
-                    className="block text-center mt-6 text-[#FFBE98] hover:text-[#E6A07C] font-medium">
-                    {t('home.view_all_contributions')} →
-                  </Link>
-                </motion.div>
-
-                {/* Contextual invite prompt for logged-in users */}
-                {user && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 15 }} 
-                    whileInView={{ opacity: 1, y: 0 }} 
-                    viewport={{ once: true }}
-                    className="mt-6 bg-gradient-to-r from-[#FFF8F0] to-[#FFBE98]/10 rounded-2xl p-5 border border-[#FFBE98]/20"
-                    data-testid="home-invite-prompt"
-                  >
-                    <div className="flex flex-col sm:flex-row items-center gap-4">
-                      <div className="flex-1 text-center sm:text-left">
-                        <p className="text-sm font-semibold text-[#2D2A26]">
-                          Conheces alguém que queira apoiar este sonho?
-                        </p>
-                        <p className="text-xs text-[#6B6661] mt-0.5">
-                          Cada amigo que convidas aproxima-te do nível Embaixador
-                        </p>
-                      </div>
-                      <Link 
-                        to="/dashboard"
-                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#2D2A26] text-white rounded-xl text-sm font-semibold hover:bg-[#4A4640] transition-all shadow-sm flex-shrink-0"
-                        data-testid="home-invite-cta"
-                      >
-                        <Users className="w-4 h-4 text-[#FFBE98]" />Convidar amigos
-                      </Link>
-                    </div>
-                  </motion.div>
-                )}
-                </div>
-              </div>
-            )}
             </>
           ) : (
             <div className="text-center py-20">
@@ -485,48 +410,7 @@ const Home = () => {
           )}
       </section>
 
-      {/* ==================== 2. PLANEIA A TUA VIAGEM ==================== */}
-      <section className="py-16 bg-white" data-testid="plan-trip-section">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-8">
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <Sparkles className="w-6 h-6 text-[#FFBE98]" />
-              <h2 className="text-3xl font-bold text-[#2D2A26] whitespace-pre-line">{t('home.plan_trip')}</h2>
-            </div>
-            <p className="text-[#6B6661] mb-2">{t('home.plan_trip_intro')}</p>
-            <p className="text-sm text-[#6B6661]/70 mb-6">{t('home.plan_trip_desc')}</p>
-            
-            <div className="max-w-md mx-auto flex flex-col sm:flex-row gap-2 mb-6">
-              <input type="text" value={customDestination} onChange={(e) => setCustomDestination(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && searchDestination()}
-                placeholder={t('home.plan_placeholder')}
-                className="flex-1 px-4 py-3 rounded-xl border border-stone-200 bg-white text-[#2D2A26] focus:outline-none focus:ring-2 focus:ring-[#FFBE98] text-base"
-                data-testid="home-search-input"
-              />
-              <button onClick={searchDestination} disabled={!customDestination.trim()}
-                className="px-6 py-3 bg-[#2D2A26] text-white rounded-xl font-medium hover:bg-[#4A4640] transition-all shadow-sm disabled:opacity-50"
-                data-testid="home-search-btn">
-                {t('home.search')}
-              </button>
-            </div>
-
-            {/* Benefit pills */}
-            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
-              {[
-                { icon: Sparkles, text: 'Roteiro com IA' },
-                { icon: MapPin, text: 'Mapa interativo' },
-                { icon: Globe, text: 'Hotéis e voos' },
-              ].map(({ icon: Icon, text }) => (
-                <span key={text} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-stone-50 rounded-full text-xs text-[#6B6661] border border-stone-100">
-                  <Icon className="w-3 h-3 text-[#FFBE98]" />{text}
-                </span>
-              ))}
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ==================== 3. SONHOS EM FASE DE MATERIALIZAÇÃO ==================== */}
+      {/* ==================== 2. SONHOS EM FASE DE MATERIALIZAÇÃO ==================== */}
       <section id="journeys" className="py-16 bg-[#FAFAF9] scroll-mt-8" data-testid="materializing-dreams-section">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
@@ -552,15 +436,14 @@ const Home = () => {
             if (displayJourneys.length === 0) {
               return (
                 <div className="text-center py-6 bg-white rounded-2xl" data-testid="ambassador-empty-state">
-                  <h3 className="text-base font-bold text-[#2D2A26] mb-1">Os primeiros sonhos estão a nascer</h3>
-                  <p className="text-sm text-[#6B6661] mb-4">Em breve poderás apoiar viagens de novos embaixadores</p>
-                  <p className="text-xs text-[#6B6661] mb-3">Queres ser um dos primeiros embaixadores?</p>
+                  <h3 className="text-base font-bold text-[#2D2A26] mb-1">Queres criar a tua viagem de sonho?</h3>
+                  <p className="text-sm text-[#6B6661] mb-4">Convida 3 amigos e desbloqueia a tua viagem</p>
                   <button
                     onClick={() => setShowAmbassadorModal(true)}
                     className="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-[#2D2A26] text-white rounded-xl text-sm font-semibold hover:bg-[#4A4640] transition-all"
                     data-testid="become-ambassador-btn"
                   >
-                    Quero ser embaixador
+                    Quero criar a minha viagem de sonho
                   </button>
                 </div>
               );

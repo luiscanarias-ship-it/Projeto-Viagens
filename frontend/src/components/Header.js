@@ -137,7 +137,8 @@ const Header = () => {
               className={navLinkClass('/plan-trip')}
               data-testid="nav-plan-trip"
             >
-              Planear Viagem
+              Planear viagem
+              <br />com IA
             </Link>
             
             {user && (
@@ -341,7 +342,8 @@ const Header = () => {
                 className={mobileNavClass('/plan-trip')}
                 data-testid="mobile-nav-plan-trip"
               >
-                Planear Viagem
+                Planear viagem
+              <br />com IA
               </Link>
               {user && (
                 <Link
