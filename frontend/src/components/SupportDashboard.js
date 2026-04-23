@@ -67,8 +67,8 @@ const SupportDashboard = () => {
   return (
     <div className="space-y-6" data-testid="support-dashboard">
       {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+        <div className="flex-1">
           <h2 className="text-2xl font-bold text-[#2D2A26] flex items-center gap-2">
             <HelpCircle className="w-6 h-6 text-[#FFBE98]" />
             Ajuda e Suporte
@@ -82,13 +82,15 @@ const SupportDashboard = () => {
             Precisas de ajuda? Abre um pedido e a nossa equipa ira responder-te o mais rapidamente possivel.
           </p>
         </div>
-        <button
-          onClick={() => navigate('/support/new')}
-          className="flex items-center gap-2 px-5 py-2.5 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-semibold text-sm hover:bg-[#f0a878] transition-colors"
-          data-testid="new-ticket-btn"
-        >
-          <Plus className="w-4 h-4" /> Abrir novo pedido
-        </button>
+        <div className="sm:mr-[12%]">
+          <button
+            onClick={() => navigate('/support/new')}
+            className="flex items-center gap-2 px-5 py-2.5 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-semibold text-sm hover:bg-[#f0a878] transition-colors"
+            data-testid="new-ticket-btn"
+          >
+            <Plus className="w-4 h-4" /> Abrir novo pedido
+          </button>
+        </div>
       </div>
 
       {/* Ticket List */}
