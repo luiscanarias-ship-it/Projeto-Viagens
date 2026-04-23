@@ -232,55 +232,45 @@ const Dashboard = () => {
     <div className="min-h-screen pt-24 pb-12 px-4 md:px-8" data-testid="dashboard-page">
       <div className="max-w-4xl mx-auto space-y-5">
         
-        {/* BLOCO 1 — Estado + Progresso Compacto */}
+        {/* AMBASSADOR ACTION CARD — Layout horizontal, glassmorphism */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-3xl shadow-lg border border-stone-100 overflow-hidden"
+          className="relative rounded-3xl overflow-hidden border border-white/20 shadow-xl"
+          style={{ background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)' }}
+          data-testid="invite-section"
         >
-          {/* Header compacto com estado */}
-          <div className={`px-5 py-4 flex items-center gap-3 ${
-            isEmbaixador 
-              ? 'bg-gradient-to-r from-[#F2C94C] via-[#FFBE98] to-[#F2C94C]' 
-              : 'bg-gradient-to-r from-[#FFBE98] to-[#E0C097]'
-          }`}>
-            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-              {isEmbaixador ? <Crown className="w-5 h-5 text-white" /> : <Star className="w-5 h-5 text-white" />}
-            </div>
-            <div className="flex-1">
-              <h2 className="text-lg font-bold text-white">{isEmbaixador ? 'Embaixador' : 'Sonhador'}</h2>
-              <p className="text-white/70 text-xs">
-                {isEmbaixador ? 'Podes candidatar-te a abrir viagem própria' : 'A caminho de Embaixador'}
-              </p>
-            </div>
-            {!isEmbaixador && (
-              <div className="text-right">
-                <p className="text-2xl font-bold text-white">{validReferrals}/3</p>
-                <p className="text-white/70 text-[10px]">amigos</p>
-              </div>
-            )}
-          </div>
-
-          {/* Conteúdo do progresso */}
-          <div className="p-5">
+          {/* Glassmorphism overlay */}
+          <div className="absolute inset-0 backdrop-blur-sm bg-white/40" />
+          
+          <div className="relative z-10 p-5 md:p-6">
             {isEmbaixador ? (
-              <>
+              /* ── EMBAIXADOR VIEW ── */
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-[#F2C94C] to-[#FFBE98] rounded-2xl flex items-center justify-center shadow-md">
+                    <Crown className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-bold text-[#2D2A26]">Embaixador</h2>
+                    <p className="text-xs text-[#6B6661]">Podes candidatar-te a abrir viagem própria</p>
+                  </div>
+                </div>
                 {myJourneys.some(j => ['candidatura', 'aprovada', 'ativa'].includes(j.status)) ? (
-                  <div className="space-y-2">
+                  <div className="space-y-2 mb-4">
                     {myJourneys.filter(j => ['candidatura', 'aprovada', 'ativa'].includes(j.status)).map(j => (
-                      <div key={j.journey_id} className="flex items-center gap-3 p-3 bg-[#E6F4F1] rounded-xl">
-                        <Plane className="w-5 h-5 text-[#FFBE98]" />
+                      <div key={j.journey_id} className="flex items-center gap-3 p-3 bg-white/70 rounded-xl border border-stone-200/50">
+                        <Plane className="w-4 h-4 text-[#004D40]" />
                         <div className="flex-1">
                           <p className="font-medium text-sm text-[#2D2A26]">{j.name}</p>
                           <p className="text-xs text-[#6B6661]">
                             Estado: <span className={`font-medium ${
-                              j.status === 'ativa' ? 'text-green-600' : 
-                              j.status === 'aprovada' ? 'text-blue-600' : 'text-amber-600'
+                              j.status === 'ativa' ? 'text-green-600' : j.status === 'aprovada' ? 'text-blue-600' : 'text-amber-600'
                             }`}>{j.status}</span>
                           </p>
                         </div>
                         {j.status === 'ativa' && (
-                          <a href={`/journey/${j.journey_id}`} className="text-[#FFBE98] hover:text-[#E6A07C] text-sm font-medium">Ver →</a>
+                          <a href={`/journey/${j.journey_id}`} className="text-[#004D40] text-sm font-semibold">Ver →</a>
                         )}
                       </div>
                     ))}
@@ -288,116 +278,98 @@ const Dashboard = () => {
                 ) : (
                   <button
                     onClick={() => setShowApplicationModal(true)}
-                    className="w-full py-3 bg-gradient-to-r from-[#F2C94C] to-[#FFBE98] text-white rounded-xl font-bold hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                    className="w-full py-3 bg-[#004D40] text-white rounded-xl font-bold hover:bg-[#00695C] hover:scale-[1.02] transition-all shadow-md flex items-center justify-center gap-2 mb-4"
                     data-testid="open-application-btn"
                   >
                     <Plane className="w-5 h-5" />
                     Candidatar-me a Abrir Viagem
                   </button>
                 )}
-              </>
-            ) : (
-              <>
-                {/* Checklist compacta em linha */}
-                <div className="flex items-center gap-3 mb-4">
-                  <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${
-                    hasContribution ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-stone-50 text-[#6B6661] border border-stone-200'
-                  }`}>
-                    {hasContribution ? <CheckCircle className="w-3.5 h-3.5" /> : <Heart className="w-3.5 h-3.5" />}
-                    {hasContribution ? 'Contribuíste' : 'Contribuir'}
-                  </div>
-                  <div className="flex-1 h-px bg-stone-200" />
-                  <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${
-                    validReferrals >= 3 ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-stone-50 text-[#6B6661] border border-stone-200'
-                  }`}>
-                    {validReferrals >= 3 ? <CheckCircle className="w-3.5 h-3.5" /> : <Users className="w-3.5 h-3.5" />}
-                    {validReferrals}/3 amigos
-                  </div>
-                </div>
-
-                {/* Barra de progresso */}
-                <div className="relative h-2.5 bg-stone-100 rounded-full overflow-hidden mb-4">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${progressPercent}%` }}
-                    transition={{ duration: 1, ease: "easeOut" }}
-                    className={`absolute inset-y-0 left-0 rounded-full ${
-                      validReferrals >= 3 ? 'bg-green-500' : 'bg-gradient-to-r from-[#FFBE98] to-[#F2C94C]'
-                    }`}
+                {dashboardData?.user_alias && (
+                  <ShareMenu
+                    inviteLink={buildInviteLink(dashboardData.user_alias)}
+                    senderName={user?.name}
+                    buttonLabel="Convidar amigos"
+                    buttonClassName="w-full flex items-center justify-center gap-2 py-3 bg-[#004D40]/10 text-[#004D40] rounded-xl text-sm font-semibold hover:bg-[#004D40]/20 transition-all border border-[#004D40]/20"
                   />
+                )}
+              </div>
+            ) : (
+              /* ── SONHADOR VIEW — Horizontal Split ── */
+              <div className="flex flex-col md:flex-row md:items-center gap-5">
+                {/* Lado Esquerdo — Indicador visual circular */}
+                <div className="flex items-center gap-4 md:w-auto">
+                  <div className="relative w-20 h-20 flex-shrink-0">
+                    {/* Background circle */}
+                    <svg className="w-20 h-20 -rotate-90" viewBox="0 0 72 72">
+                      <circle cx="36" cy="36" r="30" fill="none" stroke="#e5e7eb" strokeWidth="5" />
+                      <circle cx="36" cy="36" r="30" fill="none" stroke="#004D40" strokeWidth="5"
+                        strokeLinecap="round"
+                        strokeDasharray={`${(validReferrals / 3) * 188.5} 188.5`}
+                        className="transition-all duration-1000"
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <span className="text-xl font-bold text-[#2D2A26]">{validReferrals}</span>
+                      <span className="text-[9px] text-[#6B6661] font-medium -mt-0.5">de 3</span>
+                    </div>
+                  </div>
+                  <div className="md:hidden">
+                    <h2 className="text-base font-bold text-[#2D2A26]">Nível Sonhador</h2>
+                    <p className="text-xs text-[#6B6661] mt-0.5">
+                      {referralsNeeded > 0 
+                        ? `Falta${referralsNeeded > 1 ? 'm' : ''} ${referralsNeeded} amigo${referralsNeeded > 1 ? 's' : ''}`
+                        : 'Requisitos cumpridos!'}
+                    </p>
+                  </div>
                 </div>
 
-                {/* Referral details compactos */}
-                {dashboardData?.invites?.referral_details?.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {dashboardData.invites.referral_details.map((ref, idx) => (
-                      <span key={idx} className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs ${
-                        ref.has_contributed ? 'bg-green-50 text-green-700' : 'bg-stone-50 text-[#6B6661]'
-                      }`}>
-                        {ref.has_contributed ? <CheckCircle className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
-                        {ref.name}
-                      </span>
-                    ))}
-                    {Array.from({ length: Math.max(0, 3 - (dashboardData.invites.referral_details?.length || 0)) }).map((_, idx) => (
-                      <span key={`e-${idx}`} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs bg-stone-50 text-stone-400 border border-dashed border-stone-200">
-                        ?
-                      </span>
-                    ))}
+                {/* Lado Direito — Info + CTA */}
+                <div className="flex-1">
+                  <div className="hidden md:block mb-3">
+                    <h2 className="text-base font-bold text-[#2D2A26]">Nível Sonhador</h2>
                   </div>
-                )}
+                  <p className="text-sm text-[#2D2A26] leading-relaxed mb-1">
+                    <span className="font-semibold">Desbloqueia a tua própria viagem.</span>
+                  </p>
+                  <p className="text-xs text-[#6B6661] mb-4">
+                    {referralsNeeded > 0 
+                      ? `Faltam apenas ${referralsNeeded} amigo${referralsNeeded > 1 ? 's' : ''} para te tornares Embaixador.`
+                      : hasContribution 
+                        ? 'Parabéns! Cumpres todos os requisitos!' 
+                        : 'Contribui para a viagem principal para completar os requisitos.'}
+                  </p>
 
-                {/* Mensagem motivacional compacta */}
-                {hasContribution && validReferrals >= 3 ? (
-                  <p className="text-sm text-green-700 font-medium bg-green-50 rounded-xl px-4 py-2.5 text-center">
-                    Parabéns! Cumpres todos os requisitos!
-                  </p>
-                ) : (
-                  <p className="text-xs text-[#6B6661] text-center">
-                    {!hasContribution && validReferrals === 0
-                      ? 'Contribui para a viagem principal e convida 3 amigos para te tornares Embaixador'
-                      : !hasContribution
-                        ? `Falta contribuir para a viagem principal e convidar mais ${referralsNeeded} amigo${referralsNeeded > 1 ? 's' : ''}`
-                        : `Falta${referralsNeeded > 1 ? 'm' : ''} ${referralsNeeded} amigo${referralsNeeded > 1 ? 's' : ''} que contribua${referralsNeeded > 1 ? 'm' : ''}`}
-                  </p>
-                )}
-              </>
+                  {/* Requisitos inline */}
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium ${
+                      hasContribution ? 'bg-[#004D40]/10 text-[#004D40]' : 'bg-stone-100 text-[#6B6661]'
+                    }`}>
+                      {hasContribution ? <CheckCircle className="w-3 h-3" /> : <Heart className="w-3 h-3" />}
+                      {hasContribution ? 'Contribuição feita' : 'Contribuir'}
+                    </span>
+                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium ${
+                      validReferrals >= 3 ? 'bg-[#004D40]/10 text-[#004D40]' : 'bg-stone-100 text-[#6B6661]'
+                    }`}>
+                      {validReferrals >= 3 ? <CheckCircle className="w-3 h-3" /> : <Users className="w-3 h-3" />}
+                      {validReferrals}/3 amigos convidaram
+                    </span>
+                  </div>
+
+                  {/* CTA Principal — Azul Petróleo */}
+                  {dashboardData?.user_alias && (
+                    <ShareMenu
+                      inviteLink={buildInviteLink(dashboardData.user_alias)}
+                      senderName={user?.name}
+                      buttonLabel="Convidar amigos"
+                      buttonClassName="w-full flex items-center justify-center gap-2 py-3.5 bg-[#004D40] text-white rounded-xl text-base font-bold hover:bg-[#00695C] hover:scale-[1.02] transition-all shadow-lg"
+                    />
+                  )}
+                </div>
+              </div>
             )}
           </div>
         </motion.div>
-
-        {/* BLOCO CTA PRINCIPAL — Convidar Amigos (sempre visível, destaque máximo) */}
-        {dashboardData?.user_alias && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="bg-gradient-to-br from-[#FFBE98] to-[#F2C94C] rounded-3xl p-5 shadow-lg"
-            data-testid="invite-section"
-          >
-            <div className="text-center mb-4">
-              <Users className="w-8 h-8 text-white mx-auto mb-2" />
-              <p className="text-lg font-bold text-white">
-                {isEmbaixador ? 'Continua a convidar amigos' : `Convida amigos e torna-te Embaixador`}
-              </p>
-              {!isEmbaixador && referralsNeeded > 0 && (
-                <p className="text-white/80 text-sm mt-1">
-                  Falta{referralsNeeded > 1 ? 'm' : ''} {referralsNeeded} amigo{referralsNeeded > 1 ? 's' : ''}
-                </p>
-              )}
-            </div>
-
-            <ShareMenu
-              inviteLink={buildInviteLink(dashboardData.user_alias)}
-              senderName={user?.name}
-              buttonLabel="Convidar amigos"
-              buttonClassName="w-full flex items-center justify-center gap-2 py-3.5 bg-white text-[#2D2A26] rounded-2xl text-base font-bold hover:bg-white/90 transition-all shadow-md"
-            />
-
-            <p className="text-[10px] text-center text-white/60 mt-3">
-              O teu link: <span className="font-mono text-white/80">{buildInviteLink(dashboardData.user_alias).replace('https://', '').substring(0, 35)}...</span>
-            </p>
-          </motion.div>
-        )}
 
         {/* AMBASSADOR VALIDATIONS — Pending payments to confirm */}
         {isEmbaixador && (
