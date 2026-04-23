@@ -95,7 +95,7 @@ const Header = () => {
           <nav className="hidden md:flex items-center gap-5">
             <Link 
               to="/" 
-              onClick={() => setActiveSection(null)}
+              onClick={() => { setActiveSection(null); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
               className={navLinkClass('/')}
               data-testid="nav-home"
             >
@@ -293,7 +293,7 @@ const Header = () => {
             <div className="px-6 py-4 space-y-2">
               <Link
                 to="/"
-                onClick={() => { setActiveSection(null); setMobileMenuOpen(false); }}
+                onClick={() => { setActiveSection(null); setMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
                 className={mobileNavClass('/')}
               >
                 {t('nav.home')}
