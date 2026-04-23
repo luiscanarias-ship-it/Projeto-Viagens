@@ -229,287 +229,175 @@ const Dashboard = () => {
     : null;
 
   return (
-    <div className="min-h-screen pt-28 pb-12 px-4 md:px-8" data-testid="dashboard-page">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="min-h-screen pt-24 pb-12 px-4 md:px-8" data-testid="dashboard-page">
+      <div className="max-w-4xl mx-auto space-y-5">
         
-        {/* BLOCO 1 — Estado Atual */}
+        {/* BLOCO 1 — Estado + Progresso Compacto */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative overflow-hidden rounded-3xl"
+          className="bg-white rounded-3xl shadow-lg border border-stone-100 overflow-hidden"
         >
-          {isEmbaixador ? (
-            <div className="bg-gradient-to-br from-[#F2C94C] via-[#FFBE98] to-[#F2C94C] p-6 md:p-8">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
-                  <Crown className="w-9 h-9 text-white" />
-                </div>
-                <div>
-                  <p className="text-white/80 text-sm font-medium">Estado</p>
-                  <h2 className="text-2xl md:text-3xl font-bold text-white">Embaixador</h2>
-                  <p className="text-white/70 text-sm mt-1">Podes candidatar-te a abrir viagem própria</p>
-                </div>
+          {/* Header compacto com estado */}
+          <div className={`px-5 py-4 flex items-center gap-3 ${
+            isEmbaixador 
+              ? 'bg-gradient-to-r from-[#F2C94C] via-[#FFBE98] to-[#F2C94C]' 
+              : 'bg-gradient-to-r from-[#FFBE98] to-[#E0C097]'
+          }`}>
+            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+              {isEmbaixador ? <Crown className="w-5 h-5 text-white" /> : <Star className="w-5 h-5 text-white" />}
+            </div>
+            <div className="flex-1">
+              <h2 className="text-lg font-bold text-white">{isEmbaixador ? 'Embaixador' : 'Sonhador'}</h2>
+              <p className="text-white/70 text-xs">
+                {isEmbaixador ? 'Podes candidatar-te a abrir viagem própria' : 'A caminho de Embaixador'}
+              </p>
+            </div>
+            {!isEmbaixador && (
+              <div className="text-right">
+                <p className="text-2xl font-bold text-white">{validReferrals}/3</p>
+                <p className="text-white/70 text-[10px]">amigos</p>
               </div>
-            </div>
-          ) : (
-            <div className="bg-gradient-to-br from-[#FFBE98] to-[#E0C097] p-6 md:p-8">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-white/25 rounded-2xl flex items-center justify-center backdrop-blur-sm">
-                  <Star className="w-9 h-9 text-white" />
-                </div>
-                <div>
-                  <p className="text-white/80 text-sm font-medium">Estado</p>
-                  <h2 className="text-2xl md:text-3xl font-bold text-white">Sonhador</h2>
-                  <p className="text-white/70 text-sm mt-1">Estás a caminho de te tornares Embaixador</p>
-                </div>
-              </div>
-            </div>
-          )}
-        </motion.div>
-
-        {/* BLOCO 2 — Progresso para Embaixador */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-white rounded-3xl p-6 md:p-8 shadow-lg border border-stone-100"
-        >
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 bg-gradient-to-br from-[#F2C94C]/20 to-[#FFBE98]/20 rounded-xl flex items-center justify-center">
-              <TrendingUp className="w-6 h-6 text-[#F2C94C]" />
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-[#2D2A26]">Progresso para Embaixador</h3>
-              <p className="text-sm text-[#6B6661]">Desbloqueia acesso especial + novas funcionalidades</p>
-            </div>
+            )}
           </div>
 
-          {isEmbaixador ? (
-            <div className="text-center py-6">
-              <div className="w-20 h-20 bg-gradient-to-br from-[#F2C94C] to-[#FFBE98] rounded-full flex items-center justify-center mx-auto mb-4">
-                <Crown className="w-10 h-10 text-white" />
-              </div>
-              <h4 className="text-xl font-bold text-[#2D2A26] mb-2">Embaixador Desbloqueado!</h4>
-              <p className="text-[#6B6661] mb-4">
-                Podes agora candidatar-te a abrir a tua própria viagem na plataforma.
-              </p>
-              
-              {/* Check if user has pending/active journey */}
-              {myJourneys.some(j => ['candidatura', 'aprovada', 'ativa'].includes(j.status)) ? (
-                <div className="bg-[#E6F4F1] rounded-xl p-4 text-left">
-                  <p className="text-sm text-[#2D2A26] font-medium mb-2">A tua viagem atual:</p>
-                  {myJourneys.filter(j => ['candidatura', 'aprovada', 'ativa'].includes(j.status)).map(j => (
-                    <div key={j.journey_id} className="flex items-center gap-3 p-3 bg-white rounded-lg">
-                      <Plane className="w-5 h-5 text-[#FFBE98]" />
-                      <div className="flex-1">
-                        <p className="font-medium text-[#2D2A26]">{j.name}</p>
-                        <p className="text-xs text-[#6B6661]">
-                          Estado: <span className={`font-medium ${
-                            j.status === 'ativa' ? 'text-green-600' : 
-                            j.status === 'aprovada' ? 'text-blue-600' : 'text-amber-600'
-                          }`}>{j.status}</span>
-                        </p>
+          {/* Conteúdo do progresso */}
+          <div className="p-5">
+            {isEmbaixador ? (
+              <>
+                {myJourneys.some(j => ['candidatura', 'aprovada', 'ativa'].includes(j.status)) ? (
+                  <div className="space-y-2">
+                    {myJourneys.filter(j => ['candidatura', 'aprovada', 'ativa'].includes(j.status)).map(j => (
+                      <div key={j.journey_id} className="flex items-center gap-3 p-3 bg-[#E6F4F1] rounded-xl">
+                        <Plane className="w-5 h-5 text-[#FFBE98]" />
+                        <div className="flex-1">
+                          <p className="font-medium text-sm text-[#2D2A26]">{j.name}</p>
+                          <p className="text-xs text-[#6B6661]">
+                            Estado: <span className={`font-medium ${
+                              j.status === 'ativa' ? 'text-green-600' : 
+                              j.status === 'aprovada' ? 'text-blue-600' : 'text-amber-600'
+                            }`}>{j.status}</span>
+                          </p>
+                        </div>
+                        {j.status === 'ativa' && (
+                          <a href={`/journey/${j.journey_id}`} className="text-[#FFBE98] hover:text-[#E6A07C] text-sm font-medium">Ver →</a>
+                        )}
                       </div>
-                      {j.status === 'ativa' && (
-                        <a 
-                          href={`/journey/${j.journey_id}`}
-                          className="text-[#FFBE98] hover:text-[#E6A07C] text-sm font-medium"
-                        >
-                          Ver →
-                        </a>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <button
-                  onClick={() => setShowApplicationModal(true)}
-                  className="px-6 py-3 bg-gradient-to-r from-[#F2C94C] to-[#FFBE98] text-white rounded-xl font-bold hover:shadow-lg transition-all flex items-center gap-2 mx-auto"
-                  data-testid="open-application-btn"
-                >
-                  <Plane className="w-5 h-5" />
-                  Candidatar-me a Abrir Viagem
-                </button>
-              )}
-            </div>
-          ) : (
-            <>
-              {/* Requirements Checklist */}
-              <div className="space-y-4 mb-6">
-                {/* Requirement 1: Contribute to main trip */}
-                <div className={`flex items-center gap-3 p-4 rounded-xl ${
-                  hasContribution ? 'bg-green-50 border border-green-200' : 'bg-stone-50'
-                }`}>
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    hasContribution ? 'bg-green-500' : 'bg-stone-200'
+                    ))}
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setShowApplicationModal(true)}
+                    className="w-full py-3 bg-gradient-to-r from-[#F2C94C] to-[#FFBE98] text-white rounded-xl font-bold hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                    data-testid="open-application-btn"
+                  >
+                    <Plane className="w-5 h-5" />
+                    Candidatar-me a Abrir Viagem
+                  </button>
+                )}
+              </>
+            ) : (
+              <>
+                {/* Checklist compacta em linha */}
+                <div className="flex items-center gap-3 mb-4">
+                  <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${
+                    hasContribution ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-stone-50 text-[#6B6661] border border-stone-200'
                   }`}>
-                    {hasContribution ? (
-                      <CheckCircle className="w-5 h-5 text-white" />
-                    ) : (
-                      <span className="text-stone-500 font-bold">1</span>
-                    )}
+                    {hasContribution ? <CheckCircle className="w-3.5 h-3.5" /> : <Heart className="w-3.5 h-3.5" />}
+                    {hasContribution ? 'Contribuíste' : 'Contribuir'}
                   </div>
-                  <div className="flex-1">
-                    <p className={`font-medium ${hasContribution ? 'text-green-700' : 'text-[#2D2A26]'}`}>
-                      Contribuir para a viagem principal
-                    </p>
-                    <p className={`text-sm ${hasContribution ? 'text-green-600' : 'text-[#6B6661]'}`}>
-                      {hasContribution ? 'Contribuição confirmada!' : 'Faz uma contribuição para a viagem em destaque'}
-                    </p>
+                  <div className="flex-1 h-px bg-stone-200" />
+                  <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${
+                    validReferrals >= 3 ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-stone-50 text-[#6B6661] border border-stone-200'
+                  }`}>
+                    {validReferrals >= 3 ? <CheckCircle className="w-3.5 h-3.5" /> : <Users className="w-3.5 h-3.5" />}
+                    {validReferrals}/3 amigos
                   </div>
                 </div>
 
-                {/* Requirement 2: 3 valid referrals */}
-                <div className={`p-4 rounded-xl ${
-                  validReferrals >= 3 ? 'bg-green-50 border border-green-200' : 'bg-stone-50'
-                }`}>
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                      validReferrals >= 3 ? 'bg-green-500' : 'bg-stone-200'
-                    }`}>
-                      {validReferrals >= 3 ? (
-                        <CheckCircle className="w-5 h-5 text-white" />
-                      ) : (
-                        <span className="text-stone-500 font-bold">2</span>
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <p className={`font-medium ${validReferrals >= 3 ? 'text-green-700' : 'text-[#2D2A26]'}`}>
-                          Amigos que contribuiram
-                        </p>
-                        <span className={`text-lg font-bold ${validReferrals >= 3 ? 'text-green-600' : 'text-[#F2C94C]'}`}>
-                          {validReferrals} / 3
-                        </span>
-                      </div>
-                      <p className={`text-sm ${validReferrals >= 3 ? 'text-green-600' : 'text-[#6B6661]'}`}>
-                        {validReferrals >= 3 
-                          ? 'Objetivo atingido!' 
-                          : `Convida amigos que façam contribuições confirmadas`}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  {/* Progress Bar */}
-                  <div className="relative h-3 bg-stone-200 rounded-full overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${progressPercent}%` }}
-                      transition={{ duration: 1, ease: "easeOut" }}
-                      className={`absolute inset-y-0 left-0 rounded-full ${
-                        validReferrals >= 3 
-                          ? 'bg-green-500' 
-                          : 'bg-gradient-to-r from-[#FFBE98] to-[#F2C94C]'
-                      }`}
-                    />
-                  </div>
-                  
-                  {/* Individual referral indicators */}
-                  {dashboardData?.invites?.referral_details && dashboardData.invites.referral_details.length > 0 && (
-                    <div className="mt-3 space-y-1.5">
-                      {dashboardData.invites.referral_details.map((ref, idx) => (
-                        <div key={idx} className="flex items-center gap-2 text-sm">
-                          <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
-                            ref.has_contributed ? 'bg-green-500' : 'bg-stone-200'
-                          }`}>
-                            {ref.has_contributed && <CheckCircle className="w-3 h-3 text-white" />}
-                          </div>
-                          <span className={ref.has_contributed ? 'text-green-700' : 'text-[#6B6661]'}>
-                            {ref.name} {ref.has_contributed ? 'contribuiu' : '(aguarda contribuição)'}
-                          </span>
-                        </div>
-                      ))}
-                      {/* Empty slots for remaining */}
-                      {Array.from({ length: Math.max(0, 3 - dashboardData.invites.referral_details.length) }).map((_, idx) => {
-                        const slotNum = dashboardData.invites.referral_details.length + idx + 1;
-                        return (
-                          <div key={`empty-${idx}`} className="flex items-center gap-2 text-sm">
-                            <div className="w-4 h-4 rounded-full bg-stone-200" />
-                            <span className="text-[#6B6661]">Convida o {slotNum}o amigo</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                  {/* Empty slots when no referrals at all */}
-                  {(!dashboardData?.invites?.referral_details || dashboardData.invites.referral_details.length === 0) && (
-                    <div className="mt-3 space-y-1.5">
-                      {[1, 2, 3].map(i => (
-                        <div key={i} className="flex items-center gap-2 text-sm">
-                          <div className="w-4 h-4 rounded-full bg-stone-200" />
-                          <span className="text-[#6B6661]">Convida o {i}o amigo</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                {/* Barra de progresso */}
+                <div className="relative h-2.5 bg-stone-100 rounded-full overflow-hidden mb-4">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${progressPercent}%` }}
+                    transition={{ duration: 1, ease: "easeOut" }}
+                    className={`absolute inset-y-0 left-0 rounded-full ${
+                      validReferrals >= 3 ? 'bg-green-500' : 'bg-gradient-to-r from-[#FFBE98] to-[#F2C94C]'
+                    }`}
+                  />
                 </div>
-              </div>
 
-              {/* Status Message - Dynamic motivational */}
-              {hasContribution && validReferrals >= 3 ? (
-                <div className="p-4 bg-green-50 rounded-xl border border-green-200 text-center">
-                  <p className="text-green-700 font-medium">
-                    Parabéns! Cumpres todos os requisitos. O teu nível será atualizado em breve!
+                {/* Referral details compactos */}
+                {dashboardData?.invites?.referral_details?.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {dashboardData.invites.referral_details.map((ref, idx) => (
+                      <span key={idx} className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs ${
+                        ref.has_contributed ? 'bg-green-50 text-green-700' : 'bg-stone-50 text-[#6B6661]'
+                      }`}>
+                        {ref.has_contributed ? <CheckCircle className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
+                        {ref.name}
+                      </span>
+                    ))}
+                    {Array.from({ length: Math.max(0, 3 - (dashboardData.invites.referral_details?.length || 0)) }).map((_, idx) => (
+                      <span key={`e-${idx}`} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs bg-stone-50 text-stone-400 border border-dashed border-stone-200">
+                        ?
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Mensagem motivacional compacta */}
+                {hasContribution && validReferrals >= 3 ? (
+                  <p className="text-sm text-green-700 font-medium bg-green-50 rounded-xl px-4 py-2.5 text-center">
+                    Parabéns! Cumpres todos os requisitos!
                   </p>
-                </div>
-              ) : (
-                <div className="p-4 bg-[#FFF8F0] rounded-xl border border-[#FFBE98]/30">
-                  <p className="text-sm text-[#2D2A26] font-medium">
+                ) : (
+                  <p className="text-xs text-[#6B6661] text-center">
                     {!hasContribution && validReferrals === 0
-                      ? 'Torna-te Embaixador: contribui para a viagem principal e convida 3 amigos. Desbloqueia acesso especial e novas funcionalidades.'
+                      ? 'Contribui para a viagem principal e convida 3 amigos para te tornares Embaixador'
                       : !hasContribution
-                        ? `Estás cada vez mais perto! Contribui para a viagem principal e convida mais ${referralsNeeded} amigo${referralsNeeded > 1 ? 's' : ''} para te tornares Embaixador.`
-                        : `Estás a ${referralsNeeded} passo${referralsNeeded > 1 ? 's' : ''} de te tornares Embaixador. Falta${referralsNeeded > 1 ? 'm' : ''} ${referralsNeeded} amigo${referralsNeeded > 1 ? 's' : ''} que contribua${referralsNeeded > 1 ? 'm' : ''}.`}
+                        ? `Falta contribuir para a viagem principal e convidar mais ${referralsNeeded} amigo${referralsNeeded > 1 ? 's' : ''}`
+                        : `Falta${referralsNeeded > 1 ? 'm' : ''} ${referralsNeeded} amigo${referralsNeeded > 1 ? 's' : ''} que contribua${referralsNeeded > 1 ? 'm' : ''}`}
                   </p>
-                </div>
-              )}
-              
-              
-            </>
-          )}
-
-          {/* Invite link section - always visible regardless of level */}
-          {dashboardData?.user_alias && (
-            <div className="mt-6 p-5 bg-gradient-to-br from-[#FFF8F0] to-[#FFBE98]/10 rounded-xl border border-[#FFBE98]/30 overflow-visible" data-testid="invite-section">
-              {!isEmbaixador && referralsNeeded > 0 && (
-                <div className="mb-4 text-center">
-                  <p className="text-lg font-bold text-[#2D2A26]" data-testid="referrals-needed-msg">
-                    Estás a <span className="text-[#FFBE98]">{referralsNeeded} passo{referralsNeeded > 1 ? 's' : ''}</span> de te tornares Embaixador
-                  </p>
-                  <p className="text-xs text-[#6B6661] mt-1">
-                    {validReferrals > 0 
-                      ? `${validReferrals}/3 amigos já contribuíram`
-                      : 'Convida amigos — cada contribuição aproxima-te'
-                    }
-                  </p>
-                </div>
-              )}
-              {isEmbaixador && (
-                <div className="mb-4 text-center">
-                  <p className="text-sm font-semibold text-green-700">
-                    Embaixador desbloqueado! Continua a convidar amigos.
-                  </p>
-                </div>
-              )}
-              <p className="text-xs text-[#6B6661] mb-1.5">O teu link de convite</p>
-              <a href={buildInviteLink(dashboardData.user_alias)}
-                target="_blank" rel="noopener noreferrer"
-                className="text-sm font-mono font-semibold text-[#FFBE98] hover:underline mb-3 break-all block"
-                data-testid="invite-link-clickable">
-                {buildInviteLink(dashboardData.user_alias)}
-              </a>
-              <ShareMenu
-                inviteLink={buildInviteLink(dashboardData.user_alias)}
-                senderName={user?.name}
-                buttonLabel="Convidar amigos"
-                buttonClassName="w-full flex items-center justify-center gap-2 py-2.5 bg-[#2D2A26] text-white rounded-lg text-sm font-semibold hover:bg-[#4A4640] transition-all shadow-sm"
-              />
-              <p className="text-[10px] text-center text-[#6B6661]/60 mt-3">
-                Mais convites = mais contribuições = mais sonhos realizados
-              </p>
-            </div>
-          )}
+                )}
+              </>
+            )}
+          </div>
         </motion.div>
+
+        {/* BLOCO CTA PRINCIPAL — Convidar Amigos (sempre visível, destaque máximo) */}
+        {dashboardData?.user_alias && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="bg-gradient-to-br from-[#FFBE98] to-[#F2C94C] rounded-3xl p-5 shadow-lg"
+            data-testid="invite-section"
+          >
+            <div className="text-center mb-4">
+              <Users className="w-8 h-8 text-white mx-auto mb-2" />
+              <p className="text-lg font-bold text-white">
+                {isEmbaixador ? 'Continua a convidar amigos' : `Convida amigos e torna-te Embaixador`}
+              </p>
+              {!isEmbaixador && referralsNeeded > 0 && (
+                <p className="text-white/80 text-sm mt-1">
+                  Falta{referralsNeeded > 1 ? 'm' : ''} {referralsNeeded} amigo{referralsNeeded > 1 ? 's' : ''}
+                </p>
+              )}
+            </div>
+
+            <ShareMenu
+              inviteLink={buildInviteLink(dashboardData.user_alias)}
+              senderName={user?.name}
+              buttonLabel="Convidar amigos"
+              buttonClassName="w-full flex items-center justify-center gap-2 py-3.5 bg-white text-[#2D2A26] rounded-2xl text-base font-bold hover:bg-white/90 transition-all shadow-md"
+            />
+
+            <p className="text-[10px] text-center text-white/60 mt-3">
+              O teu link: <span className="font-mono text-white/80">{buildInviteLink(dashboardData.user_alias).replace('https://', '').substring(0, 35)}...</span>
+            </p>
+          </motion.div>
+        )}
 
         {/* AMBASSADOR VALIDATIONS — Pending payments to confirm */}
         {isEmbaixador && (
@@ -523,113 +411,30 @@ const Dashboard = () => {
           </motion.div>
         )}
 
-        {/* BLOCO 3 — Convites */}
+        {/* BLOCO 3 — Impacto dos Convites (compacto) */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-white rounded-3xl p-6 md:p-8 shadow-lg border border-stone-100"
+          className="bg-white rounded-3xl p-5 shadow-lg border border-stone-100"
         >
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 bg-[#E6F4F1] rounded-xl flex items-center justify-center">
-              <Share2 className="w-6 h-6 text-[#2D2A26]" />
+          <h3 className="text-sm font-bold text-[#2D2A26] mb-3 flex items-center gap-2">
+            <Share2 className="w-4 h-4 text-[#FFBE98]" /> O teu impacto
+          </h3>
+          <div className="grid grid-cols-3 gap-3">
+            <div className="text-center p-3 bg-stone-50 rounded-xl">
+              <p className="text-xl font-bold text-[#2D2A26]">{invites?.total_invited || 0}</p>
+              <p className="text-[10px] text-[#6B6661]">Convidados</p>
             </div>
-            <div>
-              <h3 className="text-lg font-bold text-[#2D2A26]">Convites</h3>
-              <p className="text-sm text-[#6B6661]">Partilha e acompanha o teu impacto</p>
+            <div className="text-center p-3 bg-stone-50 rounded-xl">
+              <p className="text-xl font-bold text-[#F2C94C]">{invites?.total_contributed_by_invites || 0}</p>
+              <p className="text-[10px] text-[#6B6661]">Contribuíram</p>
             </div>
-          </div>
-
-          {/* Sponsor Link */}
-          {main_journey && (
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-[#6B6661] mb-2">
-                O teu link de convite:
-              </label>
-              
-              {sponsorLinkId ? (
-                <div className="space-y-2">
-                  <a
-                    href={sponsorLinkUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm text-[#FFBE98] font-medium break-all hover:underline"
-                    data-testid="sponsor-link-input"
-                  >
-                    {sponsorLinkUrl}
-                  </a>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => copyLink(sponsorLinkId, main_journey.journey_id)}
-                      className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2 ${
-                        copiedLink 
-                          ? 'bg-green-100 text-green-700' 
-                          : 'bg-[#2D2A26] text-white hover:bg-[#4A4640]'
-                      }`}
-                      data-testid="copy-link-btn"
-                    >
-                      {copiedLink ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
-                      {copiedLink ? 'Copiado!' : 'Copiar convite'}
-                    </button>
-                    <ShareMenu
-                      inviteLink={sponsorLinkUrl}
-                      senderName={user?.name}
-                      buttonLabel="Convidar amigos"
-                      buttonClassName="flex-1 px-4 py-3 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-medium hover:bg-[#FFAB7D] transition-all flex items-center justify-center gap-2"
-                    />
-                  </div>
-                </div>
-              ) : (
-                <button
-                  onClick={() => createSponsorLink(main_journey.journey_id)}
-                  className="w-full px-4 py-3 bg-[#FFBE98] text-[#2D2A26] rounded-xl font-medium hover:bg-[#FFAB7D] transition-all flex items-center justify-center gap-2"
-                  data-testid="create-sponsor-link-btn"
-                >
-                  <Share2 className="w-5 h-5" />
-                  Gerar link de convite
-                </button>
-              )}
-            </div>
-          )}
-
-          {/* Invite Stats */}
-          <div className="grid grid-cols-3 gap-4">
-            <div className="text-center p-4 bg-stone-50 rounded-xl">
-              <p className="text-2xl font-bold text-[#2D2A26]">{invites?.total_invited || 0}</p>
-              <p className="text-xs text-[#6B6661] mt-1">Pessoas convidadas</p>
-            </div>
-            <div className="text-center p-4 bg-stone-50 rounded-xl">
-              <p className="text-2xl font-bold text-[#F2C94C]">{invites?.total_contributed_by_invites || 0}</p>
-              <p className="text-xs text-[#6B6661] mt-1">Quantas contribuíram</p>
-            </div>
-            <div className="text-center p-4 bg-stone-50 rounded-xl">
-              <p className="text-2xl font-bold text-[#FFBE98]">€{invites?.impact_amount?.toFixed(0) || 0}</p>
-              <p className="text-xs text-[#6B6661] mt-1">Impacto gerado</p>
+            <div className="text-center p-3 bg-stone-50 rounded-xl">
+              <p className="text-xl font-bold text-[#FFBE98]">€{invites?.impact_amount?.toFixed(0) || 0}</p>
+              <p className="text-[10px] text-[#6B6661]">Impacto</p>
             </div>
           </div>
-
-          {/* Impact Details */}
-          {invites?.referral_details?.length > 0 && (
-            <div className="mt-4 p-4 bg-gradient-to-br from-[#FFF8F0] to-[#FFBE98]/5 rounded-xl border border-[#FFBE98]/20" data-testid="invite-impact-panel">
-              <p className="text-sm font-semibold text-[#2D2A26] mb-3">Impacto dos teus convites</p>
-              <div className="space-y-2 mb-3">
-                {invites.referral_details.map((r, i) => (
-                  <div key={i} className="flex items-center justify-between text-sm">
-                    <span className="text-[#6B6661]">{r.name}</span>
-                    {r.has_contributed ? (
-                      <span className="font-semibold text-[#FFBE98]">€{r.amount}</span>
-                    ) : (
-                      <span className="text-xs text-[#6B6661]/50 italic">ainda não contribuiu</span>
-                    )}
-                  </div>
-                ))}
-              </div>
-              <div className="border-t border-[#FFBE98]/20 pt-2 flex items-center justify-between">
-                <span className="text-xs font-semibold text-[#6B6661]">Total gerado pelos teus convites</span>
-                <span className="text-lg font-bold text-[#FFBE98]" data-testid="invite-impact-total">€{invites?.impact_amount?.toFixed(0) || 0}</span>
-              </div>
-            </div>
-          )}
         </motion.div>
 
         {/* BLOCO 4 — Contribuições Pessoais */}
