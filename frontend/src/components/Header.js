@@ -134,11 +134,10 @@ const Header = () => {
             </Link>
             <Link 
               to="/plan-trip" 
-              className={navLinkClass('/plan-trip')}
+              className={`${navLinkClass('/plan-trip')} !whitespace-normal text-center leading-tight`}
               data-testid="nav-plan-trip"
             >
-              Planear viagem
-              <br />com IA
+              Planear viagem<br />com IA
             </Link>
             
             {user && (
