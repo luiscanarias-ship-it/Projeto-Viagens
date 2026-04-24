@@ -172,45 +172,45 @@ const Home = () => {
         description="A plataforma de CrowdDreaming para quem acredita que as viagens de sonho se podem concretizar. Contribui e ajuda sonhos a ganhar forma."
       />
       {/* Hero Section */}
-      <section className="relative min-h-[55vh] sm:min-h-[60vh] flex items-center justify-center dream-mesh">
+      <section className="relative min-h-[auto] flex items-center justify-center dream-mesh py-6 sm:py-10 md:min-h-[50vh]">
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-20 left-10 w-64 h-64 bg-[#FFBE98]/20 rounded-full blur-3xl animate-float" />
           <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#E6F4F1]/40 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
         </div>
 
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 text-center pt-20 sm:pt-16">
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 text-center pt-16 sm:pt-12">
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1 }}
-            className="text-sm md:text-base text-[#6B6661]/70 italic mb-3 sm:mb-5" data-testid="opening-question">
+            className="text-xs sm:text-sm md:text-base text-[#6B6661]/70 italic mb-2 sm:mb-3" data-testid="opening-question">
             E se os sonhos pudessem ser financiados por todos?
           </motion.p>
 
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }}>
-            <h1 className="tracking-tight mb-3 sm:mb-5">
-              <span className="font-handwritten text-4xl sm:text-5xl md:text-8xl text-[#FFBE98] block mb-2 sm:mb-3">4Luis</span>
-              <span className="font-handwritten text-2xl sm:text-3xl md:text-6xl text-[#FFBE98]" style={{ fontWeight: 700 }}>{t('hero.tagline')}</span>
+            <h1 className="tracking-tight mb-2 sm:mb-3">
+              <span className="font-handwritten text-3xl sm:text-5xl md:text-8xl text-[#FFBE98] block mb-1 sm:mb-2">4Luis</span>
+              <span className="font-handwritten text-xl sm:text-3xl md:text-6xl text-[#FFBE98]" style={{ fontWeight: 700 }}>{t('hero.tagline')}</span>
             </h1>
           </motion.div>
 
           <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.3 }}
-            className="text-sm sm:text-base md:text-lg text-[#6B6661] mb-6 sm:mb-8 max-w-xl mx-auto leading-relaxed px-2" data-testid="hero-subheadline">
+            className="text-xs sm:text-sm md:text-lg text-[#6B6661] mb-4 sm:mb-6 max-w-xl mx-auto leading-relaxed px-2" data-testid="hero-subheadline">
             Todos os sonhos começam com um primeiro passo.<br />
             Ajuda alguém a viajar hoje — amanhã pode ser a tua vez.
           </motion.p>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.4 }}>
             <button onClick={scrollToMain}
-              className="inline-flex items-center gap-2.5 px-10 sm:px-12 py-4 sm:py-5 bg-[#2D2A26] text-white text-base sm:text-lg font-bold rounded-full shadow-[0_4px_20px_rgba(45,42,38,0.3)] hover:shadow-[0_6px_30px_rgba(45,42,38,0.45)] hover:scale-105 hover:bg-[#1a1816] transition-all duration-300"
+              className="inline-flex items-center gap-2 px-8 sm:px-12 py-3 sm:py-5 bg-[#2D2A26] text-white text-sm sm:text-lg font-bold rounded-full shadow-[0_4px_20px_rgba(45,42,38,0.3)] hover:shadow-[0_6px_30px_rgba(45,42,38,0.45)] hover:scale-105 hover:bg-[#1a1816] transition-all duration-300"
               data-testid="discover-btn"
             >
-              <Heart className="w-5 h-5 sm:w-6 sm:h-6" />{t('hero.cta')}
+              <Heart className="w-4 h-4 sm:w-6 sm:h-6" />{t('hero.cta')}
             </button>
           </motion.div>
 
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}
-            className="mt-5 sm:mt-7 flex flex-col sm:flex-row items-center gap-2 sm:gap-6" data-testid="trust-signals">
+            className="mt-3 sm:mt-5 flex flex-col sm:flex-row items-center gap-1.5 sm:gap-6" data-testid="trust-signals">
             {['Pagamentos diretos ao sonhador', 'Sem comissões da plataforma', 'Clube de sonhadores'].map((text) => (
-              <span key={text} className="flex items-center gap-1.5 text-xs sm:text-sm text-[#6B6661]">
-                <CheckCircle className="w-4 h-4 text-[#FFBE98]" />
+              <span key={text} className="flex items-center gap-1.5 text-[10px] sm:text-sm text-[#6B6661]">
+                <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-[#FFBE98]" />
                 {text}
               </span>
             ))}
@@ -684,47 +684,6 @@ const Home = () => {
           </motion.div>
         </div>
       </section>
-
-      {/* Sticky Contribution Bar */}
-      <AnimatePresence>
-        {showSticky && (
-          <motion.div
-            initial={{ y: 80, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 80, opacity: 0 }}
-            className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-stone-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
-            data-testid="home-sticky-bar"
-          >
-            <div className="max-w-5xl mx-auto px-4 md:px-6 py-2.5 sm:py-3 flex items-center gap-3 md:gap-5">
-              <div className="flex-1 min-w-0 hidden sm:block">
-                <p className="text-sm font-bold text-[#2D2A26] truncate">
-                  {mainJourney.journey.name} — <span className="font-handwritten text-[#FFBE98]">{d('main.poetic', mainJourney.journey.poetic_name)}</span>
-                </p>
-                <div className="flex items-center gap-3 mt-1">
-                  {mainJourney.progress && (
-                    <div className="flex items-center gap-2">
-                      <div className="h-1.5 bg-stone-100 rounded-full overflow-hidden w-[140px]">
-                        <div className="h-full bg-gradient-to-r from-[#FFBE98] to-[#F2C94C] rounded-full" style={{ width: `${Math.min(100, mainJourney.progress.percentage)}%` }} />
-                      </div>
-                      <span className="text-xs font-semibold text-[#6B6661]">{mainJourney.progress.percentage}%</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div className="flex-1 flex justify-center sm:justify-end">
-                <button
-                  onClick={() => setShowCheckout(true)}
-                  className="w-full sm:w-auto py-3 px-6 bg-[#2D2A26] text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-[#4A4640] transition-all shadow-md"
-                  data-testid="home-sticky-contribute-btn"
-                >
-                  <Heart className="w-4 h-4 text-[#FFBE98]" />
-                  {t('home.contribute_dream')}
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Checkout Modal */}
       {mainJourney?.journey && (
