@@ -172,38 +172,41 @@ const Home = () => {
         description="A plataforma de CrowdDreaming para quem acredita que as viagens de sonho se podem concretizar. Contribui e ajuda sonhos a ganhar forma."
       />
       {/* Hero Section */}
-      <section className="relative min-h-[60vh] sm:min-h-[65vh] flex items-center justify-center dream-mesh">
+      <section className="relative min-h-[55vh] sm:min-h-[60vh] flex items-center justify-center dream-mesh">
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-20 left-10 w-64 h-64 bg-[#FFBE98]/20 rounded-full blur-3xl animate-float" />
           <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#E6F4F1]/40 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
         </div>
 
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 text-center pt-24 sm:pt-20">
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 text-center pt-20 sm:pt-16">
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1 }}
-            className="text-sm md:text-base text-[#6B6661]/70 italic mb-4 sm:mb-6" data-testid="opening-question">
+            className="text-sm md:text-base text-[#6B6661]/70 italic mb-3 sm:mb-5" data-testid="opening-question">
             E se os sonhos pudessem ser financiados por todos?
           </motion.p>
 
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }}>
-            <h1 className="tracking-tight mb-4 sm:mb-6">
-              <span className="font-handwritten text-4xl sm:text-5xl md:text-8xl text-[#FFBE98] block mb-2 sm:mb-4">4Luis</span>
+            <h1 className="tracking-tight mb-3 sm:mb-5">
+              <span className="font-handwritten text-4xl sm:text-5xl md:text-8xl text-[#FFBE98] block mb-2 sm:mb-3">4Luis</span>
               <span className="font-handwritten text-2xl sm:text-3xl md:text-6xl text-[#FFBE98]" style={{ fontWeight: 700 }}>{t('hero.tagline')}</span>
             </h1>
           </motion.div>
 
           <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-sm sm:text-lg md:text-xl text-[#6B6661] mb-8 sm:mb-10 max-w-2xl mx-auto leading-relaxed px-2">
+            className="text-sm sm:text-lg md:text-xl text-[#6B6661] mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed px-2">
             A plataforma de <span className="font-bold text-[#FFBE98]">CrowdDreaming</span> para quem acredita que as viagens de sonho se podem concretizar.
           </motion.p>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.4 }}>
-            <button onClick={scrollToMain} className="btn-primary text-base sm:text-lg" data-testid="discover-btn">
-              <Heart className="w-5 h-5 inline mr-2" />{t('hero.cta')}
+            <button onClick={scrollToMain}
+              className="inline-flex items-center gap-2.5 px-10 sm:px-12 py-4 sm:py-5 bg-[#2D2A26] text-white text-base sm:text-lg font-bold rounded-full shadow-[0_4px_20px_rgba(45,42,38,0.3)] hover:shadow-[0_6px_30px_rgba(45,42,38,0.45)] hover:scale-105 hover:bg-[#1a1816] transition-all duration-300"
+              data-testid="discover-btn"
+            >
+              <Heart className="w-5 h-5 sm:w-6 sm:h-6" />{t('hero.cta')}
             </button>
           </motion.div>
 
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}
-            className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-center gap-2 sm:gap-6" data-testid="trust-signals">
+            className="mt-5 sm:mt-7 flex flex-col sm:flex-row items-center gap-2 sm:gap-6" data-testid="trust-signals">
             {['Pagamentos diretos ao sonhador', 'Sem comissões da plataforma', 'Clube de sonhadores'].map((text) => (
               <span key={text} className="flex items-center gap-1.5 text-xs sm:text-sm text-[#6B6661]">
                 <CheckCircle className="w-4 h-4 text-[#FFBE98]" />
@@ -421,7 +424,7 @@ const Home = () => {
             <h2 className="text-3xl md:text-4xl font-bold text-[#2D2A26] mb-4">
               {t('home.materializing_dreams')}
             </h2>
-            <p className="text-[#6B6661] max-w-xl mx-auto">
+            <p className="text-[#6B6661] max-w-xl mx-auto whitespace-pre-line">
               {t('home.help_dreamers')}
             </p>
           </motion.div>
@@ -574,6 +577,10 @@ const Home = () => {
                     </div>
                     <div className="p-4">
                       <p className="text-sm text-[#6B6661] italic">"{d(`curated.${idx}.story`, dream.story)}"</p>
+                      <p className="text-[11px] text-[#FFBE98] mt-2 flex items-center gap-1">
+                        <Users className="w-3 h-3" />
+                        {[45, 32, 28, 51][idx % 4]} pessoas tornaram este sonho possível
+                      </p>
                     </div>
                   </motion.div>
                 ))}
@@ -611,6 +618,12 @@ const Home = () => {
                             <p className="text-sm text-[#6B6661] italic line-clamp-3">"{journey.story}"</p>
                           </div>
                         )}
+                        <div className={`${journey.story ? 'px-4 pb-3' : 'p-4'}`}>
+                          <p className="text-[11px] text-[#FFBE98] flex items-center gap-1">
+                            <Users className="w-3 h-3" />
+                            {journey.contributor_count || journey.completed_contributor_count || '—'} pessoas tornaram este sonho possível
+                          </p>
+                        </div>
                         {journey.photos?.length > 0 && (
                           <div className="px-4 pb-4 flex gap-2">
                             {journey.photos.slice(0, 3).map((photo, idx) => (

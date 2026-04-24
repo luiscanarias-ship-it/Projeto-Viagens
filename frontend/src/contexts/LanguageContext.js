@@ -63,7 +63,7 @@ const defaultTexts = {
   // Ambassador Journeys
   "home.ambassador_journeys": "Viagens dos Embaixadores",
   "home.materializing_dreams": "Sonhos em Fase de Materialização",
-  "home.help_dreamers": "Ajuda outros sonhadores a concretizar as suas viagens de sonho",
+  "home.help_dreamers": "Ajuda outros sonhadores a realizar os seus sonhos\ne deixa que o teu ganhe vida",
   "home.featured": "Em Destaque",
   "home.highlight": "Destaque",
   "home.by": "por",
