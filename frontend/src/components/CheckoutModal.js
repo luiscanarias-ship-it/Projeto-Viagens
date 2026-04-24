@@ -1460,7 +1460,7 @@ const CheckoutModal = ({
                 Continuar com €{totalPayment} <Heart className="w-3.5 h-3.5" />
                 <ArrowRight className="w-4 h-4" />
               </button>
-              <p className="text-[10px] leading-relaxed text-[#6B6661]/70 text-center mt-2">
+              <p className="text-xs leading-relaxed text-[#FFBE98] font-medium text-center mt-2">
                 {selectedTip > 0 
                   ? `€${selectedAmount} para o sonho + €${selectedTip} para a plataforma`
                   : 'Promoções, descontos e vouchers para quem contribui'
