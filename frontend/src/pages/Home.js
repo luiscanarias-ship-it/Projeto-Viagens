@@ -191,9 +191,10 @@ const Home = () => {
             </h1>
           </motion.div>
 
-          <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-sm sm:text-lg md:text-xl text-[#6B6661] mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed px-2">
-            A plataforma de <span className="font-bold text-[#FFBE98]">CrowdDreaming</span> para quem acredita que as viagens de sonho se podem concretizar.
+          <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.3 }}
+            className="text-sm sm:text-base md:text-lg text-[#6B6661] mb-6 sm:mb-8 max-w-xl mx-auto leading-relaxed px-2" data-testid="hero-subheadline">
+            Todos os sonhos começam com um primeiro passo.<br />
+            Ajuda alguém a viajar hoje — amanhã pode ser a tua vez.
           </motion.p>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.4 }}>
