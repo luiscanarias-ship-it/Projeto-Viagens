@@ -63,22 +63,22 @@ const StoryChapter = ({ percentage = 0, customChapters, variant = "light" }) => 
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className={`rounded-2xl px-3 py-2.5 ${isDark ? 'bg-white/10 backdrop-blur-sm' : 'bg-[#FFBE98]/8 border border-[#FFBE98]/20'}`}
+      className={`rounded-2xl px-3 py-2.5 ${isDark ? 'bg-white/5 backdrop-blur-[2px]' : 'bg-[#FFBE98]/8 border border-[#FFBE98]/20'}`}
       data-testid="story-chapter"
     >
-      <div className="flex items-center gap-2 mb-2">
+      <div className="flex items-center gap-2 mb-1.5 flex-wrap">
         <BookOpen className={`w-4 h-4 ${isDark ? 'text-[#FFBE98]' : 'text-[#FFBE98]'}`} />
         <span className={`text-xs font-semibold uppercase tracking-wider ${isDark ? 'text-white/60' : 'text-[#6B6661]/60'}`}>
           Capítulo {chapterNum}
         </span>
-        <span className="mx-1 text-white/30">—</span>
+        <span className={`${isDark ? 'text-white/30' : 'text-[#6B6661]/30'}`}>—</span>
         <span className={`font-handwritten text-lg md:text-xl ${isDark ? 'text-[#FFBE98]' : 'text-[#FFBE98]'}`} data-testid="story-chapter-title">
           {chapter.title}
         </span>
       </div>
-      <div className={`text-sm leading-relaxed ${isDark ? 'text-white/75' : 'text-[#6B6661]'}`} data-testid="story-chapter-text">
+      <div className={`text-sm leading-relaxed ${isDark ? 'text-white/80' : 'text-[#6B6661]'}`} data-testid="story-chapter-text">
         {chapter.lines.map((line, i) => (
-          line === "" ? <br key={i} /> : <span key={i}>{line}{i < chapter.lines.length - 1 ? ' ' : ''}</span>
+          <React.Fragment key={i}>{line}{i < chapter.lines.length - 1 && <br />}</React.Fragment>
         ))}
       </div>
     </motion.div>
