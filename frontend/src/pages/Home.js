@@ -325,7 +325,7 @@ const Home = () => {
                   <div className="flex flex-col md:flex-row gap-6 md:items-start">
                     {/* Left: Chapter + Progress */}
                     <div className="flex-1">
-                      <div className="max-w-lg mb-5">
+                      <div className="max-w-[280px] sm:max-w-xs mb-5">
                         <StoryChapter
                           percentage={mainJourney.progress?.percentage || 0}
                           customChapters={mainJourney.journey.story_chapters}
