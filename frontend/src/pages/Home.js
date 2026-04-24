@@ -45,6 +45,8 @@ const Home = () => {
   const [mainBtnVisible, setMainBtnVisible] = useState(true);
   const [showAmbassadorModal, setShowAmbassadorModal] = useState(false);
   const mainContributeBtnRef = useRef(null);
+  const materializingSectionRef = useRef(null);
+  const [pastHowItWorks, setPastHowItWorks] = useState(false);
   
   // Translated dynamic content from DB
   const [dynTexts, setDynTexts] = useState({});
@@ -77,7 +79,18 @@ const Home = () => {
     return () => observer.disconnect();
   }, [mainJourney]);
 
-  const showSticky = !mainBtnVisible && mainJourney?.journey && !showCheckout;
+  const showSticky = !mainBtnVisible && pastHowItWorks && mainJourney?.journey && !showCheckout;
+
+  // Track when materializing section enters viewport (means we passed "Como funciona")
+  useEffect(() => {
+    if (!materializingSectionRef.current) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => setPastHowItWorks(entry.isIntersecting || entry.boundingClientRect.top < 0),
+      { threshold: 0 }
+    );
+    obs.observe(materializingSectionRef.current);
+    return () => obs.disconnect();
+  }, [ambassadorJourneys]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -415,7 +428,7 @@ const Home = () => {
       </section>
 
       {/* ==================== 2. SONHOS EM FASE DE MATERIALIZAÇÃO ==================== */}
-      <section id="journeys" className="py-16 bg-[#FAFAF9] scroll-mt-8" data-testid="materializing-dreams-section">
+      <section id="journeys" ref={materializingSectionRef} className="py-16 bg-[#FAFAF9] scroll-mt-8" data-testid="materializing-dreams-section">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
             <span className="inline-block px-4 py-2 bg-[#E6F4F1] rounded-full text-[#2D2A26] font-medium text-sm mb-4">
@@ -684,6 +697,47 @@ const Home = () => {
           </motion.div>
         </div>
       </section>
+
+      {/* Sticky Contribution Bar — visible in materializing/realized sections only */}
+      <AnimatePresence>
+        {showSticky && (
+          <motion.div
+            initial={{ y: 80, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 80, opacity: 0 }}
+            className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-stone-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
+            data-testid="home-sticky-bar"
+          >
+            <div className="max-w-5xl mx-auto px-4 md:px-6 py-2.5 sm:py-3 flex items-center gap-3 md:gap-5">
+              <div className="flex-1 min-w-0 hidden sm:block">
+                <p className="text-sm font-bold text-[#2D2A26] truncate">
+                  {mainJourney.journey.name} — <span className="font-handwritten text-[#FFBE98]">{d('main.poetic', mainJourney.journey.poetic_name)}</span>
+                </p>
+                <div className="flex items-center gap-3 mt-1">
+                  {mainJourney.progress && (
+                    <div className="flex items-center gap-2">
+                      <div className="h-1.5 bg-stone-100 rounded-full overflow-hidden w-[140px]">
+                        <div className="h-full bg-gradient-to-r from-[#FFBE98] to-[#F2C94C] rounded-full" style={{ width: `${Math.min(100, mainJourney.progress.percentage)}%` }} />
+                      </div>
+                      <span className="text-xs font-semibold text-[#6B6661]">{mainJourney.progress.percentage}%</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="flex-1 flex justify-center sm:justify-end">
+                <button
+                  onClick={() => setShowCheckout(true)}
+                  className="w-full sm:w-auto py-3 px-6 bg-[#2D2A26] text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-[#4A4640] transition-all shadow-md"
+                  data-testid="home-sticky-contribute-btn"
+                >
+                  <Heart className="w-4 h-4 text-[#FFBE98]" />
+                  {t('home.contribute_dream')}
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Checkout Modal */}
       {mainJourney?.journey && (
