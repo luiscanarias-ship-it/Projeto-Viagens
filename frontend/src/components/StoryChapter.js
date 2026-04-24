@@ -6,24 +6,21 @@ const DEFAULT_CHAPTERS = {
   1: {
     title: "O sonho nasce",
     lines: [
-      "Um sonho de atravessar a China,",
-      "da Grande Muralha aos mercados de Pequim.",
-      "",
-      "Esta jornada começa aqui."
+      "O sonho de conhecer a China",
+      "começa aqui..."
     ]
   },
   2: {
     title: "O sonho ganha forma",
     lines: [
-      "Cada contribuição aproxima esta viagem da realidade."
+      "Cada contribuição aproxima",
+      "esta viagem da realidade."
     ]
   },
   3: {
     title: "O sonho está a caminho",
     lines: [
-      "A jornada começa a ganhar forma.",
-      "",
-      "A rota começa a desenhar-se entre cidades",
+      "A rota desenha-se entre cidades",
       "e paisagens milenares."
     ]
   },
@@ -31,15 +28,13 @@ const DEFAULT_CHAPTERS = {
     title: "O sonho quase acontece",
     lines: [
       "A viagem está cada vez mais próxima.",
-      "",
-      "Em breve esta história deixará de ser apenas um sonho."
+      "Em breve será realidade."
     ]
   },
   5: {
     title: "O sonho torna-se realidade",
     lines: [
       "A comunidade tornou este sonho possível.",
-      "",
       "Agora começa a verdadeira aventura."
     ]
   }
@@ -68,7 +63,7 @@ const StoryChapter = ({ percentage = 0, customChapters, variant = "light" }) => 
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className={`rounded-2xl p-4 ${isDark ? 'bg-white/10 backdrop-blur-sm' : 'bg-[#FFBE98]/8 border border-[#FFBE98]/20'}`}
+      className={`rounded-2xl px-3 py-2.5 ${isDark ? 'bg-white/10 backdrop-blur-sm' : 'bg-[#FFBE98]/8 border border-[#FFBE98]/20'}`}
       data-testid="story-chapter"
     >
       <div className="flex items-center gap-2 mb-2">
@@ -77,7 +72,7 @@ const StoryChapter = ({ percentage = 0, customChapters, variant = "light" }) => 
           Capítulo {chapterNum}
         </span>
         <span className="mx-1 text-white/30">—</span>
-        <span className={`font-handwritten text-base ${isDark ? 'text-[#FFBE98]' : 'text-[#FFBE98]'}`} data-testid="story-chapter-title">
+        <span className={`font-handwritten text-lg md:text-xl ${isDark ? 'text-[#FFBE98]' : 'text-[#FFBE98]'}`} data-testid="story-chapter-title">
           {chapter.title}
         </span>
       </div>
