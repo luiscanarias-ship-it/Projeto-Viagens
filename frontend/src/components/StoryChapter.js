@@ -63,7 +63,7 @@ const StoryChapter = ({ percentage = 0, customChapters, variant = "light" }) => 
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className={`rounded-2xl px-3 py-2.5 ${isDark ? 'bg-white/5 backdrop-blur-[2px]' : 'bg-[#FFBE98]/8 border border-[#FFBE98]/20'}`}
+      className={`rounded-2xl px-3 py-2 inline-block ${isDark ? 'bg-black/20' : 'bg-[#FFBE98]/8 border border-[#FFBE98]/20'}`}
       data-testid="story-chapter"
     >
       <div className="flex items-center gap-2 mb-1.5 flex-wrap">
@@ -76,7 +76,7 @@ const StoryChapter = ({ percentage = 0, customChapters, variant = "light" }) => 
           {chapter.title}
         </span>
       </div>
-      <div className={`text-sm leading-relaxed ${isDark ? 'text-white/80' : 'text-[#6B6661]'}`} data-testid="story-chapter-text">
+      <div className={`text-xs leading-snug ${isDark ? 'text-white/80' : 'text-[#6B6661]'}`} data-testid="story-chapter-text">
         {chapter.lines.map((line, i) => (
           <React.Fragment key={i}>{line}{i < chapter.lines.length - 1 && <br />}</React.Fragment>
         ))}
