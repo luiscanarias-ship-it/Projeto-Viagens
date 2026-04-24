@@ -132,7 +132,7 @@ async def get_journey_progress(journey_id: str, request: Request):
     
     journey_contributor_count = len(await db.contributions.distinct("contributor_email", {"journey_id": journey_id, "status": {"$in": ["confirmed", "completed"]}}))
     platform_contributor_count = len(await db.contributions.distinct("contributor_email", {"status": {"$in": ["confirmed", "completed"]}}))
-    contributor_display_count = platform_contributor_count + 57
+    contributor_display_count = platform_contributor_count
     
     response = {
         "journey_id": journey_id,
@@ -295,7 +295,7 @@ async def get_main_journey_details():
         })
     
     platform_contributor_count = len(await db.contributions.distinct("contributor_email", {"status": {"$in": ["confirmed", "completed"]}}))
-    contributor_display_count = platform_contributor_count + 57
+    contributor_display_count = platform_contributor_count
     journey_contributor_count = len(await db.contributions.distinct("contributor_email", {"journey_id": journey_id, "status": {"$in": ["confirmed", "completed"]}}))
     
     return {

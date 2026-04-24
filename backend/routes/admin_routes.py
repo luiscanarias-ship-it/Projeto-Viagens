@@ -125,8 +125,8 @@ async def get_dreamers_stats():
     result = await db.contributions.aggregate(pipeline).to_list(1)
     total_raised = result[0]["total"] if result else 0
 
-    display_contributors = unique_contributors + 57
-    display_total = total_users + 57
+    display_contributors = unique_contributors
+    display_total = total_users
 
     top_dreamer = None
     top_pipeline = [
