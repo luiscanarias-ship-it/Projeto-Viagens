@@ -1318,10 +1318,10 @@ const CheckoutModal = ({
                       <Heart className="w-6 h-6 text-[#FFBE98]" />
                     </div>
                     <h3 className="text-lg font-bold text-[#2D2A26]" data-testid="thank-you-title">
-                      Contribuição enviada com sucesso
+                      Já fazes parte deste sonho
                     </h3>
-                    <p className="text-xs text-[#6B6661] mt-1">
-                      Acabaste de ajudar este sonho a ganhar forma.
+                    <p className="text-xs text-[#6B6661] mt-1 leading-relaxed">
+                      Quando ele acontecer, vais saber que ajudaste a torná-lo real.
                     </p>
                   </div>
 
@@ -1337,6 +1337,11 @@ const CheckoutModal = ({
                       </p>
                     )}
                   </div>
+
+                  {/* Early adopter — emotional reinforcement */}
+                  <p className="text-[11px] text-[#FFBE98] italic text-center" data-testid="early-adopter-contribution">
+                    Estás entre os primeiros a tornar esta viagem possível.
+                  </p>
 
                   {/* Platform tip thank you - only if tip system enabled and tip > 0 */}
                   {TIP_SYSTEM_ENABLED && selectedTip > 0 && (

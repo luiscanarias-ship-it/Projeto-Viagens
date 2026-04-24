@@ -152,16 +152,17 @@ def get_contribution_email_html(contributor_name: str, amount: float, journey_na
         </div>
         """
     content = f"""
-    <h1 style="margin: 0 0 16px 0; color: #2D2A26; font-size: 24px;">Obrigado, {contributor_name}! 💜</h1>
-    <p style="margin: 0 0 24px 0; color: #6B6661; font-size: 16px; line-height: 1.6;">A tua contribuição foi confirmada com sucesso.</p>
+    <h1 style="margin: 0 0 16px 0; color: #2D2A26; font-size: 24px;">Já fazes parte deste sonho</h1>
+    <p style="margin: 0 0 8px 0; color: #6B6661; font-size: 16px; line-height: 1.6;">Olá {contributor_name},</p>
+    <p style="margin: 0 0 24px 0; color: #6B6661; font-size: 16px; line-height: 1.6;">Obrigado por fazeres parte. Quando esta viagem acontecer, vais saber que ajudaste a dar-lhe vida.</p>
     <div style="background-color: #E6F4F1; border-radius: 12px; padding: 24px; text-align: center; margin-bottom: 24px;">
         <p style="margin: 0 0 8px 0; color: #6B6661; font-size: 14px;">Contribuíste</p>
         <p style="margin: 0; color: #2D2A26; font-size: 36px; font-weight: bold;">{amount}€</p>
         <p style="margin: 8px 0 0 0; color: #6B6661; font-size: 14px;">para "{journey_name}"</p>
     </div>
     {crypto_badge}
-    <p style="margin: 0 0 24px 0; color: #6B6661; font-size: 16px; line-height: 1.6;">
-        Graças a ti, este sonho está mais perto de se tornar realidade.
+    <p style="margin: 0 0 24px 0; color: #FFBE98; font-size: 14px; font-style: italic; text-align: center;">
+        Estás entre os primeiros a tornar esta viagem possível.
     </p>
     <div style="background-color: #FFF8F0; border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 24px; border: 1px solid #FFBE9840;">
         <p style="margin: 0 0 8px 0; color: #2D2A26; font-weight: bold; font-size: 16px;">O sonho continua a crescer</p>
@@ -172,7 +173,7 @@ def get_contribution_email_html(contributor_name: str, amount: float, journey_na
         <a href="{FRONTEND_URL}/dashboard" style="display: inline-block; padding: 14px 32px; background-color: #2D2A26; color: #FFFFFF; text-decoration: none; border-radius: 12px; font-weight: bold;">Ver o meu Dashboard</a>
     </div>
     """
-    return get_email_base_template(content, "Contribuição Confirmada - 4Luis")
+    return get_email_base_template(content, "Já fazes parte deste sonho - 4Luis")
 
 
 def get_referral_contribution_email_html(sponsor_name: str, invitee_name: str, amount: float, journey_name: str, valid_referrals: int, contributed_to_main: bool) -> str:
@@ -313,7 +314,7 @@ async def send_contribution_email(contribution: dict, journey: dict):
     )
     await send_email_resend(
         to_email=contribution["contributor_email"],
-        subject=f"Contribuição de {contribution.get('amount')}€ confirmada - 4Luis",
+        subject=f"Já fazes parte deste sonho - 4Luis",
         html_content=html
     )
 

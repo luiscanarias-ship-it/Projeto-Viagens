@@ -390,6 +390,25 @@ const Dashboard = () => {
           transition={{ delay: 0.2 }}
           className="bg-white rounded-3xl p-5 shadow-lg border border-stone-100"
         >
+          {/* Mensagem emocional de impacto */}
+          {(contributions?.total_count > 0 || invites?.total_invited > 0) && (
+            <div className="mb-4 px-1">
+              <p className="text-sm text-[#2D2A26] leading-relaxed" data-testid="emotional-impact-msg">
+                {contributions?.total_count > 0 && invites?.total_invited > 0
+                  ? `Já ajudaste a dar vida a ${contributions.total_count} sonho${contributions.total_count > 1 ? 's' : ''} e inspiraste ${invites.total_invited} pessoa${invites.total_invited > 1 ? 's' : ''} a fazer parte.`
+                  : contributions?.total_count > 0
+                    ? 'O teu contributo já fez a diferença. Cada gesto conta.'
+                    : `Já inspiraste ${invites.total_invited} pessoa${invites.total_invited > 1 ? 's' : ''} a fazer parte deste movimento.`
+                }
+              </p>
+              {contributions?.total_count > 0 && contributions.total_count <= 5 && (
+                <p className="text-xs text-[#FFBE98] mt-1 italic" data-testid="early-adopter-msg">
+                  Fazes parte dos primeiros apoiantes — isso faz toda a diferença.
+                </p>
+              )}
+            </div>
+          )}
+
           <h3 className="text-sm font-bold text-[#2D2A26] mb-3 flex items-center gap-2">
             <Share2 className="w-4 h-4 text-[#FFBE98]" /> O teu impacto
           </h3>
