@@ -516,11 +516,11 @@ const CheckoutModal = ({
           className="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-hidden shadow-2xl flex flex-col"
         >
           {/* Header */}
-          <div className="bg-gradient-to-r from-[#FFBE98]/20 to-[#E6F4F1]/30 px-4 py-3 border-b border-stone-100">
-            <div className="flex items-center justify-between mb-2">
+          <div className="bg-gradient-to-r from-[#FFBE98]/20 to-[#E6F4F1]/30 px-4 py-2 border-b border-stone-100">
+            <div className="flex items-center justify-between mb-1.5">
               <div>
-                <h2 className="font-bold text-[#2D2A26] text-sm">Ajuda a realizar este sonho</h2>
-                <p className="text-xs text-[#6B6661]">Destino: {journeyName}</p>
+                <h2 className="font-bold text-[#2D2A26] text-sm leading-tight">Ajuda a realizar este sonho</h2>
+                <p className="text-[10px] text-[#6B6661]">Destino: {journeyName}</p>
               </div>
               <button
                 onClick={() => {
@@ -547,22 +547,22 @@ const CheckoutModal = ({
             
             {/* Progress bar */}
             {!showConfirmation && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 {[
                   { num: 1, label: 'Valor' },
                   { num: 2, label: 'Pagamento' },
                   { num: 3, label: 'Instruções' }
                 ].map((s, idx) => (
                   <React.Fragment key={s.num}>
-                    <div className="flex items-center gap-1.5">
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
+                    <div className="flex items-center gap-1">
+                      <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold transition-colors ${
                         step >= s.num 
                           ? 'bg-[#FFBE98] text-white' 
                           : 'bg-stone-200 text-[#6B6661]'
                       }`}>
-                        {step > s.num ? <Check className="w-3.5 h-3.5" /> : s.num}
+                        {step > s.num ? <Check className="w-3 h-3" /> : s.num}
                       </div>
-                      <span className={`text-xs ${step >= s.num ? 'text-[#2D2A26] font-medium' : 'text-[#6B6661]'}`}>
+                      <span className={`text-[10px] ${step >= s.num ? 'text-[#2D2A26] font-medium' : 'text-[#6B6661]'}`}>
                         {s.label}
                       </span>
                     </div>
@@ -576,7 +576,7 @@ const CheckoutModal = ({
           </div>
 
           {/* Content */}
-          <div className="px-4 py-3 overflow-y-auto flex-1 min-h-0">
+          <div className="px-4 py-2 overflow-y-auto flex-1 min-h-0">
             <AnimatePresence mode="wait">
               
               {/* STEP 1: Choose Amount */}
@@ -674,7 +674,7 @@ const CheckoutModal = ({
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
-                  className="space-y-3"
+                  className="space-y-2"
                 >
                   {/* Title + amount */}
                   <div className="flex items-center justify-between">
@@ -696,11 +696,6 @@ const CheckoutModal = ({
                       </button>
                     </div>
                   </div>
-
-                  {/* Emotional message */}
-                  <p className="text-xs text-[#6B6661] text-center -mt-1" data-testid="step2-emotional-msg">
-                    Mesmo uma pequena contribuição<br />ajuda este sonho a ganhar forma.
-                  </p>
 
                   {/* Direct payment notice */}
                   {isDirectPayment && (
@@ -745,13 +740,13 @@ const CheckoutModal = ({
                         }`}
                         data-testid="mbway-primary-btn"
                       >
-                        <div className="px-3 py-2.5 flex items-center justify-between">
+                        <div className="px-3 py-1.5 flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-[#FFBE98]/20 rounded-lg flex items-center justify-center">
-                              <Smartphone className="w-4 h-4 text-[#FFBE98]" />
+                            <div className="w-7 h-7 bg-[#FFBE98]/20 rounded-lg flex items-center justify-center">
+                              <Smartphone className="w-3.5 h-3.5 text-[#FFBE98]" />
                             </div>
                             <div className="text-left">
-                              <span className="text-sm font-bold text-[#2D2A26] block">MBWay</span>
+                              <span className="text-sm font-bold text-[#2D2A26] block leading-tight">MBWay</span>
                               <span className="text-[10px] text-[#6B6661]">Rápido e simples (Portugal)</span>
                             </div>
                           </div>
@@ -762,19 +757,19 @@ const CheckoutModal = ({
                       </button>
                       {paypalClientId && (
                         <div className="border-2 border-[#FFBE98] rounded-xl overflow-hidden" data-testid="paypal-section">
-                          <div className="px-3 py-2 flex items-center justify-between">
+                          <div className="px-3 py-1.5 flex items-center justify-between">
                             <div className="flex items-center gap-1.5">
-                              <ShieldCheck className="w-4 h-4 text-[#FFBE98]" />
+                              <ShieldCheck className="w-3.5 h-3.5 text-[#FFBE98]" />
                               <span className="text-[11px] font-bold text-[#2D2A26]">Cartão ou PayPal</span>
                             </div>
                             <span className="text-[10px] text-[#6B6661] flex items-center gap-1">
                               <Lock className="w-3 h-3" /> 100% seguro
                             </span>
                           </div>
-                          <p className="px-3 text-[9px] text-[#6B6661] -mt-0.5 mb-1">Pagamento simples e seguro (via PayPal)</p>
-                          <div className="px-3 pb-2">
+                          <p className="px-3 text-[9px] text-[#6B6661] -mt-1 mb-0.5">Pagamento simples e seguro (via PayPal)</p>
+                          <div className="px-3 pb-1.5">
                             {paypalError && (
-                              <p className="text-xs text-red-500 mb-2">{paypalError}</p>
+                              <p className="text-xs text-red-500 mb-1">{paypalError}</p>
                             )}
                             <PayPalScriptProvider options={{ 
                               clientId: paypalClientId, 
@@ -783,7 +778,7 @@ const CheckoutModal = ({
                               "enable-funding": "card"
                             }}>
                               <PayPalButtons
-                                style={{ layout: "vertical", height: 45, tagline: false, label: "pay", shape: "rect" }}
+                                style={{ layout: "vertical", height: 40, tagline: false, label: "pay", shape: "rect" }}
                                 disabled={paypalProcessing}
                                 forceReRender={[totalPayment, journeyId, selectedTip]}
                                 createOrder={createPayPalOrder}
@@ -801,19 +796,19 @@ const CheckoutModal = ({
                       {/* PayPal + Card — Primary for International */}
                       {paypalClientId && (
                         <div className="border-2 border-[#FFBE98] rounded-xl overflow-hidden" data-testid="paypal-section">
-                          <div className="px-3 py-2 flex items-center justify-between">
+                          <div className="px-3 py-1.5 flex items-center justify-between">
                             <div className="flex items-center gap-1.5">
-                              <ShieldCheck className="w-4 h-4 text-[#FFBE98]" />
+                              <ShieldCheck className="w-3.5 h-3.5 text-[#FFBE98]" />
                               <span className="text-[11px] font-bold text-[#2D2A26]">Cartão ou PayPal</span>
                             </div>
                             <span className="text-[10px] text-[#6B6661] flex items-center gap-1">
                               <Lock className="w-3 h-3" /> 100% seguro
                             </span>
                           </div>
-                          <p className="px-3 text-[9px] text-[#6B6661] -mt-0.5 mb-1">Pagamento simples e seguro (via PayPal)</p>
-                          <div className="px-3 pb-2">
+                          <p className="px-3 text-[9px] text-[#6B6661] -mt-1 mb-0.5">Pagamento simples e seguro (via PayPal)</p>
+                          <div className="px-3 pb-1.5">
                             {paypalError && (
-                              <p className="text-xs text-red-500 mb-2">{paypalError}</p>
+                              <p className="text-xs text-red-500 mb-1">{paypalError}</p>
                             )}
                             <PayPalScriptProvider options={{ 
                               clientId: paypalClientId, 
@@ -822,7 +817,7 @@ const CheckoutModal = ({
                               "enable-funding": "card"
                             }}>
                               <PayPalButtons
-                                style={{ layout: "vertical", height: 45, tagline: false, label: "pay", shape: "rect" }}
+                                style={{ layout: "vertical", height: 40, tagline: false, label: "pay", shape: "rect" }}
                                 disabled={paypalProcessing}
                                 forceReRender={[totalPayment, journeyId, selectedTip]}
                                 createOrder={createPayPalOrder}
@@ -846,15 +841,15 @@ const CheckoutModal = ({
                     <button
                       onClick={() => handleMethodSelect('crypto')}
                       disabled={loading}
-                      className={`p-2.5 rounded-xl border-2 transition-all text-center ${
+                      className={`p-2 rounded-xl border-2 transition-all text-center ${
                         selectedMethod === 'crypto'
                           ? 'border-[#FFBE98] bg-[#FFBE98]/10 shadow-sm'
                           : 'border-stone-200 hover:border-[#FFBE98]/50 hover:bg-[#FFBE98]/5'
                       }`}
                       data-testid="crypto-method-btn"
                     >
-                      <Bitcoin className="w-5 h-5 text-[#F7931A] mx-auto" />
-                      <span className="text-xs font-medium block mt-1">Criptomoeda</span>
+                      <Bitcoin className="w-4 h-4 text-[#F7931A] mx-auto" />
+                      <span className="text-xs font-medium block mt-0.5">Criptomoeda</span>
                       <span className="text-[9px] text-[#6B6661]">Apoio direto e imediato</span>
                     </button>
 
@@ -863,24 +858,24 @@ const CheckoutModal = ({
                       <button
                         onClick={() => handleMethodSelect('mbway')}
                         disabled={loading}
-                        className={`p-2.5 rounded-xl border-2 transition-all text-center ${
+                        className={`p-2 rounded-xl border-2 transition-all text-center ${
                           selectedMethod === 'mbway'
                             ? 'border-[#FFBE98] bg-[#FFBE98]/10 shadow-sm'
                             : 'border-stone-200 hover:border-[#FFBE98]/50 hover:bg-[#FFBE98]/5'
                         }`}
                         data-testid="mbway-secondary-btn"
                       >
-                        <Smartphone className="w-5 h-5 text-[#FFBE98] mx-auto" />
-                        <span className="text-xs font-medium block mt-1">MBWay</span>
+                        <Smartphone className="w-4 h-4 text-[#FFBE98] mx-auto" />
+                        <span className="text-xs font-medium block mt-0.5">MBWay</span>
                         <span className="text-[9px] text-[#6B6661]">Rápido e simples (Portugal)</span>
                       </button>
                     )}
 
                     {/* Multibanco — coming soon (Portugal only) */}
                     {isPortugal && (
-                      <div className="p-2.5 rounded-xl border-2 border-stone-200 bg-stone-50/50 text-center opacity-60 cursor-not-allowed" data-testid="multibanco-soon-btn">
-                        <CreditCard className="w-5 h-5 text-[#6B6661] mx-auto" />
-                        <span className="text-xs font-medium block mt-1">Multibanco</span>
+                      <div className="p-2 rounded-xl border-2 border-stone-200 bg-stone-50/50 text-center opacity-60 cursor-not-allowed" data-testid="multibanco-soon-btn">
+                        <CreditCard className="w-4 h-4 text-[#6B6661] mx-auto" />
+                        <span className="text-xs font-medium block mt-0.5">Multibanco</span>
                         <span className="text-[9px] text-[#6B6661]">Em breve</span>
                       </div>
                     )}
