@@ -15,9 +15,7 @@ const DEFAULT_CHAPTERS = {
   2: {
     title: "O sonho ganha forma",
     lines: [
-      "Cada contribuição aproxima esta viagem da realidade.",
-      "",
-      "A comunidade já começou a construir este sonho."
+      "Cada contribuição aproxima esta viagem da realidade."
     ]
   },
   3: {
@@ -70,16 +68,16 @@ const StoryChapter = ({ percentage = 0, customChapters, variant = "light" }) => 
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className={`rounded-2xl p-6 ${isDark ? 'bg-white/10 backdrop-blur-sm' : 'bg-[#FFBE98]/8 border border-[#FFBE98]/20'}`}
+      className={`rounded-2xl p-4 ${isDark ? 'bg-white/10 backdrop-blur-sm' : 'bg-[#FFBE98]/8 border border-[#FFBE98]/20'}`}
       data-testid="story-chapter"
     >
-      <div className="flex items-center gap-2 mb-3">
+      <div className="flex items-center gap-2 mb-2">
         <BookOpen className={`w-4 h-4 ${isDark ? 'text-[#FFBE98]' : 'text-[#FFBE98]'}`} />
         <span className={`text-xs font-semibold uppercase tracking-wider ${isDark ? 'text-white/60' : 'text-[#6B6661]/60'}`}>
           Capítulo {chapterNum}
         </span>
       </div>
-      <h3 className={`font-handwritten text-xl md:text-2xl mb-3 ${isDark ? 'text-[#FFBE98]' : 'text-[#FFBE98]'}`} data-testid="story-chapter-title">
+      <h3 className={`font-handwritten text-lg md:text-xl mb-2 ${isDark ? 'text-[#FFBE98]' : 'text-[#FFBE98]'}`} data-testid="story-chapter-title">
         {chapter.title}
       </h3>
       <div className={`text-sm leading-relaxed ${isDark ? 'text-white/75' : 'text-[#6B6661]'}`} data-testid="story-chapter-text">
