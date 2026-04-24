@@ -3807,10 +3807,52 @@ app.include_router(api_router)
 
 @app.on_event("startup")
 async def startup_event():
-    """Seed admin user on startup and start background validation checker"""
+    """Seed admin user, create indexes, start background tasks"""
     from passlib.context import CryptContext
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
     
+    # ── Create indexes (idempotent — no-op if already exist) ──
+    await db.users.create_index("user_id", unique=True)
+    await db.users.create_index("email", unique=True, sparse=True)
+    await db.users.create_index("sponsor_id")
+    await db.users.create_index("level")
+
+    await db.journeys.create_index("journey_id", unique=True)
+    await db.journeys.create_index("status")
+    await db.journeys.create_index("is_active")
+    await db.journeys.create_index("ambassador_user_id")
+    await db.journeys.create_index("is_main_trip")
+    await db.journeys.create_index([("is_active", 1), ("status", 1)])
+    await db.journeys.create_index("visibility_score")
+
+    await db.contributions.create_index("contribution_id", unique=True)
+    await db.contributions.create_index("journey_id")
+    await db.contributions.create_index("user_id")
+    await db.contributions.create_index("status")
+    await db.contributions.create_index("created_at")
+    await db.contributions.create_index("payment_reference")
+    await db.contributions.create_index("contributor_email")
+    await db.contributions.create_index([("journey_id", 1), ("status", 1)])
+    await db.contributions.create_index([("user_id", 1), ("status", 1)])
+
+    await db.sponsor_links.create_index("link_id", unique=True)
+    await db.sponsor_links.create_index("user_id")
+    await db.sponsor_links.create_index([("user_id", 1), ("journey_id", 1)])
+
+    await db.points.create_index("point_id", unique=True)
+    await db.points.create_index("user_id")
+    await db.points.create_index("journey_id")
+
+    await db.notifications.create_index("notification_id", unique=True)
+    await db.notifications.create_index("user_id")
+    await db.notifications.create_index("for_admin")
+
+    await db.audit_logs.create_index("timestamp")
+    await db.audit_logs.create_index("target_type")
+
+    logger.info("MongoDB indexes ensured")
+
+    # ── Seed admin ──
     admin_exists = await db.users.find_one({"email": ADMIN_EMAIL})
     if not admin_exists:
         admin_doc = {

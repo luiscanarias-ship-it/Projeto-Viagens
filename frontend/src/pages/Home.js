@@ -475,6 +475,7 @@ const Home = () => {
                             <img
                               src={journey.image_url}
                               alt={journey.name}
+                              loading="lazy"
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
@@ -562,7 +563,7 @@ const Home = () => {
                   <motion.div key={dream.id} initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}
                     className="bg-[#FAFAF9] rounded-2xl overflow-hidden group">
                     <div className="relative h-48 overflow-hidden">
-                      <img src={dream.image_url} alt={dream.name}
+                      <img src={dream.image_url} alt={dream.name} loading="lazy"
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                       <div className="absolute bottom-4 left-4 right-4">
@@ -600,7 +601,7 @@ const Home = () => {
                     {data.journeys.map((journey) => (
                       <Link to={`/journey/${journey.journey_id}`} key={journey.journey_id} className="bg-[#FAFAF9] rounded-2xl overflow-hidden group hover:shadow-lg transition-all duration-300 cursor-pointer">
                         <div className="relative h-48 overflow-hidden">
-                          <img src={journey.image_url} alt={journey.name}
+                          <img src={journey.image_url} alt={journey.name} loading="lazy"
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                           <div className="absolute bottom-4 left-4 right-4">
@@ -627,7 +628,7 @@ const Home = () => {
                         {journey.photos?.length > 0 && (
                           <div className="px-4 pb-4 flex gap-2">
                             {journey.photos.slice(0, 3).map((photo, idx) => (
-                              <img key={idx} src={photo} alt="" className="w-12 h-12 rounded-lg object-cover" />
+                              <img key={idx} src={photo} alt="" loading="lazy" className="w-12 h-12 rounded-lg object-cover" />
                             ))}
                             {journey.photos.length > 3 && (
                               <div className="w-12 h-12 rounded-lg bg-stone-200 flex items-center justify-center text-sm text-[#6B6661]">

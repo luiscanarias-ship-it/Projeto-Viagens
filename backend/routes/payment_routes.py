@@ -1095,77 +1095,71 @@ async def reject_contribution(contribution_id: str, request: Request):
 
 @router.get("/admin/contributions/reports")
 async def get_contribution_reports(request: Request):
-    """Get comprehensive contribution reports for admin"""
+    """Get comprehensive contribution reports — uses MongoDB aggregation pipelines"""
     await require_admin(request)
 
-    all_contributions = await db.contributions.find(
-        {"status": "confirmed"},
-        {"_id": 0}
-    ).to_list(10000)
+    match_confirmed = {"$match": {"status": {"$in": ["confirmed", "completed"]}}}
 
-    completed_contributions = await db.contributions.find(
-        {"status": "completed"},
-        {"_id": 0}
-    ).to_list(10000)
-
-    contributions = all_contributions + completed_contributions
-
-    by_amount = {}
-    for c in contributions:
-        amt = c.get("amount", 0)
-        if amt not in by_amount:
-            by_amount[amt] = {"count": 0, "total": 0}
-        by_amount[amt]["count"] += 1
-        by_amount[amt]["total"] += amt
-
-    amount_report = [
-        {"amount": amt, "count": data["count"], "total": data["total"]}
-        for amt, data in sorted(by_amount.items())
+    # Summary via aggregation
+    summary_pipeline = [
+        match_confirmed,
+        {"$group": {
+            "_id": None,
+            "total_count": {"$sum": 1},
+            "total_amount": {"$sum": "$amount"},
+            "avg_amount": {"$avg": "$amount"}
+        }}
     ]
+    summary_result = await db.contributions.aggregate(summary_pipeline).to_list(1)
+    summary_data = summary_result[0] if summary_result else {"total_count": 0, "total_amount": 0, "avg_amount": 0}
 
-    by_method = {}
-    for c in contributions:
-        method = c.get("payment_method", "unknown")
-        if method not in by_method:
-            by_method[method] = {"count": 0, "total": 0, "method_info": PAYMENT_METHODS.get(method, {})}
-        by_method[method]["count"] += 1
-        by_method[method]["total"] += c.get("amount", 0)
+    # By amount via aggregation
+    amount_pipeline = [
+        match_confirmed,
+        {"$group": {"_id": "$amount", "count": {"$sum": 1}, "total": {"$sum": "$amount"}}},
+        {"$sort": {"_id": 1}},
+        {"$project": {"_id": 0, "amount": "$_id", "count": 1, "total": 1}}
+    ]
+    amount_report = await db.contributions.aggregate(amount_pipeline).to_list(100)
 
+    # By method via aggregation
+    method_pipeline = [
+        match_confirmed,
+        {"$group": {"_id": {"$ifNull": ["$payment_method", "unknown"]}, "count": {"$sum": 1}, "total": {"$sum": "$amount"}}},
+        {"$project": {"_id": 0, "method": "$_id", "count": 1, "total": 1}}
+    ]
+    method_results = await db.contributions.aggregate(method_pipeline).to_list(50)
     method_report = [
-        {"method": method, "name": data["method_info"].get("name", method), "count": data["count"], "total": data["total"]}
-        for method, data in by_method.items()
+        {"method": m["method"], "name": PAYMENT_METHODS.get(m["method"], {}).get("name", m["method"]), "count": m["count"], "total": m["total"]}
+        for m in method_results
     ]
 
-    temporal = defaultdict(lambda: {"count": 0, "total": 0})
-    for c in contributions:
-        created_at = c.get("created_at", "")
-        if isinstance(created_at, str):
-            day = created_at[:10]
-        else:
-            day = created_at.strftime("%Y-%m-%d")
-        temporal[day]["count"] += 1
-        temporal[day]["total"] += c.get("amount", 0)
-
-    temporal_report = [
-        {"date": day, "count": data["count"], "total": data["total"]}
-        for day, data in sorted(temporal.items(), reverse=True)[:30]
+    # Temporal (last 30 days) via aggregation
+    temporal_pipeline = [
+        match_confirmed,
+        {"$project": {"day": {"$substr": ["$created_at", 0, 10]}, "amount": 1}},
+        {"$group": {"_id": "$day", "count": {"$sum": 1}, "total": {"$sum": "$amount"}}},
+        {"$sort": {"_id": -1}},
+        {"$limit": 30},
+        {"$project": {"_id": 0, "date": "$_id", "count": 1, "total": 1}}
     ]
+    temporal_report = await db.contributions.aggregate(temporal_pipeline).to_list(30)
 
-    total_amount = sum(c.get("amount", 0) for c in contributions)
-    total_count = len(contributions)
-    avg_contribution = total_amount / total_count if total_count > 0 else 0
-
-    pending = await db.contributions.find({"status": "pending"}, {"_id": 0}).to_list(1000)
-    pending_count = len(pending)
-    pending_amount = sum(c.get("amount", 0) for c in pending)
+    # Pending summary via aggregation
+    pending_pipeline = [
+        {"$match": {"status": "pending"}},
+        {"$group": {"_id": None, "count": {"$sum": 1}, "total": {"$sum": "$amount"}}}
+    ]
+    pending_result = await db.contributions.aggregate(pending_pipeline).to_list(1)
+    pending_data = pending_result[0] if pending_result else {"count": 0, "total": 0}
 
     return {
         "summary": {
-            "total_confirmed": total_count,
-            "total_amount": total_amount,
-            "average_contribution": round(avg_contribution, 2),
-            "pending_count": pending_count,
-            "pending_amount": pending_amount
+            "total_confirmed": summary_data.get("total_count", 0),
+            "total_amount": summary_data.get("total_amount", 0),
+            "average_contribution": round(summary_data.get("avg_amount", 0), 2),
+            "pending_count": pending_data.get("count", 0),
+            "pending_amount": pending_data.get("total", 0)
         },
         "by_amount": amount_report,
         "by_payment_method": method_report,

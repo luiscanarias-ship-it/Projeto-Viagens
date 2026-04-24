@@ -56,15 +56,17 @@ const Header = () => {
     }`;
 
   useEffect(() => {
+    const cached = sessionStorage.getItem('4luis_settings');
+    if (cached) {
+      try { const d = JSON.parse(cached); if (d.contact_email) setContactEmail(d.contact_email); } catch {}
+      return;
+    }
     const fetchSettings = async () => {
       try {
         const response = await axios.get(`${API}/settings`);
-        if (response.data.contact_email) {
-          setContactEmail(response.data.contact_email);
-        }
-      } catch (error) {
-        // Use default email
-      }
+        if (response.data.contact_email) setContactEmail(response.data.contact_email);
+        sessionStorage.setItem('4luis_settings', JSON.stringify(response.data));
+      } catch (error) {}
     };
     fetchSettings();
   }, []);

@@ -29,10 +29,14 @@ async def get_admin_stats(request: Request):
     await require_admin(request)
 
     total_contributions = await db.contributions.count_documents({"status": "completed"})
-    total_amount = 0
-    contributions = await db.contributions.find({"status": "completed"}, {"_id": 0}).to_list(10000)
-    for c in contributions:
-        total_amount += c.get("amount", 0)
+
+    # Use $group aggregation instead of loading all docs into memory
+    amount_pipeline = [
+        {"$match": {"status": "completed"}},
+        {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
+    ]
+    amount_result = await db.contributions.aggregate(amount_pipeline).to_list(1)
+    total_amount = amount_result[0]["total"] if amount_result else 0
 
     total_users = await db.users.count_documents({})
     total_journeys = await db.journeys.count_documents({})
@@ -514,28 +518,55 @@ async def test_email_send(request: Request):
 
 @router.get("/admin/sponsors-report")
 async def get_sponsors_report(request: Request):
-    """Get report of sponsors who have 3+ successful referrals"""
+    """Get report of sponsors who have 3+ successful referrals — uses $lookup to avoid N+1"""
     await require_admin(request)
-    sponsors = await db.sponsor_links.find({"successful_referrals": {"$gte": 3}}, {"_id": 0}).to_list(1000)
+
+    pipeline = [
+        {"$match": {"successful_referrals": {"$gte": 3}}},
+        {"$lookup": {
+            "from": "users", "localField": "user_id", "foreignField": "user_id",
+            "pipeline": [{"$project": {"_id": 0, "name": 1, "email": 1, "alias": 1}}],
+            "as": "user_info"
+        }},
+        {"$lookup": {
+            "from": "journeys", "localField": "journey_id", "foreignField": "journey_id",
+            "pipeline": [{"$project": {"_id": 0, "name": 1}}],
+            "as": "journey_info"
+        }},
+        {"$lookup": {
+            "from": "points", "localField": "user_id", "foreignField": "user_id",
+            "pipeline": [{"$project": {"_id": 0, "point_id": 1, "points_value": 1}}],
+            "as": "points_info"
+        }},
+        {"$project": {
+            "_id": 0,
+            "user_id": 1, "successful_referrals": 1, "referral_count": 1, "created_at": 1,
+            "user_info": {"$arrayElemAt": ["$user_info", 0]},
+            "journey_info": {"$arrayElemAt": ["$journey_info", 0]},
+            "points_info": 1
+        }}
+    ]
+
+    sponsors = await db.sponsor_links.aggregate(pipeline).to_list(1000)
 
     report = []
-    for sponsor in sponsors:
-        user = await db.users.find_one({"user_id": sponsor["user_id"]}, {"_id": 0, "name": 1, "email": 1, "alias": 1})
-        journey = await db.journeys.find_one({"journey_id": sponsor["journey_id"]}, {"_id": 0, "name": 1})
-        points = await db.points.find({"user_id": sponsor["user_id"]}, {"_id": 0}).to_list(1000)
-        total_points = sum(p.get("points_value", 1) for p in points)
+    for s in sponsors:
+        u = s.get("user_info") or {}
+        j = s.get("journey_info") or {}
+        pts = s.get("points_info") or []
+        total_points = sum(p.get("points_value", 1) for p in pts)
 
         report.append({
-            "user_id": sponsor["user_id"],
-            "user_name": user.get("name") if user else "Desconhecido",
-            "user_email": user.get("email") if user else "",
-            "alias": user.get("alias") if user else None,
-            "journey_name": journey.get("name") if journey else "Desconhecida",
-            "successful_referrals": sponsor["successful_referrals"],
-            "total_referrals": sponsor["referral_count"],
+            "user_id": s["user_id"],
+            "user_name": u.get("name", "Desconhecido"),
+            "user_email": u.get("email", ""),
+            "alias": u.get("alias"),
+            "journey_name": j.get("name", "Desconhecida"),
+            "successful_referrals": s["successful_referrals"],
+            "total_referrals": s["referral_count"],
             "total_points": total_points,
-            "registration_numbers": [p["point_id"] for p in points],
-            "created_at": sponsor.get("created_at")
+            "registration_numbers": [p["point_id"] for p in pts],
+            "created_at": s.get("created_at")
         })
 
     report.sort(key=lambda x: x["total_points"], reverse=True)

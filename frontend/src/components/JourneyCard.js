@@ -86,4 +86,4 @@ const JourneyCard = ({ journey, index }) => {
   );
 };
 
-export default JourneyCard;
+export default React.memo(JourneyCard);

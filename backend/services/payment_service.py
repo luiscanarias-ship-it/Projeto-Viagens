@@ -88,7 +88,7 @@ async def get_paypal_access_token():
 
 async def generate_points_for_user(user_id: str, journey_id: str, contribution_id: str,
                                     points_count: int, is_crypto: bool):
-    """Generate points for a user based on their contribution"""
+    """Generate points for a user based on their contribution — uses insert_many"""
     link = await db.sponsor_links.find_one(
         {"user_id": user_id, "journey_id": journey_id}, {"_id": 0}
     )
@@ -96,24 +96,31 @@ async def generate_points_for_user(user_id: str, journey_id: str, contribution_i
     if not link or link.get("successful_referrals", 0) < 3:
         return
 
+    if points_count <= 0:
+        return
+
     user = await db.users.find_one({"user_id": user_id}, {"_id": 0})
     name_initial = (user.get("name", "X")[0]).upper() if user else "X"
     surname_initial = (user.get("surname", "X")[0]).upper() if user and user.get("surname") else "X"
 
     existing_count = await db.points.count_documents({"journey_id": journey_id})
+    now_iso = datetime.now(timezone.utc).isoformat()
 
+    docs = []
     for i in range(points_count):
         registration_number = existing_count + i + 1
         point_id = f"{name_initial}{surname_initial}1{str(registration_number).zfill(7)}"
-
-        await db.points.insert_one({
+        docs.append({
             "point_id": point_id,
             "user_id": user_id,
             "journey_id": journey_id,
             "contribution_id": contribution_id,
             "points_value": 1,
-            "created_at": datetime.now(timezone.utc).isoformat()
+            "created_at": now_iso
         })
+
+    if docs:
+        await db.points.insert_many(docs)
 
 
 def validate_contribution_amount(amount: int) -> bool:
