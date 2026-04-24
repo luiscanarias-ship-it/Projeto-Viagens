@@ -76,10 +76,11 @@ const StoryChapter = ({ percentage = 0, customChapters, variant = "light" }) => 
         <span className={`text-xs font-semibold uppercase tracking-wider ${isDark ? 'text-white/60' : 'text-[#6B6661]/60'}`}>
           Capítulo {chapterNum}
         </span>
+        <span className="mx-1 text-white/30">—</span>
+        <span className={`font-handwritten text-base ${isDark ? 'text-[#FFBE98]' : 'text-[#FFBE98]'}`} data-testid="story-chapter-title">
+          {chapter.title}
+        </span>
       </div>
-      <h3 className={`font-handwritten text-lg md:text-xl mb-2 ${isDark ? 'text-[#FFBE98]' : 'text-[#FFBE98]'}`} data-testid="story-chapter-title">
-        {chapter.title}
-      </h3>
       <div className={`text-sm leading-relaxed ${isDark ? 'text-white/75' : 'text-[#6B6661]'}`} data-testid="story-chapter-text">
         {chapter.lines.map((line, i) => (
           line === "" ? <br key={i} /> : <span key={i}>{line}{i < chapter.lines.length - 1 ? ' ' : ''}</span>
