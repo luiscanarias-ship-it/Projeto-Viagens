@@ -25,7 +25,7 @@ const Admin = () => {
   const [contributionSearch, setContributionSearch] = useState('');
   const [searchingContribution, setSearchingContribution] = useState(false);
   const [stats, setStats] = useState(null);
-  const [settings, setSettings] = useState({ contact_email: '', contact_message: '' });
+  const [settings, setSettings] = useState({ contact_email: '', contact_message: '', sender_email: '' });
   const [passwordForm, setPasswordForm] = useState({ current: '', new_password: '', confirm: '' });
   const [passwordMsg, setPasswordMsg] = useState('');
   const [loading, setLoading] = useState(true);
@@ -2961,32 +2961,54 @@ const Admin = () => {
                 <h2 className="text-xl font-bold">Configurações do Site</h2>
               </div>
 
-              <div className="max-w-md space-y-6">
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    <Mail className="w-4 h-4 inline mr-2" />
-                    Email de Contacto
+              <div className="max-w-lg space-y-6">
+                {/* Email de Envio */}
+                <div className="p-4 bg-stone-50 rounded-xl border border-stone-200">
+                  <label className="block text-sm font-bold text-[#2D2A26] mb-1 flex items-center gap-2">
+                    <Mail className="w-4 h-4 text-[#FFBE98]" />
+                    Email de Envio (Remetente)
                   </label>
+                  <p className="text-xs text-[#6B6661] mb-2">
+                    Usado como remetente em: confirmações de contribuição, convites de embaixador, newsletters, notificações
+                  </p>
+                  <input
+                    type="email"
+                    value={settings.sender_email || ''}
+                    onChange={(e) => setSettings({ ...settings, sender_email: e.target.value })}
+                    placeholder="mail@4luis.com"
+                    className="w-full input-warm px-4"
+                    data-testid="sender-email-input"
+                  />
+                </div>
+
+                {/* Email de Suporte */}
+                <div className="p-4 bg-stone-50 rounded-xl border border-stone-200">
+                  <label className="block text-sm font-bold text-[#2D2A26] mb-1 flex items-center gap-2">
+                    <Mail className="w-4 h-4 text-[#FFBE98]" />
+                    Email de Suporte (Contacto)
+                  </label>
+                  <p className="text-xs text-[#6B6661] mb-2">
+                    Usado em: secção "Contacte-nos", reportar problemas, política de privacidade e cookies
+                  </p>
                   <input
                     type="email"
                     value={settings.contact_email || ''}
                     onChange={(e) => setSettings({ ...settings, contact_email: e.target.value })}
-                    placeholder="contacto@4luis.com"
+                    placeholder="suporte@4luis.com"
                     className="w-full input-warm px-4"
                     data-testid="contact-email-input"
                   />
-                  <p className="text-xs text-[#6B6661] mt-1">
-                    Este email será mostrado na secção "Entre em Contacto"
-                  </p>
                 </div>
 
+                {/* Mensagem de Contacto */}
                 <div>
-                  <label className="block text-sm font-medium mb-2">Mensagem de Contacto</label>
+                  <label className="block text-sm font-bold text-[#2D2A26] mb-1">Mensagem de Contacto</label>
+                  <p className="text-xs text-[#6B6661] mb-2">Texto mostrado na secção "Contacte-nos" do footer</p>
                   <textarea
                     value={settings.contact_message || ''}
                     onChange={(e) => setSettings({ ...settings, contact_message: e.target.value })}
                     placeholder="Tem alguma questão? Entre em contacto connosco."
-                    className="w-full input-warm px-4 py-3 h-24 resize-none"
+                    className="w-full input-warm px-4 py-3 h-20 resize-none"
                   />
                 </div>
 

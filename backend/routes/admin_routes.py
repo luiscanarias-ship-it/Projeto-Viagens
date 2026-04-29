@@ -72,14 +72,17 @@ async def update_site_settings(request: Request):
     admin = await require_admin(request)
     data = await request.json()
 
+    update_fields = {"setting_id": "main", "updated_at": datetime.now(timezone.utc).isoformat()}
+    if "contact_email" in data:
+        update_fields["contact_email"] = data["contact_email"]
+    if "contact_message" in data:
+        update_fields["contact_message"] = data["contact_message"]
+    if "sender_email" in data:
+        update_fields["sender_email"] = data["sender_email"]
+
     await db.site_settings.update_one(
         {"setting_id": "main"},
-        {"$set": {
-            "setting_id": "main",
-            "contact_email": data.get("contact_email"),
-            "contact_message": data.get("contact_message"),
-            "updated_at": datetime.now(timezone.utc).isoformat()
-        }},
+        {"$set": update_fields},
         upsert=True
     )
 
@@ -97,9 +100,12 @@ async def get_admin_settings(request: Request):
     settings = await db.site_settings.find_one({"setting_id": "main"}, {"_id": 0})
     if not settings:
         return {
-            "contact_email": "contacto@4luis.com",
-            "contact_message": "Tem alguma questão? Entre em contacto connosco."
+            "contact_email": "suporte@4luis.com",
+            "contact_message": "Tem alguma questão? Entre em contacto connosco.",
+            "sender_email": "mail@4luis.com"
         }
+    if not settings.get("sender_email"):
+        settings["sender_email"] = "mail@4luis.com"
     return settings
 
 
