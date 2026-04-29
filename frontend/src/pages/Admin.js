@@ -28,6 +28,8 @@ const Admin = () => {
   const [settings, setSettings] = useState({ contact_email: '', contact_message: '', sender_email: '' });
   const [passwordForm, setPasswordForm] = useState({ current: '', new_password: '', confirm: '' });
   const [passwordMsg, setPasswordMsg] = useState('');
+  const [showCurrentPwd, setShowCurrentPwd] = useState(false);
+  const [showNewPwd, setShowNewPwd] = useState(false);
   const [loading, setLoading] = useState(true);
   const [editingJourney, setEditingJourney] = useState(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -3000,16 +3002,21 @@ const Admin = () => {
                   />
                 </div>
 
-                {/* Mensagem de Contacto */}
-                <div>
-                  <label className="block text-sm font-bold text-[#2D2A26] mb-1">Mensagem de Contacto</label>
-                  <p className="text-xs text-[#6B6661] mb-2">Texto mostrado na secção "Contacte-nos" do footer</p>
-                  <textarea
-                    value={settings.contact_message || ''}
-                    onChange={(e) => setSettings({ ...settings, contact_message: e.target.value })}
-                    placeholder="Tem alguma questão? Entre em contacto connosco."
-                    className="w-full input-warm px-4 py-3 h-20 resize-none"
-                  />
+                {/* Assinatura dos Emails */}
+                <div className="p-4 bg-stone-50 rounded-xl border border-stone-200">
+                  <label className="block text-sm font-bold text-[#2D2A26] mb-1 flex items-center gap-2">
+                    <Mail className="w-4 h-4 text-[#FFBE98]" />
+                    Assinatura dos Emails
+                  </label>
+                  <p className="text-xs text-[#6B6661] mb-2">
+                    Texto que aparece no rodapé de todos os emails enviados pela plataforma
+                  </p>
+                  <div className="bg-white rounded-lg p-3 border border-stone-100 text-xs text-[#6B6661] leading-relaxed">
+                    <p className="italic text-[#2D2A26]">"Nunca deixes de sonhar, sonha connosco."</p>
+                    <p className="mt-1"><strong>4Luis</strong> — Sonha connosco.</p>
+                    <p className="mt-1">Este é um email transacional automático da 4Luis.</p>
+                  </div>
+                  <p className="text-[10px] text-[#6B6661] mt-2 italic">Esta assinatura é aplicada automaticamente a todos os emails.</p>
                 </div>
 
                 <button
@@ -3030,47 +3037,74 @@ const Admin = () => {
                   <div className="space-y-3">
                     <div>
                       <label className="block text-sm font-medium mb-1">Password atual</label>
-                      <input
-                        type="password"
-                        value={passwordForm?.current || ''}
-                        onChange={(e) => setPasswordForm({ ...passwordForm, current: e.target.value })}
-                        className="w-full input-warm px-4"
-                        data-testid="current-password-input"
-                      />
+                      <div className="relative">
+                        <input
+                          type={showCurrentPwd ? 'text' : 'password'}
+                          value={passwordForm?.current || ''}
+                          onChange={(e) => setPasswordForm({ ...passwordForm, current: e.target.value })}
+                          className="w-full input-warm px-4 pr-10"
+                          data-testid="current-password-input"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowCurrentPwd(!showCurrentPwd)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B6661] hover:text-[#2D2A26]"
+                          data-testid="toggle-current-pwd"
+                        >
+                          {showCurrentPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-1">Nova password</label>
-                      <input
-                        type="password"
-                        value={passwordForm?.new_password || ''}
-                        onChange={(e) => setPasswordForm({ ...passwordForm, new_password: e.target.value })}
-                        className="w-full input-warm px-4"
-                        data-testid="new-password-input"
-                      />
+                      <div className="relative">
+                        <input
+                          type={showNewPwd ? 'text' : 'password'}
+                          value={passwordForm?.new_password || ''}
+                          onChange={(e) => setPasswordForm({ ...passwordForm, new_password: e.target.value })}
+                          className="w-full input-warm px-4 pr-10"
+                          data-testid="new-password-input"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowNewPwd(!showNewPwd)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B6661] hover:text-[#2D2A26]"
+                          data-testid="toggle-new-pwd"
+                        >
+                          {showNewPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-1">Confirmar nova password</label>
-                      <input
-                        type="password"
-                        value={passwordForm?.confirm || ''}
-                        onChange={(e) => setPasswordForm({ ...passwordForm, confirm: e.target.value })}
-                        className="w-full input-warm px-4"
-                        data-testid="confirm-password-input"
-                      />
+                      <div className="relative">
+                        <input
+                          type={showNewPwd ? 'text' : 'password'}
+                          value={passwordForm?.confirm || ''}
+                          onChange={(e) => setPasswordForm({ ...passwordForm, confirm: e.target.value })}
+                          className="w-full input-warm px-4 pr-10"
+                          data-testid="confirm-password-input"
+                        />
+                      </div>
                     </div>
                     {passwordMsg && (
                       <p className={`text-sm ${passwordMsg.includes('sucesso') ? 'text-green-600' : 'text-red-500'}`} data-testid="password-msg">
                         {passwordMsg}
                       </p>
                     )}
-                    <button
-                      onClick={handleChangePassword}
-                      className="btn-primary flex items-center gap-2"
-                      data-testid="change-password-btn"
-                    >
-                      <Lock className="w-4 h-4" />
-                      Alterar Password
-                    </button>
+                    <div className="flex items-center justify-between">
+                      <button
+                        onClick={handleChangePassword}
+                        className="btn-primary flex items-center gap-2"
+                        data-testid="change-password-btn"
+                      >
+                        <Lock className="w-4 h-4" />
+                        Alterar Password
+                      </button>
+                      <a href="/login?mode=forgot" className="text-xs text-[#FFBE98] hover:underline" data-testid="forgot-password-admin">
+                        Esqueci-me da password
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>
