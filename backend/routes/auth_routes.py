@@ -9,7 +9,7 @@ import httpx
 
 from config import db, logger, ADMIN_PASSWORD, FRONTEND_URL
 from models import UserCreate, UserLogin, generate_anonymous_alias
-from auth import get_current_user, create_jwt_token, hash_password, verify_password
+from auth import get_current_user, require_auth, create_jwt_token, hash_password, verify_password
 from email_service import get_email_base_template, send_email_resend
 from services.notification_service import create_notification
 
@@ -261,3 +261,37 @@ async def logout(request: Request, response: Response):
         await db.user_sessions.delete_one({"session_token": session_token})
     response.delete_cookie("session_token", path="/", secure=True, samesite="none")
     return {"message": "Logout realizado com sucesso"}
+
+
+
+@router.put("/auth/change-password")
+async def change_password(request: Request):
+    """Change password for authenticated user"""
+    from passlib.context import CryptContext
+    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+    user = await require_auth(request)
+    data = await request.json()
+    current_password = data.get("current_password")
+    new_password = data.get("new_password")
+
+    if not current_password or not new_password:
+        raise HTTPException(status_code=400, detail="Password atual e nova são obrigatórias")
+
+    if len(new_password) < 6:
+        raise HTTPException(status_code=400, detail="A nova password deve ter pelo menos 6 caracteres")
+
+    user_doc = await db.users.find_one({"user_id": user.user_id})
+    if not user_doc or not user_doc.get("password_hash"):
+        raise HTTPException(status_code=400, detail="Utilizador sem password definida")
+
+    if not pwd_context.verify(current_password, user_doc["password_hash"]):
+        raise HTTPException(status_code=403, detail="Password atual incorreta")
+
+    new_hash = pwd_context.hash(new_password)
+    await db.users.update_one(
+        {"user_id": user.user_id},
+        {"$set": {"password_hash": new_hash}}
+    )
+
+    return {"message": "Password alterada com sucesso"}

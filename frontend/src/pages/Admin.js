@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit2, Trash2, Save, X, BarChart3, Settings, CheckCircle, XCircle, Mail, Users, Award, Gift, Crown, TrendingUp, UserPlus, ChevronRight, Star, FileText, Clock, MapPin, Target, Calendar, Eye, EyeOff, MessageSquare, AlertCircle, ExternalLink, History, Search, Heart, Sparkles, BookOpen, Wallet, ArrowUpRight, Banknote } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, X, BarChart3, Settings, CheckCircle, XCircle, Mail, Users, Award, Gift, Crown, TrendingUp, UserPlus, ChevronRight, Star, FileText, Clock, MapPin, Target, Calendar, Eye, EyeOff, MessageSquare, AlertCircle, ExternalLink, History, Search, Heart, Sparkles, BookOpen, Wallet, ArrowUpRight, Banknote, Lock } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -26,6 +26,8 @@ const Admin = () => {
   const [searchingContribution, setSearchingContribution] = useState(false);
   const [stats, setStats] = useState(null);
   const [settings, setSettings] = useState({ contact_email: '', contact_message: '' });
+  const [passwordForm, setPasswordForm] = useState({ current: '', new_password: '', confirm: '' });
+  const [passwordMsg, setPasswordMsg] = useState('');
   const [loading, setLoading] = useState(true);
   const [editingJourney, setEditingJourney] = useState(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -313,6 +315,33 @@ const Admin = () => {
     } catch (error) {
       console.error('Error saving settings:', error);
       alert('Erro ao guardar configurações');
+    }
+  };
+
+  const handleChangePassword = async () => {
+    setPasswordMsg('');
+    if (!passwordForm.current || !passwordForm.new_password) {
+      setPasswordMsg('Preenche todos os campos');
+      return;
+    }
+    if (passwordForm.new_password !== passwordForm.confirm) {
+      setPasswordMsg('As passwords não coincidem');
+      return;
+    }
+    if (passwordForm.new_password.length < 6) {
+      setPasswordMsg('A nova password deve ter pelo menos 6 caracteres');
+      return;
+    }
+    try {
+      const headers = getAuthHeaders();
+      await axios.put(`${API}/auth/change-password`, {
+        current_password: passwordForm.current,
+        new_password: passwordForm.new_password
+      }, { headers, withCredentials: true });
+      setPasswordMsg('Password alterada com sucesso!');
+      setPasswordForm({ current: '', new_password: '', confirm: '' });
+    } catch (error) {
+      setPasswordMsg(error.response?.data?.detail || 'Erro ao alterar password');
     }
   };
 
@@ -2969,6 +2998,59 @@ const Admin = () => {
                   <Save className="w-5 h-5" />
                   Guardar Configurações
                 </button>
+
+                {/* Alterar Password */}
+                <div className="pt-6 mt-6 border-t border-stone-200">
+                  <h3 className="text-base font-bold text-[#2D2A26] mb-4 flex items-center gap-2">
+                    <Lock className="w-4 h-4 text-[#FFBE98]" />
+                    Alterar Password
+                  </h3>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Password atual</label>
+                      <input
+                        type="password"
+                        value={passwordForm?.current || ''}
+                        onChange={(e) => setPasswordForm({ ...passwordForm, current: e.target.value })}
+                        className="w-full input-warm px-4"
+                        data-testid="current-password-input"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Nova password</label>
+                      <input
+                        type="password"
+                        value={passwordForm?.new_password || ''}
+                        onChange={(e) => setPasswordForm({ ...passwordForm, new_password: e.target.value })}
+                        className="w-full input-warm px-4"
+                        data-testid="new-password-input"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Confirmar nova password</label>
+                      <input
+                        type="password"
+                        value={passwordForm?.confirm || ''}
+                        onChange={(e) => setPasswordForm({ ...passwordForm, confirm: e.target.value })}
+                        className="w-full input-warm px-4"
+                        data-testid="confirm-password-input"
+                      />
+                    </div>
+                    {passwordMsg && (
+                      <p className={`text-sm ${passwordMsg.includes('sucesso') ? 'text-green-600' : 'text-red-500'}`} data-testid="password-msg">
+                        {passwordMsg}
+                      </p>
+                    )}
+                    <button
+                      onClick={handleChangePassword}
+                      className="btn-primary flex items-center gap-2"
+                      data-testid="change-password-btn"
+                    >
+                      <Lock className="w-4 h-4" />
+                      Alterar Password
+                    </button>
+                  </div>
+                </div>
               </div>
             </motion.div>
           )}
