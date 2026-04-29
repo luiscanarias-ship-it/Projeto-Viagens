@@ -68,7 +68,7 @@ export default function CookiePolicy() {
             <p className="text-sm">
               Duvidas? Contacta-nos em{' '}
               <a
-                href="mailto:mail@4luis.com"
+                href="mailto:suporte@4luis.com"
                 className="text-[#FFBE98] font-semibold hover:text-[#E6A07C] transition-colors"
                 data-testid="cookie-policy-email"
               >

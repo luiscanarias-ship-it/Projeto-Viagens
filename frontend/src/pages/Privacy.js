@@ -104,7 +104,7 @@ export default function Privacy() {
             <p className="mt-3">
               Pedidos podem ser enviados para:{' '}
               <a
-                href="mailto:luis@4luis.com"
+                href="mailto:suporte@4luis.com"
                 className="text-[#FFBE98] font-semibold hover:text-[#E6A07C] transition-colors"
                 data-testid="privacy-email"
               >

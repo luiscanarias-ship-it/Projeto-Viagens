@@ -645,7 +645,7 @@ const JourneyDetail = () => {
       {/* Report Problem - Discrete */}
       <div className="max-w-6xl mx-auto px-6 md:px-12 pb-8 flex justify-end">
         <a
-          href={`mailto:mail@4luis.com?subject=Reportar problema — ${journey?.name || 'Viagem'}&body=Olá equipa 4Luis,%0A%0AGostaria de reportar um problema com a viagem "${journey?.name || ''}".%0A%0ADescrição do problema:%0A`}
+          href={`mailto:suporte@4luis.com?subject=Reportar problema — ${journey?.name || 'Viagem'}&body=Olá equipa 4Luis,%0A%0AGostaria de reportar um problema com a viagem "${journey?.name || ''}".%0A%0ADescrição do problema:%0A`}
           className="inline-flex items-center gap-1.5 text-xs text-[#6B6661]/50 hover:text-[#6B6661] transition-colors"
           data-testid="report-problem-btn"
         >
