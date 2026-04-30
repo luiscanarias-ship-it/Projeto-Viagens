@@ -11,12 +11,9 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const PAYMENT_METHODS = [
-  { id: 'stripe', name: 'Cartão (Stripe)', icon: CreditCard, description: 'Visa, Mastercard - automático' },
-  { id: 'mbway', name: 'MBWay', icon: Smartphone, description: 'Pagamento móvel Portugal' },
-  { id: 'paypal', name: 'PayPal', icon: ExternalLink, description: 'Transferência internacional' },
-  { id: 'revolut', name: 'Revolut', icon: ExternalLink, description: 'Transferência rápida' },
-  { id: 'wise', name: 'Wise', icon: ExternalLink, description: 'Baixas taxas internacionais' },
-  { id: 'crypto', name: 'Criptomoedas', icon: Bitcoin, description: 'BTC, ETH, USDT, USDC' }
+  { id: 'mbway', name: 'MBWay', icon: Smartphone, description: 'Pagamento móvel (Portugal)' },
+  { id: 'paypal', name: 'PayPal', icon: ExternalLink, description: 'Email PayPal para receber' },
+  { id: 'crypto', name: 'Criptomoedas', icon: Bitcoin, description: 'BTC, ETH, USDT' }
 ];
 
 const FLEXIBILITY_OPTIONS = [
@@ -75,7 +72,12 @@ const JourneyApplicationModal = ({ isOpen, onClose, onSuccess, authHeaders }) =>
     why_this_destination: '',
     
     // Step 5: Payment Methods
-    payment_methods: ['stripe'],
+    payment_methods: [],
+    payment_details: {
+      mbway: { phone: '', name: '' },
+      paypal: { email: '' },
+      crypto: { btc: '', eth: '', usdt: '' }
+    },
     
     // Optional
     poetic_name: '',
@@ -152,6 +154,17 @@ const JourneyApplicationModal = ({ isOpen, onClose, onSuccess, authHeaders }) =>
       case 4:
         if (formData.payment_methods.length === 0) 
           return 'Seleciona pelo menos um método de pagamento';
+        for (const method of formData.payment_methods) {
+          if (method === 'mbway' && !formData.payment_details.mbway.phone.trim())
+            return 'Preenche o número de telefone MBWay';
+          if (method === 'paypal' && !formData.payment_details.paypal.email.trim())
+            return 'Preenche o email PayPal';
+          if (method === 'crypto') {
+            const c = formData.payment_details.crypto;
+            if (!c.btc.trim() && !c.eth.trim() && !c.usdt.trim())
+              return 'Preenche pelo menos um endereço de criptomoeda';
+          }
+        }
         break;
       default:
         break;
@@ -189,12 +202,29 @@ const JourneyApplicationModal = ({ isOpen, onClose, onSuccess, authHeaders }) =>
     setError('');
 
     try {
-      // Clean up arrays
+      // Clean up arrays and build payment methods object
       const cleanedData = {
         ...formData,
         cities_to_visit: formData.cities_to_visit.filter(c => c.trim()),
         main_activities: formData.main_activities.filter(a => a.trim())
       };
+
+      // Build payment_methods object for backend (key: method data)
+      const paymentMethodsObj = {};
+      for (const method of formData.payment_methods) {
+        if (method === 'mbway') {
+          paymentMethodsObj.mbway = formData.payment_details.mbway;
+        } else if (method === 'paypal') {
+          paymentMethodsObj.paypal = formData.payment_details.paypal;
+        } else if (method === 'crypto') {
+          const cryptoData = {};
+          if (formData.payment_details.crypto.btc.trim()) cryptoData.btc = { address: formData.payment_details.crypto.btc.trim() };
+          if (formData.payment_details.crypto.eth.trim()) cryptoData.eth = { address: formData.payment_details.crypto.eth.trim() };
+          if (formData.payment_details.crypto.usdt.trim()) cryptoData.usdt = { address: formData.payment_details.crypto.usdt.trim() };
+          paymentMethodsObj.crypto = cryptoData;
+        }
+      }
+      cleanedData.payment_methods = paymentMethodsObj;
 
       const response = await axios.post(
         `${API}/ambassador/apply-journey`,
@@ -563,63 +593,174 @@ const JourneyApplicationModal = ({ isOpen, onClose, onSuccess, authHeaders }) =>
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="space-y-6"
+                className="space-y-5"
               >
-                <div className="text-center mb-6">
-                  <CreditCard className="w-12 h-12 text-[#FFBE98] mx-auto mb-2" />
-                  <h3 className="text-lg font-bold text-[#2D2A26]">Métodos de Pagamento</h3>
-                  <p className="text-sm text-[#6B6661]">Quais métodos aceitas para receber contribuições?</p>
+                <div className="text-center mb-4">
+                  <CreditCard className="w-10 h-10 text-[#FFBE98] mx-auto mb-2" />
+                  <h3 className="text-lg font-bold text-[#2D2A26]">Os teus Meios de Pagamento</h3>
+                  <p className="text-sm text-[#6B6661]">Configura como queres receber contribuições</p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                {/* Method selection */}
+                <div className="space-y-3">
                   {PAYMENT_METHODS.map((method) => {
                     const Icon = method.icon;
                     const isSelected = formData.payment_methods.includes(method.id);
                     return (
-                      <button
-                        key={method.id}
-                        onClick={() => togglePaymentMethod(method.id)}
-                        className={`p-4 rounded-xl border-2 text-left transition-all ${
-                          isSelected
-                            ? 'border-[#FFBE98] bg-[#FFBE98]/10'
-                            : 'border-stone-200 hover:border-[#FFBE98]/50'
-                        }`}
-                      >
-                        <div className="flex items-start gap-3">
+                      <div key={method.id} className={`rounded-xl border-2 transition-all overflow-hidden ${
+                        isSelected ? 'border-[#FFBE98] bg-[#FFBE98]/5' : 'border-stone-200'
+                      }`}>
+                        {/* Toggle header */}
+                        <button
+                          onClick={() => togglePaymentMethod(method.id)}
+                          className="w-full p-3 flex items-center gap-3 text-left"
+                        >
                           <div className={`p-2 rounded-lg ${isSelected ? 'bg-[#FFBE98]' : 'bg-stone-100'}`}>
-                            <Icon className={`w-5 h-5 ${isSelected ? 'text-white' : 'text-[#6B6661]'}`} />
+                            <Icon className={`w-4 h-4 ${isSelected ? 'text-white' : 'text-[#6B6661]'}`} />
                           </div>
                           <div className="flex-1">
                             <p className="font-medium text-[#2D2A26] text-sm">{method.name}</p>
                             <p className="text-xs text-[#6B6661]">{method.description}</p>
                           </div>
-                          {isSelected && <Check className="w-5 h-5 text-[#FFBE98]" />}
-                        </div>
-                      </button>
+                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                            isSelected ? 'border-[#FFBE98] bg-[#FFBE98]' : 'border-stone-300'
+                          }`}>
+                            {isSelected && <Check className="w-3 h-3 text-white" />}
+                          </div>
+                        </button>
+
+                        {/* Configuration fields (shown when selected) */}
+                        {isSelected && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            className="px-3 pb-3 border-t border-stone-100"
+                          >
+                            <div className="pt-3 space-y-2">
+                              {method.id === 'mbway' && (
+                                <>
+                                  <div>
+                                    <label className="text-xs font-medium text-[#6B6661] mb-1 block">Número de telefone</label>
+                                    <input
+                                      type="tel"
+                                      value={formData.payment_details.mbway.phone}
+                                      onChange={(e) => setFormData(prev => ({
+                                        ...prev,
+                                        payment_details: { ...prev.payment_details, mbway: { ...prev.payment_details.mbway, phone: e.target.value } }
+                                      }))}
+                                      placeholder="+351 9XX XXX XXX"
+                                      className="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#FFBE98]/50"
+                                      data-testid="mbway-phone-input"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="text-xs font-medium text-[#6B6661] mb-1 block">Nome (como aparece no MBWay)</label>
+                                    <input
+                                      type="text"
+                                      value={formData.payment_details.mbway.name}
+                                      onChange={(e) => setFormData(prev => ({
+                                        ...prev,
+                                        payment_details: { ...prev.payment_details, mbway: { ...prev.payment_details.mbway, name: e.target.value } }
+                                      }))}
+                                      placeholder="O teu nome"
+                                      className="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#FFBE98]/50"
+                                      data-testid="mbway-name-input"
+                                    />
+                                  </div>
+                                </>
+                              )}
+
+                              {method.id === 'paypal' && (
+                                <div>
+                                  <label className="text-xs font-medium text-[#6B6661] mb-1 block">Email PayPal</label>
+                                  <input
+                                    type="email"
+                                    value={formData.payment_details.paypal.email}
+                                    onChange={(e) => setFormData(prev => ({
+                                      ...prev,
+                                      payment_details: { ...prev.payment_details, paypal: { ...prev.payment_details.paypal, email: e.target.value } }
+                                    }))}
+                                    placeholder="email@exemplo.com"
+                                    className="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#FFBE98]/50"
+                                    data-testid="paypal-email-input"
+                                  />
+                                </div>
+                              )}
+
+                              {method.id === 'crypto' && (
+                                <>
+                                  <p className="text-[10px] text-[#6B6661] italic">Preenche pelo menos um endereço</p>
+                                  <div>
+                                    <label className="text-xs font-medium text-[#6B6661] mb-1 block">Bitcoin (BTC)</label>
+                                    <input
+                                      type="text"
+                                      value={formData.payment_details.crypto.btc}
+                                      onChange={(e) => setFormData(prev => ({
+                                        ...prev,
+                                        payment_details: { ...prev.payment_details, crypto: { ...prev.payment_details.crypto, btc: e.target.value } }
+                                      }))}
+                                      placeholder="bc1q..."
+                                      className="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#FFBE98]/50"
+                                      data-testid="crypto-btc-input"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="text-xs font-medium text-[#6B6661] mb-1 block">Ethereum (ETH)</label>
+                                    <input
+                                      type="text"
+                                      value={formData.payment_details.crypto.eth}
+                                      onChange={(e) => setFormData(prev => ({
+                                        ...prev,
+                                        payment_details: { ...prev.payment_details, crypto: { ...prev.payment_details.crypto, eth: e.target.value } }
+                                      }))}
+                                      placeholder="0x..."
+                                      className="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#FFBE98]/50"
+                                      data-testid="crypto-eth-input"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="text-xs font-medium text-[#6B6661] mb-1 block">Tether (USDT - TRC20)</label>
+                                    <input
+                                      type="text"
+                                      value={formData.payment_details.crypto.usdt}
+                                      onChange={(e) => setFormData(prev => ({
+                                        ...prev,
+                                        payment_details: { ...prev.payment_details, crypto: { ...prev.payment_details.crypto, usdt: e.target.value } }
+                                      }))}
+                                      placeholder="T..."
+                                      className="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#FFBE98]/50"
+                                      data-testid="crypto-usdt-input"
+                                    />
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                          </motion.div>
+                        )}
+                      </div>
                     );
                   })}
                 </div>
 
-                <div className="bg-[#E6F4F1]/50 rounded-xl p-4 mt-6">
-                  <p className="text-sm text-[#6B6661]">
-                    <strong>Nota:</strong> Os métodos selecionados serão disponibilizados aos contribuidores. 
-                    Certifica-te de que tens conta ativa nos métodos escolhidos.
+                <div className="bg-[#E6F4F1]/50 rounded-xl p-3">
+                  <p className="text-xs text-[#6B6661]">
+                    <strong>Como funciona:</strong> Os contribuidores verão os teus dados de pagamento e enviarão directamente para ti. Tu confirmas o recebimento no teu painel.
                   </p>
                 </div>
 
                 {/* Summary */}
-                <div className="bg-stone-50 rounded-xl p-6 mt-6">
-                  <h4 className="font-bold text-[#2D2A26] mb-4 flex items-center gap-2">
-                    <Sparkles className="w-5 h-5 text-[#FFBE98]" />
+                <div className="bg-stone-50 rounded-xl p-4">
+                  <h4 className="font-bold text-[#2D2A26] mb-3 flex items-center gap-2 text-sm">
+                    <Sparkles className="w-4 h-4 text-[#FFBE98]" />
                     Resumo da Candidatura
                   </h4>
-                  <div className="space-y-2 text-sm">
+                  <div className="space-y-1.5 text-sm">
                     <p><strong>Viagem:</strong> {formData.name || '—'}</p>
                     <p><strong>Destino:</strong> {formData.destination_city ? `${formData.destination_city}, ` : ''}{formData.destination_country || '—'}</p>
                     <p><strong>Duração:</strong> {formData.duration_days} dias</p>
                     <p><strong>Objetivo:</strong> {formData.goal_amount}€</p>
                     <p><strong>Início previsto:</strong> {formData.start_date_approximate || '—'}</p>
-                    <p><strong>Pagamentos:</strong> {formData.payment_methods.length} método(s)</p>
+                    <p><strong>Pagamentos:</strong> {formData.payment_methods.map(m => PAYMENT_METHODS.find(p => p.id === m)?.name).filter(Boolean).join(', ') || '—'}</p>
                   </div>
                 </div>
               </motion.div>
